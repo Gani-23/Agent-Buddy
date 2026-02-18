@@ -1,0 +1,66 @@
+name: Release AgentBuddy
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and publish release assets
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            artifact_ext: zip
+          - rid: linux-x64
+            artifact_ext: tar.gz
+          - rid: osx-arm64
+            artifact_ext: tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore AgentBuddy.csproj
+
+      - name: Publish (${{ matrix.rid }})
+        run: |
+          dotnet publish AgentBuddy.csproj \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishTrimmed=false \
+            -o out/${{ matrix.rid }}
+
+      - name: Package (zip)
+        if: matrix.artifact_ext == 'zip'
+        run: |
+          cd out
+          zip -r AgentBuddy-${{ matrix.rid }}.zip ${{ matrix.rid }}
+
+      - name: Package (tar.gz)
+        if: matrix.artifact_ext == 'tar.gz'
+        run: |
+          cd out
+          tar -czf AgentBuddy-${{ matrix.rid }}.tar.gz ${{ matrix.rid }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            out/AgentBuddy-${{ matrix.rid }}.${{ matrix.artifact_ext }}
