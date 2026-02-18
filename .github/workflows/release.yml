@@ -2,12 +2,13 @@ name: Release AgentBuddy
 
 on:
   push:
+    branches: [main]
     tags:
       - 'v*'
   workflow_dispatch:
     inputs:
       tag:
-        description: 'DOP Agnt Buddy'
+        description: 'Tag name to publish (example: v1.2.3)'
         required: false
         type: string
 
