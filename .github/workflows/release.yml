@@ -2,10 +2,14 @@ name: Release AgentBuddy
 
 on:
   push:
-    branches: [main]
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'DOP Agnt Buddy'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -59,9 +63,19 @@ jobs:
           cd out
           tar -czf AgentBuddy-${{ matrix.rid }}.tar.gz ${{ matrix.rid }}
 
-      - name: Upload release assets
+      - name: Upload release assets (tag push)
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
+          files: |
+            out/AgentBuddy-${{ matrix.rid }}.${{ matrix.artifact_ext }}
+
+      - name: Upload release assets (manual)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
           generate_release_notes: true
           files: |
             out/AgentBuddy-${{ matrix.rid }}.${{ matrix.artifact_ext }}
