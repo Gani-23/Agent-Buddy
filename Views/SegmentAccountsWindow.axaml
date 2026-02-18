@@ -1,0 +1,70 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        xmlns:models="using:AgentBuddy.Models"
+        mc:Ignorable="d"
+        d:DesignWidth="980"
+        d:DesignHeight="680"
+        x:Class="AgentBuddy.Views.SegmentAccountsWindow"
+        x:DataType="vm:SegmentAccountsWindowViewModel"
+        Width="980"
+        Height="680"
+        MinWidth="860"
+        MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="{DynamicResource AppCardBackgroundBrush}">
+
+    <Border Padding="20" Classes="FadeIn">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
+            <StackPanel Grid.Row="0" Spacing="4">
+                <TextBlock Text="Accounts" Classes="Kicker"/>
+                <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="Bold"/>
+                <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                    <Run Text="Accounts: "/>
+                    <Run Text="{Binding Count}"/>
+                    <Run Text="   |   Total Amount: "/>
+                    <Run Text="Rs. "/>
+                    <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
+                </TextBlock>
+            </StackPanel>
+
+            <Border Grid.Row="1" Classes="Card" Padding="10,8">
+                <Grid ColumnDefinitions="140,*,120,120,150" ColumnSpacing="10">
+                    <TextBlock Text="Account No" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="1" Text="Account Name" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="2" Text="Amount" FontWeight="SemiBold" TextAlignment="Right"/>
+                    <TextBlock Grid.Column="3" Text="Paid Upto" FontWeight="SemiBold" TextAlignment="Center"/>
+                    <TextBlock Grid.Column="4" Text="Next Due" FontWeight="SemiBold"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Classes="Card" Padding="0">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Accounts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:RDAccount">
+                                <Border Padding="10,8" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
+                                    <Grid ColumnDefinitions="140,*,120,120,150" ColumnSpacing="10">
+                                        <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
+                                        <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="Close"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+</Window>

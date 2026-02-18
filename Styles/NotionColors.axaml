@@ -1,0 +1,83 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <!-- Notion-inspired neutrals -->
+        <Color x:Key="LightBackground">#F7F6F3</Color>
+        <Color x:Key="LightCardBackground">#FFFFFF</Color>
+        <Color x:Key="LightSidebarBackground">#FBFAF8</Color>
+        <Color x:Key="LightTextPrimary">#2F3437</Color>
+        <Color x:Key="LightTextSecondary">#6B7280</Color>
+        <Color x:Key="LightBorder">#E7E5E4</Color>
+        <Color x:Key="LightHover">#F1F0EE</Color>
+        <Color x:Key="LightPressed">#E8E7E5</Color>
+
+        <Color x:Key="DarkBackground">#171717</Color>
+        <Color x:Key="DarkCardBackground">#202020</Color>
+        <Color x:Key="DarkSidebarBackground">#1B1B1B</Color>
+        <Color x:Key="DarkTextPrimary">#ECECEC</Color>
+        <Color x:Key="DarkTextSecondary">#A3A3A3</Color>
+        <Color x:Key="DarkBorder">#333333</Color>
+        <Color x:Key="DarkHover">#2A2A2A</Color>
+        <Color x:Key="DarkPressed">#353535</Color>
+
+        <!-- Accents -->
+        <Color x:Key="AccentBlue">#2F76E6</Color>
+        <Color x:Key="AccentBlueHover">#235FC2</Color>
+        <Color x:Key="AccentGreen">#1F8A62</Color>
+        <Color x:Key="AccentGreenHover">#1A7553</Color>
+        <Color x:Key="AccentRed">#D94848</Color>
+        <Color x:Key="AccentRedHover">#BE3E3E</Color>
+        <Color x:Key="AccentYellow">#D4A017</Color>
+        <Color x:Key="AccentPink">#C44582</Color>
+
+        <!-- Legacy keys kept for compatibility -->
+        <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackground}"/>
+        <SolidColorBrush x:Key="LightCardBackgroundBrush" Color="{StaticResource LightCardBackground}"/>
+        <SolidColorBrush x:Key="LightSidebarBackgroundBrush" Color="{StaticResource LightSidebarBackground}"/>
+        <SolidColorBrush x:Key="LightTextPrimaryBrush" Color="{StaticResource LightTextPrimary}"/>
+        <SolidColorBrush x:Key="LightTextSecondaryBrush" Color="{StaticResource LightTextSecondary}"/>
+        <SolidColorBrush x:Key="LightBorderBrush" Color="{StaticResource LightBorder}"/>
+        <SolidColorBrush x:Key="LightHoverBrush" Color="{StaticResource LightHover}"/>
+        <SolidColorBrush x:Key="LightPressedBrush" Color="{StaticResource LightPressed}"/>
+
+        <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{StaticResource DarkBackground}"/>
+        <SolidColorBrush x:Key="DarkCardBackgroundBrush" Color="{StaticResource DarkCardBackground}"/>
+        <SolidColorBrush x:Key="DarkSidebarBackgroundBrush" Color="{StaticResource DarkSidebarBackground}"/>
+        <SolidColorBrush x:Key="DarkTextPrimaryBrush" Color="{StaticResource DarkTextPrimary}"/>
+        <SolidColorBrush x:Key="DarkTextSecondaryBrush" Color="{StaticResource DarkTextSecondary}"/>
+        <SolidColorBrush x:Key="DarkBorderBrush" Color="{StaticResource DarkBorder}"/>
+        <SolidColorBrush x:Key="DarkHoverBrush" Color="{StaticResource DarkHover}"/>
+        <SolidColorBrush x:Key="DarkPressedBrush" Color="{StaticResource DarkPressed}"/>
+
+        <!-- App tokens defaulting to Light; updated at runtime when theme toggles -->
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource LightBackground}"/>
+        <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="{StaticResource LightCardBackground}"/>
+        <SolidColorBrush x:Key="AppSidebarBackgroundBrush" Color="{StaticResource LightSidebarBackground}"/>
+        <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{StaticResource LightTextPrimary}"/>
+        <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{StaticResource LightTextSecondary}"/>
+        <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource LightBorder}"/>
+        <SolidColorBrush x:Key="AppHoverBrush" Color="{StaticResource LightHover}"/>
+        <SolidColorBrush x:Key="AppPressedBrush" Color="{StaticResource LightPressed}"/>
+
+        <SolidColorBrush x:Key="SuccessTintBrush" Color="#E7F4EC"/>
+        <SolidColorBrush x:Key="WarningTintBrush" Color="#FFF4DC"/>
+        <SolidColorBrush x:Key="DangerTintBrush" Color="#FDECEC"/>
+        <SolidColorBrush x:Key="InfoTintBrush" Color="#EAF2FF"/>
+
+        <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
+        <SolidColorBrush x:Key="AccentBlueHoverBrush" Color="{StaticResource AccentBlueHover}"/>
+        <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource AccentGreen}"/>
+        <SolidColorBrush x:Key="AccentGreenHoverBrush" Color="{StaticResource AccentGreenHover}"/>
+        <SolidColorBrush x:Key="AccentRedBrush" Color="{StaticResource AccentRed}"/>
+        <SolidColorBrush x:Key="AccentRedHoverBrush" Color="{StaticResource AccentRedHover}"/>
+        <SolidColorBrush x:Key="AccentYellowBrush" Color="{StaticResource AccentYellow}"/>
+        <SolidColorBrush x:Key="AccentPinkBrush" Color="{StaticResource AccentPink}"/>
+
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource AccentGreen}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource AccentYellow}"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource AccentRed}"/>
+        <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource AccentBlue}"/>
+    </Styles.Resources>
+
+</Styles>

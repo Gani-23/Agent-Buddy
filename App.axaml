@@ -1,0 +1,26 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:AgentBuddy.Converters"
+             x:Class="AgentBuddy.App"
+             RequestedThemeVariant="Light">
+    
+    <Application.Resources>
+        <converters:BoolToThemeIconConverter x:Key="BoolToThemeIconConverter"/>
+        <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
+        <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+    </Application.Resources>
+    
+    <Application.Styles>
+        <FluentTheme />
+        
+        <!-- Import Notion theme colors -->
+        <StyleInclude Source="/Styles/NotionColors.axaml"/>
+        
+        <!-- Import animations -->
+        <StyleInclude Source="/Styles/Animations.axaml"/>
+        
+        <!-- Import custom controls -->
+        <StyleInclude Source="/Styles/CustomControls.axaml"/>
+    </Application.Styles>
+
+</Application>

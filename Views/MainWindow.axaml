@@ -1,0 +1,119 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        xmlns:views="using:AgentBuddy.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="AgentBuddy.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Agent Buddy"
+        Icon="/Assets/AgentBuddy.ico"
+        Width="1400"
+        Height="900"
+        MinWidth="1200"
+        MinHeight="700"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="240,*" Background="{DynamicResource AppBackgroundBrush}">
+
+        <!-- SIDEBAR (text only) -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource AppSidebarBackgroundBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="0,0,1,0"
+                Padding="14">
+
+            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
+                <Border Grid.Row="0" Classes="Card" Padding="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Agent Buddy"
+                                   FontSize="26"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="Post Office RD Workspace"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Grid.Row="1"
+                           Text="NAVIGATION"
+                           Classes="Kicker"
+                           Margin="8,4,8,0"/>
+
+                <StackPanel Grid.Row="2" Spacing="4">
+                    <Button x:Name="DashboardNavButton"
+                            Classes="NavItem"
+                            Content="Dashboard"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Dashboard"/>
+
+                    <Button x:Name="ListsNavButton"
+                            Classes="NavItem"
+                            Content="Create Lists"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Lists"/>
+
+                    <Button x:Name="ReportsNavButton"
+                            Classes="NavItem"
+                            Content="Reports"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Reports"/>
+
+                    <Button x:Name="SupportNavButton"
+                            Classes="NavItem"
+                            Content="Support"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Support"/>
+
+                    <Button x:Name="SettingsNavButton"
+                            Classes="NavItem"
+                            Content="Settings"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="Settings"/>
+                </StackPanel>
+
+                <Border Grid.Row="3"
+                        Classes="Card"
+                        Padding="8">
+                    <Button Classes="NavItem"
+                            Command="{Binding ToggleThemeCommand}"
+                            Content="Toggle Theme"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- MAIN CONTENT -->
+        <Border Grid.Column="1" Padding="20">
+            <Border Classes="SectionCard" Padding="22">
+                <ContentControl Content="{Binding CurrentView}">
+                    <ContentControl.DataTemplates>
+                        <DataTemplate DataType="vm:DashboardViewModel">
+                            <views:DashboardView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:ListManagementViewModel">
+                            <views:ListManagementView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:ReportsViewModel">
+                            <views:ReportsView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:SupportViewModel">
+                            <views:SupportView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:SettingsViewModel">
+                            <views:SettingsView/>
+                        </DataTemplate>
+                    </ContentControl.DataTemplates>
+                </ContentControl>
+            </Border>
+        </Border>
+
+    </Grid>
+
+</Window>

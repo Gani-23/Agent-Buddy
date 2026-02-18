@@ -1,0 +1,140 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <!-- ============================================ -->
+        <!-- SMOOTH ANIMATIONS & TRANSITIONS -->
+        <!-- ============================================ -->
+        
+        <!-- Default transition duration -->
+        <x:Double x:Key="DefaultTransitionDuration">0.3</x:Double>
+        <x:Double x:Key="FastTransitionDuration">0.2</x:Double>
+        <x:Double x:Key="SlowTransitionDuration">0.4</x:Double>
+    </Styles.Resources>
+    
+    <!-- ============================================ -->
+    <!-- FADE IN ANIMATION -->
+    <!-- ============================================ -->
+    <Style Selector="Control.FadeIn">
+        <Style.Animations>
+            <Animation Duration="0:0:0.3" FillMode="Forward">
+                <KeyFrame Cue="0%">
+                    <Setter Property="Opacity" Value="0"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="Opacity" Value="1"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- SLIDE IN FROM LEFT -->
+    <!-- ============================================ -->
+    <Style Selector="Control.SlideInLeft">
+        <Style.Animations>
+            <Animation Duration="0:0:0.3" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                    <Setter Property="TranslateTransform.X" Value="-50"/>
+                    <Setter Property="Opacity" Value="0"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="TranslateTransform.X" Value="0"/>
+                    <Setter Property="Opacity" Value="1"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- HOVER LIFT EFFECT -->
+    <!-- ============================================ -->
+    <Style Selector="Border.Hoverable">
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Border.Hoverable:pointerover">
+        <Setter Property="RenderTransform" Value="translate(0px, -2px)"/>
+        <Setter Property="BoxShadow" Value="0 4 12 0 #0000001A"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- BUTTON PRESS EFFECT -->
+    <!-- ============================================ -->
+    <Style Selector="Button">
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Button:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.97)"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- SMOOTH PROPERTY TRANSITIONS -->
+    <!-- ============================================ -->
+    <Style Selector="TextBlock.Smooth">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Border.Smooth">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                <ThicknessTransition Property="BorderThickness" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- LOADING SPINNER -->
+    <!-- ============================================ -->
+    <Style Selector="Control.Spinner">
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform" Value="rotate(0deg)"/>
+        <Style.Animations>
+            <Animation Duration="0:0:1" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RenderTransform" Value="rotate(0deg)"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RenderTransform" Value="rotate(360deg)"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- PULSE ANIMATION (for notifications) -->
+    <!-- ============================================ -->
+    <Style Selector="Border.Pulse">
+        <Style.Animations>
+            <Animation Duration="0:0:1" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="Opacity" Value="1"/>
+                </KeyFrame>
+                <KeyFrame Cue="50%">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="Opacity" Value="1"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+</Styles>

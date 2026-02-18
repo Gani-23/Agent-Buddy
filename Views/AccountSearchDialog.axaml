@@ -1,0 +1,219 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+        x:Class="AgentBuddy.Views.AccountSearchDialog"
+        x:DataType="vm:AccountSearchViewModel"
+        Title="Add Accounts to List"
+        Width="700"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="{DynamicResource AppCardBackgroundBrush}">
+
+    <Border Padding="24" Classes="FadeIn">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+            
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Spacing="8">
+                <TextBlock Text="Search" Classes="Kicker"/>
+                <TextBlock Text="Add Accounts to List" 
+                           Classes="SectionHeader"
+                           FontSize="26"
+                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                <TextBlock Text="{Binding ListName, StringFormat='Adding to: {0}'}"
+                           FontSize="13"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <Separator Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- Search & Filters -->
+            <Border Grid.Row="1" Classes="Card" Padding="16" Margin="0,16,0,0">
+                <StackPanel Spacing="12">
+                    
+                    <!-- Search Box -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding SearchQuery}"
+                                 Watermark="Search by account number or name..."
+                                 Classes="Notion"
+                                 FontSize="14"/>
+                        <Button Grid.Column="1"
+                                Classes="Primary"
+                                Command="{Binding SearchCommand}"
+                                Padding="20,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Search"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Filter Options -->
+                    <WrapPanel>
+                        <ComboBox Width="150"
+                                  Margin="0,0,12,0"
+                                  SelectedIndex="{Binding FilterDueSoon}">
+                            <ComboBoxItem Content="All Accounts"/>
+                            <ComboBoxItem Content="Due Soon Only"/>
+                        </ComboBox>
+
+                        <ComboBox Width="150"
+                                  Margin="0,0,12,0"
+                                  SelectedIndex="{Binding SortBy}">
+                            <ComboBoxItem Content="Sort by Number"/>
+                            <ComboBoxItem Content="Sort by Name"/>
+                            <ComboBoxItem Content="Sort by Amount"/>
+                            <ComboBoxItem Content="Sort by Due Date"/>
+                        </ComboBox>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding ClearFiltersCommand}"
+                                Padding="12,8">
+                            <TextBlock Text="Clear Filters"/>
+                        </Button>
+                    </WrapPanel>
+
+                    <!-- Result Count -->
+                    <TextBlock Text="{Binding SearchResults.Count, StringFormat='{}{0} accounts found'}"
+                               FontSize="12"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Search Results List -->
+            <Border Grid.Row="2" 
+                    Classes="Card" 
+                    Padding="0" 
+                    Margin="0,16,0,0">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding SearchResults}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="16,12"
+                                        BorderThickness="0,0,0,1"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        Classes="Hoverable">
+                                    <Border.Styles>
+                                        <Style Selector="Border:pointerover">
+                                            <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                                        </Style>
+                                    </Border.Styles>
+
+                                    <Grid ColumnDefinitions="30,120,*,Auto,Auto,100">
+                                        
+                                        <!-- Checkbox -->
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected}"
+                                                  VerticalAlignment="Center"/>
+
+                                        <!-- Account Number -->
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Account.AccountNo}"
+                                                   FontFamily="Consolas"
+                                                   FontWeight="Medium"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="8,0,0,0"/>
+
+                                        <!-- Account Name -->
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Account.AccountName}"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="12,0"/>
+
+                                        <!-- Amount -->
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding Account.Denomination}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentBlueBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,12,0"/>
+
+                                        <!-- Due Soon Indicator -->
+                                        <Border Grid.Column="4"
+                                                Background="{DynamicResource WarningTintBrush}"
+                                                CornerRadius="4"
+                                                Padding="8,4"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,12,0"
+                                                IsVisible="{Binding IsDueSoon}">
+                                            <TextBlock Text="Due Soon"
+                                                       FontSize="11"
+                                                       FontWeight="Medium"
+                                                       Foreground="{StaticResource WarningBrush}"/>
+                                        </Border>
+
+                                        <!-- Due Date -->
+                                        <TextBlock Grid.Column="5"
+                                                   Text="{Binding Account.NextInstallmentDate}"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Right"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Action Buttons -->
+            <Grid Grid.Row="3" 
+                  ColumnDefinitions="Auto,*,Auto,Auto"
+                  Margin="0,16,0,0">
+                
+                <WrapPanel Grid.Column="0">
+                    <Button Classes="Secondary"
+                            Command="{Binding SelectAllCommand}"
+                            Padding="12,8"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="Select All"/>
+                    </Button>
+                    <Button Classes="Secondary"
+                            Command="{Binding SelectNoneCommand}"
+                            Padding="12,8"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="Select None"/>
+                    </Button>
+                    <Button Classes="Secondary"
+                            Command="{Binding SelectFilteredCommand}"
+                            Padding="12,8">
+                        <TextBlock Text="Select Filtered"/>
+                    </Button>
+                </WrapPanel>
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding SelectedCount, StringFormat='{}{0} selected'}"
+                           FontWeight="Medium"
+                           Foreground="{StaticResource AccentBlueBrush}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0"/>
+
+                <WrapPanel Grid.Column="3">
+                    <Button Classes="Primary"
+                            Click="AddSelected_Click"
+                            Padding="20,10"
+                            Margin="0,0,12,0"
+                            IsEnabled="{Binding HasSelection}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Add Selected"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="Secondary"
+                            Click="Cancel_Click"
+                            Padding="16,10">
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                </WrapPanel>
+
+            </Grid>
+
+        </Grid>
+    </Border>
+
+</Window>

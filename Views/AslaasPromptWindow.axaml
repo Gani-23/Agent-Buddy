@@ -1,0 +1,78 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        x:Class="AgentBuddy.Views.AslaasPromptWindow"
+        x:DataType="vm:AslaasPromptViewModel"
+        mc:Ignorable="d"
+        Width="520"
+        Height="270"
+        MinWidth="520"
+        MinHeight="270"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="ASLAAS Required">
+
+    <Border Padding="18"
+            Background="{DynamicResource AppCardBackgroundBrush}">
+        <StackPanel Spacing="12">
+            <TextBlock Text="ASLAAS number is missing for this account."
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Account"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding AccountNo}"
+                           FontFamily="Consolas"
+                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           Text="Name"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <TextBlock Grid.Row="1"
+                           Grid.Column="1"
+                           Text="{Binding AccountName}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="ASLAAS"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <TextBox Grid.Row="2"
+                         Grid.Column="1"
+                         x:Name="AslaasTextBox"
+                         Text="{Binding AslaasNo}"
+                         Watermark="APPLIED"
+                         FontFamily="Consolas"
+                         MaxLength="30"/>
+            </Grid>
+
+            <TextBlock Text="Use APPLIED if ASLAAS request is already submitted."
+                       FontSize="11"
+                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <Button Grid.Column="1"
+                        Classes="Secondary"
+                        Content="Cancel"
+                        Click="Cancel_Click"
+                        Padding="14,8"/>
+                <Button Grid.Column="2"
+                        Classes="Primary"
+                        Content="Save and Continue"
+                        Click="Save_Click"
+                        Padding="14,8"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

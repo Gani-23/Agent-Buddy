@@ -1,0 +1,295 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AgentBuddy.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="AgentBuddy.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Spacing="24" Margin="0,0,0,24" MaxWidth="800">
+            
+            <!-- Header -->
+            <StackPanel Spacing="2">
+                <TextBlock Text="Configuration" Classes="Kicker"/>
+                <TextBlock Text="Settings" Classes="SectionHeader"/>
+            </StackPanel>
+
+            <!-- Python Configuration -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Python Configuration" Classes="SubHeader"/>
+
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Python Version:" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" 
+                                   Text="{Binding PythonVersion}" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Scripts Path:" 
+                                   VerticalAlignment="Top"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{Binding ScriptsPath}" 
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary" 
+                            Command="{Binding CheckPythonCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Check Python"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Database Configuration -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Database Configuration" Classes="SubHeader"/>
+
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Database Path:" 
+                                   VerticalAlignment="Top"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" 
+                                   Text="{Binding DatabasePath}" 
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Agent ID:" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{Binding AgentId}" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    </Grid>
+
+                    <Separator/>
+
+                    <TextBlock Text="Portal Credentials"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Agent ID:"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding EditableAgentId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Enter Agent ID"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Password:"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding EditablePassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Enter portal password"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding CredentialsStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveCredentialsCommand}"
+                            IsEnabled="{Binding !IsSavingCredentials}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Save Credentials"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
+                    <TextBlock Text="Mobile Sync (Dashboard API)"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="API URL:"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding MobileSyncApiUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="https://rd-base.vercel.app"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="API Key:"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding MobileSyncApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="x-api-key (optional)"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding MobileSyncStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveMobileSyncSettingsCommand}"
+                            IsEnabled="{Binding !IsSavingMobileSyncSettings}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Save Mobile Sync Settings"/>
+                        </StackPanel>
+                    </Button>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Classes="Secondary" Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Backup Database"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Secondary" Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Export to Excel"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <Separator/>
+
+                    <TextBlock Text="Legacy DB Sync"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Source (.sqlite):"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding SourceDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Select source database.sqlite"/>
+                        <Button Grid.Row="0" Grid.Column="2"
+                                Classes="Secondary"
+                                Click="BrowseSourceDb_Click"
+                                Padding="12,8"
+                                Content="Browse"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Target (.db):"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding TargetDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Select target dop_agent.db"/>
+                        <Button Grid.Row="1" Grid.Column="2"
+                                Classes="Secondary"
+                                Click="BrowseTargetDb_Click"
+                                Padding="12,8"
+                                Content="Browse"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <CheckBox IsChecked="{Binding SyncDryRun}"
+                                  VerticalAlignment="Center"
+                                  Content="Dry run (preview only)"/>
+
+                        <Button Classes="Primary"
+                                Command="{Binding SyncLegacyDatabaseCommand}"
+                                IsEnabled="{Binding !IsSyncing}"
+                                Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Sync Legacy Data"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Danger"
+                                Command="{Binding ForceSyncLegacyDatabaseCommand}"
+                                IsEnabled="{Binding !IsSyncing}"
+                                Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Force Full Sync"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding LegacySyncStatus}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Path Diagnostics" Classes="SubHeader"/>
+
+                    <Grid ColumnDefinitions="190,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Resolved Documents:"
+                                   VerticalAlignment="Top"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding DocumentsPath}"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Resolved Base:"
+                                   VerticalAlignment="Top"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding BasePath}"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="About Agent Buddy" Classes="SubHeader"/>
+
+                    <TextBlock Text="Version 1.0.0" 
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    
+                    <TextBlock Text="India Post DOP Agent Portal Automation Tool" 
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
