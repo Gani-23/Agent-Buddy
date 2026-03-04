@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using ReactiveUI;
 using AgentBuddy.Models;
@@ -20,6 +24,10 @@ namespace AgentBuddy.ViewModels;
 /// </summary>
 public class DashboardViewModel : ViewModelBase
 {
+    private const int MaturedInstallmentThreshold = 120;
+    private const int AboutToMatureInstallmentThreshold = 108;
+    private const int RecentAccountInstallmentWindow = 2;
+
     private readonly DatabaseService _databaseService;
     private readonly MetricsCalculator _metricsCalculator;
     private readonly PythonService _pythonService;
@@ -64,8 +72,12 @@ public class DashboardViewModel : ViewModelBase
     private decimal _newAccounts30DaysAmount;
     private int _aboutToFreezeCount;
     private decimal _aboutToFreezeAmount;
+    private int _aboutToMatureCount;
+    private decimal _aboutToMatureAmount;
     private int _maturedCount;
     private decimal _maturedAmount;
+    private int _closedAccountsCount;
+    private decimal _closedAccountsAmount;
     private int _firstHalfPendingWindowCount;
     private decimal _firstHalfPendingWindowAmount;
     private int _secondHalfPendingWindowCount;
@@ -148,8 +160,18 @@ public class DashboardViewModel : ViewModelBase
     public string UpdateStatus
     {
         get => _updateStatus;
-        set => this.RaiseAndSetIfChanged(ref _updateStatus, value);
+        set
+        {
+            var hadStatus = HasUpdateStatus;
+            this.RaiseAndSetIfChanged(ref _updateStatus, value);
+            if (hadStatus != HasUpdateStatus)
+            {
+                this.RaisePropertyChanged(nameof(HasUpdateStatus));
+            }
+        }
     }
+
+    public bool HasUpdateStatus => !string.IsNullOrWhiteSpace(UpdateStatus);
 
     public int TotalAccounts
     {
@@ -321,6 +343,30 @@ public class DashboardViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _maturedAmount, value);
     }
 
+    public int AboutToMatureCount
+    {
+        get => _aboutToMatureCount;
+        private set => this.RaiseAndSetIfChanged(ref _aboutToMatureCount, value);
+    }
+
+    public decimal AboutToMatureAmount
+    {
+        get => _aboutToMatureAmount;
+        private set => this.RaiseAndSetIfChanged(ref _aboutToMatureAmount, value);
+    }
+
+    public int ClosedAccountsCount
+    {
+        get => _closedAccountsCount;
+        private set => this.RaiseAndSetIfChanged(ref _closedAccountsCount, value);
+    }
+
+    public decimal ClosedAccountsAmount
+    {
+        get => _closedAccountsAmount;
+        private set => this.RaiseAndSetIfChanged(ref _closedAccountsAmount, value);
+    }
+
     public int FirstHalfPendingWindowCount
     {
         get => _firstHalfPendingWindowCount;
@@ -392,7 +438,8 @@ public class DashboardViewModel : ViewModelBase
             }
 
             var accounts = await _databaseService.GetAllActiveAccountsAsync();
-            BuildActionableSegments(accounts);
+            var closedAccounts = await _databaseService.GetClosedAccountsAsync();
+            BuildActionableSegments(accounts, closedAccounts);
 
             // Load metrics
             var metrics = await _metricsCalculator.CalculateMetricsAsync();
@@ -450,7 +497,7 @@ public class DashboardViewModel : ViewModelBase
         }
     }
 
-    private void BuildActionableSegments(List<RDAccount> accounts)
+    private void BuildActionableSegments(List<RDAccount> accounts, List<RDAccount> closedAccounts)
     {
         var today = DateTime.Today;
         var monthStart = new DateTime(today.Year, today.Month, 1);
@@ -535,8 +582,13 @@ public class DashboardViewModel : ViewModelBase
             .ToList();
 
         var newAccounts30Days = accounts
-            .Where(a => a.GetMonthPaidNumber() == 1)
-            .OrderBy(a => a.AccountNo)
+            .Where(a =>
+            {
+                var paid = a.GetMonthPaidNumber();
+                return paid > 0 && paid <= RecentAccountInstallmentWindow;
+            })
+            .OrderBy(a => a.GetMonthPaidNumber())
+            .ThenBy(a => a.AccountNo)
             .ToList();
 
         var aboutToFreeze = accounts
@@ -548,8 +600,18 @@ public class DashboardViewModel : ViewModelBase
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
+        var aboutToMature = accounts
+            .Where(a =>
+            {
+                var paid = a.GetMonthPaidNumber();
+                return paid >= AboutToMatureInstallmentThreshold && paid < MaturedInstallmentThreshold;
+            })
+            .OrderByDescending(a => a.GetMonthPaidNumber())
+            .ThenBy(a => a.AccountNo)
+            .ToList();
+
         var matured = accounts
-            .Where(a => a.GetMonthPaidNumber() >= 60)
+            .Where(a => a.GetMonthPaidNumber() >= MaturedInstallmentThreshold)
             .OrderByDescending(a => a.GetMonthPaidNumber())
             .ThenBy(a => a.AccountNo)
             .ToList();
@@ -559,7 +621,12 @@ public class DashboardViewModel : ViewModelBase
         _segmentAccounts["advanced-paid"] = advancedPaid;
         _segmentAccounts["new-accounts"] = newAccounts30Days;
         _segmentAccounts["freeze-risk"] = aboutToFreeze;
+        _segmentAccounts["about-to-mature"] = aboutToMature;
         _segmentAccounts["matured"] = matured;
+        _segmentAccounts["closed-accounts"] = closedAccounts
+            .OrderByDescending(a => a.LastUpdated)
+            .ThenBy(a => a.AccountNo)
+            .ToList();
         _segmentAccounts["pending-first-half"] = firstHalfPendingWindow;
         _segmentAccounts["pending-second-half"] = secondHalfPendingWindow;
         _segmentAccounts["deposited-first-half"] = firstHalfDepositedWindow;
@@ -579,8 +646,12 @@ public class DashboardViewModel : ViewModelBase
         NewAccounts30DaysAmount = newAccounts30Days.Sum(a => a.GetAmount());
         AboutToFreezeCount = aboutToFreeze.Count;
         AboutToFreezeAmount = aboutToFreeze.Sum(a => a.GetAmount());
+        AboutToMatureCount = aboutToMature.Count;
+        AboutToMatureAmount = aboutToMature.Sum(a => a.GetAmount());
         MaturedCount = matured.Count;
         MaturedAmount = matured.Sum(a => a.GetAmount());
+        ClosedAccountsCount = closedAccounts.Count;
+        ClosedAccountsAmount = closedAccounts.Sum(a => a.GetAmount());
         FirstHalfPendingWindowCount = firstHalfPendingWindow.Count;
         FirstHalfPendingWindowAmount = firstHalfPendingWindow.Sum(a => a.GetAmount());
         SecondHalfPendingWindowCount = secondHalfPendingWindow.Count;
@@ -610,9 +681,11 @@ public class DashboardViewModel : ViewModelBase
             "pending-month" => "Pending - Current Month",
             "next-month" => "Next Month Collection",
             "advanced-paid" => "Advance Paid Accounts",
-            "new-accounts" => "New Accounts (Month Paid Upto = 1)",
+            "new-accounts" => "New Accounts (Last 2 Months)",
             "freeze-risk" => "About To Freeze Accounts",
+            "about-to-mature" => "About To Mature Accounts",
             "matured" => "Matured Accounts",
+            "closed-accounts" => "Closed Accounts",
             "pending-first-half" => "Pending Accounts (1st–15th)",
             "pending-second-half" => "Pending Accounts (16th–End of Month)",
             "deposited-first-half" => "Deposited Accounts (1st–15th)",
@@ -724,6 +797,118 @@ public class DashboardViewModel : ViewModelBase
     {
         // This will be called from the view to show account details
         // The view will handle opening the modal
+    }
+
+    public async Task<(bool success, string message)> PrintSegmentAsync(string? segmentKey)
+    {
+        var accounts = GetAccountsForSegment(segmentKey);
+        if (accounts.Count == 0)
+        {
+            return (false, "No accounts available to print.");
+        }
+
+        var preferredPrinter = ((await _databaseService.GetAppSettingAsync("default_printer")) ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(preferredPrinter))
+        {
+            preferredPrinter = ((await _databaseService.GetAppSettingAsync("reports_default_printer")) ?? string.Empty).Trim();
+        }
+
+        var title = GetSegmentTitle(segmentKey);
+        var safeTitle = new string(title
+            .Select(ch => char.IsLetterOrDigit(ch) ? ch : '_')
+            .ToArray())
+            .Trim('_');
+        if (string.IsNullOrWhiteSpace(safeTitle))
+        {
+            safeTitle = "accounts";
+        }
+
+        var tempFilePath = Path.Combine(
+            Path.GetTempPath(),
+            $"agentbuddy_{safeTitle}_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+
+        var reportBuilder = new StringBuilder();
+        reportBuilder.AppendLine($"Agent Buddy - {title}");
+        reportBuilder.AppendLine($"Generated: {DateTime.Now:dd-MMM-yyyy HH:mm:ss}");
+        reportBuilder.AppendLine($"Count: {accounts.Count}");
+        reportBuilder.AppendLine($"Total Amount: Rs. {accounts.Sum(a => a.GetAmount()):N0}");
+        reportBuilder.AppendLine(new string('-', 110));
+        reportBuilder.AppendLine("Account No        Name                                Amount      Paid Upto   Next Due");
+        reportBuilder.AppendLine(new string('-', 110));
+
+        foreach (var account in accounts)
+        {
+            var accountNo = (account.AccountNo ?? string.Empty).PadRight(16);
+            var name = (account.AccountName ?? string.Empty);
+            if (name.Length > 34)
+            {
+                name = name[..34];
+            }
+            name = name.PadRight(34);
+            var amount = account.GetAmount().ToString("N0").PadLeft(10);
+            var paid = (account.MonthPaidUpto ?? string.Empty).PadLeft(10);
+            var due = account.GetNextInstallmentDate()?.ToString("dd-MMM-yyyy") ??
+                      account.NextInstallmentDate ??
+                      "-";
+
+            reportBuilder.AppendLine($"{accountNo}  {name}  {amount}  {paid}  {due}");
+        }
+
+        await File.WriteAllTextAsync(tempFilePath, reportBuilder.ToString());
+
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var printInfo = new ProcessStartInfo
+                {
+                    FileName = "notepad.exe",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                printInfo.ArgumentList.Add("/p");
+                printInfo.ArgumentList.Add(tempFilePath);
+                Process.Start(printInfo);
+            }
+            else
+            {
+                var lpInfo = new ProcessStartInfo
+                {
+                    FileName = "lp",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+                if (!string.IsNullOrWhiteSpace(preferredPrinter))
+                {
+                    lpInfo.ArgumentList.Add("-d");
+                    lpInfo.ArgumentList.Add(preferredPrinter);
+                }
+                lpInfo.ArgumentList.Add(tempFilePath);
+                using var process = Process.Start(lpInfo);
+                if (process == null)
+                {
+                    return (false, "Could not start print process.");
+                }
+
+                var stderr = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+                if (process.ExitCode != 0)
+                {
+                    var message = string.IsNullOrWhiteSpace(stderr)
+                        ? "Print command failed."
+                        : stderr.Trim();
+                    return (false, message);
+                }
+            }
+
+            return (true, $"Print command sent for {title} ({accounts.Count} account(s)).");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Could not print list: {ex.Message}");
+        }
     }
 
     private async Task UpdateDatabaseAsync()

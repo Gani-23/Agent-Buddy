@@ -2,32 +2,74 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:AgentBuddy.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             xmlns:vm="using:AgentBuddy.ViewModels"
              x:Class="AgentBuddy.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
-
-    <Design.DataContext>
-        <vm:SettingsViewModel/>
-    </Design.DataContext>
 
     <ScrollViewer>
         <StackPanel Spacing="24" Margin="0,0,0,24" MaxWidth="800">
             
             <!-- Header -->
             <StackPanel Spacing="2">
-                <TextBlock Text="Configuration" Classes="Kicker"/>
-                <TextBlock Text="Settings" Classes="SectionHeader"/>
+                <TextBlock Text="{DynamicResource L_Set_Kicker}" Classes="Kicker"/>
+                <TextBlock Text="{DynamicResource L_Set_Title}" Classes="SectionHeader"/>
             </StackPanel>
+
+            <!-- Language -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{DynamicResource L_Set_LanguageSection}" Classes="SubHeader"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Set_LanguageLabel}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Grid.Row="0"
+                                  Grid.Column="1"
+                                  MinWidth="220"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding LanguageOptions}"
+                                  SelectedItem="{Binding SelectedLanguage}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding LanguageStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveLanguageCommand}"
+                            IsEnabled="{Binding !IsSavingLanguageSettings}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{DynamicResource L_Set_SaveLanguage}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
 
             <!-- Python Configuration -->
             <Border Classes="SectionCard" Padding="24">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Python Configuration" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Set_PythonConfig}" Classes="SubHeader"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Python Version:" 
+                                   Text="{DynamicResource L_Set_PythonVersion}" 
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" 
@@ -36,7 +78,7 @@
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Scripts Path:" 
+                                   Text="{DynamicResource L_Set_ScriptsPath}" 
                                    VerticalAlignment="Top"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" 
@@ -51,7 +93,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Check Python"/>
+                            <TextBlock Text="{DynamicResource L_Set_CheckPython}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -60,11 +102,11 @@
             <!-- Database Configuration -->
             <Border Classes="SectionCard" Padding="24">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Database Configuration" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Set_DatabaseConfig}" Classes="SubHeader"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Database Path:" 
+                                   Text="{DynamicResource L_Set_DatabasePath}" 
                                    VerticalAlignment="Top"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" 
@@ -74,7 +116,7 @@
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Agent ID:" 
+                                   Text="{DynamicResource L_Set_AgentId}" 
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" 
@@ -85,27 +127,27 @@
 
                     <Separator/>
 
-                    <TextBlock Text="Portal Credentials"
+                    <TextBlock Text="{DynamicResource L_Set_PortalCredentials}"
                                FontSize="15"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Agent ID:"
+                                   Text="{DynamicResource L_Set_AgentIdField}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding EditableAgentId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Enter Agent ID"/>
+                                 Watermark="{DynamicResource L_Set_WmAgentId}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Password:"
+                                   Text="{DynamicResource L_Set_PasswordField}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding EditablePassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Enter portal password"/>
+                                 Watermark="{DynamicResource L_Set_WmPassword}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="1"
                                    Text="{Binding CredentialsStatus}"
@@ -119,33 +161,33 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Save Credentials"/>
+                            <TextBlock Text="{DynamicResource L_Set_SaveCredentials}"/>
                         </StackPanel>
                     </Button>
 
                     <Separator/>
 
-                    <TextBlock Text="Mobile Sync (Dashboard API)"
+                    <TextBlock Text="{DynamicResource L_Set_MobileSync}"
                                FontSize="15"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="API URL:"
+                                   Text="{DynamicResource L_Set_ApiUrl}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding MobileSyncApiUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="https://rd-base.vercel.app"/>
+                                 Watermark="{DynamicResource L_Set_WmApiUrl}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="API Key:"
+                                   Text="{DynamicResource L_Set_ApiKey}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding MobileSyncApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="x-api-key (optional)"/>
+                                 Watermark="{DynamicResource L_Set_WmApiKey}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="1"
                                    Text="{Binding MobileSyncStatus}"
@@ -159,70 +201,200 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Save Mobile Sync Settings"/>
+                            <TextBlock Text="{DynamicResource L_Set_SaveMobileSync}"/>
                         </StackPanel>
                     </Button>
 
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Classes="Secondary" Padding="16,10">
+                    <Separator/>
+
+                    <TextBlock Text="{DynamicResource L_Set_PrinterConfig}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Set_DefaultPrinter}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Grid.Row="0"
+                                  Grid.Column="1"
+                                  MinWidth="260"
+                                  HorizontalAlignment="Left"
+                                  IsEnabled="{Binding HasPrinterOptions}"
+                                  ItemsSource="{Binding PrinterOptions}"
+                                  SelectedItem="{Binding SelectedDefaultPrinter}"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding PrinterStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <WrapPanel>
+                        <Button Classes="Secondary"
+                                Command="{Binding RefreshPrintersCommand}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Backup Database"/>
+                                <TextBlock Text="{DynamicResource L_Set_RefreshPrinters}"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Classes="Secondary" Padding="16,10">
+                        <Button Classes="Primary"
+                                Command="{Binding SaveDefaultPrinterCommand}"
+                                IsEnabled="{Binding !IsSavingPrinterSettings}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Export to Excel"/>
+                                <TextBlock Text="{DynamicResource L_Set_SaveDefaultPrinter}"/>
                             </StackPanel>
                         </Button>
-                    </StackPanel>
+                    </WrapPanel>
 
                     <Separator/>
 
-                    <TextBlock Text="Legacy DB Sync"
+                    <TextBlock Text="{DynamicResource L_Set_BrowserConfig}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Set_DefaultBrowser}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Grid.Row="0"
+                                  Grid.Column="1"
+                                  MinWidth="260"
+                                  HorizontalAlignment="Left"
+                                  IsEnabled="{Binding HasBrowserOptions}"
+                                  ItemsSource="{Binding BrowserOptions}"
+                                  SelectedItem="{Binding SelectedBrowser}"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding BrowserStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveBrowserSettingsCommand}"
+                            IsEnabled="{Binding !IsSavingBrowserSettings}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{DynamicResource L_Set_SaveBrowser}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
+                    <TextBlock Text="{DynamicResource L_Set_AslaasMaintenance}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <WrapPanel>
+                        <Button Classes="Primary"
+                                Command="{Binding UpdateMissingAslaasAllCommand}"
+                                IsEnabled="{Binding !IsUpdatingMissingAslaas}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{DynamicResource L_Set_UpdateMissingAslaasAll}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding ForceUpdateAllAslaasCommand}"
+                                IsEnabled="{Binding !IsUpdatingMissingAslaas}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{DynamicResource L_Set_ForceUpdateAslaasAll}"/>
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+
+                    <TextBlock Text="{Binding AslaasUpdateStatus}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                    <WrapPanel>
+                        <Button Classes="Secondary" Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{DynamicResource L_Set_BackupDb}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Secondary" Padding="16,10" Margin="12,0,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{DynamicResource L_Set_ExportExcel}"/>
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+
+                    <Separator/>
+
+                    <TextBlock Text="{DynamicResource L_Set_LegacySync}"
                                FontSize="15"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Source (.sqlite):"
+                                   Text="{DynamicResource L_Set_SourceSqlite}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding SourceDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Select source database.sqlite"/>
+                                 Watermark="{DynamicResource L_Set_WmSourceDb}"/>
                         <Button Grid.Row="0" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseSourceDb_Click"
                                 Padding="12,8"
-                                Content="Browse"/>
+                                Content="{DynamicResource L_Set_Browse}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Target (.db):"
+                                   Text="{DynamicResource L_Set_TargetDb}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding TargetDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Select target dop_agent.db"/>
+                                 Watermark="{DynamicResource L_Set_WmTargetDb}"/>
                         <Button Grid.Row="1" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseTargetDb_Click"
                                 Padding="12,8"
-                                Content="Browse"/>
+                                Content="{DynamicResource L_Set_Browse}"/>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <WrapPanel VerticalAlignment="Center">
                         <CheckBox IsChecked="{Binding SyncDryRun}"
                                   VerticalAlignment="Center"
-                                  Content="Dry run (preview only)"/>
+                                  Margin="0,0,12,0"
+                                  Content="{DynamicResource L_Set_DryRun}"/>
 
                         <Button Classes="Primary"
                                 Command="{Binding SyncLegacyDatabaseCommand}"
                                 IsEnabled="{Binding !IsSyncing}"
-                                Padding="16,10">
+                                Padding="16,10"
+                                Margin="0,0,12,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Sync Legacy Data"/>
+                                <TextBlock Text="{DynamicResource L_Set_SyncLegacy}"/>
                             </StackPanel>
                         </Button>
 
@@ -231,10 +403,10 @@
                                 IsEnabled="{Binding !IsSyncing}"
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Force Full Sync"/>
+                                <TextBlock Text="{DynamicResource L_Set_ForceFullSync}"/>
                             </StackPanel>
                         </Button>
-                    </StackPanel>
+                    </WrapPanel>
 
                     <TextBlock Text="{Binding LegacySyncStatus}"
                                TextWrapping="Wrap"
@@ -245,14 +417,14 @@
             <!-- About -->
             <Border Classes="SectionCard" Padding="24">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Path Diagnostics" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Set_PathDiagnostics}" Classes="SubHeader"/>
 
                     <Grid ColumnDefinitions="190,*"
                           RowDefinitions="Auto,Auto"
                           RowSpacing="12"
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Resolved Documents:"
+                                   Text="{DynamicResource L_Set_ResolvedDocs}"
                                    VerticalAlignment="Top"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="0" Grid.Column="1"
@@ -262,7 +434,7 @@
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Resolved Base:"
+                                   Text="{DynamicResource L_Set_ResolvedBase}"
                                    VerticalAlignment="Top"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1"
@@ -278,12 +450,12 @@
             <!-- About -->
             <Border Classes="SectionCard" Padding="24">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="About Agent Buddy" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Set_AboutTitle}" Classes="SubHeader"/>
 
-                    <TextBlock Text="Version 1.0.0" 
+                    <TextBlock Text="{DynamicResource L_Set_VersionText}" 
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     
-                    <TextBlock Text="India Post DOP Agent Portal Automation Tool" 
+                    <TextBlock Text="{DynamicResource L_Set_AboutDesc}" 
                                TextWrapping="Wrap"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </StackPanel>

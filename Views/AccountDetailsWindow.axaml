@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
         x:Class="AgentBuddy.Views.AccountDetailsWindow"
         x:DataType="models:RDAccount"
-        Title="Account Details"
+        Title="{DynamicResource L_AccountDetails_Title}"
         Width="500"
         Height="400"
         WindowStartupLocation="CenterOwner"
@@ -18,8 +18,8 @@
             
             <!-- Header -->
             <StackPanel Spacing="8">
-                <TextBlock Text="Profile" Classes="Kicker"/>
-                <TextBlock Text="Account Details" 
+                <TextBlock Text="{DynamicResource L_AccountDetails_Kicker}" Classes="Kicker"/>
+                <TextBlock Text="{DynamicResource L_AccountDetails_Title}" 
                            Classes="SectionHeader"
                            FontSize="28"
                            FontWeight="Bold"
@@ -34,7 +34,7 @@
                 
                 <!-- Account Number -->
                 <TextBlock Grid.Row="0" Grid.Column="0"
-                           Text="Account No:" 
+                           Text="{DynamicResource L_AccountDetails_AccountNo}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1"
                            Text="{Binding AccountNo}"
@@ -45,7 +45,7 @@
 
                 <!-- Name -->
                 <TextBlock Grid.Row="1" Grid.Column="0"
-                           Text="Name:" 
+                           Text="{DynamicResource L_AccountDetails_Name}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="1" Grid.Column="1"
                            Text="{Binding AccountName}"
@@ -54,7 +54,7 @@
 
                 <!-- Amount -->
                 <TextBlock Grid.Row="2" Grid.Column="0"
-                           Text="Amount:" 
+                           Text="{DynamicResource L_AccountDetails_Amount}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="2" Grid.Column="1"
                            Text="{Binding Denomination}"
@@ -63,7 +63,7 @@
 
                 <!-- Due Date -->
                 <TextBlock Grid.Row="3" Grid.Column="0"
-                           Text="Due Date:" 
+                           Text="{DynamicResource L_AccountDetails_DueDate}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="3" Grid.Column="1"
                            Text="{Binding NextInstallmentDate}"
@@ -71,7 +71,7 @@
 
                 <!-- Month Paid Upto -->
                 <TextBlock Grid.Row="4" Grid.Column="0"
-                           Text="Month Paid upto:" 
+                           Text="{DynamicResource L_AccountDetails_MonthPaidUpto}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="4" Grid.Column="1"
                            Text="{Binding MonthPaidUpto}"
@@ -79,7 +79,7 @@
 
                 <!-- Short Code -->
                 <TextBlock Grid.Row="5" Grid.Column="0"
-                           Text="Short Code:" 
+                           Text="{DynamicResource L_AccountDetails_ShortCode}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="5" Grid.Column="1"
                            FontFamily="Consolas"
@@ -89,7 +89,7 @@
 
                 <!-- First Seen -->
                 <TextBlock Grid.Row="6" Grid.Column="0"
-                           Text="First Seen:" 
+                           Text="{DynamicResource L_AccountDetails_FirstSeen}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="6" Grid.Column="1"
                            Text="{Binding FirstSeen, StringFormat='{}{0:dd-MMM-yyyy}'}"
@@ -97,7 +97,7 @@
 
                 <!-- Last Updated -->
                 <TextBlock Grid.Row="7" Grid.Column="0"
-                           Text="Last Updated:" 
+                           Text="{DynamicResource L_AccountDetails_LastUpdated}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="7" Grid.Column="1"
                            Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
@@ -111,14 +111,14 @@
                         Width="120"
                         Click="AddToList_Click">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Add to List"/>
+                        <TextBlock Text="{DynamicResource L_AccountDetails_AddToList}"/>
                     </StackPanel>
                 </Button>
                 
                 <Button Classes="Secondary" 
                         Width="100"
                         Click="Close_Click">
-                    <TextBlock Text="Close"/>
+                    <TextBlock Text="{DynamicResource L_Common_Close}"/>
                 </Button>
             </StackPanel>
 

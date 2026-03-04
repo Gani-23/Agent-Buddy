@@ -17,8 +17,16 @@ public partial class DopChequePromptWindow : Window
         DataContext = new DopChequePromptViewModel(request);
         Opened += (_, _) =>
         {
-            ChequeNoTextBox.Focus();
-            ChequeNoTextBox.SelectAll();
+            if (DataContext is DopChequePromptViewModel vm && vm.RequireChequeNo)
+            {
+                ChequeNoTextBox.Focus();
+                ChequeNoTextBox.SelectAll();
+            }
+            else
+            {
+                PaymentAccountTextBox.Focus();
+                PaymentAccountTextBox.SelectAll();
+            }
         };
         KeyDown += OnKeyDown;
     }
@@ -31,23 +39,27 @@ public partial class DopChequePromptWindow : Window
             return;
         }
 
+        vm.ClearValidationMessage();
         var chequeNo = (vm.ChequeNo ?? string.Empty).Trim();
         var paymentAccountNo = (vm.PaymentAccountNo ?? string.Empty).Trim();
 
-        if (string.IsNullOrWhiteSpace(chequeNo))
+        if (vm.RequireChequeNo && string.IsNullOrWhiteSpace(chequeNo))
         {
+            vm.SetValidationMessage("Enter cheque number.");
             ChequeNoTextBox.Focus();
             return;
         }
 
         if (string.IsNullOrWhiteSpace(paymentAccountNo))
         {
+            vm.SetValidationMessage("Enter payment account number.");
             PaymentAccountTextBox.Focus();
             return;
         }
 
         Close(new DopChequePromptResult
         {
+            AccountNo = vm.AccountNo,
             ChequeNo = chequeNo,
             PaymentAccountNo = paymentAccountNo
         });

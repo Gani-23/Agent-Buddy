@@ -20,15 +20,18 @@ public class PythonService
     private static readonly Regex ReferenceRegex = new(
         @"Reference:\s*([A-Z0-9]+)\b",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private const string PreferredBrowserSettingKey = "preferred_browser";
 
     private readonly string _pythonCommand;
     private readonly string _scriptsPath;
     private readonly string _documentsPath;
     private readonly string _venvPath;
     private readonly bool _hasVenv;
+    private readonly DatabaseService _databaseService;
 
-    public PythonService()
+    public PythonService(DatabaseService? databaseService = null)
     {
+        _databaseService = databaseService ?? new DatabaseService();
         _documentsPath = AppPaths.DocumentsDirectory;
         _scriptsPath = AppPaths.BaseDirectory;
         Directory.CreateDirectory(_scriptsPath);
@@ -66,7 +69,7 @@ public class PythonService
     {
         try
         {
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -107,18 +110,18 @@ public class PythonService
     /// </summary>
     public async Task<bool> CheckRequiredPackagesAsync()
     {
-        var requiredPackages = new[] { "selenium", "pandas", "pyperclip", "openpyxl", "xlrd", "reportlab" };
-        
+        var requiredPackages = new[] { "selenium", "pandas", "pyperclip", "openpyxl", "xlrd", "reportlab", "PIL" };
+
         foreach (var package in requiredPackages)
         {
             try
             {
-                var process = new Process
+                using var process = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = _pythonCommand,
-                        Arguments = $"-m pip show {package}",
+                        ArgumentList = { "-c", $"import importlib; importlib.import_module('{package}')" },
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
@@ -130,11 +133,13 @@ public class PythonService
                 ApplyPythonRuntimeEnvironment(process.StartInfo);
 
                 process.Start();
+                await process.StandardOutput.ReadToEndAsync();
+                await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
                 if (process.ExitCode != 0)
                 {
-                    return false; // Package not installed
+                    return false; // Package missing or broken.
                 }
             }
             catch
@@ -156,7 +161,7 @@ public class PythonService
         try
         {
             var packages = "selenium pandas pyperclip openpyxl xlrd reportlab";
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -213,12 +218,12 @@ public class PythonService
 
         try
         {
-            var process = new Process
+            var browserArg = await GetPreferredBrowserArgAsync();
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = _pythonCommand,
-                    Arguments = $"\"{scriptPath}\"",
                     UseShellExecute = false,
                     RedirectStandardInput = true,   // IMPORTANT: Enable stdin
                     RedirectStandardOutput = true,
@@ -230,6 +235,10 @@ public class PythonService
                 }
             };
             ApplyPythonRuntimeEnvironment(process.StartInfo);
+            process.StartInfo.ArgumentList.Add("-u");
+            process.StartInfo.ArgumentList.Add(scriptPath);
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
 
             process.OutputDataReceived += (sender, args) =>
             {
@@ -256,6 +265,7 @@ public class PythonService
             // Send "1" to automatically select menu option 1 (active-only update)
             await process.StandardInput.WriteLineAsync("1");
             await process.StandardInput.FlushAsync();
+            process.StandardInput.Close();
             
             await process.WaitForExitAsync();
 
@@ -293,7 +303,8 @@ public class PythonService
 
         try
         {
-            var process = new Process
+            var browserArg = await GetPreferredBrowserArgAsync();
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -314,20 +325,22 @@ public class PythonService
             process.StartInfo.ArgumentList.Add(bulkListsString);
             process.StartInfo.ArgumentList.Add("--pay-mode");
             process.StartInfo.ArgumentList.Add(NormalizePaymentModeArg(paymentMode));
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
             if (dopChequeInputs is { Count: > 0 })
             {
                 var normalizedDopCheque = dopChequeInputs
                     .Where(item =>
                         item.ListIndex > 0 &&
                         !string.IsNullOrWhiteSpace(item.AccountNo) &&
-                        !string.IsNullOrWhiteSpace(item.ChequeNo) &&
                         !string.IsNullOrWhiteSpace(item.PaymentAccountNo))
                     .Select(item => new
                     {
                         list_index = item.ListIndex,
                         account_no = item.AccountNo.Trim(),
-                        cheque_no = item.ChequeNo.Trim(),
-                        payment_account_no = item.PaymentAccountNo.Trim()
+                        cheque_no = (item.ChequeNo ?? string.Empty).Trim(),
+                        payment_account_no = item.PaymentAccountNo.Trim(),
+                        payment_mode = NormalizePaymentModeArg(item.PaymentModeToken)
                     })
                     .ToList();
 
@@ -430,7 +443,7 @@ public class PythonService
 
         try
         {
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -504,6 +517,119 @@ public class PythonService
         }
     }
 
+    public async Task<(bool success, string output)> UpdateMissingAslaasAsync(
+        IReadOnlyCollection<AslaasUpdateItem> updates,
+        Action<string>? progressCallback = null)
+    {
+        if (updates == null || updates.Count == 0)
+        {
+            return (false, "No missing ASLAAS accounts found.");
+        }
+
+        var scriptPath = Path.Combine(_scriptsPath, "ScheduleArguments.py");
+        if (!File.Exists(scriptPath))
+        {
+            return (false, $"Script not found: {scriptPath}");
+        }
+
+        var normalized = updates
+            .Where(item => !string.IsNullOrWhiteSpace(item.AccountNo))
+            .Select(item => new
+            {
+                account_no = item.AccountNo.Trim(),
+                aslaas_no = string.IsNullOrWhiteSpace(item.AslaasNo) ? "APPLIED" : item.AslaasNo.Trim()
+            })
+            .ToList();
+
+        if (normalized.Count == 0)
+        {
+            return (false, "No valid ASLAAS updates to process.");
+        }
+
+        var payload = JsonSerializer.Serialize(normalized);
+        var output = new StringBuilder();
+        string? payloadFilePath = null;
+
+        try
+        {
+            var browserArg = await GetPreferredBrowserArgAsync();
+            payloadFilePath = Path.Combine(
+                _scriptsPath,
+                $"aslaas_updates_{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}.json");
+            await File.WriteAllTextAsync(payloadFilePath, payload, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _pythonCommand,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    CreateNoWindow = true,
+                    WorkingDirectory = _scriptsPath
+                }
+            };
+
+            process.StartInfo.ArgumentList.Add("-u");
+            process.StartInfo.ArgumentList.Add(scriptPath);
+            process.StartInfo.ArgumentList.Add("--aslaas-only-file");
+            process.StartInfo.ArgumentList.Add(payloadFilePath);
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
+            ApplyPythonRuntimeEnvironment(process.StartInfo);
+
+            process.OutputDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                output.AppendLine(args.Data);
+                progressCallback?.Invoke(args.Data);
+            };
+
+            process.ErrorDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                output.AppendLine(args.Data);
+                progressCallback?.Invoke(args.Data);
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+
+            return (process.ExitCode == 0, output.ToString());
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error executing ASLAAS update: {ex.Message}");
+        }
+        finally
+        {
+            if (!string.IsNullOrWhiteSpace(payloadFilePath))
+            {
+                try
+                {
+                    File.Delete(payloadFilePath);
+                }
+                catch
+                {
+                    // Ignore temp-file cleanup failures.
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Get Python scripts directory path
     /// </summary>
@@ -531,6 +657,33 @@ public class PythonService
     {
         startInfo.Environment["PYTHONUTF8"] = "1";
         startInfo.Environment["PYTHONIOENCODING"] = "utf-8";
+    }
+
+    private async Task<string> GetPreferredBrowserArgAsync()
+    {
+        try
+        {
+            var saved = await _databaseService.GetAppSettingAsync(PreferredBrowserSettingKey);
+            return NormalizeBrowserArg(saved);
+        }
+        catch
+        {
+            return "chrome";
+        }
+    }
+
+    private static string NormalizeBrowserArg(string? browser)
+    {
+        var value = (browser ?? string.Empty).Trim().ToLowerInvariant();
+        return value switch
+        {
+            "edge" => "edge",
+            "internet_explorer" => "ie",
+            "internet explorer" => "ie",
+            "ie" => "ie",
+            "safari" => "safari",
+            _ => "chrome"
+        };
     }
 
     private static string NormalizePaymentModeArg(string? paymentMode)

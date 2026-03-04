@@ -27,6 +27,13 @@ public enum ListRunState
 
 public class ListPanelViewModel : ReactiveObject
 {
+    private enum EntryMessageTone
+    {
+        Neutral,
+        Success,
+        Error
+    }
+
     private static readonly string[] PaymentModeOptions =
     {
         "Cash",
@@ -44,9 +51,15 @@ public class ListPanelViewModel : ReactiveObject
     private string _pendingAccountNo = string.Empty;
     private string _pendingInstallmentText = "1";
     private string _entryMessage = string.Empty;
+    private EntryMessageTone _entryMessageTone = EntryMessageTone.Neutral;
     private ListRunState _runState = ListRunState.Pending;
     private string _referenceNumber = string.Empty;
     private string _failureReason = string.Empty;
+    private bool _isInstallmentSuggestionActive;
+    private string _installmentSuggestionHint = string.Empty;
+    private int _suggestedInstallment = 1;
+    private int _installmentSuggestionRequestId;
+    private bool _isApplyingInstallmentSuggestion;
     private string _lastProcessedSignature = string.Empty;
     private string _selectedPaymentMode = "Cash";
     private string _lastProcessedPaymentMode = "Cash";
@@ -106,7 +119,13 @@ public class ListPanelViewModel : ReactiveObject
         set
         {
             var normalized = NormalizeAccountInput(value);
+            if (string.Equals(_pendingAccountNo, normalized, StringComparison.Ordinal))
+            {
+                return;
+            }
+
             this.RaiseAndSetIfChanged(ref _pendingAccountNo, normalized);
+            _ = RefreshInstallmentSuggestionAsync(normalized);
         }
     }
 
@@ -117,6 +136,13 @@ public class ListPanelViewModel : ReactiveObject
         {
             var normalized = NormalizeInstallmentInput(value);
             this.RaiseAndSetIfChanged(ref _pendingInstallmentText, normalized);
+            if (_isApplyingInstallmentSuggestion)
+            {
+                return;
+            }
+
+            var parsed = ParseInstallment(normalized);
+            SetInstallmentSuggestionState(_suggestedInstallment > 1 && parsed == _suggestedInstallment);
         }
     }
 
@@ -193,6 +219,12 @@ public class ListPanelViewModel : ReactiveObject
     };
 
     public bool HasEntryMessage => !string.IsNullOrWhiteSpace(EntryMessage);
+    public string EntryMessageForeground => _entryMessageTone switch
+    {
+        EntryMessageTone.Success => "#1B5E20",
+        EntryMessageTone.Error => "#C62828",
+        _ => "#667085"
+    };
     public bool IsPendingState => RunState == ListRunState.Pending;
     public bool IsProcessingState => RunState == ListRunState.Processing;
     public bool IsSuccessState => RunState == ListRunState.Success;
@@ -203,6 +235,11 @@ public class ListPanelViewModel : ReactiveObject
     public decimal RemainingAmount => HasAmountLimit ? Math.Max(0, MaxAmount - TotalAmount) : 0m;
     public bool IsFull => HasAmountLimit && TotalAmount >= MaxAmount;
     public string AmountLimitText => HasAmountLimit ? " / Rs. 20,000" : " / No Limit";
+    public string PaymentModeToken => GetPaymentModeToken();
+    public bool IsInstallmentSuggestionActive => _isInstallmentSuggestionActive;
+    public string InstallmentInputTag => IsInstallmentSuggestionActive ? "InstallmentSuggested" : "InstallmentInput";
+    public string InstallmentSuggestionHint => _installmentSuggestionHint;
+    public bool HasInstallmentSuggestionHint => !string.IsNullOrWhiteSpace(InstallmentSuggestionHint);
 
     public ObservableCollection<ListItem> Items { get; }
 
@@ -223,31 +260,35 @@ public class ListPanelViewModel : ReactiveObject
 
         if (string.IsNullOrWhiteSpace(accountNo))
         {
-            EntryMessage = "Enter an account number.";
+            SetEntryErrorMessage("Enter an account number.");
             return false;
         }
 
-        var account = await _databaseService.GetAccountByNumberAsync(accountNo);
+        var existing = existingAccountsInLists ?? Items.Select(i => i.AccountNo).ToList();
+        var (status, account) = await _validationService.ValidateAccountAsync(accountNo, existing);
+        if (status != AccountValidationStatus.Valid && status != AccountValidationStatus.DueSoon)
+        {
+            SetEntryErrorMessage(status switch
+            {
+                AccountValidationStatus.Duplicate => $"{accountNo} already exists in a list.",
+                AccountValidationStatus.Closed => $"{accountNo} is closed and cannot be added.",
+                AccountValidationStatus.Matured => $"{accountNo} is already matured and cannot be added.",
+                AccountValidationStatus.Invalid => $"{accountNo} not found in database.",
+                _ => $"{accountNo} cannot be added."
+            });
+            return false;
+        }
 
         if (account == null)
         {
-            EntryMessage = $"{accountNo} not found in database.";
+            SetEntryErrorMessage($"{accountNo} not found in database.");
             return false;
         }
 
         var amountToAdd = account.GetAmount() * installment;
         if (HasAmountLimit && TotalAmount + amountToAdd > MaxAmount)
         {
-            EntryMessage = $"Cannot add {accountNo}. This list is limited to Rs. 20,000.";
-            return false;
-        }
-
-        var existing = existingAccountsInLists ?? Items.Select(i => i.AccountNo).ToList();
-        var (status, _) = await _validationService.ValidateAccountAsync(accountNo, existing);
-
-        if (status == AccountValidationStatus.Duplicate)
-        {
-            EntryMessage = $"{accountNo} already exists in a list.";
+            SetEntryErrorMessage($"Cannot add {accountNo}. This list is limited to Rs. 20,000.");
             return false;
         }
 
@@ -259,11 +300,11 @@ public class ListPanelViewModel : ReactiveObject
             AccountDetails = account
         });
 
-        EntryMessage = status switch
+        SetEntrySuccessMessage(status switch
         {
             AccountValidationStatus.DueSoon => $"{accountNo} added (due soon).",
             _ => $"{accountNo} added."
-        };
+        });
 
         return true;
     }
@@ -277,18 +318,71 @@ public class ListPanelViewModel : ReactiveObject
 
         if (Items.Remove(item))
         {
-            EntryMessage = $"{item.AccountNo} removed.";
+            SetEntrySuccessMessage($"{item.AccountNo} removed.");
         }
     }
 
     public void Clear()
     {
         Items.Clear();
-        EntryMessage = "List cleared.";
+        ClearInstallmentSuggestion(resetInstallmentValue: true);
+        SetEntrySuccessMessage("List cleared.");
+    }
+
+    public void ResetProcessingMarkers()
+    {
+        foreach (var item in Items)
+        {
+            item.IsProcessedInCurrentRun = false;
+        }
+    }
+
+    public void MarkAccountProcessed(string accountNo)
+    {
+        var normalized = (accountNo ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return;
+        }
+
+        var matched = Items.FirstOrDefault(item =>
+            string.Equals(item.AccountNo?.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
+        if (matched != null)
+        {
+            matched.IsProcessedInCurrentRun = true;
+        }
+    }
+
+    public void MarkAllAccountsProcessed()
+    {
+        foreach (var item in Items)
+        {
+            if (!string.IsNullOrWhiteSpace(item.AccountNo))
+            {
+                item.IsProcessedInCurrentRun = true;
+            }
+        }
     }
 
     public void SetEntryMessage(string message)
     {
+        SetEntryMessageInternal(message, EntryMessageTone.Neutral);
+    }
+
+    public void SetEntryErrorMessage(string message)
+    {
+        SetEntryMessageInternal(message, EntryMessageTone.Error);
+    }
+
+    public void SetEntrySuccessMessage(string message)
+    {
+        SetEntryMessageInternal(message, EntryMessageTone.Success);
+    }
+
+    private void SetEntryMessageInternal(string? message, EntryMessageTone tone)
+    {
+        _entryMessageTone = tone;
+        this.RaisePropertyChanged(nameof(EntryMessageForeground));
         EntryMessage = message ?? string.Empty;
     }
 
@@ -324,6 +418,7 @@ public class ListPanelViewModel : ReactiveObject
         RunState = ListRunState.Pending;
         ReferenceNumber = string.Empty;
         FailureReason = string.Empty;
+        ResetProcessingMarkers();
         Name = $"List {ListNumber}";
     }
 
@@ -339,6 +434,7 @@ public class ListPanelViewModel : ReactiveObject
         ReferenceNumber = (referenceNumber ?? string.Empty).Trim();
         FailureReason = string.Empty;
         RunState = ListRunState.Success;
+        MarkAllAccountsProcessed();
         _lastProcessedSignature = GetPayloadSignature();
         _lastProcessedPaymentMode = SelectedPaymentMode;
         Name = string.IsNullOrWhiteSpace(ReferenceNumber) ? $"List {ListNumber}" : ReferenceNumber;
@@ -451,13 +547,114 @@ public class ListPanelViewModel : ReactiveObject
         return int.TryParse(text, out var parsed) && parsed > 0 ? parsed : 1;
     }
 
+    private async Task RefreshInstallmentSuggestionAsync(string accountNo)
+    {
+        var requestId = ++_installmentSuggestionRequestId;
+        // Support both 10-digit and 12-digit account numbers.
+        if (string.IsNullOrWhiteSpace(accountNo) || accountNo.Length < 10)
+        {
+            ClearInstallmentSuggestion(resetInstallmentValue: true);
+            return;
+        }
+
+        RDAccount? account;
+        try
+        {
+            account = await _databaseService.GetAccountByNumberAsync(accountNo);
+        }
+        catch
+        {
+            return;
+        }
+
+        if (requestId != _installmentSuggestionRequestId)
+        {
+            return;
+        }
+
+        if (account == null || !account.IsActive)
+        {
+            ClearInstallmentSuggestion(resetInstallmentValue: true);
+            return;
+        }
+
+        var suggestedInstallments = account.GetPendingInstallmentsTill(DateTime.Today);
+        _suggestedInstallment = suggestedInstallments;
+        if (suggestedInstallments <= 1)
+        {
+            ClearInstallmentSuggestion(resetInstallmentValue: true);
+            return;
+        }
+
+        _installmentSuggestionHint =
+            $"Suggested pending installments: {suggestedInstallments}. You can edit this value.";
+        this.RaisePropertyChanged(nameof(InstallmentSuggestionHint));
+        this.RaisePropertyChanged(nameof(HasInstallmentSuggestionHint));
+
+        var currentInstallment = ParseInstallment(PendingInstallmentText);
+        if (currentInstallment <= 1 || IsInstallmentSuggestionActive)
+        {
+            _isApplyingInstallmentSuggestion = true;
+            PendingInstallmentText = suggestedInstallments.ToString(CultureInfo.InvariantCulture);
+            _isApplyingInstallmentSuggestion = false;
+        }
+
+        SetInstallmentSuggestionState(ParseInstallment(PendingInstallmentText) == suggestedInstallments);
+    }
+
+    private void ClearInstallmentSuggestion(bool resetInstallmentValue)
+    {
+        _suggestedInstallment = 1;
+        if (resetInstallmentValue)
+        {
+            _isApplyingInstallmentSuggestion = true;
+            PendingInstallmentText = "1";
+            _isApplyingInstallmentSuggestion = false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_installmentSuggestionHint))
+        {
+            _installmentSuggestionHint = string.Empty;
+            this.RaisePropertyChanged(nameof(InstallmentSuggestionHint));
+            this.RaisePropertyChanged(nameof(HasInstallmentSuggestionHint));
+        }
+
+        SetInstallmentSuggestionState(false);
+    }
+
+    private void SetInstallmentSuggestionState(bool active)
+    {
+        if (_isInstallmentSuggestionActive == active)
+        {
+            return;
+        }
+
+        _isInstallmentSuggestionActive = active;
+        this.RaisePropertyChanged(nameof(IsInstallmentSuggestionActive));
+        this.RaisePropertyChanged(nameof(InstallmentInputTag));
+    }
+
     private static string NormalizePaymentModeSelection(string? value)
     {
         var mode = (value ?? string.Empty).Trim();
-        return mode switch
+        if (string.IsNullOrWhiteSpace(mode))
         {
-            "DOP Cheque" => "DOP Cheque",
-            "Non DOP Cheque" => "Non DOP Cheque",
+            return "Cash";
+        }
+
+        var normalized = mode
+            .Replace("_", " ", StringComparison.Ordinal)
+            .Replace("-", " ", StringComparison.Ordinal)
+            .Trim();
+
+        return normalized.ToLowerInvariant() switch
+        {
+            "dop cheque" => "DOP Cheque",
+            "dopcheque" => "DOP Cheque",
+            "non dop cheque" => "Non DOP Cheque",
+            "nondop cheque" => "Non DOP Cheque",
+            "non dopcheque" => "Non DOP Cheque",
+            "cash" => "Cash",
             _ => "Cash"
         };
     }
@@ -502,6 +699,12 @@ public class ListManagementViewModel : ViewModelBase
         @"\d+(?:_\d+)?",
         RegexOptions.Compiled);
 
+    private static readonly Regex AccountProcessedRegex = new(
+        @"(?:\bSet\s+\d+\s+installments?\s+for|\bSetting\s+\d+\s+installments?\s+for)\s+(\d{6,})",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private const int MaxProcessLogEntries = 300;
+
     private readonly DatabaseService _databaseService;
     private readonly ValidationService _validationService;
     private readonly PythonService _pythonService;
@@ -537,6 +740,8 @@ public class ListManagementViewModel : ViewModelBase
 
         Lists = new ObservableCollection<ListPanelViewModel>();
         ReferenceNumbers = new ObservableCollection<string>();
+        ProcessingLogs = new ObservableCollection<string>();
+        ProcessingLogs.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(HasProcessingLogs));
 
         AddNewListCommand = ReactiveCommand.Create(AddNewList);
         SaveLotCommand = ReactiveCommand.CreateFromTask(SaveLotAsync);
@@ -567,9 +772,11 @@ public class ListManagementViewModel : ViewModelBase
     }
 
     public bool HasFailedLists => Lists.Any(list => list.IsFailedState);
+    public bool HasProcessingLogs => ProcessingLogs.Count > 0;
 
     public ObservableCollection<ListPanelViewModel> Lists { get; }
     public ObservableCollection<string> ReferenceNumbers { get; }
+    public ObservableCollection<string> ProcessingLogs { get; }
     public Interaction<AslaasPromptRequest, string?> AslaasPrompt { get; } = new();
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
 
@@ -773,17 +980,18 @@ public class ListManagementViewModel : ViewModelBase
         var normalizedAccountNo = (accountNo ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(normalizedAccountNo))
         {
-            list.SetEntryMessage("Enter an account number.");
+            list.SetEntryErrorMessage("Enter an account number.");
             return false;
         }
 
         var existingAccounts = GetAllExistingAccountNumbers();
-        var isDuplicate = existingAccounts.Any(existing =>
-            string.Equals(existing?.Trim(), normalizedAccountNo, StringComparison.OrdinalIgnoreCase));
+        var (validationStatus, validatedAccount) = await _validationService.ValidateAccountAsync(normalizedAccountNo, existingAccounts);
+        var isProcessable = validationStatus == AccountValidationStatus.Valid ||
+                            validationStatus == AccountValidationStatus.DueSoon;
 
-        if (!isDuplicate)
+        if (isProcessable)
         {
-            var account = await _databaseService.GetAccountByNumberAsync(normalizedAccountNo);
+            var account = validatedAccount;
             if (account != null && IsAslaasMissing(account))
             {
                 if (!_pendingAslaasUpdates.TryGetValue(normalizedAccountNo, out var queuedAslaas))
@@ -791,7 +999,7 @@ public class ListManagementViewModel : ViewModelBase
                     queuedAslaas = await RequestAslaasValueAsync(account);
                     if (string.IsNullOrWhiteSpace(queuedAslaas))
                     {
-                        list.SetEntryMessage($"{normalizedAccountNo} requires ASLAAS before adding.");
+                        list.SetEntryErrorMessage($"{normalizedAccountNo} requires ASLAAS before adding.");
                         return false;
                     }
 
@@ -899,15 +1107,35 @@ public class ListManagementViewModel : ViewModelBase
         }
 
         IsProcessing = true;
+        ClearProcessingLogs();
+        AppendProcessingLog(
+            retryFailedOnly
+                ? $"Retry started for {processableLists.Count} failed list(s)."
+                : $"Run started for {processableLists.Count} pending list(s).");
 
         try
         {
             ProcessStatus = "Checking Python installation...";
+            AppendProcessingLog(ProcessStatus);
             var (isInstalled, _) = await _pythonService.CheckPythonInstalledAsync();
             if (!isInstalled)
             {
                 ProcessStatus = "Python not found. Install Python 3.x and try again.";
+                AppendProcessingLog(ProcessStatus);
                 _notificationService?.Error("Python Missing", "Install Python 3.x to process lists.");
+                return;
+            }
+
+            ProcessStatus = "Checking Python packages...";
+            AppendProcessingLog(ProcessStatus);
+            var hasRequiredPackages = await _pythonService.CheckRequiredPackagesAsync();
+            if (!hasRequiredPackages)
+            {
+                ProcessStatus = "Python packages missing or broken. Reinstall requirements and try again.";
+                AppendProcessingLog(ProcessStatus);
+                _notificationService?.Error(
+                    "Python Packages Missing",
+                    "Required Python packages are missing or broken. Open Settings and reinstall requirements.");
                 return;
             }
 
@@ -925,25 +1153,40 @@ public class ListManagementViewModel : ViewModelBase
             if (string.IsNullOrWhiteSpace(bulkListsString))
             {
                 ProcessStatus = "No valid list payload to send.";
+                AppendProcessingLog(ProcessStatus);
                 _notificationService?.Warning("Nothing To Send", "All selected lists are empty.");
                 return;
             }
 
             var queuedAslaasUpdates = CollectPendingAslaasUpdates(processableLists);
+            AppendProcessingLog($"Queued ASLAAS updates: {queuedAslaasUpdates.Count}");
             var queuedDopChequeInputs = await CollectDopChequeInputsAsync(processableLists);
             if (queuedDopChequeInputs == null)
             {
                 ProcessStatus = "Processing cancelled.";
+                AppendProcessingLog(ProcessStatus);
                 return;
+            }
+            AppendProcessingLog($"Queued cheque/account prompts: {queuedDopChequeInputs.Count}");
+
+            if (queuedDopChequeInputs.Count > 0)
+            {
+                await _databaseService.SaveDopChequeInputsAsync(queuedDopChequeInputs);
             }
 
             ProcessStatus = retryFailedOnly
                 ? $"Retrying {processableLists.Count} failed list(s)..."
                 : $"Running {processableLists.Count} pending list(s)...";
+            AppendProcessingLog(ProcessStatus);
 
             var indexedProcessableLists = processableLists
                 .Select((list, index) => new { list, index = index + 1 })
                 .ToDictionary(entry => entry.index, entry => entry.list);
+
+            var defaultPaymentMode = processableLists
+                .Select(list => list.PaymentModeToken)
+                .FirstOrDefault(token => !string.IsNullOrWhiteSpace(token))
+                ?? "cash";
 
             var stateLock = new object();
             var currentProcessingIndex = 0;
@@ -951,7 +1194,7 @@ public class ListManagementViewModel : ViewModelBase
             var result = await _pythonService.ProcessListsAsync(
                 bulkListsString,
                 queuedAslaasUpdates,
-                paymentMode: "cash",
+                paymentMode: defaultPaymentMode,
                 dopChequeInputs: queuedDopChequeInputs,
                 progress =>
                 {
@@ -962,6 +1205,7 @@ public class ListManagementViewModel : ViewModelBase
 
                     var line = progress.Trim();
                     Dispatcher.UIThread.Post(() => ProcessStatus = line);
+                    AppendProcessingLog(line);
 
                     var processingMatch = ProcessingListRegex.Match(line);
                     if (processingMatch.Success && int.TryParse(processingMatch.Groups[1].Value, out var processingIndex))
@@ -980,6 +1224,25 @@ public class ListManagementViewModel : ViewModelBase
                             }
                         });
                         return;
+                    }
+
+                    var accountProcessedMatch = AccountProcessedRegex.Match(line);
+                    if (accountProcessedMatch.Success)
+                    {
+                        var accountNo = accountProcessedMatch.Groups[1].Value.Trim();
+                        var mappedIndex = 0;
+                        lock (stateLock)
+                        {
+                            mappedIndex = currentProcessingIndex;
+                        }
+
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (mappedIndex > 0 && indexedProcessableLists.TryGetValue(mappedIndex, out var list))
+                            {
+                                list.MarkAccountProcessed(accountNo);
+                            }
+                        });
                     }
 
                     var referenceMatch = ReferenceRegex.Match(line);
@@ -1053,6 +1316,11 @@ public class ListManagementViewModel : ViewModelBase
                 ProcessStatus = string.IsNullOrWhiteSpace(result.ErrorMessage)
                     ? "List processing failed."
                     : result.ErrorMessage;
+                AppendProcessingLog("List processing failed.");
+                if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    AppendProcessingLog($"Failure reason: {errorMessage}");
+                }
                 _notificationService?.Error("List Processing Failed", "ScheduleArguments.py returned an error.");
                 RefreshReferenceNumbersFromLists();
                 RaiseListStateProperties();
@@ -1084,6 +1352,7 @@ public class ListManagementViewModel : ViewModelBase
             ProcessStatus = failed == 0
                 ? $"Completed. {completed}/{processableLists.Count} list(s) processed successfully."
                 : $"Completed with issues. Success: {completed}, Failed: {failed}.";
+            AppendProcessingLog(ProcessStatus);
 
             if (failed == 0)
             {
@@ -1097,6 +1366,7 @@ public class ListManagementViewModel : ViewModelBase
         catch (Exception ex)
         {
             ProcessStatus = $"Error: {ex.Message}";
+            AppendProcessingLog(ProcessStatus);
             _notificationService?.Error("Processing Error", ex.Message);
         }
         finally
@@ -1176,6 +1446,35 @@ public class ListManagementViewModel : ViewModelBase
     private void RaiseListStateProperties()
     {
         this.RaisePropertyChanged(nameof(HasFailedLists));
+    }
+
+    private void ClearProcessingLogs()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ProcessingLogs.Clear();
+            this.RaisePropertyChanged(nameof(HasProcessingLogs));
+        });
+    }
+
+    private void AppendProcessingLog(string message)
+    {
+        var line = (message ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            ProcessingLogs.Add($"{DateTime.Now:HH:mm:ss}  {line}");
+            while (ProcessingLogs.Count > MaxProcessLogEntries)
+            {
+                ProcessingLogs.RemoveAt(0);
+            }
+
+            this.RaisePropertyChanged(nameof(HasProcessingLogs));
+        });
     }
 
     private void RefreshReferenceNumbersFromLists()
@@ -1428,11 +1727,37 @@ public class ListManagementViewModel : ViewModelBase
             return "Processing failed.";
         }
 
-        return text
+        var lines = text
             .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(line => line.Trim())
-            .FirstOrDefault(line => !string.IsNullOrWhiteSpace(line))
-            ?? "Processing failed.";
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToList();
+
+        if (lines.Count == 0)
+        {
+            return "Processing failed.";
+        }
+
+        var hasTraceback = lines.Any(line =>
+            line.StartsWith("Traceback (most recent call last):", StringComparison.OrdinalIgnoreCase));
+
+        if (hasTraceback)
+        {
+            for (var i = lines.Count - 1; i >= 0; i--)
+            {
+                var line = lines[i];
+                if (line.StartsWith("Traceback", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("File \"", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("During handling of the above exception", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return line;
+            }
+        }
+
+        return lines[0];
     }
 
     private async Task<IReadOnlyCollection<DopChequeInputItem>?> CollectDopChequeInputsAsync(
@@ -1444,7 +1769,10 @@ public class ListManagementViewModel : ViewModelBase
         for (var index = 0; index < processableLists.Count; index++)
         {
             var list = processableLists[index];
-            if (!string.Equals(list.SelectedPaymentMode, "DOP Cheque", StringComparison.Ordinal))
+            var paymentModeToken = list.PaymentModeToken;
+            var isDopChequeMode = string.Equals(paymentModeToken, "dop_cheque", StringComparison.Ordinal);
+            var isNonDopChequeMode = string.Equals(paymentModeToken, "non_dop_cheque", StringComparison.Ordinal);
+            if (!isDopChequeMode && !isNonDopChequeMode)
             {
                 continue;
             }
@@ -1462,6 +1790,8 @@ public class ListManagementViewModel : ViewModelBase
                     AccountNo = item.AccountNo,
                     AccountName = item.AccountNameDisplay,
                     Installment = item.EffectiveInstallment,
+                    PaymentModeToken = paymentModeToken,
+                    RequireChequeNo = isDopChequeMode,
                     SuggestedChequeNo = lastChequeNo,
                     SuggestedPaymentAccountNo = lastPaymentAccountNo
                 }).ToTask();
@@ -1473,20 +1803,27 @@ public class ListManagementViewModel : ViewModelBase
 
                 var chequeNo = (response.ChequeNo ?? string.Empty).Trim();
                 var paymentAccountNo = (response.PaymentAccountNo ?? string.Empty).Trim();
-                if (string.IsNullOrWhiteSpace(chequeNo) || string.IsNullOrWhiteSpace(paymentAccountNo))
+                var accountNo = (response.AccountNo ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(accountNo) ||
+                    (isDopChequeMode && string.IsNullOrWhiteSpace(chequeNo)) ||
+                    string.IsNullOrWhiteSpace(paymentAccountNo))
                 {
                     return null;
                 }
 
-                lastChequeNo = chequeNo;
+                if (!string.IsNullOrWhiteSpace(chequeNo))
+                {
+                    lastChequeNo = chequeNo;
+                }
                 lastPaymentAccountNo = paymentAccountNo;
 
                 result.Add(new DopChequeInputItem
                 {
                     ListIndex = index + 1,
-                    AccountNo = item.AccountNo.Trim(),
+                    AccountNo = accountNo,
                     ChequeNo = chequeNo,
-                    PaymentAccountNo = paymentAccountNo
+                    PaymentAccountNo = paymentAccountNo,
+                    PaymentModeToken = paymentModeToken
                 });
             }
         }
@@ -1517,15 +1854,22 @@ public class ListManagementViewModel : ViewModelBase
     {
         var normalizedChequeNo = (chequeNo ?? string.Empty).Trim();
         var normalizedPaymentAccountNo = (paymentAccountNo ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(normalizedChequeNo) || string.IsNullOrWhiteSpace(normalizedPaymentAccountNo))
+        if (string.IsNullOrWhiteSpace(normalizedChequeNo) && string.IsNullOrWhiteSpace(normalizedPaymentAccountNo))
         {
             return;
         }
 
         try
         {
-            await _databaseService.SaveAppSettingAsync(DopChequeDefaultChequeNoKey, normalizedChequeNo);
-            await _databaseService.SaveAppSettingAsync(DopChequeDefaultPaymentAccountNoKey, normalizedPaymentAccountNo);
+            if (!string.IsNullOrWhiteSpace(normalizedChequeNo))
+            {
+                await _databaseService.SaveAppSettingAsync(DopChequeDefaultChequeNoKey, normalizedChequeNo);
+            }
+
+            if (!string.IsNullOrWhiteSpace(normalizedPaymentAccountNo))
+            {
+                await _databaseService.SaveAppSettingAsync(DopChequeDefaultPaymentAccountNoKey, normalizedPaymentAccountNo);
+            }
         }
         catch
         {

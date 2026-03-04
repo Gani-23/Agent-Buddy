@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace AgentBuddy.Services;
 /// </summary>
 public class ValidationService
 {
+    private const int FullyMaturedInstallmentThreshold = 120;
     private readonly DatabaseService _databaseService;
 
     public ValidationService(DatabaseService databaseService)
@@ -24,24 +26,43 @@ public class ValidationService
         string accountNo, 
         List<string> existingAccountsInLists)
     {
-        // Check if account exists in database
-        var account = await _databaseService.GetAccountByNumberAsync(accountNo);
-        
-        if (account == null)
+        var normalizedAccountNo = (accountNo ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedAccountNo))
         {
             return (AccountValidationStatus.Invalid, null);
         }
 
-        // Check for duplicates across lists
-        if (existingAccountsInLists.Contains(accountNo))
+        // Check if account exists in active account table first.
+        var account = await _databaseService.GetAccountByNumberAsync(normalizedAccountNo);
+        if (account == null)
         {
-            return (AccountValidationStatus.Duplicate, account);
+            var archived = await _databaseService.GetClosedAccountByNumberAsync(normalizedAccountNo);
+            if (archived != null)
+            {
+                return (IsMaturedCompletely(archived)
+                    ? AccountValidationStatus.Matured
+                    : AccountValidationStatus.Closed, archived);
+            }
+
+            return (AccountValidationStatus.Invalid, null);
         }
 
-        // Check if due soon (within 30 days)
-        if (account.IsDueWithinDays(30))
+        if (IsMaturedCompletely(account))
         {
-            return (AccountValidationStatus.DueSoon, account);
+            return (AccountValidationStatus.Matured, account);
+        }
+
+        if (!account.IsActive || IsClosedStatus(account.Status))
+        {
+            return (AccountValidationStatus.Closed, account);
+        }
+
+        // Check for duplicates across lists.
+        var isDuplicate = existingAccountsInLists.Any(existing =>
+            string.Equals(existing?.Trim(), normalizedAccountNo, StringComparison.OrdinalIgnoreCase));
+        if (isDuplicate)
+        {
+            return (AccountValidationStatus.Duplicate, account);
         }
 
         return (AccountValidationStatus.Valid, account);
@@ -67,8 +88,9 @@ public class ValidationService
                 AccountDetails = account
             });
 
-            // Add to existing list for duplicate checking
-            if (account != null)
+            // Add only processable accounts for duplicate checking.
+            if (account != null &&
+                (status == AccountValidationStatus.Valid || status == AccountValidationStatus.DueSoon))
             {
                 existingAccountsInLists.Add(accountNo);
             }
@@ -84,9 +106,10 @@ public class ValidationService
     {
         return status switch
         {
-            AccountValidationStatus.DueSoon => "#FFC853",    // Yellow
             AccountValidationStatus.Invalid => "#E03E3E",    // Red
             AccountValidationStatus.Duplicate => "#E91E63",  // Pink
+            AccountValidationStatus.Closed => "#B22222",     // Firebrick
+            AccountValidationStatus.Matured => "#A94442",    // Matured/closed tone
             _ => "Transparent"                                // Valid - no highlight
         };
     }
@@ -99,11 +122,49 @@ public class ValidationService
         return status switch
         {
             AccountValidationStatus.Valid => "Valid account",
-            AccountValidationStatus.DueSoon => "Payment due within 30 days",
             AccountValidationStatus.Invalid => "Account not found in database",
             AccountValidationStatus.Duplicate => "Duplicate account in lists",
+            AccountValidationStatus.Closed => "Account is already closed",
+            AccountValidationStatus.Matured => "Account is already matured completely",
             _ => string.Empty
         };
+    }
+
+    private static bool IsClosedStatus(string status)
+    {
+        var normalized = (status ?? string.Empty).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return false;
+        }
+
+        return normalized.Contains("closed", StringComparison.Ordinal) ||
+               normalized.Contains("inactive", StringComparison.Ordinal) ||
+               normalized.Contains("deactivated", StringComparison.Ordinal);
+    }
+
+    private static bool IsMaturedStatus(string status)
+    {
+        var normalized = (status ?? string.Empty).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return false;
+        }
+
+        return normalized.Contains("matured", StringComparison.Ordinal) ||
+               normalized.Equals("mature", StringComparison.Ordinal) ||
+               normalized.Contains("maturity", StringComparison.Ordinal);
+    }
+
+    private static bool IsMaturedCompletely(RDAccount account)
+    {
+        if (account == null)
+        {
+            return false;
+        }
+
+        return account.GetMonthPaidNumber() >= FullyMaturedInstallmentThreshold ||
+               IsMaturedStatus(account.Status);
     }
 
     /// <summary>

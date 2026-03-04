@@ -7,14 +7,20 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
              x:Class="AgentBuddy.Views.ListManagementView"
              x:DataType="vm:ListManagementViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBox[Tag=InstallmentSuggested]">
+            <Setter Property="Background" Value="{DynamicResource WarningTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+        </Style>
+    </UserControl.Styles>
 
     <ScrollViewer>
         <StackPanel Spacing="24" Margin="0,0,0,24">
             
             <!-- Header -->
             <StackPanel Spacing="2">
-                <TextBlock Text="Daily Workflow" Classes="Kicker"/>
-                <TextBlock Text="Create Payment Lists" Classes="SectionHeader"/>
+                <TextBlock Text="{DynamicResource L_List_Kicker}" Classes="Kicker"/>
+                <TextBlock Text="{DynamicResource L_List_Title}" Classes="SectionHeader"/>
             </StackPanel>
 
             <!-- Action Buttons -->
@@ -24,7 +30,7 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Save Lot"/>
+                        <TextBlock Text="{DynamicResource L_List_SaveLot}"/>
                     </StackPanel>
                 </Button>
 
@@ -33,7 +39,7 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Reload List"/>
+                        <TextBlock Text="{DynamicResource L_List_ReloadList}"/>
                     </StackPanel>
                 </Button>
 
@@ -42,7 +48,7 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Delete All"/>
+                        <TextBlock Text="{DynamicResource L_List_DeleteAll}"/>
                     </StackPanel>
                 </Button>
 
@@ -54,7 +60,7 @@
                         Margin="0,0,12,0"
                         IsEnabled="{Binding !IsProcessing}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Start And Take A Walk" FontWeight="Medium"/>
+                        <TextBlock Text="{DynamicResource L_List_StartWalk}" FontWeight="Medium"/>
                     </StackPanel>
                 </Button>
 
@@ -64,7 +70,7 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Retry Failed Only"/>
+                        <TextBlock Text="{DynamicResource L_List_RetryFailed}"/>
                     </StackPanel>
                 </Button>
 
@@ -72,7 +78,7 @@
                         Command="{Binding AddNewListCommand}"
                         Padding="16,10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Add List"/>
+                        <TextBlock Text="{DynamicResource L_List_AddList}"/>
                     </StackPanel>
                 </Button>
             </WrapPanel>
@@ -85,7 +91,7 @@
                 <StackPanel Spacing="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock Text="⏳" Classes="Pulse" FontSize="16"/>
-                        <TextBlock Text="Processing..." 
+                        <TextBlock Text="{DynamicResource L_List_Processing}" 
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     </StackPanel>
@@ -95,12 +101,39 @@
                 </StackPanel>
             </Border>
 
+            <Border Classes="Card"
+                    Padding="16"
+                    IsVisible="{Binding HasProcessingLogs}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Runtime Logs"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <Border Background="{DynamicResource AppHoverBrush}"
+                            CornerRadius="6"
+                            Padding="10">
+                        <ScrollViewer MaxHeight="170"
+                                      VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding ProcessingLogs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- Reference Numbers Display -->
             <Border Classes="Card"
                     Padding="20"
                     IsVisible="{Binding ReferenceNumbers.Count}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Reference Numbers" 
+                    <TextBlock Text="{DynamicResource L_List_ReferenceNumbers}"
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     
@@ -162,7 +195,7 @@
                                         </Grid>
 
                                         <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                            <TextBlock Text="Mode"
+                                            <TextBlock Text="{DynamicResource L_List_Mode}"
                                                        FontSize="11"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
@@ -230,40 +263,45 @@
                                             Padding="8">
                                         <Grid ColumnDefinitions="*,90" ColumnSpacing="8">
                                             <TextBox Text="{Binding PendingAccountNo, UpdateSourceTrigger=PropertyChanged}"
-                                                     Watermark="Account number"
+                                                     Watermark="{DynamicResource L_List_WatermarkAccountNo}"
                                                      Tag="AccountInput"
                                                      MaxLength="12"
                                                      FontFamily="Consolas"
                                                      KeyDown="PendingField_KeyDown"/>
                                             <TextBox Grid.Column="1"
                                                      Text="{Binding PendingInstallmentText, UpdateSourceTrigger=PropertyChanged}"
-                                                     Watermark="Inst"
-                                                     Tag="InstallmentInput"
+                                                     Watermark="{DynamicResource L_List_WatermarkInst}"
+                                                     Tag="{Binding InstallmentInputTag}"
                                                      HorizontalContentAlignment="Center"
                                                      FontFamily="Consolas"
                                                      KeyDown="PendingField_KeyDown"/>
                                         </Grid>
                                     </Border>
 
-                                    <TextBlock Grid.Row="3"
-                                               Text="Press Enter to add. Installment defaults to 1."
-                                               FontSize="10"
-                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <StackPanel Grid.Row="3" Spacing="2">
+                                        <TextBlock Text="{DynamicResource L_List_EnterHint}"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding InstallmentSuggestionHint}"
+                                                   FontSize="10"
+                                                   IsVisible="{Binding HasInstallmentSuggestionHint}"
+                                                   Foreground="{DynamicResource WarningBrush}"/>
+                                    </StackPanel>
 
                                     <TextBlock Grid.Row="4"
                                                Text="{Binding EntryMessage}"
                                                FontSize="11"
                                                TextWrapping="Wrap"
                                                IsVisible="{Binding HasEntryMessage}"
-                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                               Foreground="{Binding EntryMessageForeground}"/>
 
                                     <Grid Grid.Row="5" ColumnDefinitions="*,70,Auto" ColumnSpacing="8">
-                                        <TextBlock Text="Account Number"
+                                        <TextBlock Text="{DynamicResource L_List_ColumnAccountNo}"
                                                    FontSize="11"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                         <TextBlock Grid.Column="1"
-                                                   Text="Inst"
+                                                   Text="{DynamicResource L_List_ColumnInst}"
                                                    FontSize="11"
                                                    HorizontalAlignment="Center"
                                                    FontWeight="SemiBold"
@@ -283,9 +321,13 @@
                                                             <Style Selector="Border">
                                                                 <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                                                             </Style>
-                                                            <!-- Yellow for Due Soon -->
-                                                            <Style Selector="Border[Tag=DueSoon]">
-                                                                <Setter Property="Background" Value="{DynamicResource WarningTintBrush}"/>
+                                                            <!-- Blue for Paying Advance -->
+                                                            <Style Selector="Border[Tag=PayingAdvance]">
+                                                                <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
+                                                            </Style>
+                                                            <!-- Red for Additional Instalment -->
+                                                            <Style Selector="Border[Tag=AdditionalInstallment]">
+                                                                <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
                                                             </Style>
                                                             <!-- Red for Invalid -->
                                                             <Style Selector="Border[Tag=Invalid]">
@@ -295,10 +337,13 @@
                                                             <Style Selector="Border[Tag=Duplicate]">
                                                                 <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
                                                             </Style>
+                                                            <Style Selector="Border[Tag=Processed]">
+                                                                <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
+                                                            </Style>
                                                         </Border.Styles>
                                                         
                                                         <Border.Tag>
-                                                            <Binding Path="Status" Converter="{StaticResource StatusToTagConverter}"/>
+                                                            <Binding Converter="{StaticResource ListItemToTagConverter}"/>
                                                         </Border.Tag>
 
                                                         <Grid ColumnDefinitions="*,70,Auto" ColumnSpacing="8">
@@ -353,7 +398,7 @@
                                             Classes="Danger" 
                                             Command="{Binding ClearCommand}"
                                             HorizontalAlignment="Stretch"
-                                            Content="Clear List"
+                                            Content="{DynamicResource L_List_ClearList}"
                                             Margin="0,6,0,-4"
                                             Padding="10"/>
 
@@ -373,9 +418,9 @@
                     <StackPanel Orientation="Horizontal" 
                                 Spacing="8">
                         <Border Width="16" Height="16" 
-                                Background="{StaticResource AccentYellowBrush}" 
+                                Background="{StaticResource AccentBlueBrush}" 
                                 CornerRadius="4"/>
-                        <TextBlock Text="Due Soon (30 days)" 
+                        <TextBlock Text="{DynamicResource L_List_LegendPayingAdvance}" 
                                    FontSize="12"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </StackPanel>
@@ -385,17 +430,27 @@
                         <Border Width="16" Height="16" 
                                 Background="{StaticResource AccentRedBrush}" 
                                 CornerRadius="4"/>
-                        <TextBlock Text="Invalid Account" 
+                        <TextBlock Text="{DynamicResource L_List_LegendAdditionalInst}" 
                                    FontSize="12"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" 
+                    <StackPanel Orientation="Horizontal"
                                 Spacing="8">
-                        <Border Width="16" Height="16" 
-                                Background="{StaticResource AccentPinkBrush}" 
+                        <Border Width="16" Height="16"
+                                Background="{DynamicResource SuccessTintBrush}"
                                 CornerRadius="4"/>
-                        <TextBlock Text="Duplicate (same/other list)" 
+                        <TextBlock Text="Processed in run"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <Border Width="16" Height="16"
+                                Background="{DynamicResource WarningTintBrush}"
+                                CornerRadius="4"/>
+                        <TextBlock Text="Auto-suggested installments"
                                    FontSize="12"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </StackPanel>

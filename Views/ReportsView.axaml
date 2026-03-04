@@ -11,13 +11,13 @@
     <ScrollViewer>
         <StackPanel Spacing="20" Margin="0,0,0,24">
             <StackPanel Spacing="2">
-                <TextBlock Text="Operations" Classes="Kicker"/>
-                <TextBlock Text="Reports" Classes="SectionHeader"/>
+                <TextBlock Text="{DynamicResource L_Report_Kicker}" Classes="Kicker"/>
+                <TextBlock Text="{DynamicResource L_Report_Title}" Classes="SectionHeader"/>
             </StackPanel>
 
             <Border Classes="SectionCard" Padding="20">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Daily Summary" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Report_DailySummary}" Classes="SubHeader"/>
                     <TextBlock Text="{Binding SummaryText}"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     <TextBlock Text="{Binding StatusMessage}"
@@ -32,7 +32,7 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Refresh"/>
+                        <TextBlock Text="{DynamicResource L_Common_Refresh}"/>
                     </StackPanel>
                 </Button>
 
@@ -43,7 +43,7 @@
                         BorderBrush="{DynamicResource AppBorderBrush}"
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="Print Copies"
+                        <TextBlock Text="{DynamicResource L_Report_PrintCopies}"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <ComboBox Width="84"
@@ -53,13 +53,50 @@
                     </StackPanel>
                 </Border>
 
+                <Border Margin="0,0,12,0"
+                        Padding="10,6"
+                        CornerRadius="8"
+                        Background="{DynamicResource AppCardBackgroundBrush}"
+                        BorderBrush="{DynamicResource AppBorderBrush}"
+                        BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource L_Report_DefaultPrinter}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Width="220"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding PrinterOptions}"
+                                  SelectedItem="{Binding SelectedPrinter}"
+                                  IsEnabled="{Binding HasPrinterOptions}"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Classes="Secondary"
+                        Command="{Binding SetDefaultPrinterCommand}"
+                        IsEnabled="{Binding HasPrinterOptions}"
+                        Padding="16,10"
+                        Margin="0,0,12,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{DynamicResource L_Report_SetDefaultPrinter}"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="Secondary"
+                        Command="{Binding RefreshPrintersCommand}"
+                        Padding="16,10"
+                        Margin="0,0,12,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{DynamicResource L_Common_Refresh}"/>
+                    </StackPanel>
+                </Button>
+
                 <Button Classes="Success"
                         Command="{Binding PrintAllCommand}"
                         IsEnabled="{Binding HasPrintableReports}"
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Print All (Today)"/>
+                        <TextBlock Text="{DynamicResource L_Report_PrintAllToday}"/>
                     </StackPanel>
                 </Button>
 
@@ -69,18 +106,18 @@
                         Padding="16,10"
                         Margin="0,0,12,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="Generate Payslip (Selected)"/>
+                        <TextBlock Text="{DynamicResource L_Report_GeneratePayslip}"/>
                     </StackPanel>
                 </Button>
 
-                <TextBlock Text="Max 3 payslips per A4 page"
+                <TextBlock Text="{DynamicResource L_Report_Max3A4}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </WrapPanel>
 
             <Border Classes="SectionCard" Padding="16" IsVisible="{Binding HasReports}">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Today's Lists" Classes="SubHeader"/>
+                    <TextBlock Text="{DynamicResource L_Report_TodayLists}" Classes="SubHeader"/>
 
                     <ItemsControl ItemsSource="{Binding TodayReports}">
                         <ItemsControl.ItemTemplate>
@@ -104,28 +141,32 @@
 
                                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                             <Button Classes="Secondary"
-                                                    Content="View"
+                                                    Content="{DynamicResource L_Report_View}"
                                                     Click="ViewPdf_Click"
                                                     IsEnabled="{Binding HasPdf}"
                                                     Padding="12,6"/>
                                             <Button Classes="Primary"
-                                                    Content="Print"
+                                                    Content="{DynamicResource L_Report_Print}"
                                                     Click="PrintPdf_Click"
                                                     IsEnabled="{Binding HasPdf}"
                                                     Padding="12,6"/>
                                             <Button Classes="Danger"
-                                                    Content="Delete"
+                                                    Content="{DynamicResource L_Report_Delete}"
                                                     Click="DeleteReport_Click"
                                                     Padding="12,6"/>
                                         </StackPanel>
 
                                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                                   Text="{Binding AccountCount, StringFormat='Accounts: {0}'}"
-                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                            <Run Text="{DynamicResource L_Report_AccountsLabel}"/>
+                                            <Run Text="{Binding AccountCount}"/>
+                                        </TextBlock>
 
                                         <TextBlock Grid.Row="1" Grid.Column="1"
-                                                   Text="{Binding HasPdf, StringFormat='PDF Available: {0}'}"
-                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                            <Run Text="{DynamicResource L_Report_PdfAvailableLabel}"/>
+                                            <Run Text="{Binding HasPdf}"/>
+                                        </TextBlock>
 
                                         <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                    Text="{Binding AccountsRaw}"
@@ -141,7 +182,7 @@
             </Border>
 
             <Border Classes="SectionCard" Padding="16" IsVisible="{Binding !HasReports}">
-                <TextBlock Text="No lists found for today."
+                <TextBlock Text="{DynamicResource L_Report_NoListsToday}"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </Border>
         </StackPanel>

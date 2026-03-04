@@ -16,6 +16,8 @@ public class StatusToTagConverter : IValueConverter
                 AccountValidationStatus.DueSoon => "DueSoon",
                 AccountValidationStatus.Invalid => "Invalid",
                 AccountValidationStatus.Duplicate => "Duplicate",
+                AccountValidationStatus.Closed => "Invalid",
+                AccountValidationStatus.Matured => "Invalid",
                 _ => "Valid"
             };
         }

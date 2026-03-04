@@ -126,6 +126,36 @@ public class DatabaseService
     }
 
     /// <summary>
+    /// Get closed/matured accounts archived during full updates.
+    /// </summary>
+    public async Task<List<RDAccount>> GetClosedAccountsAsync()
+    {
+        EnsureAnalyticsSchema();
+        var accounts = new List<RDAccount>();
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT id, account_no, account_name, COALESCE(aslaas_no, ''), denomination, month_paid_upto,
+                   next_installment_date, COALESCE(first_seen, ''), COALESCE(last_updated, ''), 0,
+                   COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
+                   COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
+                   COALESCE(status, 'closed')
+            FROM closed_accounts
+            ORDER BY COALESCE(closed_on, last_updated) DESC, account_no";
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            accounts.Add(MapAccount(reader));
+        }
+
+        return accounts;
+    }
+
+    /// <summary>
     /// Get account by account number
     /// </summary>
     public async Task<RDAccount?> GetAccountByNumberAsync(string accountNo)
@@ -143,6 +173,36 @@ public class DatabaseService
                    COALESCE(status, '')
             FROM rd_accounts
             WHERE account_no = @accountNo";
+        command.Parameters.AddWithValue("@accountNo", accountNo);
+
+        using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return MapAccount(reader);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Get archived closed/matured account by account number.
+    /// </summary>
+    public async Task<RDAccount?> GetClosedAccountByNumberAsync(string accountNo)
+    {
+        EnsureAnalyticsSchema();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT id, account_no, account_name, COALESCE(aslaas_no, ''), denomination, month_paid_upto,
+                   next_installment_date, COALESCE(first_seen, ''), COALESCE(last_updated, ''), 0,
+                   COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
+                   COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
+                   COALESCE(status, 'closed')
+            FROM closed_accounts
+            WHERE account_no = @accountNo
+            LIMIT 1";
         command.Parameters.AddWithValue("@accountNo", accountNo);
 
         using var reader = await command.ExecuteReaderAsync();
@@ -264,6 +324,96 @@ public class DatabaseService
         }
 
         await transaction.CommitAsync();
+    }
+
+    public async Task<List<AslaasUpdateItem>> GetMissingAslaasAccountsAsync(bool activeOnly = true)
+    {
+        EnsureAnalyticsSchema();
+        var items = new List<AslaasUpdateItem>();
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = activeOnly
+            ? @"
+                SELECT account_no
+                FROM rd_accounts
+                WHERE is_active = 1
+                  AND lower(trim(COALESCE(status, ''))) NOT IN ('closed', 'matured', 'matured/closed', 'closed/matured')
+                  AND account_no NOT IN (
+                      SELECT trim(COALESCE(account_no, ''))
+                      FROM closed_accounts
+                      WHERE trim(COALESCE(account_no, '')) <> ''
+                  )
+                  AND trim(COALESCE(aslaas_no, '')) = ''
+                ORDER BY account_no"
+            : @"
+                SELECT account_no
+                FROM rd_accounts
+                WHERE trim(COALESCE(aslaas_no, '')) = ''
+                ORDER BY account_no";
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var accountNo = GetStringOrEmpty(reader, 0);
+            if (string.IsNullOrWhiteSpace(accountNo))
+            {
+                continue;
+            }
+
+            items.Add(new AslaasUpdateItem
+            {
+                AccountNo = accountNo.Trim(),
+                AslaasNo = "APPLIED"
+            });
+        }
+
+        return items;
+    }
+
+    public async Task<List<AslaasUpdateItem>> GetAllActiveAslaasAccountsAsync()
+    {
+        EnsureAnalyticsSchema();
+        var items = new List<AslaasUpdateItem>();
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT account_no, trim(COALESCE(aslaas_no, ''))
+            FROM rd_accounts
+            WHERE is_active = 1
+              AND lower(trim(COALESCE(status, ''))) NOT IN ('closed', 'matured', 'matured/closed', 'closed/matured')
+              AND account_no NOT IN (
+                  SELECT trim(COALESCE(account_no, ''))
+                  FROM closed_accounts
+                  WHERE trim(COALESCE(account_no, '')) <> ''
+              )
+            ORDER BY account_no";
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var accountNo = GetStringOrEmpty(reader, 0);
+            if (string.IsNullOrWhiteSpace(accountNo))
+            {
+                continue;
+            }
+
+            var aslaasNo = GetStringOrEmpty(reader, 1);
+            items.Add(new AslaasUpdateItem
+            {
+                AccountNo = accountNo.Trim(),
+                AslaasNo = string.IsNullOrWhiteSpace(aslaasNo)
+                    ? "APPLIED"
+                    : aslaasNo.Trim().ToUpperInvariant()
+            });
+        }
+
+        return items;
     }
 
     /// <summary>
@@ -549,6 +699,71 @@ public class DatabaseService
     }
 
     /// <summary>
+    /// Save DOP cheque inputs captured during list processing.
+    /// </summary>
+    public async Task SaveDopChequeInputsAsync(IEnumerable<DopChequeInputItem> inputs)
+    {
+        EnsureAnalyticsSchema();
+        var normalized = inputs?
+            .Where(item =>
+                item != null &&
+                item.ListIndex > 0 &&
+                !string.IsNullOrWhiteSpace(item.AccountNo) &&
+                !string.IsNullOrWhiteSpace(item.PaymentAccountNo))
+            .Select(item => new DopChequeInputItem
+            {
+                ListIndex = item.ListIndex,
+                AccountNo = item.AccountNo.Trim(),
+                ChequeNo = (item.ChequeNo ?? string.Empty).Trim(),
+                PaymentAccountNo = item.PaymentAccountNo.Trim(),
+                PaymentModeToken = string.IsNullOrWhiteSpace(item.PaymentModeToken)
+                    ? "dop_cheque"
+                    : item.PaymentModeToken.Trim().ToLowerInvariant()
+            })
+            .ToList() ?? new List<DopChequeInputItem>();
+
+        if (normalized.Count == 0)
+        {
+            return;
+        }
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+
+        foreach (var item in normalized)
+        {
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = @"
+                INSERT INTO dop_cheque_inputs (
+                    list_index,
+                    account_no,
+                    payment_mode,
+                    cheque_no,
+                    payment_account_no,
+                    captured_at
+                )
+                VALUES (
+                    @listIndex,
+                    @accountNo,
+                    @paymentMode,
+                    @chequeNo,
+                    @paymentAccountNo,
+                    CURRENT_TIMESTAMP
+                )";
+            command.Parameters.AddWithValue("@listIndex", item.ListIndex);
+            command.Parameters.AddWithValue("@accountNo", item.AccountNo);
+            command.Parameters.AddWithValue("@paymentMode", item.PaymentModeToken);
+            command.Parameters.AddWithValue("@chequeNo", item.ChequeNo);
+            command.Parameters.AddWithValue("@paymentAccountNo", item.PaymentAccountNo);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        await transaction.CommitAsync();
+    }
+
+    /// <summary>
     /// Get mobile sync API settings from local database.
     /// </summary>
     public async Task<(string apiUrl, string apiKey)> GetMobileSyncSettingsAsync()
@@ -683,6 +898,31 @@ public class DatabaseService
                 createUpdateHistory.ExecuteNonQuery();
             }
 
+            using (var createClosedAccounts = connection.CreateCommand())
+            {
+                createClosedAccounts.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS closed_accounts (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        account_no TEXT UNIQUE NOT NULL,
+                        account_name TEXT,
+                        aslaas_no TEXT DEFAULT '',
+                        denomination TEXT,
+                        month_paid_upto TEXT,
+                        next_installment_date TEXT,
+                        amount INTEGER DEFAULT 0,
+                        month_paid_upto_num INTEGER DEFAULT 0,
+                        next_due_date_iso TEXT,
+                        total_deposit INTEGER DEFAULT 0,
+                        status TEXT DEFAULT 'closed',
+                        first_seen TIMESTAMP,
+                        last_updated TIMESTAMP,
+                        closed_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        closed_reason TEXT DEFAULT 'missing_from_popup',
+                        source_update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )";
+                createClosedAccounts.ExecuteNonQuery();
+            }
+
             using (var createReferenceData = connection.CreateCommand())
             {
                 createReferenceData.CommandText = @"
@@ -730,6 +970,21 @@ public class DatabaseService
                 createAppSettings.ExecuteNonQuery();
             }
 
+            using (var createDopChequeInputs = connection.CreateCommand())
+            {
+                createDopChequeInputs.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS dop_cheque_inputs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        list_index INTEGER NOT NULL,
+                        account_no TEXT NOT NULL,
+                        payment_mode TEXT NOT NULL DEFAULT 'dop_cheque',
+                        cheque_no TEXT NOT NULL,
+                        payment_account_no TEXT NOT NULL,
+                        captured_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )";
+                createDopChequeInputs.ExecuteNonQuery();
+            }
+
             EnsureColumn(connection, "credentials", "encrypted_password", "TEXT");
             EnsureColumn(connection, "rd_accounts", "amount", "INTEGER DEFAULT 0");
             EnsureColumn(connection, "rd_accounts", "month_paid_upto_num", "INTEGER DEFAULT 0");
@@ -739,6 +994,18 @@ public class DatabaseService
             EnsureColumn(connection, "rd_accounts", "aslaas_no", "TEXT DEFAULT ''");
             EnsureColumn(connection, "update_history", "active_amount", "INTEGER DEFAULT 0");
             EnsureColumn(connection, "update_history", "due_within_30_days", "INTEGER DEFAULT 0");
+            EnsureColumn(connection, "closed_accounts", "aslaas_no", "TEXT DEFAULT ''");
+            EnsureColumn(connection, "closed_accounts", "amount", "INTEGER DEFAULT 0");
+            EnsureColumn(connection, "closed_accounts", "month_paid_upto_num", "INTEGER DEFAULT 0");
+            EnsureColumn(connection, "closed_accounts", "next_due_date_iso", "TEXT");
+            EnsureColumn(connection, "closed_accounts", "total_deposit", "INTEGER DEFAULT 0");
+            EnsureColumn(connection, "closed_accounts", "status", "TEXT DEFAULT 'closed'");
+            EnsureColumn(connection, "closed_accounts", "first_seen", "TIMESTAMP");
+            EnsureColumn(connection, "closed_accounts", "last_updated", "TIMESTAMP");
+            EnsureColumn(connection, "closed_accounts", "closed_on", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+            EnsureColumn(connection, "closed_accounts", "closed_reason", "TEXT DEFAULT 'missing_from_popup'");
+            EnsureColumn(connection, "closed_accounts", "source_update_time", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+            EnsureColumn(connection, "dop_cheque_inputs", "payment_mode", "TEXT DEFAULT 'dop_cheque'");
 
             _schemaEnsured = true;
         }

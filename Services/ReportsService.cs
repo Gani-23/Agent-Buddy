@@ -9,11 +9,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AgentBuddy.Models;
+using Microsoft.Data.Sqlite;
 
 namespace AgentBuddy.Services;
 
 public class ReportsService
 {
+    private const string PreferredPrinterSettingKey = "default_printer";
+    private const string LegacyPreferredPrinterSettingKey = "reports_default_printer";
     private static readonly Regex ReportEntryRegex = new(
         @"Timestamp:\s*(?<timestamp>[^\r\n]+)\s*[\r\n]+List #:\s*(?<list>\d+)\s*[\r\n]+Reference Number:\s*(?<reference>[^\r\n]+)\s*[\r\n]+Accounts:\s*(?<accounts>[^\r\n]+)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -22,14 +25,17 @@ public class ReportsService
     private readonly string _pdfDirectoryPath;
     private readonly string _scriptsPath;
     private readonly string _pythonCommand;
+    private readonly string _connectionString;
 
     public ReportsService()
     {
         var dopAgentRoot = AppPaths.BaseDirectory;
         var reportsRoot = Path.Combine(dopAgentRoot, "Reports");
+        var dbPath = Path.Combine(dopAgentRoot, "dop_agent.db");
         _referencesFilePath = Path.Combine(reportsRoot, "references", "payment_references.txt");
         _pdfDirectoryPath = Path.Combine(reportsRoot, "pdf");
         _scriptsPath = dopAgentRoot;
+        _connectionString = $"Data Source={dbPath}";
         Directory.CreateDirectory(_scriptsPath);
         Directory.CreateDirectory(Path.GetDirectoryName(_referencesFilePath)!);
         Directory.CreateDirectory(_pdfDirectoryPath);
@@ -143,18 +149,24 @@ public class ReportsService
         }
 
         var safeCopies = Math.Max(1, copies);
+        var preferredPrinter = (await GetEffectiveDefaultPrinterAsync()).Trim();
 
         try
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var opened = await OpenPdfAsync(normalizedPath);
-                if (!opened.Success)
+                var (printed, printError) = await TryWindowsDirectPdfPrintAsync(normalizedPath, preferredPrinter, safeCopies);
+                if (printed)
                 {
-                    return (false, opened.Message);
+                    return (true, string.IsNullOrWhiteSpace(preferredPrinter)
+                        ? $"Print command sent ({safeCopies} copy/copies)."
+                        : $"Print command sent to {preferredPrinter} ({safeCopies} copy/copies).");
                 }
 
-                return (true, $"Opened PDF. Press Ctrl+P and set Copies={safeCopies}, Color=Grayscale.");
+                var reason = string.IsNullOrWhiteSpace(printError)
+                    ? "Could not auto-print this PDF on Windows."
+                    : printError;
+                return (false, reason);
             }
 
             var lpInfo = new ProcessStartInfo
@@ -167,6 +179,11 @@ public class ReportsService
             };
             lpInfo.ArgumentList.Add("-n");
             lpInfo.ArgumentList.Add(safeCopies.ToString(CultureInfo.InvariantCulture));
+            if (!string.IsNullOrWhiteSpace(preferredPrinter))
+            {
+                lpInfo.ArgumentList.Add("-d");
+                lpInfo.ArgumentList.Add(preferredPrinter);
+            }
             lpInfo.ArgumentList.Add(normalizedPath);
 
             using var lpProcess = Process.Start(lpInfo);
@@ -184,12 +201,387 @@ public class ReportsService
                 return (false, error);
             }
 
-            return (true, "Print command sent.");
+            return (true, string.IsNullOrWhiteSpace(preferredPrinter)
+                ? "Print command sent."
+                : $"Print command sent to {preferredPrinter}.");
         }
         catch (Exception ex)
         {
             return (false, $"Could not print PDF: {ex.Message}");
         }
+    }
+
+    private async Task<(bool success, string error)> TryWindowsDirectPdfPrintAsync(
+        string pdfPath,
+        string preferredPrinter,
+        int copies)
+    {
+        var targetPrinter = string.IsNullOrWhiteSpace(preferredPrinter)
+            ? (await GetSystemDefaultPrinterAsync()).Trim()
+            : preferredPrinter.Trim();
+
+        var sumatraPath = FindSumatraPdfPath();
+        if (!string.IsNullOrWhiteSpace(sumatraPath))
+        {
+            var (success, error) = await TrySumatraPdfPrintAsync(sumatraPath, pdfPath, targetPrinter, copies);
+            if (success)
+            {
+                return (true, string.Empty);
+            }
+
+            return (false, $"SumatraPDF print failed: {error}");
+        }
+
+        var adobePath = FindAdobeReaderPath();
+        if (!string.IsNullOrWhiteSpace(adobePath))
+        {
+            var (success, error) = await TryAdobeReaderPrintAsync(adobePath, pdfPath, targetPrinter, copies);
+            if (success)
+            {
+                return (true, string.Empty);
+            }
+
+            return (false, $"Adobe Reader print failed: {error}");
+        }
+
+        return (false, "Windows auto-print requires SumatraPDF or Adobe Reader. Install one of them, or open PDF and press Ctrl+P.");
+    }
+
+    private static async Task<(bool success, string error)> TrySumatraPdfPrintAsync(
+        string sumatraPath,
+        string pdfPath,
+        string printerName,
+        int copies)
+    {
+        try
+        {
+            var safeCopies = Math.Max(1, copies);
+            for (var i = 0; i < safeCopies; i++)
+            {
+                var (exitCode, _, stderr) = await RunSumatraPrintAsync(sumatraPath, pdfPath, printerName);
+                if (exitCode == 0)
+                {
+                    continue;
+                }
+
+                // Printer name mismatch is common; retry default printer once.
+                if (!string.IsNullOrWhiteSpace(printerName))
+                {
+                    var (fallbackCode, _, fallbackError) = await RunSumatraPrintAsync(sumatraPath, pdfPath, string.Empty);
+                    if (fallbackCode == 0)
+                    {
+                        continue;
+                    }
+
+                    var preferredError = string.IsNullOrWhiteSpace(stderr)
+                        ? $"SumatraPDF exited with code {exitCode}."
+                        : stderr.Trim();
+                    var defaultError = string.IsNullOrWhiteSpace(fallbackError)
+                        ? $"SumatraPDF exited with code {fallbackCode} on default printer."
+                        : fallbackError.Trim();
+                    return (false, $"{preferredError} Fallback default print failed: {defaultError}");
+                }
+
+                return (false, string.IsNullOrWhiteSpace(stderr)
+                    ? $"SumatraPDF exited with code {exitCode}."
+                    : stderr.Trim());
+            }
+
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private static async Task<(int ExitCode, string StdOut, string StdErr)> RunSumatraPrintAsync(
+        string sumatraPath,
+        string pdfPath,
+        string printerName)
+    {
+        var info = new ProcessStartInfo
+        {
+            FileName = sumatraPath,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        if (!string.IsNullOrWhiteSpace(printerName))
+        {
+            info.ArgumentList.Add("-print-to");
+            info.ArgumentList.Add(printerName);
+        }
+        else
+        {
+            info.ArgumentList.Add("-print-to-default");
+        }
+
+        info.ArgumentList.Add("-silent");
+        info.ArgumentList.Add("-exit-when-done");
+        info.ArgumentList.Add(pdfPath);
+
+        using var process = Process.Start(info);
+        if (process == null)
+        {
+            return (-1, string.Empty, "Could not start SumatraPDF.");
+        }
+
+        var stdout = await process.StandardOutput.ReadToEndAsync();
+        var stderr = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, stdout, stderr);
+    }
+
+    private static async Task<(bool success, string error)> TryAdobeReaderPrintAsync(
+        string adobeReaderPath,
+        string pdfPath,
+        string printerName,
+        int copies)
+    {
+        try
+        {
+            var safeCopies = Math.Max(1, copies);
+            for (var i = 0; i < safeCopies; i++)
+            {
+                var info = new ProcessStartInfo
+                {
+                    FileName = adobeReaderPath,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                info.ArgumentList.Add("/N");
+                info.ArgumentList.Add("/T");
+                info.ArgumentList.Add(pdfPath);
+                if (!string.IsNullOrWhiteSpace(printerName))
+                {
+                    info.ArgumentList.Add(printerName);
+                }
+
+                var process = Process.Start(info);
+                if (process == null)
+                {
+                    return (false, "Could not start Adobe Reader.");
+                }
+
+                // Adobe may continue running after queuing print. If it exits quickly with non-zero, treat as failure.
+                await Task.Delay(1200);
+                if (process.HasExited && process.ExitCode != 0)
+                {
+                    return (false, $"Adobe Reader exited with code {process.ExitCode}.");
+                }
+            }
+
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private static string FindSumatraPdfPath()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "SumatraPDF", "SumatraPDF.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "SumatraPDF", "SumatraPDF.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SumatraPDF", "SumatraPDF.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "SumatraPDF", "SumatraPDF.exe")
+        };
+
+        var fromKnownPaths = candidates.FirstOrDefault(File.Exists);
+        if (!string.IsNullOrWhiteSpace(fromKnownPaths))
+        {
+            return fromKnownPaths;
+        }
+
+        return FindExecutableOnPath("SumatraPDF.exe");
+    }
+
+    private static string FindAdobeReaderPath()
+    {
+        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+
+        var candidates = new[]
+        {
+            Path.Combine(programFiles, "Adobe", "Acrobat Reader DC", "Reader", "AcroRd32.exe"),
+            Path.Combine(programFilesX86, "Adobe", "Acrobat Reader DC", "Reader", "AcroRd32.exe"),
+            Path.Combine(programFiles, "Adobe", "Acrobat Reader", "Reader", "AcroRd32.exe"),
+            Path.Combine(programFilesX86, "Adobe", "Acrobat Reader", "Reader", "AcroRd32.exe"),
+            Path.Combine(programFiles, "Adobe", "Acrobat", "Acrobat", "Acrobat.exe"),
+            Path.Combine(programFilesX86, "Adobe", "Acrobat", "Acrobat", "Acrobat.exe")
+        };
+
+        var fromKnownPaths = candidates.FirstOrDefault(File.Exists);
+        if (!string.IsNullOrWhiteSpace(fromKnownPaths))
+        {
+            return fromKnownPaths;
+        }
+
+        var fromPath = FindExecutableOnPath("AcroRd32.exe");
+        if (!string.IsNullOrWhiteSpace(fromPath))
+        {
+            return fromPath;
+        }
+
+        return FindExecutableOnPath("Acrobat.exe");
+    }
+
+    private static string FindExecutableOnPath(string executableName)
+    {
+        if (string.IsNullOrWhiteSpace(executableName))
+        {
+            return string.Empty;
+        }
+
+        var pathValue = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(pathValue))
+        {
+            return string.Empty;
+        }
+
+        foreach (var rawPart in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var directory = rawPart.Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                continue;
+            }
+
+            try
+            {
+                var candidate = Path.Combine(directory, executableName);
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+            catch
+            {
+                // Ignore malformed PATH entries.
+            }
+        }
+
+        return string.Empty;
+    }
+
+    public async Task<List<string>> GetAvailablePrintersAsync()
+    {
+        var printers = new List<string>();
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var (exitCode, stdout, _) = await RunProcessAsync(
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "Get-CimInstance Win32_Printer | Select-Object -ExpandProperty Name");
+
+            if (exitCode == 0)
+            {
+                foreach (var line in stdout.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var printer = line.Trim();
+                    if (!string.IsNullOrWhiteSpace(printer))
+                    {
+                        printers.Add(printer);
+                    }
+                }
+            }
+        }
+        else
+        {
+            var (exitCode, stdout, _) = await RunProcessAsync("lpstat", "-a");
+            if (exitCode == 0)
+            {
+                foreach (var line in stdout.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var trimmed = line.Trim();
+                    if (string.IsNullOrWhiteSpace(trimmed))
+                    {
+                        continue;
+                    }
+
+                    var separatorIndex = trimmed.IndexOf(' ');
+                    var printer = separatorIndex > 0
+                        ? trimmed[..separatorIndex].Trim()
+                        : trimmed;
+
+                    if (!string.IsNullOrWhiteSpace(printer))
+                    {
+                        printers.Add(printer);
+                    }
+                }
+            }
+        }
+
+        var deduped = printers
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var preferred = (await GetSavedPreferredPrinterAsync()).Trim();
+        if (!string.IsNullOrWhiteSpace(preferred) &&
+            deduped.All(item => !string.Equals(item, preferred, StringComparison.OrdinalIgnoreCase)))
+        {
+            deduped.Insert(0, preferred);
+        }
+
+        return deduped;
+    }
+
+    public async Task<string> GetEffectiveDefaultPrinterAsync()
+    {
+        var preferred = (await GetSavedPreferredPrinterAsync()).Trim();
+        if (!string.IsNullOrWhiteSpace(preferred))
+        {
+            return preferred;
+        }
+
+        var systemDefault = (await GetSystemDefaultPrinterAsync()).Trim();
+        return systemDefault;
+    }
+
+    public async Task<(bool Success, string Message)> SetDefaultPrinterAsync(string printerName)
+    {
+        var normalizedPrinter = (printerName ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedPrinter))
+        {
+            return (false, "Select a printer first.");
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var (exitCode, _, stderr) = await RunProcessAsync(
+                "rundll32",
+                "printui.dll,PrintUIEntry",
+                "/y",
+                "/n",
+                normalizedPrinter);
+
+            if (exitCode != 0)
+            {
+                var error = string.IsNullOrWhiteSpace(stderr) ? "Failed to set default printer." : stderr.Trim();
+                return (false, error);
+            }
+        }
+        else
+        {
+            var (exitCode, _, stderr) = await RunProcessAsync("lpoptions", "-d", normalizedPrinter);
+            if (exitCode != 0)
+            {
+                var error = string.IsNullOrWhiteSpace(stderr) ? "Failed to set default printer." : stderr.Trim();
+                return (false, error);
+            }
+        }
+
+        await SavePreferredPrinterAsync(normalizedPrinter);
+        return (true, $"Default printer set to {normalizedPrinter}.");
     }
 
     private static string NormalizePath(string? path)
@@ -200,6 +592,152 @@ public class ReportsService
         }
 
         return path.Trim().Trim('"');
+    }
+
+    private async Task<string> GetSavedPreferredPrinterAsync()
+    {
+        EnsureAppSettingsTable();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT value
+            FROM app_settings
+            WHERE key = @key
+            LIMIT 1";
+        command.Parameters.AddWithValue("@key", PreferredPrinterSettingKey);
+
+        var result = await command.ExecuteScalarAsync();
+        var preferred = result?.ToString() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(preferred))
+        {
+            return preferred;
+        }
+
+        using var legacyCommand = connection.CreateCommand();
+        legacyCommand.CommandText = @"
+            SELECT value
+            FROM app_settings
+            WHERE key = @key
+            LIMIT 1";
+        legacyCommand.Parameters.AddWithValue("@key", LegacyPreferredPrinterSettingKey);
+        var legacy = legacyCommand.ExecuteScalar()?.ToString() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(legacy))
+        {
+            // Backfill old key to the new global key.
+            await SavePreferredPrinterAsync(legacy);
+        }
+
+        return legacy;
+    }
+
+    private async Task SavePreferredPrinterAsync(string printerName)
+    {
+        EnsureAppSettingsTable();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO app_settings (key, value, updated_at)
+            VALUES (@key, @value, CURRENT_TIMESTAMP)
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = CURRENT_TIMESTAMP";
+        command.Parameters.AddWithValue("@key", PreferredPrinterSettingKey);
+        command.Parameters.AddWithValue("@value", printerName);
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private async Task<string> GetSystemDefaultPrinterAsync()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var (exitCode, stdout, _) = await RunProcessAsync(
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "$p = Get-CimInstance Win32_Printer | Where-Object {$_.Default -eq $true} | Select-Object -First 1 -ExpandProperty Name; if ($p) { $p }");
+            if (exitCode != 0)
+            {
+                return string.Empty;
+            }
+
+            return stdout
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(item => item.Trim())
+                .FirstOrDefault(item => !string.IsNullOrWhiteSpace(item)) ?? string.Empty;
+        }
+
+        var (code, output, _) = await RunProcessAsync("lpstat", "-d");
+        if (code != 0)
+        {
+            return string.Empty;
+        }
+
+        var line = output
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(item => item.Trim())
+            .FirstOrDefault(item => !string.IsNullOrWhiteSpace(item));
+
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            return string.Empty;
+        }
+
+        var marker = "destination:";
+        var index = line.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index < 0)
+        {
+            return string.Empty;
+        }
+
+        return line[(index + marker.Length)..].Trim();
+    }
+
+    private void EnsureAppSettingsTable()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )";
+        command.ExecuteNonQuery();
+    }
+
+    private static async Task<(int ExitCode, string StdOut, string StdErr)> RunProcessAsync(string fileName, params string[] args)
+    {
+        var info = new ProcessStartInfo
+        {
+            FileName = fileName,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        foreach (var arg in args)
+        {
+            info.ArgumentList.Add(arg);
+        }
+
+        using var process = Process.Start(info);
+        if (process == null)
+        {
+            return (-1, string.Empty, "Failed to start process.");
+        }
+
+        var stdout = await process.StandardOutput.ReadToEndAsync();
+        var stderr = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, stdout, stderr);
     }
 
     public Task<(bool Success, string Message)> OpenLinkAsync(string link)

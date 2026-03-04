@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -22,7 +23,7 @@ public partial class SettingsView : UserControl
             return;
         }
 
-        var path = await PickDatabaseFileAsync("Select Source Legacy Database");
+        var path = await PickDatabaseFileAsync(GetStringResource("L_Set_PickSourceDialogTitle", "Select Source Legacy Database"));
         if (!string.IsNullOrWhiteSpace(path))
         {
             vm.SourceDatabasePath = path;
@@ -36,7 +37,7 @@ public partial class SettingsView : UserControl
             return;
         }
 
-        var path = await PickDatabaseFileAsync("Select Target DOPAgent Database");
+        var path = await PickDatabaseFileAsync(GetStringResource("L_Set_PickTargetDialogTitle", "Select Target DOPAgent Database"));
         if (!string.IsNullOrWhiteSpace(path))
         {
             vm.TargetDatabasePath = path;
@@ -78,5 +79,17 @@ public partial class SettingsView : UserControl
         }
 
         return Uri.UnescapeDataString(selected.Path.LocalPath);
+    }
+
+    private string GetStringResource(string key, string fallback)
+    {
+        if (Application.Current?.TryGetResource(key, Application.Current.ActualThemeVariant, out var value) == true &&
+            value is string text &&
+            !string.IsNullOrWhiteSpace(text))
+        {
+            return text;
+        }
+
+        return fallback;
     }
 }

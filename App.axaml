@@ -7,11 +7,15 @@
     <Application.Resources>
         <converters:BoolToThemeIconConverter x:Key="BoolToThemeIconConverter"/>
         <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
+        <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
         <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
     </Application.Resources>
     
     <Application.Styles>
         <FluentTheme />
+
+        <!-- Default language (English). Hindi/Telugu overlays are loaded at runtime -->
+        <StyleInclude Source="/Resources/Strings.en.axaml"/>
         
         <!-- Import Notion theme colors -->
         <StyleInclude Source="/Styles/NotionColors.axaml"/>

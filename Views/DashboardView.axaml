@@ -15,51 +15,50 @@
     <ScrollViewer>
         <StackPanel Spacing="24" Margin="0,0,0,24">
 
-            <!-- Header -->
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="Overview" Classes="Kicker"/>
-                    <TextBlock Text="Dashboard" Classes="SectionHeader"/>
+                    <TextBlock Text="{DynamicResource L_Dash_Kicker}" Classes="Kicker"/>
+                    <TextBlock Text="{DynamicResource L_Dash_Title}" Classes="SectionHeader"/>
                 </StackPanel>
 
                 <WrapPanel Grid.Column="1" IsVisible="{Binding !IsLoading}">
-                    <Button Classes="Secondary" Command="{Binding RefreshCommand}" Padding="14,8" Margin="0,0,8,0" Content="Refresh"/>
+                    <Button Classes="Secondary" Command="{Binding RefreshCommand}" Padding="14,8" Margin="0,0,8,0" Content="{DynamicResource L_Common_Refresh}"/>
                     <Button Classes="Secondary"
                             Command="{Binding SyncToMobileCommand}"
                             Padding="14,8"
                             Margin="0,0,8,0"
                             IsEnabled="{Binding !IsBusy}"
-                            Content="Sync To Mobile"/>
+                            Content="{DynamicResource L_Dash_SyncToMobile}"/>
                     <Button Classes="Primary"
                             Command="{Binding UpdateDatabaseCommand}"
                             Padding="14,8"
                             IsEnabled="{Binding !IsBusy}"
-                            Content="Update Database"/>
+                            Content="{DynamicResource L_Dash_UpdateDatabase}"/>
                 </WrapPanel>
             </Grid>
 
-            <!-- Loading -->
             <Border Classes="Card" Padding="28" IsVisible="{Binding IsLoading}">
                 <StackPanel Spacing="8" HorizontalAlignment="Center">
-                    <TextBlock Text="Loading dashboard data..." FontSize="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    <TextBlock Text="{DynamicResource L_Dash_Loading}" FontSize="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </StackPanel>
             </Border>
 
             <StackPanel Spacing="24" IsVisible="{Binding !IsLoading}">
-
-                <!-- Summary -->
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
                     <Border Grid.Column="0" Classes="MetricCard">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="TOTAL ACCOUNTS" Classes="Kicker"/>
+                            <TextBlock Text="{DynamicResource L_Dash_TotalAccounts}" Classes="Kicker"/>
                             <TextBlock Text="{Binding TotalAccounts}" Classes="MetricValue"/>
-                            <TextBlock Text="{Binding LastUpdated, StringFormat='Updated: {0:dd-MMM HH:mm}'}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBlock FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                <Run Text="{DynamicResource L_Dash_UpdatedPrefix}"/>
+                                <Run Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM HH:mm}'}"/>
+                            </TextBlock>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="1" Classes="MetricCard">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="ACTIVE AMOUNT" Classes="Kicker"/>
+                            <TextBlock Text="{DynamicResource L_Dash_ActiveAmount}" Classes="Kicker"/>
                             <TextBlock Classes="MetricValue" Foreground="{StaticResource AccentBlueBrush}">
                                 <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
                             </TextBlock>
@@ -68,148 +67,258 @@
 
                     <Border Grid.Column="2" Classes="MetricCard">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="DUE WITHIN 30 DAYS" Classes="Kicker"/>
+                            <TextBlock Text="{DynamicResource L_Dash_Due30Days}" Classes="Kicker"/>
                             <TextBlock Text="{Binding AccountsDueSoon.Count}" Classes="MetricValue" Foreground="{StaticResource WarningBrush}"/>
-                            <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="View Accounts"/>
+                            <WrapPanel>
+                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                            </WrapPanel>
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <!-- Action Center -->
-                <Border Classes="SectionCard" Padding="18">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Action Center" Classes="SubHeader"/>
-
-                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
-
-                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintDanger">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="Pending This Month" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding PendingThisMonthCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding PendingThisMonthAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="pending-month" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="Next Month Collection" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding NextMonthCollectionCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding NextMonthCollectionAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="next-month" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintSuccess">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="Advance Paid" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding AdvancedPaidCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding AdvancedPaidAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="advanced-paid" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="New Accounts (Month Paid Upto = 1)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding NewAccounts30DaysCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding NewAccounts30DaysAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="new-accounts" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="About To Freeze" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding AboutToFreezeCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding AboutToFreezeAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="freeze-risk" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintSuccess">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="Matured Accounts" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding MaturedCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
-                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                        <Run Text="Rs. "/><Run Text="{Binding MaturedAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="matured" Click="OpenSegment_Click" Content="View Accounts"/>
-                                </StackPanel>
-                            </Border>
-
-                        </Grid>
-                    </StackPanel>
+                <Border Classes="Card" Padding="16" IsVisible="{Binding HasUpdateStatus}">
+                    <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </Border>
 
-                <!-- Half-Month Pending -->
                 <Border Classes="SectionCard" Padding="18">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Half-Month Pending &amp; Deposits" Classes="SubHeader"/>
+                        <TextBlock Text="{DynamicResource L_Dash_HalfMonthTitle}" Classes="SubHeader"/>
 
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                             <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintDanger">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="First Half Pending (1-15)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding FirstHalfPendingWindowCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource L_Dash_FirstHalfPending}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding FirstHalfPendingWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
                                     <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
                                         <Run Text="Rs. "/><Run Text="{Binding FirstHalfPendingWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="pending-first-half" Click="OpenSegment_Click" Content="View Accounts"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintWarning">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="Second Half Pending (16-End)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SecondHalfPendingWindowCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource L_Dash_SecondHalfPending}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding SecondHalfPendingWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
                                     <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
                                         <Run Text="Rs. "/><Run Text="{Binding SecondHalfPendingWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="pending-second-half" Click="OpenSegment_Click" Content="View Accounts"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintSuccess">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="First Half Deposited (1-15)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding FirstHalfDepositedWindowCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource L_Dash_FirstHalfDeposited}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding FirstHalfDepositedWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
                                     <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
                                         <Run Text="Rs. "/><Run Text="{Binding FirstHalfDepositedWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="deposited-first-half" Click="OpenSegment_Click" Content="View Accounts"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintInfo">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="Second Half Deposited (16-End)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SecondHalfDepositedWindowCount, StringFormat='{}{0} accounts'}" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource L_Dash_SecondHalfDeposited}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding SecondHalfDepositedWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
                                     <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
                                         <Run Text="Rs. "/><Run Text="{Binding SecondHalfDepositedWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Button Classes="Secondary" HorizontalAlignment="Left" Padding="10,6" Tag="deposited-second-half" Click="OpenSegment_Click" Content="View Accounts"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Charts -->
+                <Border Classes="SectionCard" Padding="18">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{DynamicResource L_Dash_ActionCenter}" Classes="SubHeader"/>
+
+                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+
+                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_PendingMonth}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding PendingThisMonthCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding PendingThisMonthAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_NextMonthCollection}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding NextMonthCollectionCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding NextMonthCollectionAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_AdvancePaid}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AdvancedPaidCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AdvancedPaidAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="New Accounts (Last 2 Months)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding NewAccounts30DaysCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding NewAccounts30DaysAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_AboutToFreeze}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AboutToFreezeCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AboutToFreezeAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_MaturedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding MaturedCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding MaturedAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="2" Grid.Column="0" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_ClosedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding ClosedAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding ClosedAccountsAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="2" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="About To Mature" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AboutToMatureCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AboutToMatureAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
                 <Grid ColumnDefinitions="*,1.4*" ColumnSpacing="16">
                     <Border Grid.Column="0" Classes="Card">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Category Split" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_CategorySplit}" Classes="SubHeader"/>
                             <lvc:PieChart Series="{Binding CategorySeries}"
                                           Height="260"
                                           LegendPosition="Bottom"
@@ -219,7 +328,7 @@
 
                     <Border Grid.Column="1" Classes="Card">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Monthly Collections" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_MonthlyCollections}" Classes="SubHeader"/>
                             <lvc:CartesianChart Series="{Binding RevenueSeries}"
                                                 XAxes="{Binding RevenueXAxes}"
                                                 YAxes="{Binding RevenueYAxes}"
@@ -229,14 +338,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-
-                <!-- Update Status -->
-                <Border Classes="Card" Padding="16" IsVisible="{Binding IsBusy}">
-                    <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                </Border>
-
             </StackPanel>
-
         </StackPanel>
     </ScrollViewer>
 

@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
         x:Class="AgentBuddy.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="Agent Buddy"
+        Title="{DynamicResource L_App_WindowTitle}"
         Icon="/Assets/AgentBuddy.ico"
         Width="1400"
         Height="900"
@@ -32,59 +32,65 @@
             <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
                 <Border Grid.Row="0" Classes="Card" Padding="12">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Agent Buddy"
+                        <TextBlock Text="{DynamicResource L_Main_AppName}"
                                    FontSize="26"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Post Office RD Workspace"
+                        <TextBlock Text="{DynamicResource L_Main_Subtitle}"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"
                                    FontSize="12"/>
                     </StackPanel>
                 </Border>
 
                 <TextBlock Grid.Row="1"
-                           Text="NAVIGATION"
+                           Text="{DynamicResource L_Main_Navigation}"
                            Classes="Kicker"
                            Margin="8,4,8,0"/>
 
                 <StackPanel Grid.Row="2" Spacing="4">
                     <Button x:Name="DashboardNavButton"
                             Classes="NavItem"
-                            Content="Dashboard"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="Dashboard"/>
+                            CommandParameter="Dashboard">
+                        <TextBlock Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap"/>
+                    </Button>
 
                     <Button x:Name="ListsNavButton"
                             Classes="NavItem"
-                            Content="Create Lists"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="Lists"/>
+                            CommandParameter="Lists">
+                        <TextBlock Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap"/>
+                    </Button>
 
                     <Button x:Name="ReportsNavButton"
                             Classes="NavItem"
-                            Content="Reports"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="Reports"/>
+                            CommandParameter="Reports">
+                        <TextBlock Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap"/>
+                    </Button>
 
                     <Button x:Name="SupportNavButton"
                             Classes="NavItem"
-                            Content="Support"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="Support"/>
+                            CommandParameter="Support">
+                        <TextBlock Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap"/>
+                    </Button>
 
                     <Button x:Name="SettingsNavButton"
                             Classes="NavItem"
-                            Content="Settings"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="Settings"/>
+                            CommandParameter="Settings">
+                        <TextBlock Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap"/>
+                    </Button>
                 </StackPanel>
 
                 <Border Grid.Row="3"
                         Classes="Card"
                         Padding="8">
                     <Button Classes="NavItem"
-                            Command="{Binding ToggleThemeCommand}"
-                            Content="Toggle Theme"/>
+                            Command="{Binding ToggleThemeCommand}">
+                        <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap"/>
+                    </Button>
                 </Border>
             </Grid>
         </Border>

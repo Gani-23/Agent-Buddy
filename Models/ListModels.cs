@@ -1,17 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
+using ReactiveUI;
 
 namespace AgentBuddy.Models;
 
 /// <summary>
 /// Represents an account in a payment list with installment support
 /// </summary>
-public class ListItem
+public class ListItem : ReactiveObject
 {
+    private bool _isProcessedInCurrentRun;
+
     public string AccountNo { get; set; } = string.Empty;
     public int Installment { get; set; } = 1; // Default to 1st installment
     public AccountValidationStatus Status { get; set; }
     public RDAccount? AccountDetails { get; set; }
+    public bool IsProcessedInCurrentRun
+    {
+        get => _isProcessedInCurrentRun;
+        set => this.RaiseAndSetIfChanged(ref _isProcessedInCurrentRun, value);
+    }
     public int EffectiveInstallment => Installment > 0 ? Installment : 1;
     public decimal TotalAmount => (AccountDetails?.GetAmount() ?? 0) * EffectiveInstallment;
     public string AccountNameDisplay =>
@@ -95,4 +103,5 @@ public class DopChequeInputItem
     public string AccountNo { get; set; } = string.Empty;
     public string ChequeNo { get; set; } = string.Empty;
     public string PaymentAccountNo { get; set; } = string.Empty;
+    public string PaymentModeToken { get; set; } = "dop_cheque";
 }

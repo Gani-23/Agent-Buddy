@@ -9,6 +9,7 @@
         d:DesignHeight="680"
         x:Class="AgentBuddy.Views.SegmentAccountsWindow"
         x:DataType="vm:SegmentAccountsWindowViewModel"
+        Title="{DynamicResource L_Segment_Title}"
         Width="980"
         Height="680"
         MinWidth="860"
@@ -18,32 +19,38 @@
         Background="{DynamicResource AppCardBackgroundBrush}">
 
     <Border Padding="20" Classes="FadeIn">
-        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
             <StackPanel Grid.Row="0" Spacing="4">
-                <TextBlock Text="Accounts" Classes="Kicker"/>
+                <TextBlock Text="{DynamicResource L_Segment_Kicker}" Classes="Kicker"/>
                 <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="Bold"/>
                 <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                    <Run Text="Accounts: "/>
+                    <Run Text="{DynamicResource L_Segment_AccountsPrefix}"/>
                     <Run Text="{Binding Count}"/>
-                    <Run Text="   |   Total Amount: "/>
+                    <Run Text="{DynamicResource L_Segment_TotalAmountPrefix}"/>
                     <Run Text="Rs. "/>
                     <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
                 </TextBlock>
             </StackPanel>
 
-            <Border Grid.Row="1" Classes="Card" Padding="10,8">
+            <Border Grid.Row="1" Classes="Card" Padding="12,10">
+                <TextBox x:Name="SearchBox"
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Watermark="{DynamicResource L_Search_Watermark}"/>
+            </Border>
+
+            <Border Grid.Row="2" Classes="Card" Padding="10,8">
                 <Grid ColumnDefinitions="140,*,120,120,150" ColumnSpacing="10">
-                    <TextBlock Text="Account No" FontWeight="SemiBold"/>
-                    <TextBlock Grid.Column="1" Text="Account Name" FontWeight="SemiBold"/>
-                    <TextBlock Grid.Column="2" Text="Amount" FontWeight="SemiBold" TextAlignment="Right"/>
-                    <TextBlock Grid.Column="3" Text="Paid Upto" FontWeight="SemiBold" TextAlignment="Center"/>
-                    <TextBlock Grid.Column="4" Text="Next Due" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource L_Segment_ColumnAccountNo}" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Segment_ColumnAccountName}" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="2" Text="{DynamicResource L_Segment_ColumnAmount}" FontWeight="SemiBold" TextAlignment="Right"/>
+                    <TextBlock Grid.Column="3" Text="{DynamicResource L_Segment_ColumnPaidUpto}" FontWeight="SemiBold" TextAlignment="Center"/>
+                    <TextBlock Grid.Column="4" Text="{DynamicResource L_Segment_ColumnNextDue}" FontWeight="SemiBold"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2" Classes="Card" Padding="0">
+            <Border Grid.Row="3" Classes="Card" Padding="0">
                 <ScrollViewer>
-                    <ItemsControl ItemsSource="{Binding Accounts}">
+                    <ItemsControl ItemsSource="{Binding FilteredAccounts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:RDAccount">
                                 <Border Padding="10,8" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
@@ -61,8 +68,8 @@
                 </ScrollViewer>
             </Border>
 
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="Close"/>
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="{DynamicResource L_Common_Close}"/>
             </StackPanel>
         </Grid>
     </Border>

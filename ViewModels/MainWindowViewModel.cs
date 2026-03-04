@@ -1,5 +1,6 @@
 using System;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
 using Avalonia.Media;
@@ -26,6 +27,7 @@ public class MainWindowViewModel : ViewModelBase
     private readonly ReportsService _reportsService;
     private readonly NotificationService _notificationService;
     private readonly MobileSyncService _mobileSyncService;
+    private readonly LocalizationService _localizationService;
 
     // View Models
     public DashboardViewModel DashboardViewModel { get; }
@@ -44,19 +46,20 @@ public class MainWindowViewModel : ViewModelBase
 
         // Initialize services
         _databaseService = new DatabaseService();
-        _pythonService = new PythonService();
+        _pythonService = new PythonService(_databaseService);
         _metricsCalculator = new MetricsCalculator(_databaseService);
         _validationService = new ValidationService(_databaseService);
         _reportsService = new ReportsService();
         _notificationService = new NotificationService();
         _mobileSyncService = new MobileSyncService();
+        _localizationService = new LocalizationService();
 
         // Initialize view models
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService);
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
-        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService);
+        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService);
 
         // Set default view
         _currentView = DashboardViewModel;
@@ -73,6 +76,7 @@ public class MainWindowViewModel : ViewModelBase
         SupportViewModel.IsDarkTheme = IsDarkTheme;
         SettingsViewModel.IsDarkTheme = IsDarkTheme;
         ApplyThemeResources(IsDarkTheme);
+        _ = InitializeLocalizationAsync();
     }
 
     /// <summary>
@@ -213,5 +217,11 @@ public class MainWindowViewModel : ViewModelBase
     private void ToggleSidebar()
     {
         IsSidebarExpanded = !IsSidebarExpanded;
+    }
+
+    private async Task InitializeLocalizationAsync()
+    {
+        await _localizationService.InitializeAsync(_databaseService);
+        SettingsViewModel.SyncSelectedLanguageFromService();
     }
 }

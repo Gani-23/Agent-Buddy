@@ -23,7 +23,9 @@ public enum AccountValidationStatus
     Valid,
     DueSoon,      // Yellow - Due within 30 days
     Invalid,      // Red - Not found in database
-    Duplicate     // Pink - Duplicate in lists
+    Duplicate,    // Pink - Duplicate in lists
+    Closed,       // Blocked - Account already closed
+    Matured       // Blocked - Account already matured completely
 }
 
 /// <summary>

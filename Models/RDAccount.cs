@@ -133,6 +133,44 @@ public class RDAccount
     }
 
     /// <summary>
+    /// Suggest installments required to cover overdue months up to the given date.
+    /// Returns at least 1.
+    /// </summary>
+    public int GetPendingInstallmentsTill(DateTime asOfDate, int maturityInstallments = 120)
+    {
+        var dueDate = GetNextInstallmentDate();
+        if (!dueDate.HasValue)
+        {
+            return 1;
+        }
+
+        var dueMonth = new DateTime(dueDate.Value.Year, dueDate.Value.Month, 1);
+        var currentMonth = new DateTime(asOfDate.Year, asOfDate.Month, 1);
+        if (dueMonth >= currentMonth)
+        {
+            return 1;
+        }
+
+        // Pending suggestion includes current month when due month is older.
+        // Example: due month = Jan, current month = Feb => suggest 2 installments.
+        var monthGap = (currentMonth.Year - dueMonth.Year) * 12 + (currentMonth.Month - dueMonth.Month);
+        var pending = monthGap + 1;
+        pending = Math.Max(1, pending);
+
+        if (maturityInstallments > 0)
+        {
+            var paid = Math.Max(0, GetMonthPaidNumber());
+            var remaining = Math.Max(0, maturityInstallments - paid);
+            if (remaining > 0)
+            {
+                pending = Math.Min(pending, remaining);
+            }
+        }
+
+        return Math.Max(1, pending);
+    }
+
+    /// <summary>
     /// Gets the short code (first 2 chars of account name)
     /// </summary>
     public string GetShortCode()

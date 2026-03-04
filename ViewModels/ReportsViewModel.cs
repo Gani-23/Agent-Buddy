@@ -18,6 +18,8 @@ public class ReportsViewModel : ViewModelBase
     private bool _isDarkTheme;
     private string _statusMessage = string.Empty;
     private int _printCopies = 2;
+    private string _selectedPrinter = string.Empty;
+    private bool _isSettingDefaultPrinter;
 
     public ReportsViewModel(ReportsService reportsService, NotificationService? notificationService = null)
     {
@@ -31,7 +33,10 @@ public class ReportsViewModel : ViewModelBase
         PrintReportCommand = ReactiveCommand.CreateFromTask<DailyListReport?>(PrintReportAsync);
         PrintAllCommand = ReactiveCommand.CreateFromTask(PrintAllAsync);
         GeneratePayslipsCommand = ReactiveCommand.CreateFromTask(GeneratePayslipsAsync);
+        RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
+        SetDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SetDefaultPrinterAsync);
 
+        _ = LoadPrintersAsync();
         _ = LoadTodayReportsAsync();
     }
 
@@ -56,6 +61,21 @@ public class ReportsViewModel : ViewModelBase
     public IReadOnlyList<int> CopyOptions { get; } = Enumerable.Range(1, 10).ToList();
 
     public ObservableCollection<DailyListReport> TodayReports { get; }
+    public ObservableCollection<string> PrinterOptions { get; } = new();
+
+    public string SelectedPrinter
+    {
+        get => _selectedPrinter;
+        set => this.RaiseAndSetIfChanged(ref _selectedPrinter, value);
+    }
+
+    public bool IsSettingDefaultPrinter
+    {
+        get => _isSettingDefaultPrinter;
+        set => this.RaiseAndSetIfChanged(ref _isSettingDefaultPrinter, value);
+    }
+
+    public bool HasPrinterOptions => PrinterOptions.Count > 0;
 
     public bool HasReports => TodayReports.Count > 0;
     public bool HasPrintableReports => TodayReports.Any(item => item.HasPdf);
@@ -70,6 +90,8 @@ public class ReportsViewModel : ViewModelBase
     public ReactiveCommand<DailyListReport?, Unit> PrintReportCommand { get; }
     public ReactiveCommand<Unit, Unit> PrintAllCommand { get; }
     public ReactiveCommand<Unit, Unit> GeneratePayslipsCommand { get; }
+    public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
+    public ReactiveCommand<Unit, Unit> SetDefaultPrinterCommand { get; }
 
     public async Task LoadTodayReportsAsync()
     {
@@ -186,8 +208,8 @@ public class ReportsViewModel : ViewModelBase
         }
 
         StatusMessage = failedCount == 0
-            ? $"Opened {successCount}/{printableReports.Count} PDFs. Press Ctrl+P in viewer and set Copies={PrintCopies}, Grayscale."
-            : $"Batch print preparation completed with issues: opened {successCount}/{printableReports.Count}.";
+            ? $"Sent print command for {successCount}/{printableReports.Count} report(s)."
+            : $"Batch print completed with issues: printed {successCount}/{printableReports.Count}.";
         _notificationService?.Info("Batch Print", StatusMessage);
     }
 
@@ -217,6 +239,99 @@ public class ReportsViewModel : ViewModelBase
         if (!string.IsNullOrWhiteSpace(outputPdfPath))
         {
             await _reportsService.OpenPdfAsync(outputPdfPath);
+        }
+    }
+
+    public async Task LoadPrintersAsync()
+    {
+        try
+        {
+            var currentSelection = (SelectedPrinter ?? string.Empty).Trim();
+            var printerOptions = await _reportsService.GetAvailablePrintersAsync();
+            var preferredPrinter = (await _reportsService.GetEffectiveDefaultPrinterAsync()).Trim();
+
+            PrinterOptions.Clear();
+            foreach (var printer in printerOptions)
+            {
+                if (!string.IsNullOrWhiteSpace(printer))
+                {
+                    PrinterOptions.Add(printer);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(preferredPrinter) &&
+                PrinterOptions.All(item => !string.Equals(item, preferredPrinter, StringComparison.OrdinalIgnoreCase)))
+            {
+                PrinterOptions.Insert(0, preferredPrinter);
+            }
+
+            var nextSelection = !string.IsNullOrWhiteSpace(preferredPrinter)
+                ? preferredPrinter
+                : currentSelection;
+
+            if (!string.IsNullOrWhiteSpace(nextSelection))
+            {
+                var matched = PrinterOptions.FirstOrDefault(item =>
+                    string.Equals(item, nextSelection, StringComparison.OrdinalIgnoreCase));
+                SelectedPrinter = matched ?? nextSelection;
+            }
+            else if (PrinterOptions.Count > 0)
+            {
+                SelectedPrinter = PrinterOptions[0];
+            }
+            else
+            {
+                SelectedPrinter = string.Empty;
+                StatusMessage = "No printers detected on this system.";
+            }
+
+            this.RaisePropertyChanged(nameof(HasPrinterOptions));
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load printers: {ex.Message}";
+            this.RaisePropertyChanged(nameof(HasPrinterOptions));
+        }
+    }
+
+    public async Task SetDefaultPrinterAsync()
+    {
+        if (IsSettingDefaultPrinter)
+        {
+            return;
+        }
+
+        var selected = (SelectedPrinter ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(selected))
+        {
+            StatusMessage = "Select a printer first.";
+            return;
+        }
+
+        IsSettingDefaultPrinter = true;
+        try
+        {
+            var (success, message) = await _reportsService.SetDefaultPrinterAsync(selected);
+            StatusMessage = message;
+
+            if (success)
+            {
+                _notificationService?.Success("Printer Updated", selected);
+                await LoadPrintersAsync();
+            }
+            else
+            {
+                _notificationService?.Error("Printer Update Failed", message);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Could not set default printer: {ex.Message}";
+            _notificationService?.Error("Printer Update Failed", StatusMessage);
+        }
+        finally
+        {
+            IsSettingDefaultPrinter = false;
         }
     }
 
