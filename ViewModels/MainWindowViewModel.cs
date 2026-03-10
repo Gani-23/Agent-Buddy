@@ -6,6 +6,7 @@ using Avalonia.Styling;
 using Avalonia.Media;
 using ReactiveUI;
 using AgentBuddy.Services;
+using AgentBuddy.Models;
 
 namespace AgentBuddy.ViewModels;
 
@@ -18,9 +19,12 @@ public class MainWindowViewModel : ViewModelBase
     private bool _isDarkTheme;
     private bool _isSidebarExpanded = true;
     private string _currentViewName = "Dashboard";
+    private bool _isLicenseActive;
+    private string _licenseStatusText = "Checking license...";
 
     // Services
     private readonly DatabaseService _databaseService;
+    private readonly LicenseService _licenseService;
     private readonly PythonService _pythonService;
     private readonly MetricsCalculator _metricsCalculator;
     private readonly ValidationService _validationService;
@@ -46,6 +50,7 @@ public class MainWindowViewModel : ViewModelBase
 
         // Initialize services
         _databaseService = new DatabaseService();
+        _licenseService = new LicenseService(_databaseService);
         _pythonService = new PythonService(_databaseService);
         _metricsCalculator = new MetricsCalculator(_databaseService);
         _validationService = new ValidationService(_databaseService);
@@ -59,7 +64,8 @@ public class MainWindowViewModel : ViewModelBase
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
-        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService);
+        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService);
+        SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
 
         // Set default view
         _currentView = DashboardViewModel;
@@ -77,6 +83,7 @@ public class MainWindowViewModel : ViewModelBase
         SettingsViewModel.IsDarkTheme = IsDarkTheme;
         ApplyThemeResources(IsDarkTheme);
         _ = InitializeLocalizationAsync();
+        _ = InitializeLicenseAsync();
     }
 
     /// <summary>
@@ -115,6 +122,24 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentViewName, value);
     }
 
+    public bool IsLicenseActive
+    {
+        get => _isLicenseActive;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isLicenseActive, value);
+            this.RaisePropertyChanged(nameof(IsLicenseLocked));
+        }
+    }
+
+    public bool IsLicenseLocked => !IsLicenseActive;
+
+    public string LicenseStatusText
+    {
+        get => _licenseStatusText;
+        private set => this.RaiseAndSetIfChanged(ref _licenseStatusText, value);
+    }
+
     /// <summary>
     /// Command to navigate between views
     /// </summary>
@@ -135,6 +160,14 @@ public class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void Navigate(string viewName)
     {
+        if (IsLicenseLocked && !string.Equals(viewName, "Settings", StringComparison.OrdinalIgnoreCase))
+        {
+            CurrentView = SettingsViewModel;
+            CurrentViewName = "Settings";
+            _notificationService.Warning("License required", "Activate a valid license in Settings to unlock this section.");
+            return;
+        }
+
         if (viewName == "Reports")
         {
             _ = ReportsViewModel.LoadTodayReportsAsync();
@@ -223,5 +256,32 @@ public class MainWindowViewModel : ViewModelBase
     {
         await _localizationService.InitializeAsync(_databaseService);
         SettingsViewModel.SyncSelectedLanguageFromService();
+    }
+
+    private async Task InitializeLicenseAsync()
+    {
+        var state = await _licenseService.GetCurrentStatusAsync(validateOnline: false);
+        ApplyLicenseState(state, notifyWhenLocked: false);
+    }
+
+    private void OnLicenseStateChanged(object? sender, LicenseStatus state)
+    {
+        ApplyLicenseState(state, notifyWhenLocked: false);
+    }
+
+    private void ApplyLicenseState(LicenseStatus state, bool notifyWhenLocked)
+    {
+        IsLicenseActive = state.IsActive;
+        LicenseStatusText = state.Message;
+
+        if (!state.IsActive)
+        {
+            CurrentView = SettingsViewModel;
+            CurrentViewName = "Settings";
+            if (notifyWhenLocked)
+            {
+                _notificationService.Warning("License required", "Activate a valid license in Settings.");
+            }
+        }
     }
 }

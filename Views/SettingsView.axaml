@@ -207,6 +207,88 @@
 
                     <Separator/>
 
+                    <TextBlock Text="Application License"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="License Server URL"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Text="{Binding LicenseServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="https://oauth4-0.onrender.com (optional for offline token checks)"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="App ID"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Text="{Binding LicenseAppId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="agentbuddy"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="License Token"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="2"
+                                 Grid.Column="1"
+                                 Text="{Binding LicenseToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Paste JWT license token"/>
+
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   Text="{Binding LicenseStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="1"
+                                   Text="{Binding LicenseSummary}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <WrapPanel>
+                        <Button Classes="Primary"
+                                Command="{Binding ActivateLicenseCommand}"
+                                IsEnabled="{Binding !IsProcessingLicense}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
+                            <TextBlock Text="Activate License"/>
+                        </Button>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding ValidateStoredLicenseCommand}"
+                                IsEnabled="{Binding !IsProcessingLicense}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0">
+                            <TextBlock Text="Validate Saved License"/>
+                        </Button>
+
+                        <Button Classes="Danger"
+                                Command="{Binding ClearLicenseCommand}"
+                                IsEnabled="{Binding !IsProcessingLicense}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0">
+                            <TextBlock Text="Clear License"/>
+                        </Button>
+                    </WrapPanel>
+
+                    <Separator/>
+
                     <TextBlock Text="{DynamicResource L_Set_PrinterConfig}"
                                FontSize="15"
                                FontWeight="SemiBold"

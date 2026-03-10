@@ -22,6 +22,7 @@ public class SettingsViewModel : ViewModelBase
     private readonly PythonService _pythonService;
     private readonly LocalizationService _localizationService;
     private readonly ReportsService _reportsService;
+    private readonly LicenseService _licenseService;
 
     private bool _isDarkTheme;
     private string? _pythonVersion;
@@ -55,17 +56,25 @@ public class SettingsViewModel : ViewModelBase
     private string _browserStatus = string.Empty;
     private bool _isSavingBrowserSettings;
     private string? _selectedBrowser;
+    private string? _licenseServerUrl;
+    private string? _licenseAppId;
+    private string? _licenseToken;
+    private string _licenseStatus = string.Empty;
+    private string _licenseSummary = string.Empty;
+    private bool _isProcessingLicense;
 
     public SettingsViewModel(
         DatabaseService databaseService,
         PythonService pythonService,
         LocalizationService localizationService,
-        ReportsService reportsService)
+        ReportsService reportsService,
+        LicenseService licenseService)
     {
         _databaseService = databaseService;
         _pythonService = pythonService;
         _localizationService = localizationService;
         _reportsService = reportsService;
+        _licenseService = licenseService;
 
         LanguageOptions = new ObservableCollection<LanguageOption>(_localizationService.AvailableLanguages);
         _selectedLanguage = LanguageOptions.FirstOrDefault(option =>
@@ -83,6 +92,9 @@ public class SettingsViewModel : ViewModelBase
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
         SaveDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SaveDefaultPrinterAsync);
         SaveBrowserSettingsCommand = ReactiveCommand.CreateFromTask(SaveBrowserSettingsAsync);
+        ActivateLicenseCommand = ReactiveCommand.CreateFromTask(ActivateLicenseAsync);
+        ValidateStoredLicenseCommand = ReactiveCommand.CreateFromTask(ValidateStoredLicenseAsync);
+        ClearLicenseCommand = ReactiveCommand.CreateFromTask(ClearLicenseAsync);
 
         // Load initial data
         LoadSettings();
@@ -282,6 +294,42 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _languageStatus, value);
     }
 
+    public string? LicenseServerUrl
+    {
+        get => _licenseServerUrl;
+        set => this.RaiseAndSetIfChanged(ref _licenseServerUrl, value);
+    }
+
+    public string? LicenseAppId
+    {
+        get => _licenseAppId;
+        set => this.RaiseAndSetIfChanged(ref _licenseAppId, value);
+    }
+
+    public string? LicenseToken
+    {
+        get => _licenseToken;
+        set => this.RaiseAndSetIfChanged(ref _licenseToken, value);
+    }
+
+    public string LicenseStatus
+    {
+        get => _licenseStatus;
+        set => this.RaiseAndSetIfChanged(ref _licenseStatus, value);
+    }
+
+    public string LicenseSummary
+    {
+        get => _licenseSummary;
+        set => this.RaiseAndSetIfChanged(ref _licenseSummary, value);
+    }
+
+    public bool IsProcessingLicense
+    {
+        get => _isProcessingLicense;
+        set => this.RaiseAndSetIfChanged(ref _isProcessingLicense, value);
+    }
+
     public ReactiveCommand<Unit, Unit> CheckPythonCommand { get; }
     public ReactiveCommand<Unit, Unit> SyncLegacyDatabaseCommand { get; }
     public ReactiveCommand<Unit, Unit> ForceSyncLegacyDatabaseCommand { get; }
@@ -293,6 +341,10 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveDefaultPrinterCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveBrowserSettingsCommand { get; }
+    public ReactiveCommand<Unit, Unit> ActivateLicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit> ValidateStoredLicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearLicenseCommand { get; }
+    public event EventHandler<LicenseStatus>? LicenseStateChanged;
 
     private async void LoadSettings()
     {
@@ -311,6 +363,8 @@ public class SettingsViewModel : ViewModelBase
         MobileSyncStatus = "Set API URL and key for mobile sync.";
         AslaasUpdateStatus = "Update missing ASLAAS numbers, or force update all active accounts.";
         LanguageStatus = "Select your preferred language, then click Apply Language.";
+        LicenseStatus = "Enter token and activate license.";
+        LicenseSummary = "No active license.";
 
         var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();
         PythonVersion = isInstalled ? version : "Not installed";
@@ -333,6 +387,7 @@ public class SettingsViewModel : ViewModelBase
 
         await LoadPrintersAsync();
         await LoadBrowserSettingsAsync();
+        await LoadLicenseSettingsAsync();
     }
 
     private async void CheckPython()
@@ -715,6 +770,129 @@ public class SettingsViewModel : ViewModelBase
         {
             IsSavingBrowserSettings = false;
         }
+    }
+
+    private async Task LoadLicenseSettingsAsync()
+    {
+        try
+        {
+            var settings = await _licenseService.GetLicenseSettingsAsync();
+            LicenseServerUrl = settings.ServerUrl;
+            LicenseAppId = settings.AppId;
+
+            var state = await _licenseService.GetCurrentStatusAsync(validateOnline: false);
+            LicenseSummary = BuildLicenseSummary(state);
+            LicenseStatus = state.Message;
+            LicenseStateChanged?.Invoke(this, state);
+        }
+        catch (Exception ex)
+        {
+            LicenseStatus = $"Failed to load license settings: {ex.Message}";
+            LicenseSummary = "No active license.";
+        }
+    }
+
+    private async Task ActivateLicenseAsync()
+    {
+        if (IsProcessingLicense)
+        {
+            return;
+        }
+
+        IsProcessingLicense = true;
+        LicenseStatus = "Activating license...";
+        try
+        {
+            var result = await _licenseService.ActivateLicenseAsync(LicenseServerUrl, LicenseAppId, LicenseToken);
+            LicenseStatus = result.Message;
+            LicenseSummary = BuildLicenseSummary(result.Status);
+            if (result.Success)
+            {
+                LicenseToken = string.Empty;
+                LicenseServerUrl = result.Status.ServerUrl;
+                LicenseAppId = result.Status.AppId;
+            }
+
+            LicenseStateChanged?.Invoke(this, result.Status);
+        }
+        catch (Exception ex)
+        {
+            LicenseStatus = $"Failed to activate license: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessingLicense = false;
+        }
+    }
+
+    private async Task ValidateStoredLicenseAsync()
+    {
+        if (IsProcessingLicense)
+        {
+            return;
+        }
+
+        IsProcessingLicense = true;
+        LicenseStatus = "Validating stored license...";
+        try
+        {
+            var result = await _licenseService.ValidateStoredLicenseAsync();
+            LicenseStatus = result.Message;
+            LicenseSummary = BuildLicenseSummary(result.Status);
+            LicenseStateChanged?.Invoke(this, result.Status);
+        }
+        catch (Exception ex)
+        {
+            LicenseStatus = $"License validation failed: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessingLicense = false;
+        }
+    }
+
+    private async Task ClearLicenseAsync()
+    {
+        if (IsProcessingLicense)
+        {
+            return;
+        }
+
+        IsProcessingLicense = true;
+        LicenseStatus = "Clearing license...";
+        try
+        {
+            await _licenseService.ClearLicenseAsync();
+            LicenseToken = string.Empty;
+            LicenseSummary = "No active license.";
+            LicenseStatus = "License cleared.";
+            LicenseStateChanged?.Invoke(this, new LicenseStatus
+            {
+                IsActive = false,
+                Message = "License cleared.",
+            });
+        }
+        catch (Exception ex)
+        {
+            LicenseStatus = $"Failed to clear license: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessingLicense = false;
+        }
+    }
+
+    private static string BuildLicenseSummary(LicenseStatus state)
+    {
+        if (!state.IsActive)
+        {
+            return string.IsNullOrWhiteSpace(state.Message) ? "No active license." : state.Message;
+        }
+
+        var expires = state.ExpiresAtUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm zzz") ?? "unknown";
+        var validated = state.LastValidatedAtUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm zzz") ?? "not yet";
+        var owner = string.IsNullOrWhiteSpace(state.Subject) ? "n/a" : state.Subject;
+        return $"App: {state.AppId} | Expires: {expires} | Last check: {validated} | Subject: {owner}";
     }
 
     private static IReadOnlyList<string> GetSupportedBrowserOptions()

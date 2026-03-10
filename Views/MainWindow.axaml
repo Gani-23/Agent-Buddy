@@ -50,6 +50,7 @@
                 <StackPanel Grid.Row="2" Spacing="4">
                     <Button x:Name="DashboardNavButton"
                             Classes="NavItem"
+                            IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Dashboard">
                         <TextBlock Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap"/>
@@ -57,6 +58,7 @@
 
                     <Button x:Name="ListsNavButton"
                             Classes="NavItem"
+                            IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Lists">
                         <TextBlock Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap"/>
@@ -64,6 +66,7 @@
 
                     <Button x:Name="ReportsNavButton"
                             Classes="NavItem"
+                            IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Reports">
                         <TextBlock Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap"/>
@@ -71,6 +74,7 @@
 
                     <Button x:Name="SupportNavButton"
                             Classes="NavItem"
+                            IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Support">
                         <TextBlock Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap"/>
@@ -87,10 +91,16 @@
                 <Border Grid.Row="3"
                         Classes="Card"
                         Padding="8">
-                    <Button Classes="NavItem"
-                            Command="{Binding ToggleThemeCommand}">
-                        <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap"/>
-                    </Button>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding LicenseStatusText}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
+                        <Button Classes="NavItem"
+                                Command="{Binding ToggleThemeCommand}">
+                            <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap"/>
+                        </Button>
+                    </StackPanel>
                 </Border>
             </Grid>
         </Border>
