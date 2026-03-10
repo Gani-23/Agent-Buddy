@@ -11,12 +11,19 @@ Agent Buddy is a cross-platform Avalonia desktop app that helps India Post DOP a
 - Built-in licensing flow using JWT tokens (optional online validation).
 
 ## Screenshots
-Place screenshots in `docs/screenshots/` with the filenames below.
+The current UI screenshots live in `docs/screenshots/`:
 
-![Dashboard](docs/screenshots/dashboard.png)
-![Create Lists](docs/screenshots/create-lists.png)
-![Reports](docs/screenshots/reports.png)
-![Settings](docs/screenshots/settings.png)
+Dashboard overview.
+![Dashboard](docs/screenshots/Dashboard.png)
+
+Create Lists workspace.
+![Create Lists](docs/screenshots/CreateList.png)
+
+Reports view.
+![Reports](docs/screenshots/Reports.png)
+
+Support view.
+![Support](docs/screenshots/Support.png)
 
 ## Tech Stack
 - .NET `net10.0` (Avalonia UI 11.3.x)
