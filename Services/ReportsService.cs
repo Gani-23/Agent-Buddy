@@ -117,6 +117,70 @@ public class ReportsService
             .ToList();
     }
 
+    public async Task<List<DailyListReport>> GetReportsByReferencesAsync(IReadOnlyList<string> references)
+    {
+        if (references == null || references.Count == 0 || !File.Exists(_referencesFilePath))
+        {
+            return new List<DailyListReport>();
+        }
+
+        var referenceSet = references
+            .Where(reference => !string.IsNullOrWhiteSpace(reference))
+            .Select(reference => reference.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (referenceSet.Count == 0)
+        {
+            return new List<DailyListReport>();
+        }
+
+        var content = await File.ReadAllTextAsync(_referencesFilePath);
+        var latestByReference = new Dictionary<string, DailyListReport>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (Match match in ReportEntryRegex.Matches(content))
+        {
+            var reference = match.Groups["reference"].Value.Trim();
+            if (string.IsNullOrWhiteSpace(reference) || !referenceSet.Contains(reference))
+            {
+                continue;
+            }
+
+            var timestampRaw = match.Groups["timestamp"].Value.Trim();
+            if (!DateTime.TryParse(timestampRaw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var timestamp))
+            {
+                continue;
+            }
+
+            var listRaw = match.Groups["list"].Value.Trim();
+            var accountsRaw = match.Groups["accounts"].Value.Trim();
+            if (!int.TryParse(listRaw, out var listIndex))
+            {
+                listIndex = 0;
+            }
+
+            var pdfPath = Path.Combine(_pdfDirectoryPath, $"{reference}.pdf");
+            var report = new DailyListReport
+            {
+                Timestamp = timestamp,
+                ListIndex = listIndex,
+                ReferenceNumber = reference,
+                AccountsRaw = accountsRaw,
+                AccountCount = CountAccounts(accountsRaw),
+                PdfPath = pdfPath,
+                HasPdf = File.Exists(pdfPath)
+            };
+
+            if (!latestByReference.TryGetValue(reference, out var existing) || report.Timestamp > existing.Timestamp)
+            {
+                latestByReference[reference] = report;
+            }
+        }
+
+        return latestByReference.Values
+            .OrderByDescending(item => item.Timestamp)
+            .ToList();
+    }
+
     public Task<(bool Success, string Message)> OpenPdfAsync(string pdfPath)
     {
         if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))

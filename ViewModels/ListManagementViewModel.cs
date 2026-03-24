@@ -708,6 +708,7 @@ public class ListManagementViewModel : ViewModelBase
     private readonly DatabaseService _databaseService;
     private readonly ValidationService _validationService;
     private readonly PythonService _pythonService;
+    private readonly ReportsService _reportsService;
     private readonly NotificationService? _notificationService;
     private readonly string _processingStatePath;
     private readonly string _lotSnapshotPath;
@@ -723,11 +724,13 @@ public class ListManagementViewModel : ViewModelBase
         DatabaseService databaseService,
         ValidationService validationService,
         PythonService pythonService,
+        ReportsService reportsService,
         NotificationService? notificationService = null)
     {
         _databaseService = databaseService;
         _validationService = validationService;
         _pythonService = pythonService;
+        _reportsService = reportsService;
         _notificationService = notificationService;
 
         var stateDirectory = Path.Combine(AppPaths.BaseDirectory, "State");
@@ -779,6 +782,7 @@ public class ListManagementViewModel : ViewModelBase
     public ObservableCollection<string> ProcessingLogs { get; }
     public Interaction<AslaasPromptRequest, string?> AslaasPrompt { get; } = new();
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
+    public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
 
     public ReactiveCommand<Unit, Unit> AddNewListCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveLotCommand { get; }
@@ -1362,6 +1366,29 @@ public class ListManagementViewModel : ViewModelBase
             {
                 _notificationService?.Warning("Lists Partially Processed", $"Success: {completed}, Failed: {failed}.");
             }
+
+            if (failed == 0 && completed > 0)
+            {
+                await EnsureMissingReportsAsync();
+
+                var runReferences = processableLists
+                    .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
+                    .Select(list => list.ReferenceNumber.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (runReferences.Count > 0)
+                {
+                    await HandlePostProcessPromptsAsync(runReferences);
+                }
+            }
+            else if (failed > 0 && completed > 0)
+            {
+                var message = "Some lists failed. Retry failed lists to enable printing and payslips.";
+                ProcessStatus = message;
+                AppendProcessingLog(message);
+                _notificationService?.Info("Printing On Hold", message);
+            }
         }
         catch (Exception ex)
         {
@@ -1374,6 +1401,154 @@ public class ListManagementViewModel : ViewModelBase
             IsProcessing = false;
             RaiseListStateProperties();
         }
+    }
+
+    private async Task HandlePostProcessPromptsAsync(IReadOnlyList<string> runReferences)
+    {
+        try
+        {
+            var runReports = await _reportsService.GetReportsByReferencesAsync(runReferences);
+            if (runReports.Count == 0)
+            {
+                return;
+            }
+
+            var reportsWithPdf = runReports.Where(report => report.HasPdf).ToList();
+            var shouldPrintReports = false;
+
+            if (reportsWithPdf.Count > 0)
+            {
+                shouldPrintReports = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+                    "Print Reports?",
+                    $"Print all {reportsWithPdf.Count} report PDF(s) generated in this run? This will print 2 copies of each report.",
+                    "Print 2 Copies",
+                    "Skip")).ToTask();
+            }
+
+            if (shouldPrintReports)
+            {
+                var printedCount = 0;
+                foreach (var report in reportsWithPdf)
+                {
+                    if (string.IsNullOrWhiteSpace(report.PdfPath))
+                    {
+                        continue;
+                    }
+
+                    var (printed, _) = await _reportsService.PrintPdfAsync(report.PdfPath, 2);
+                    if (printed)
+                    {
+                        printedCount++;
+                    }
+                }
+
+                if (printedCount > 0)
+                {
+                    _notificationService?.Success("Printing Started", $"Queued {printedCount} report PDF(s) for printing (2 copies).");
+                }
+                else
+                {
+                    _notificationService?.Warning("Print Skipped", "No printable PDFs were found for today.");
+                }
+            }
+
+            var shouldGeneratePayslips = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+                "Generate Payslips?",
+                "Generate payslips for the current run and print 1 copy?",
+                "Generate & Print",
+                "Not Now")).ToTask();
+
+            if (!shouldGeneratePayslips)
+            {
+                return;
+            }
+
+            var (generated, message, outputPdfPath) = await _reportsService.GeneratePayslipsAsync(runReports);
+            if (!generated)
+            {
+                _notificationService?.Error("Payslip Failed", message);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(outputPdfPath))
+            {
+                var (printed, printMessage) = await _reportsService.PrintPdfAsync(outputPdfPath, 1);
+                if (printed)
+                {
+                    _notificationService?.Success("Payslip Printed", "Payslip generated and sent to printer (1 copy).");
+                }
+                else
+                {
+                    _notificationService?.Warning("Payslip Generated", printMessage);
+                }
+            }
+        }
+        catch (UnhandledInteractionException<ConfirmDialogRequest, bool>)
+        {
+            // Ignore prompts if the view is not available.
+        }
+    }
+
+    private async Task EnsureMissingReportsAsync()
+    {
+        var allReferences = Lists
+            .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
+            .Select(list => list.ReferenceNumber.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (allReferences.Count == 0)
+        {
+            return;
+        }
+
+        var missingRefs = allReferences
+            .Where(reference =>
+            {
+                var pdfPath = Path.Combine(_reportsService.PdfDirectoryPath, $"{reference}.pdf");
+                return !File.Exists(pdfPath);
+            })
+            .ToList();
+
+        if (missingRefs.Count == 0)
+        {
+            return;
+        }
+
+        var startMessage = $"Downloading {missingRefs.Count} missing report(s)...";
+        ProcessStatus = startMessage;
+        AppendProcessingLog(startMessage);
+        _notificationService?.Info("Downloading Reports", startMessage);
+
+        var result = await _pythonService.GenerateReportsFromReferencesAsync(
+            missingRefs,
+            progress =>
+            {
+                if (string.IsNullOrWhiteSpace(progress))
+                {
+                    return;
+                }
+                var line = progress.Trim();
+                ProcessStatus = line;
+                AppendProcessingLog(line);
+            });
+
+        if (!result.Success)
+        {
+            var error = FirstMeaningfulLine(result.ErrorMessage);
+            var message = string.IsNullOrWhiteSpace(error)
+                ? "Failed to download missing reports."
+                : error;
+            ProcessStatus = message;
+            AppendProcessingLog(message);
+            _notificationService?.Error("Report Download Failed", message);
+            return;
+        }
+
+        var successMessage = $"Generated {missingRefs.Count} missing report(s).";
+        ProcessStatus = successMessage;
+        AppendProcessingLog(successMessage);
+        _notificationService?.Success("Reports Ready", successMessage);
     }
 
     private void OnListPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -1655,8 +1830,12 @@ public class ListManagementViewModel : ViewModelBase
                 continue;
             }
 
-            list.MarkSuccess(referenceInfo.ReferenceNumber);
-            PersistListState(list);
+            var pdfPath = Path.Combine(_reportsService.PdfDirectoryPath, $"{referenceInfo.ReferenceNumber}.pdf");
+            if (File.Exists(pdfPath))
+            {
+                list.MarkSuccess(referenceInfo.ReferenceNumber);
+                PersistListState(list);
+            }
         }
     }
 

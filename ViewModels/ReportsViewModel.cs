@@ -13,6 +13,7 @@ namespace AgentBuddy.ViewModels;
 public class ReportsViewModel : ViewModelBase
 {
     private readonly ReportsService _reportsService;
+    private readonly PythonService _pythonService;
     private readonly NotificationService? _notificationService;
 
     private bool _isDarkTheme;
@@ -20,10 +21,12 @@ public class ReportsViewModel : ViewModelBase
     private int _printCopies = 2;
     private string _selectedPrinter = string.Empty;
     private bool _isSettingDefaultPrinter;
+    private bool _isGeneratingMissingReports;
 
-    public ReportsViewModel(ReportsService reportsService, NotificationService? notificationService = null)
+    public ReportsViewModel(ReportsService reportsService, PythonService pythonService, NotificationService? notificationService = null)
     {
         _reportsService = reportsService;
+        _pythonService = pythonService;
         _notificationService = notificationService;
 
         TodayReports = new ObservableCollection<DailyListReport>();
@@ -33,6 +36,7 @@ public class ReportsViewModel : ViewModelBase
         PrintReportCommand = ReactiveCommand.CreateFromTask<DailyListReport?>(PrintReportAsync);
         PrintAllCommand = ReactiveCommand.CreateFromTask(PrintAllAsync);
         GeneratePayslipsCommand = ReactiveCommand.CreateFromTask(GeneratePayslipsAsync);
+        GenerateMissingReportsCommand = ReactiveCommand.CreateFromTask(GenerateMissingReportsAsync);
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
         SetDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SetDefaultPrinterAsync);
 
@@ -79,6 +83,7 @@ public class ReportsViewModel : ViewModelBase
 
     public bool HasReports => TodayReports.Count > 0;
     public bool HasPrintableReports => TodayReports.Any(item => item.HasPdf);
+    public bool HasMissingReports => TodayReports.Any(item => !item.HasPdf);
 
     public int TotalAccounts => TodayReports.Sum(item => item.AccountCount);
 
@@ -90,6 +95,7 @@ public class ReportsViewModel : ViewModelBase
     public ReactiveCommand<DailyListReport?, Unit> PrintReportCommand { get; }
     public ReactiveCommand<Unit, Unit> PrintAllCommand { get; }
     public ReactiveCommand<Unit, Unit> GeneratePayslipsCommand { get; }
+    public ReactiveCommand<Unit, Unit> GenerateMissingReportsCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
     public ReactiveCommand<Unit, Unit> SetDefaultPrinterCommand { get; }
 
@@ -242,6 +248,58 @@ public class ReportsViewModel : ViewModelBase
         }
     }
 
+    public async Task GenerateMissingReportsAsync()
+    {
+        if (_isGeneratingMissingReports)
+        {
+            return;
+        }
+
+        var missingRefs = TodayReports
+            .Where(item => !item.HasPdf)
+            .Select(item => item.ReferenceNumber)
+            .Where(refNo => !string.IsNullOrWhiteSpace(refNo))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (missingRefs.Count == 0)
+        {
+            StatusMessage = "All reports already have PDFs.";
+            _notificationService?.Info("Nothing Missing", StatusMessage);
+            return;
+        }
+
+        _isGeneratingMissingReports = true;
+        try
+        {
+            StatusMessage = $"Generating {missingRefs.Count} missing PDF(s)...";
+            _notificationService?.Info("Generating PDFs", StatusMessage);
+
+            var result = await _pythonService.GenerateReportsFromReferencesAsync(
+                missingRefs,
+                progress => StatusMessage = progress);
+
+            if (!result.Success)
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(result.ErrorMessage)
+                    ? "Failed to generate PDFs."
+                    : result.ErrorMessage;
+                _notificationService?.Error("PDF Generation Failed", StatusMessage);
+            }
+            else
+            {
+                StatusMessage = $"Generated PDFs for {missingRefs.Count} report(s).";
+                _notificationService?.Success("PDFs Ready", StatusMessage);
+            }
+
+            await LoadTodayReportsAsync();
+        }
+        finally
+        {
+            _isGeneratingMissingReports = false;
+        }
+    }
+
     public async Task LoadPrintersAsync()
     {
         try
@@ -339,6 +397,7 @@ public class ReportsViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(HasReports));
         this.RaisePropertyChanged(nameof(HasPrintableReports));
+        this.RaisePropertyChanged(nameof(HasMissingReports));
         this.RaisePropertyChanged(nameof(TotalAccounts));
         this.RaisePropertyChanged(nameof(SummaryText));
     }

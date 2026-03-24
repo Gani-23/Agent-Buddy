@@ -110,6 +110,16 @@
                     </StackPanel>
                 </Button>
 
+                <Button Classes="Secondary"
+                        Command="{Binding GenerateMissingReportsCommand}"
+                        IsEnabled="{Binding HasMissingReports}"
+                        Padding="16,10"
+                        Margin="0,0,12,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{DynamicResource L_Report_GenerateMissingPdfs}"/>
+                    </StackPanel>
+                </Button>
+
                 <TextBlock Text="{DynamicResource L_Report_Max3A4}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>

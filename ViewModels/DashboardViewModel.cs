@@ -39,6 +39,7 @@ public class DashboardViewModel : ViewModelBase
     private bool _isUpdating;
     private bool _isSyncingToMobile;
     private string _updateStatus = string.Empty;
+    private string _halfMonthTitleSuffix = string.Empty;
     private int _totalAccounts;
     private decimal _totalAmount;
     private DateTime? _lastUpdated;
@@ -76,6 +77,8 @@ public class DashboardViewModel : ViewModelBase
     private decimal _aboutToMatureAmount;
     private int _maturedCount;
     private decimal _maturedAmount;
+    private int _extendedAccountsCount;
+    private decimal _extendedAccountsAmount;
     private int _closedAccountsCount;
     private decimal _closedAccountsAmount;
     private int _firstHalfPendingWindowCount;
@@ -110,7 +113,14 @@ public class DashboardViewModel : ViewModelBase
         ViewAccountDetailsCommand = ReactiveCommand.Create<RDAccount>(ViewAccountDetails);
 
         // Load data on initialization
+        HalfMonthTitleSuffix = BuildHalfMonthTitleSuffix(DateTime.Today);
         _ = LoadDataAsync();
+    }
+
+    public string HalfMonthTitleSuffix
+    {
+        get => _halfMonthTitleSuffix;
+        private set => this.RaiseAndSetIfChanged(ref _halfMonthTitleSuffix, value);
     }
 
     public bool IsDarkTheme
@@ -343,6 +353,18 @@ public class DashboardViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _maturedAmount, value);
     }
 
+    public int ExtendedAccountsCount
+    {
+        get => _extendedAccountsCount;
+        private set => this.RaiseAndSetIfChanged(ref _extendedAccountsCount, value);
+    }
+
+    public decimal ExtendedAccountsAmount
+    {
+        get => _extendedAccountsAmount;
+        private set => this.RaiseAndSetIfChanged(ref _extendedAccountsAmount, value);
+    }
+
     public int AboutToMatureCount
     {
         get => _aboutToMatureCount;
@@ -500,6 +522,7 @@ public class DashboardViewModel : ViewModelBase
     private void BuildActionableSegments(List<RDAccount> accounts, List<RDAccount> closedAccounts)
     {
         var today = DateTime.Today;
+        HalfMonthTitleSuffix = BuildHalfMonthTitleSuffix(today);
         var monthStart = new DateTime(today.Year, today.Month, 1);
         var monthEnd = monthStart.AddMonths(1).AddDays(-1);
         var nextMonthStart = monthStart.AddMonths(1);
@@ -610,8 +633,31 @@ public class DashboardViewModel : ViewModelBase
             .ThenBy(a => a.AccountNo)
             .ToList();
 
-        var matured = accounts
+        var closedLookup = closedAccounts
+            .Select(a => (a.AccountNo ?? string.Empty).Trim())
+            .Where(accountNo => !string.IsNullOrWhiteSpace(accountNo))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var maturedAll = accounts
             .Where(a => a.GetMonthPaidNumber() >= MaturedInstallmentThreshold)
+            .ToList();
+
+        var extendedAccounts = maturedAll
+            .Where(a =>
+            {
+                var accountNo = (a.AccountNo ?? string.Empty).Trim();
+                return !string.IsNullOrWhiteSpace(accountNo) && closedLookup.Contains(accountNo);
+            })
+            .OrderByDescending(a => a.GetMonthPaidNumber())
+            .ThenBy(a => a.AccountNo)
+            .ToList();
+
+        var matured = maturedAll
+            .Where(a =>
+            {
+                var accountNo = (a.AccountNo ?? string.Empty).Trim();
+                return string.IsNullOrWhiteSpace(accountNo) || !closedLookup.Contains(accountNo);
+            })
             .OrderByDescending(a => a.GetMonthPaidNumber())
             .ThenBy(a => a.AccountNo)
             .ToList();
@@ -623,6 +669,7 @@ public class DashboardViewModel : ViewModelBase
         _segmentAccounts["freeze-risk"] = aboutToFreeze;
         _segmentAccounts["about-to-mature"] = aboutToMature;
         _segmentAccounts["matured"] = matured;
+        _segmentAccounts["extended-accounts"] = extendedAccounts;
         _segmentAccounts["closed-accounts"] = closedAccounts
             .OrderByDescending(a => a.LastUpdated)
             .ThenBy(a => a.AccountNo)
@@ -650,6 +697,8 @@ public class DashboardViewModel : ViewModelBase
         AboutToMatureAmount = aboutToMature.Sum(a => a.GetAmount());
         MaturedCount = matured.Count;
         MaturedAmount = matured.Sum(a => a.GetAmount());
+        ExtendedAccountsCount = extendedAccounts.Count;
+        ExtendedAccountsAmount = extendedAccounts.Sum(a => a.GetAmount());
         ClosedAccountsCount = closedAccounts.Count;
         ClosedAccountsAmount = closedAccounts.Sum(a => a.GetAmount());
         FirstHalfPendingWindowCount = firstHalfPendingWindow.Count;
@@ -685,14 +734,20 @@ public class DashboardViewModel : ViewModelBase
             "freeze-risk" => "About To Freeze Accounts",
             "about-to-mature" => "About To Mature Accounts",
             "matured" => "Matured Accounts",
+            "extended-accounts" => "Extended Accounts",
             "closed-accounts" => "Closed Accounts",
-            "pending-first-half" => "Pending Accounts (1st–15th)",
-            "pending-second-half" => "Pending Accounts (16th–End of Month)",
-            "deposited-first-half" => "Deposited Accounts (1st–15th)",
-            "deposited-second-half" => "Deposited Accounts (16th–End of Month)",
+            "pending-first-half" => "Pending Accounts - First Half",
+            "pending-second-half" => "Pending Accounts - Second Half",
+            "deposited-first-half" => "Deposited Accounts - First Half",
+            "deposited-second-half" => "Deposited Accounts - Second Half",
             "due-soon" => "Accounts Due Within 30 Days",
             _ => "Accounts"
         };
+    }
+
+    private static string BuildHalfMonthTitleSuffix(DateTime date)
+    {
+        return $"({date:MMMM yyyy})";
     }
 
     private void CreateCategoryChart(List<CategoryData> categories)

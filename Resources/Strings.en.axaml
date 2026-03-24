@@ -41,10 +41,11 @@
         <x:String x:Key="L_Dash_MaturedAccounts">Matured Accounts</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">Closed Accounts</x:String>
         <x:String x:Key="L_Dash_HalfMonthTitle">Half-Month Pending &amp; Deposits</x:String>
-        <x:String x:Key="L_Dash_FirstHalfPending">First Half Pending (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfPending">Second Half Pending (16-End)</x:String>
-        <x:String x:Key="L_Dash_FirstHalfDeposited">First Half Deposited (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfDeposited">Second Half Deposited (16-End)</x:String>
+        <x:String x:Key="L_Dash_FirstHalfPending">First Half Pending</x:String>
+        <x:String x:Key="L_Dash_SecondHalfPending">Second Half Pending</x:String>
+        <x:String x:Key="L_Dash_FirstHalfDeposited">First Half Deposited</x:String>
+        <x:String x:Key="L_Dash_SecondHalfDeposited">Second Half Deposited</x:String>
+        <x:String x:Key="L_Dash_ExtendedAccounts">Extended Accounts</x:String>
         <x:String x:Key="L_Dash_CategorySplit">Category Split</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">Monthly Split</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">Updated: </x:String>
@@ -78,6 +79,7 @@
         <x:String x:Key="L_Report_SetDefaultPrinter">Set Default Printer</x:String>
         <x:String x:Key="L_Report_PrintAllToday">Print All (Today)</x:String>
         <x:String x:Key="L_Report_GeneratePayslip">Generate Payslip (Selected)</x:String>
+        <x:String x:Key="L_Report_GenerateMissingPdfs">Make Missing PDFs</x:String>
         <x:String x:Key="L_Report_Max3A4">Max 3 payslips per A4 page</x:String>
         <x:String x:Key="L_Report_TodayLists">Today's Lists</x:String>
         <x:String x:Key="L_Report_View">View</x:String>

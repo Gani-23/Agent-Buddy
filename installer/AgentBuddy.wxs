@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="AgentBuddy"
+           Manufacturer="AgentBuddy"
+           Version="1.0.0"
+           InstallScope="perMachine"
+           UpgradeCode="6B5C94C5-9E3A-46A7-B3A4-0F6F5D8C7E9B">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+    <Property Id="ARPPRODUCTICON" Value="AgentBuddyIcon" />
+    <Feature Id="MainFeature" Title="AgentBuddy" Level="1">
+      <ComponentGroupRef Id="AppComponents" />
+    </Feature>
+    <ui:WixUI Id="WixUI_Minimal" />
+  </Package>
+
+  <Fragment>
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="AgentBuddy" />
+    </StandardDirectory>
+    <StandardDirectory Id="CommonDesktopFolder" />
+  </Fragment>
+
+  <Fragment>
+    <Icon Id="AgentBuddyIcon" SourceFile="$(var.SourceDir)/AgentBuddy.ico" />
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="cmp_1" Guid="*">
+        <File Id="fil_1" Source="$(var.SourceDir)/AgentBuddy.deps.json" />
+      </Component>
+      <Component Id="cmp_2" Guid="*">
+        <File Id="fil_2" Source="$(var.SourceDir)/AgentBuddy.dll" />
+      </Component>
+      <Component Id="cmp_3" Guid="*">
+        <File Id="fil_3" Source="$(var.SourceDir)/AgentBuddy.exe" />
+      </Component>
+      <Component Id="cmp_4" Guid="*">
+        <File Id="fil_4" Source="$(var.SourceDir)/AgentBuddy.ico" />
+      </Component>
+      <Component Id="cmp_5" Guid="*">
+        <File Id="fil_5" Source="$(var.SourceDir)/AgentBuddy.pdb" />
+      </Component>
+      <Component Id="cmp_6" Guid="*">
+        <File Id="fil_6" Source="$(var.SourceDir)/AgentBuddy.runtimeconfig.json" />
+      </Component>
+      <Component Id="cmp_7" Guid="*">
+        <File Id="fil_7" Source="$(var.SourceDir)/Avalonia.Base.dll" />
+      </Component>
+      <Component Id="cmp_8" Guid="*">
+        <File Id="fil_8" Source="$(var.SourceDir)/Avalonia.Controls.DataGrid.dll" />
+      </Component>
+      <Component Id="cmp_9" Guid="*">
+        <File Id="fil_9" Source="$(var.SourceDir)/Avalonia.Controls.dll" />
+      </Component>
+      <Component Id="cmp_10" Guid="*">
+        <File Id="fil_10" Source="$(var.SourceDir)/Avalonia.DesignerSupport.dll" />
+      </Component>
+      <Component Id="cmp_11" Guid="*">
+        <File Id="fil_11" Source="$(var.SourceDir)/Avalonia.Desktop.dll" />
+      </Component>
+      <Component Id="cmp_12" Guid="*">
+        <File Id="fil_12" Source="$(var.SourceDir)/Avalonia.Dialogs.dll" />
+      </Component>
+      <Component Id="cmp_13" Guid="*">
+        <File Id="fil_13" Source="$(var.SourceDir)/Avalonia.Fonts.Inter.dll" />
+      </Component>
+      <Component Id="cmp_14" Guid="*">
+        <File Id="fil_14" Source="$(var.SourceDir)/Avalonia.FreeDesktop.dll" />
+      </Component>
+      <Component Id="cmp_15" Guid="*">
+        <File Id="fil_15" Source="$(var.SourceDir)/Avalonia.Markup.Xaml.dll" />
+      </Component>
+      <Component Id="cmp_16" Guid="*">
+        <File Id="fil_16" Source="$(var.SourceDir)/Avalonia.Markup.dll" />
+      </Component>
+      <Component Id="cmp_17" Guid="*">
+        <File Id="fil_17" Source="$(var.SourceDir)/Avalonia.Metal.dll" />
+      </Component>
+      <Component Id="cmp_18" Guid="*">
+        <File Id="fil_18" Source="$(var.SourceDir)/Avalonia.MicroCom.dll" />
+      </Component>
+      <Component Id="cmp_19" Guid="*">
+        <File Id="fil_19" Source="$(var.SourceDir)/Avalonia.Native.dll" />
+      </Component>
+      <Component Id="cmp_20" Guid="*">
+        <File Id="fil_20" Source="$(var.SourceDir)/Avalonia.OpenGL.dll" />
+      </Component>
+      <Component Id="cmp_21" Guid="*">
+        <File Id="fil_21" Source="$(var.SourceDir)/Avalonia.ReactiveUI.dll" />
+      </Component>
+      <Component Id="cmp_22" Guid="*">
+        <File Id="fil_22" Source="$(var.SourceDir)/Avalonia.Remote.Protocol.dll" />
+      </Component>
+      <Component Id="cmp_23" Guid="*">
+        <File Id="fil_23" Source="$(var.SourceDir)/Avalonia.Skia.dll" />
+      </Component>
+      <Component Id="cmp_24" Guid="*">
+        <File Id="fil_24" Source="$(var.SourceDir)/Avalonia.Themes.Fluent.dll" />
+      </Component>
+      <Component Id="cmp_25" Guid="*">
+        <File Id="fil_25" Source="$(var.SourceDir)/Avalonia.Vulkan.dll" />
+      </Component>
+      <Component Id="cmp_26" Guid="*">
+        <File Id="fil_26" Source="$(var.SourceDir)/Avalonia.Win32.Automation.dll" />
+      </Component>
+      <Component Id="cmp_27" Guid="*">
+        <File Id="fil_27" Source="$(var.SourceDir)/Avalonia.Win32.dll" />
+      </Component>
+      <Component Id="cmp_28" Guid="*">
+        <File Id="fil_28" Source="$(var.SourceDir)/Avalonia.X11.dll" />
+      </Component>
+      <Component Id="cmp_29" Guid="*">
+        <File Id="fil_29" Source="$(var.SourceDir)/Avalonia.dll" />
+      </Component>
+      <Component Id="cmp_30" Guid="*">
+        <File Id="fil_30" Source="$(var.SourceDir)/DynamicData.dll" />
+      </Component>
+      <Component Id="cmp_31" Guid="*">
+        <File Id="fil_31" Source="$(var.SourceDir)/HarfBuzzSharp.dll" />
+      </Component>
+      <Component Id="cmp_32" Guid="*">
+        <File Id="fil_32" Source="$(var.SourceDir)/LiveChartsCore.SkiaSharpView.Avalonia.dll" />
+      </Component>
+      <Component Id="cmp_33" Guid="*">
+        <File Id="fil_33" Source="$(var.SourceDir)/LiveChartsCore.SkiaSharpView.dll" />
+      </Component>
+      <Component Id="cmp_34" Guid="*">
+        <File Id="fil_34" Source="$(var.SourceDir)/LiveChartsCore.dll" />
+      </Component>
+      <Component Id="cmp_35" Guid="*">
+        <File Id="fil_35" Source="$(var.SourceDir)/MicroCom.Runtime.dll" />
+      </Component>
+      <Component Id="cmp_36" Guid="*">
+        <File Id="fil_36" Source="$(var.SourceDir)/Microsoft.CSharp.dll" />
+      </Component>
+      <Component Id="cmp_37" Guid="*">
+        <File Id="fil_37" Source="$(var.SourceDir)/Microsoft.Data.Sqlite.dll" />
+      </Component>
+      <Component Id="cmp_38" Guid="*">
+        <File Id="fil_38" Source="$(var.SourceDir)/Microsoft.DiaSymReader.Native.amd64.dll" />
+      </Component>
+      <Component Id="cmp_39" Guid="*">
+        <File Id="fil_39" Source="$(var.SourceDir)/Microsoft.VisualBasic.Core.dll" />
+      </Component>
+      <Component Id="cmp_40" Guid="*">
+        <File Id="fil_40" Source="$(var.SourceDir)/Microsoft.VisualBasic.dll" />
+      </Component>
+      <Component Id="cmp_41" Guid="*">
+        <File Id="fil_41" Source="$(var.SourceDir)/Microsoft.Win32.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_42" Guid="*">
+        <File Id="fil_42" Source="$(var.SourceDir)/Microsoft.Win32.Registry.dll" />
+      </Component>
+      <Component Id="cmp_43" Guid="*">
+        <File Id="fil_43" Source="$(var.SourceDir)/ReactiveUI.dll" />
+      </Component>
+      <Component Id="cmp_44" Guid="*">
+        <File Id="fil_44" Source="$(var.SourceDir)/SQLitePCLRaw.batteries_v2.dll" />
+      </Component>
+      <Component Id="cmp_45" Guid="*">
+        <File Id="fil_45" Source="$(var.SourceDir)/SQLitePCLRaw.core.dll" />
+      </Component>
+      <Component Id="cmp_46" Guid="*">
+        <File Id="fil_46" Source="$(var.SourceDir)/SQLitePCLRaw.provider.e_sqlite3.dll" />
+      </Component>
+      <Component Id="cmp_47" Guid="*">
+        <File Id="fil_47" Source="$(var.SourceDir)/SkiaSharp.HarfBuzz.dll" />
+      </Component>
+      <Component Id="cmp_48" Guid="*">
+        <File Id="fil_48" Source="$(var.SourceDir)/SkiaSharp.dll" />
+      </Component>
+      <Component Id="cmp_49" Guid="*">
+        <File Id="fil_49" Source="$(var.SourceDir)/Splat.dll" />
+      </Component>
+      <Component Id="cmp_50" Guid="*">
+        <File Id="fil_50" Source="$(var.SourceDir)/System.AppContext.dll" />
+      </Component>
+      <Component Id="cmp_51" Guid="*">
+        <File Id="fil_51" Source="$(var.SourceDir)/System.Buffers.dll" />
+      </Component>
+      <Component Id="cmp_52" Guid="*">
+        <File Id="fil_52" Source="$(var.SourceDir)/System.Collections.Concurrent.dll" />
+      </Component>
+      <Component Id="cmp_53" Guid="*">
+        <File Id="fil_53" Source="$(var.SourceDir)/System.Collections.Immutable.dll" />
+      </Component>
+      <Component Id="cmp_54" Guid="*">
+        <File Id="fil_54" Source="$(var.SourceDir)/System.Collections.NonGeneric.dll" />
+      </Component>
+      <Component Id="cmp_55" Guid="*">
+        <File Id="fil_55" Source="$(var.SourceDir)/System.Collections.Specialized.dll" />
+      </Component>
+      <Component Id="cmp_56" Guid="*">
+        <File Id="fil_56" Source="$(var.SourceDir)/System.Collections.dll" />
+      </Component>
+      <Component Id="cmp_57" Guid="*">
+        <File Id="fil_57" Source="$(var.SourceDir)/System.ComponentModel.Annotations.dll" />
+      </Component>
+      <Component Id="cmp_58" Guid="*">
+        <File Id="fil_58" Source="$(var.SourceDir)/System.ComponentModel.DataAnnotations.dll" />
+      </Component>
+      <Component Id="cmp_59" Guid="*">
+        <File Id="fil_59" Source="$(var.SourceDir)/System.ComponentModel.EventBasedAsync.dll" />
+      </Component>
+      <Component Id="cmp_60" Guid="*">
+        <File Id="fil_60" Source="$(var.SourceDir)/System.ComponentModel.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_61" Guid="*">
+        <File Id="fil_61" Source="$(var.SourceDir)/System.ComponentModel.TypeConverter.dll" />
+      </Component>
+      <Component Id="cmp_62" Guid="*">
+        <File Id="fil_62" Source="$(var.SourceDir)/System.ComponentModel.dll" />
+      </Component>
+      <Component Id="cmp_63" Guid="*">
+        <File Id="fil_63" Source="$(var.SourceDir)/System.Configuration.dll" />
+      </Component>
+      <Component Id="cmp_64" Guid="*">
+        <File Id="fil_64" Source="$(var.SourceDir)/System.Console.dll" />
+      </Component>
+      <Component Id="cmp_65" Guid="*">
+        <File Id="fil_65" Source="$(var.SourceDir)/System.Core.dll" />
+      </Component>
+      <Component Id="cmp_66" Guid="*">
+        <File Id="fil_66" Source="$(var.SourceDir)/System.Data.Common.dll" />
+      </Component>
+      <Component Id="cmp_67" Guid="*">
+        <File Id="fil_67" Source="$(var.SourceDir)/System.Data.DataSetExtensions.dll" />
+      </Component>
+      <Component Id="cmp_68" Guid="*">
+        <File Id="fil_68" Source="$(var.SourceDir)/System.Data.dll" />
+      </Component>
+      <Component Id="cmp_69" Guid="*">
+        <File Id="fil_69" Source="$(var.SourceDir)/System.Diagnostics.Contracts.dll" />
+      </Component>
+      <Component Id="cmp_70" Guid="*">
+        <File Id="fil_70" Source="$(var.SourceDir)/System.Diagnostics.Debug.dll" />
+      </Component>
+      <Component Id="cmp_71" Guid="*">
+        <File Id="fil_71" Source="$(var.SourceDir)/System.Diagnostics.DiagnosticSource.dll" />
+      </Component>
+      <Component Id="cmp_72" Guid="*">
+        <File Id="fil_72" Source="$(var.SourceDir)/System.Diagnostics.FileVersionInfo.dll" />
+      </Component>
+      <Component Id="cmp_73" Guid="*">
+        <File Id="fil_73" Source="$(var.SourceDir)/System.Diagnostics.Process.dll" />
+      </Component>
+      <Component Id="cmp_74" Guid="*">
+        <File Id="fil_74" Source="$(var.SourceDir)/System.Diagnostics.StackTrace.dll" />
+      </Component>
+      <Component Id="cmp_75" Guid="*">
+        <File Id="fil_75" Source="$(var.SourceDir)/System.Diagnostics.TextWriterTraceListener.dll" />
+      </Component>
+      <Component Id="cmp_76" Guid="*">
+        <File Id="fil_76" Source="$(var.SourceDir)/System.Diagnostics.Tools.dll" />
+      </Component>
+      <Component Id="cmp_77" Guid="*">
+        <File Id="fil_77" Source="$(var.SourceDir)/System.Diagnostics.TraceSource.dll" />
+      </Component>
+      <Component Id="cmp_78" Guid="*">
+        <File Id="fil_78" Source="$(var.SourceDir)/System.Diagnostics.Tracing.dll" />
+      </Component>
+      <Component Id="cmp_79" Guid="*">
+        <File Id="fil_79" Source="$(var.SourceDir)/System.Drawing.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_80" Guid="*">
+        <File Id="fil_80" Source="$(var.SourceDir)/System.Drawing.dll" />
+      </Component>
+      <Component Id="cmp_81" Guid="*">
+        <File Id="fil_81" Source="$(var.SourceDir)/System.Dynamic.Runtime.dll" />
+      </Component>
+      <Component Id="cmp_82" Guid="*">
+        <File Id="fil_82" Source="$(var.SourceDir)/System.Formats.Asn1.dll" />
+      </Component>
+      <Component Id="cmp_83" Guid="*">
+        <File Id="fil_83" Source="$(var.SourceDir)/System.Formats.Tar.dll" />
+      </Component>
+      <Component Id="cmp_84" Guid="*">
+        <File Id="fil_84" Source="$(var.SourceDir)/System.Globalization.Calendars.dll" />
+      </Component>
+      <Component Id="cmp_85" Guid="*">
+        <File Id="fil_85" Source="$(var.SourceDir)/System.Globalization.Extensions.dll" />
+      </Component>
+      <Component Id="cmp_86" Guid="*">
+        <File Id="fil_86" Source="$(var.SourceDir)/System.Globalization.dll" />
+      </Component>
+      <Component Id="cmp_87" Guid="*">
+        <File Id="fil_87" Source="$(var.SourceDir)/System.IO.Compression.Brotli.dll" />
+      </Component>
+      <Component Id="cmp_88" Guid="*">
+        <File Id="fil_88" Source="$(var.SourceDir)/System.IO.Compression.FileSystem.dll" />
+      </Component>
+      <Component Id="cmp_89" Guid="*">
+        <File Id="fil_89" Source="$(var.SourceDir)/System.IO.Compression.Native.dll" />
+      </Component>
+      <Component Id="cmp_90" Guid="*">
+        <File Id="fil_90" Source="$(var.SourceDir)/System.IO.Compression.ZipFile.dll" />
+      </Component>
+      <Component Id="cmp_91" Guid="*">
+        <File Id="fil_91" Source="$(var.SourceDir)/System.IO.Compression.dll" />
+      </Component>
+      <Component Id="cmp_92" Guid="*">
+        <File Id="fil_92" Source="$(var.SourceDir)/System.IO.FileSystem.AccessControl.dll" />
+      </Component>
+      <Component Id="cmp_93" Guid="*">
+        <File Id="fil_93" Source="$(var.SourceDir)/System.IO.FileSystem.DriveInfo.dll" />
+      </Component>
+      <Component Id="cmp_94" Guid="*">
+        <File Id="fil_94" Source="$(var.SourceDir)/System.IO.FileSystem.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_95" Guid="*">
+        <File Id="fil_95" Source="$(var.SourceDir)/System.IO.FileSystem.Watcher.dll" />
+      </Component>
+      <Component Id="cmp_96" Guid="*">
+        <File Id="fil_96" Source="$(var.SourceDir)/System.IO.FileSystem.dll" />
+      </Component>
+      <Component Id="cmp_97" Guid="*">
+        <File Id="fil_97" Source="$(var.SourceDir)/System.IO.IsolatedStorage.dll" />
+      </Component>
+      <Component Id="cmp_98" Guid="*">
+        <File Id="fil_98" Source="$(var.SourceDir)/System.IO.MemoryMappedFiles.dll" />
+      </Component>
+      <Component Id="cmp_99" Guid="*">
+        <File Id="fil_99" Source="$(var.SourceDir)/System.IO.Pipelines.dll" />
+      </Component>
+      <Component Id="cmp_100" Guid="*">
+        <File Id="fil_100" Source="$(var.SourceDir)/System.IO.Pipes.AccessControl.dll" />
+      </Component>
+      <Component Id="cmp_101" Guid="*">
+        <File Id="fil_101" Source="$(var.SourceDir)/System.IO.Pipes.dll" />
+      </Component>
+      <Component Id="cmp_102" Guid="*">
+        <File Id="fil_102" Source="$(var.SourceDir)/System.IO.UnmanagedMemoryStream.dll" />
+      </Component>
+      <Component Id="cmp_103" Guid="*">
+        <File Id="fil_103" Source="$(var.SourceDir)/System.IO.dll" />
+      </Component>
+      <Component Id="cmp_104" Guid="*">
+        <File Id="fil_104" Source="$(var.SourceDir)/System.Linq.AsyncEnumerable.dll" />
+      </Component>
+      <Component Id="cmp_105" Guid="*">
+        <File Id="fil_105" Source="$(var.SourceDir)/System.Linq.Expressions.dll" />
+      </Component>
+      <Component Id="cmp_106" Guid="*">
+        <File Id="fil_106" Source="$(var.SourceDir)/System.Linq.Parallel.dll" />
+      </Component>
+      <Component Id="cmp_107" Guid="*">
+        <File Id="fil_107" Source="$(var.SourceDir)/System.Linq.Queryable.dll" />
+      </Component>
+      <Component Id="cmp_108" Guid="*">
+        <File Id="fil_108" Source="$(var.SourceDir)/System.Linq.dll" />
+      </Component>
+      <Component Id="cmp_109" Guid="*">
+        <File Id="fil_109" Source="$(var.SourceDir)/System.Memory.dll" />
+      </Component>
+      <Component Id="cmp_110" Guid="*">
+        <File Id="fil_110" Source="$(var.SourceDir)/System.Net.Http.Json.dll" />
+      </Component>
+      <Component Id="cmp_111" Guid="*">
+        <File Id="fil_111" Source="$(var.SourceDir)/System.Net.Http.dll" />
+      </Component>
+      <Component Id="cmp_112" Guid="*">
+        <File Id="fil_112" Source="$(var.SourceDir)/System.Net.HttpListener.dll" />
+      </Component>
+      <Component Id="cmp_113" Guid="*">
+        <File Id="fil_113" Source="$(var.SourceDir)/System.Net.Mail.dll" />
+      </Component>
+      <Component Id="cmp_114" Guid="*">
+        <File Id="fil_114" Source="$(var.SourceDir)/System.Net.NameResolution.dll" />
+      </Component>
+      <Component Id="cmp_115" Guid="*">
+        <File Id="fil_115" Source="$(var.SourceDir)/System.Net.NetworkInformation.dll" />
+      </Component>
+      <Component Id="cmp_116" Guid="*">
+        <File Id="fil_116" Source="$(var.SourceDir)/System.Net.Ping.dll" />
+      </Component>
+      <Component Id="cmp_117" Guid="*">
+        <File Id="fil_117" Source="$(var.SourceDir)/System.Net.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_118" Guid="*">
+        <File Id="fil_118" Source="$(var.SourceDir)/System.Net.Quic.dll" />
+      </Component>
+      <Component Id="cmp_119" Guid="*">
+        <File Id="fil_119" Source="$(var.SourceDir)/System.Net.Requests.dll" />
+      </Component>
+      <Component Id="cmp_120" Guid="*">
+        <File Id="fil_120" Source="$(var.SourceDir)/System.Net.Security.dll" />
+      </Component>
+      <Component Id="cmp_121" Guid="*">
+        <File Id="fil_121" Source="$(var.SourceDir)/System.Net.ServerSentEvents.dll" />
+      </Component>
+      <Component Id="cmp_122" Guid="*">
+        <File Id="fil_122" Source="$(var.SourceDir)/System.Net.ServicePoint.dll" />
+      </Component>
+      <Component Id="cmp_123" Guid="*">
+        <File Id="fil_123" Source="$(var.SourceDir)/System.Net.Sockets.dll" />
+      </Component>
+      <Component Id="cmp_124" Guid="*">
+        <File Id="fil_124" Source="$(var.SourceDir)/System.Net.WebClient.dll" />
+      </Component>
+      <Component Id="cmp_125" Guid="*">
+        <File Id="fil_125" Source="$(var.SourceDir)/System.Net.WebHeaderCollection.dll" />
+      </Component>
+      <Component Id="cmp_126" Guid="*">
+        <File Id="fil_126" Source="$(var.SourceDir)/System.Net.WebProxy.dll" />
+      </Component>
+      <Component Id="cmp_127" Guid="*">
+        <File Id="fil_127" Source="$(var.SourceDir)/System.Net.WebSockets.Client.dll" />
+      </Component>
+      <Component Id="cmp_128" Guid="*">
+        <File Id="fil_128" Source="$(var.SourceDir)/System.Net.WebSockets.dll" />
+      </Component>
+      <Component Id="cmp_129" Guid="*">
+        <File Id="fil_129" Source="$(var.SourceDir)/System.Net.dll" />
+      </Component>
+      <Component Id="cmp_130" Guid="*">
+        <File Id="fil_130" Source="$(var.SourceDir)/System.Numerics.Vectors.dll" />
+      </Component>
+      <Component Id="cmp_131" Guid="*">
+        <File Id="fil_131" Source="$(var.SourceDir)/System.Numerics.dll" />
+      </Component>
+      <Component Id="cmp_132" Guid="*">
+        <File Id="fil_132" Source="$(var.SourceDir)/System.ObjectModel.dll" />
+      </Component>
+      <Component Id="cmp_133" Guid="*">
+        <File Id="fil_133" Source="$(var.SourceDir)/System.Private.CoreLib.dll" />
+      </Component>
+      <Component Id="cmp_134" Guid="*">
+        <File Id="fil_134" Source="$(var.SourceDir)/System.Private.DataContractSerialization.dll" />
+      </Component>
+      <Component Id="cmp_135" Guid="*">
+        <File Id="fil_135" Source="$(var.SourceDir)/System.Private.Uri.dll" />
+      </Component>
+      <Component Id="cmp_136" Guid="*">
+        <File Id="fil_136" Source="$(var.SourceDir)/System.Private.Xml.Linq.dll" />
+      </Component>
+      <Component Id="cmp_137" Guid="*">
+        <File Id="fil_137" Source="$(var.SourceDir)/System.Private.Xml.dll" />
+      </Component>
+      <Component Id="cmp_138" Guid="*">
+        <File Id="fil_138" Source="$(var.SourceDir)/System.Reactive.dll" />
+      </Component>
+      <Component Id="cmp_139" Guid="*">
+        <File Id="fil_139" Source="$(var.SourceDir)/System.Reflection.DispatchProxy.dll" />
+      </Component>
+      <Component Id="cmp_140" Guid="*">
+        <File Id="fil_140" Source="$(var.SourceDir)/System.Reflection.Emit.ILGeneration.dll" />
+      </Component>
+      <Component Id="cmp_141" Guid="*">
+        <File Id="fil_141" Source="$(var.SourceDir)/System.Reflection.Emit.Lightweight.dll" />
+      </Component>
+      <Component Id="cmp_142" Guid="*">
+        <File Id="fil_142" Source="$(var.SourceDir)/System.Reflection.Emit.dll" />
+      </Component>
+      <Component Id="cmp_143" Guid="*">
+        <File Id="fil_143" Source="$(var.SourceDir)/System.Reflection.Extensions.dll" />
+      </Component>
+      <Component Id="cmp_144" Guid="*">
+        <File Id="fil_144" Source="$(var.SourceDir)/System.Reflection.Metadata.dll" />
+      </Component>
+      <Component Id="cmp_145" Guid="*">
+        <File Id="fil_145" Source="$(var.SourceDir)/System.Reflection.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_146" Guid="*">
+        <File Id="fil_146" Source="$(var.SourceDir)/System.Reflection.TypeExtensions.dll" />
+      </Component>
+      <Component Id="cmp_147" Guid="*">
+        <File Id="fil_147" Source="$(var.SourceDir)/System.Reflection.dll" />
+      </Component>
+      <Component Id="cmp_148" Guid="*">
+        <File Id="fil_148" Source="$(var.SourceDir)/System.Resources.Reader.dll" />
+      </Component>
+      <Component Id="cmp_149" Guid="*">
+        <File Id="fil_149" Source="$(var.SourceDir)/System.Resources.ResourceManager.dll" />
+      </Component>
+      <Component Id="cmp_150" Guid="*">
+        <File Id="fil_150" Source="$(var.SourceDir)/System.Resources.Writer.dll" />
+      </Component>
+      <Component Id="cmp_151" Guid="*">
+        <File Id="fil_151" Source="$(var.SourceDir)/System.Runtime.CompilerServices.Unsafe.dll" />
+      </Component>
+      <Component Id="cmp_152" Guid="*">
+        <File Id="fil_152" Source="$(var.SourceDir)/System.Runtime.CompilerServices.VisualC.dll" />
+      </Component>
+      <Component Id="cmp_153" Guid="*">
+        <File Id="fil_153" Source="$(var.SourceDir)/System.Runtime.Extensions.dll" />
+      </Component>
+      <Component Id="cmp_154" Guid="*">
+        <File Id="fil_154" Source="$(var.SourceDir)/System.Runtime.Handles.dll" />
+      </Component>
+      <Component Id="cmp_155" Guid="*">
+        <File Id="fil_155" Source="$(var.SourceDir)/System.Runtime.InteropServices.JavaScript.dll" />
+      </Component>
+      <Component Id="cmp_156" Guid="*">
+        <File Id="fil_156" Source="$(var.SourceDir)/System.Runtime.InteropServices.RuntimeInformation.dll" />
+      </Component>
+      <Component Id="cmp_157" Guid="*">
+        <File Id="fil_157" Source="$(var.SourceDir)/System.Runtime.InteropServices.dll" />
+      </Component>
+      <Component Id="cmp_158" Guid="*">
+        <File Id="fil_158" Source="$(var.SourceDir)/System.Runtime.Intrinsics.dll" />
+      </Component>
+      <Component Id="cmp_159" Guid="*">
+        <File Id="fil_159" Source="$(var.SourceDir)/System.Runtime.Loader.dll" />
+      </Component>
+      <Component Id="cmp_160" Guid="*">
+        <File Id="fil_160" Source="$(var.SourceDir)/System.Runtime.Numerics.dll" />
+      </Component>
+      <Component Id="cmp_161" Guid="*">
+        <File Id="fil_161" Source="$(var.SourceDir)/System.Runtime.Serialization.Formatters.dll" />
+      </Component>
+      <Component Id="cmp_162" Guid="*">
+        <File Id="fil_162" Source="$(var.SourceDir)/System.Runtime.Serialization.Json.dll" />
+      </Component>
+      <Component Id="cmp_163" Guid="*">
+        <File Id="fil_163" Source="$(var.SourceDir)/System.Runtime.Serialization.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_164" Guid="*">
+        <File Id="fil_164" Source="$(var.SourceDir)/System.Runtime.Serialization.Xml.dll" />
+      </Component>
+      <Component Id="cmp_165" Guid="*">
+        <File Id="fil_165" Source="$(var.SourceDir)/System.Runtime.Serialization.dll" />
+      </Component>
+      <Component Id="cmp_166" Guid="*">
+        <File Id="fil_166" Source="$(var.SourceDir)/System.Runtime.dll" />
+      </Component>
+      <Component Id="cmp_167" Guid="*">
+        <File Id="fil_167" Source="$(var.SourceDir)/System.Security.AccessControl.dll" />
+      </Component>
+      <Component Id="cmp_168" Guid="*">
+        <File Id="fil_168" Source="$(var.SourceDir)/System.Security.Claims.dll" />
+      </Component>
+      <Component Id="cmp_169" Guid="*">
+        <File Id="fil_169" Source="$(var.SourceDir)/System.Security.Cryptography.Algorithms.dll" />
+      </Component>
+      <Component Id="cmp_170" Guid="*">
+        <File Id="fil_170" Source="$(var.SourceDir)/System.Security.Cryptography.Cng.dll" />
+      </Component>
+      <Component Id="cmp_171" Guid="*">
+        <File Id="fil_171" Source="$(var.SourceDir)/System.Security.Cryptography.Csp.dll" />
+      </Component>
+      <Component Id="cmp_172" Guid="*">
+        <File Id="fil_172" Source="$(var.SourceDir)/System.Security.Cryptography.Encoding.dll" />
+      </Component>
+      <Component Id="cmp_173" Guid="*">
+        <File Id="fil_173" Source="$(var.SourceDir)/System.Security.Cryptography.OpenSsl.dll" />
+      </Component>
+      <Component Id="cmp_174" Guid="*">
+        <File Id="fil_174" Source="$(var.SourceDir)/System.Security.Cryptography.Primitives.dll" />
+      </Component>
+      <Component Id="cmp_175" Guid="*">
+        <File Id="fil_175" Source="$(var.SourceDir)/System.Security.Cryptography.X509Certificates.dll" />
+      </Component>
+      <Component Id="cmp_176" Guid="*">
+        <File Id="fil_176" Source="$(var.SourceDir)/System.Security.Cryptography.dll" />
+      </Component>
+      <Component Id="cmp_177" Guid="*">
+        <File Id="fil_177" Source="$(var.SourceDir)/System.Security.Principal.Windows.dll" />
+      </Component>
+      <Component Id="cmp_178" Guid="*">
+        <File Id="fil_178" Source="$(var.SourceDir)/System.Security.Principal.dll" />
+      </Component>
+      <Component Id="cmp_179" Guid="*">
+        <File Id="fil_179" Source="$(var.SourceDir)/System.Security.SecureString.dll" />
+      </Component>
+      <Component Id="cmp_180" Guid="*">
+        <File Id="fil_180" Source="$(var.SourceDir)/System.Security.dll" />
+      </Component>
+      <Component Id="cmp_181" Guid="*">
+        <File Id="fil_181" Source="$(var.SourceDir)/System.ServiceModel.Web.dll" />
+      </Component>
+      <Component Id="cmp_182" Guid="*">
+        <File Id="fil_182" Source="$(var.SourceDir)/System.ServiceProcess.dll" />
+      </Component>
+      <Component Id="cmp_183" Guid="*">
+        <File Id="fil_183" Source="$(var.SourceDir)/System.Text.Encoding.CodePages.dll" />
+      </Component>
+      <Component Id="cmp_184" Guid="*">
+        <File Id="fil_184" Source="$(var.SourceDir)/System.Text.Encoding.Extensions.dll" />
+      </Component>
+      <Component Id="cmp_185" Guid="*">
+        <File Id="fil_185" Source="$(var.SourceDir)/System.Text.Encoding.dll" />
+      </Component>
+      <Component Id="cmp_186" Guid="*">
+        <File Id="fil_186" Source="$(var.SourceDir)/System.Text.Encodings.Web.dll" />
+      </Component>
+      <Component Id="cmp_187" Guid="*">
+        <File Id="fil_187" Source="$(var.SourceDir)/System.Text.Json.dll" />
+      </Component>
+      <Component Id="cmp_188" Guid="*">
+        <File Id="fil_188" Source="$(var.SourceDir)/System.Text.RegularExpressions.dll" />
+      </Component>
+      <Component Id="cmp_189" Guid="*">
+        <File Id="fil_189" Source="$(var.SourceDir)/System.Threading.AccessControl.dll" />
+      </Component>
+      <Component Id="cmp_190" Guid="*">
+        <File Id="fil_190" Source="$(var.SourceDir)/System.Threading.Channels.dll" />
+      </Component>
+      <Component Id="cmp_191" Guid="*">
+        <File Id="fil_191" Source="$(var.SourceDir)/System.Threading.Overlapped.dll" />
+      </Component>
+      <Component Id="cmp_192" Guid="*">
+        <File Id="fil_192" Source="$(var.SourceDir)/System.Threading.Tasks.Dataflow.dll" />
+      </Component>
+      <Component Id="cmp_193" Guid="*">
+        <File Id="fil_193" Source="$(var.SourceDir)/System.Threading.Tasks.Extensions.dll" />
+      </Component>
+      <Component Id="cmp_194" Guid="*">
+        <File Id="fil_194" Source="$(var.SourceDir)/System.Threading.Tasks.Parallel.dll" />
+      </Component>
+      <Component Id="cmp_195" Guid="*">
+        <File Id="fil_195" Source="$(var.SourceDir)/System.Threading.Tasks.dll" />
+      </Component>
+      <Component Id="cmp_196" Guid="*">
+        <File Id="fil_196" Source="$(var.SourceDir)/System.Threading.Thread.dll" />
+      </Component>
+      <Component Id="cmp_197" Guid="*">
+        <File Id="fil_197" Source="$(var.SourceDir)/System.Threading.ThreadPool.dll" />
+      </Component>
+      <Component Id="cmp_198" Guid="*">
+        <File Id="fil_198" Source="$(var.SourceDir)/System.Threading.Timer.dll" />
+      </Component>
+      <Component Id="cmp_199" Guid="*">
+        <File Id="fil_199" Source="$(var.SourceDir)/System.Threading.dll" />
+      </Component>
+      <Component Id="cmp_200" Guid="*">
+        <File Id="fil_200" Source="$(var.SourceDir)/System.Transactions.Local.dll" />
+      </Component>
+      <Component Id="cmp_201" Guid="*">
+        <File Id="fil_201" Source="$(var.SourceDir)/System.Transactions.dll" />
+      </Component>
+      <Component Id="cmp_202" Guid="*">
+        <File Id="fil_202" Source="$(var.SourceDir)/System.ValueTuple.dll" />
+      </Component>
+      <Component Id="cmp_203" Guid="*">
+        <File Id="fil_203" Source="$(var.SourceDir)/System.Web.HttpUtility.dll" />
+      </Component>
+      <Component Id="cmp_204" Guid="*">
+        <File Id="fil_204" Source="$(var.SourceDir)/System.Web.dll" />
+      </Component>
+      <Component Id="cmp_205" Guid="*">
+        <File Id="fil_205" Source="$(var.SourceDir)/System.Windows.dll" />
+      </Component>
+      <Component Id="cmp_206" Guid="*">
+        <File Id="fil_206" Source="$(var.SourceDir)/System.Xml.Linq.dll" />
+      </Component>
+      <Component Id="cmp_207" Guid="*">
+        <File Id="fil_207" Source="$(var.SourceDir)/System.Xml.ReaderWriter.dll" />
+      </Component>
+      <Component Id="cmp_208" Guid="*">
+        <File Id="fil_208" Source="$(var.SourceDir)/System.Xml.Serialization.dll" />
+      </Component>
+      <Component Id="cmp_209" Guid="*">
+        <File Id="fil_209" Source="$(var.SourceDir)/System.Xml.XDocument.dll" />
+      </Component>
+      <Component Id="cmp_210" Guid="*">
+        <File Id="fil_210" Source="$(var.SourceDir)/System.Xml.XPath.XDocument.dll" />
+      </Component>
+      <Component Id="cmp_211" Guid="*">
+        <File Id="fil_211" Source="$(var.SourceDir)/System.Xml.XPath.dll" />
+      </Component>
+      <Component Id="cmp_212" Guid="*">
+        <File Id="fil_212" Source="$(var.SourceDir)/System.Xml.XmlDocument.dll" />
+      </Component>
+      <Component Id="cmp_213" Guid="*">
+        <File Id="fil_213" Source="$(var.SourceDir)/System.Xml.XmlSerializer.dll" />
+      </Component>
+      <Component Id="cmp_214" Guid="*">
+        <File Id="fil_214" Source="$(var.SourceDir)/System.Xml.dll" />
+      </Component>
+      <Component Id="cmp_215" Guid="*">
+        <File Id="fil_215" Source="$(var.SourceDir)/System.dll" />
+      </Component>
+      <Component Id="cmp_216" Guid="*">
+        <File Id="fil_216" Source="$(var.SourceDir)/Tmds.DBus.Protocol.dll" />
+      </Component>
+      <Component Id="cmp_217" Guid="*">
+        <File Id="fil_217" Source="$(var.SourceDir)/WindowsBase.dll" />
+      </Component>
+      <Component Id="cmp_218" Guid="*">
+        <File Id="fil_218" Source="$(var.SourceDir)/av_libglesv2.dll" />
+      </Component>
+      <Component Id="cmp_219" Guid="*">
+        <File Id="fil_219" Source="$(var.SourceDir)/clretwrc.dll" />
+      </Component>
+      <Component Id="cmp_220" Guid="*">
+        <File Id="fil_220" Source="$(var.SourceDir)/clrgc.dll" />
+      </Component>
+      <Component Id="cmp_221" Guid="*">
+        <File Id="fil_221" Source="$(var.SourceDir)/clrgcexp.dll" />
+      </Component>
+      <Component Id="cmp_222" Guid="*">
+        <File Id="fil_222" Source="$(var.SourceDir)/clrjit.dll" />
+      </Component>
+      <Component Id="cmp_223" Guid="*">
+        <File Id="fil_223" Source="$(var.SourceDir)/coreclr.dll" />
+      </Component>
+      <Component Id="cmp_224" Guid="*">
+        <File Id="fil_224" Source="$(var.SourceDir)/createdump.exe" />
+      </Component>
+      <Component Id="cmp_225" Guid="*">
+        <File Id="fil_225" Source="$(var.SourceDir)/e_sqlite3.dll" />
+      </Component>
+      <Component Id="cmp_226" Guid="*">
+        <File Id="fil_226" Source="$(var.SourceDir)/hostfxr.dll" />
+      </Component>
+      <Component Id="cmp_227" Guid="*">
+        <File Id="fil_227" Source="$(var.SourceDir)/hostpolicy.dll" />
+      </Component>
+      <Component Id="cmp_228" Guid="*">
+        <File Id="fil_228" Source="$(var.SourceDir)/libHarfBuzzSharp.dll" />
+      </Component>
+      <Component Id="cmp_229" Guid="*">
+        <File Id="fil_229" Source="$(var.SourceDir)/libSkiaSharp.dll" />
+      </Component>
+      <Component Id="cmp_230" Guid="*">
+        <File Id="fil_230" Source="$(var.SourceDir)/mscordaccore.dll" />
+      </Component>
+      <Component Id="cmp_231" Guid="*">
+        <File Id="fil_231" Source="$(var.SourceDir)/mscordaccore_amd64_amd64_10.0.326.7603.dll" />
+      </Component>
+      <Component Id="cmp_232" Guid="*">
+        <File Id="fil_232" Source="$(var.SourceDir)/mscordbi.dll" />
+      </Component>
+      <Component Id="cmp_233" Guid="*">
+        <File Id="fil_233" Source="$(var.SourceDir)/mscorlib.dll" />
+      </Component>
+      <Component Id="cmp_234" Guid="*">
+        <File Id="fil_234" Source="$(var.SourceDir)/mscorrc.dll" />
+      </Component>
+      <Component Id="cmp_235" Guid="*">
+        <File Id="fil_235" Source="$(var.SourceDir)/msquic.dll" />
+      </Component>
+      <Component Id="cmp_236" Guid="*">
+        <File Id="fil_236" Source="$(var.SourceDir)/netstandard.dll" />
+      </Component>
+      <Directory Id="dir_1" Name="DOPAgent">
+        <Directory Id="dir_2" Name="Reports">
+          <Directory Id="dir_3" Name="downloads">
+          </Directory>
+          <Directory Id="dir_4" Name="legacy">
+          </Directory>
+          <Directory Id="dir_5" Name="payslips">
+          </Directory>
+          <Directory Id="dir_6" Name="pdf">
+          </Directory>
+          <Directory Id="dir_7" Name="references">
+          </Directory>
+        </Directory>
+        <Directory Id="dir_8" Name="State">
+        </Directory>
+        <Directory Id="dir_9" Name="backups">
+        </Directory>
+        <Directory Id="dir_10" Name="docs">
+        </Directory>
+        <Directory Id="dir_11" Name="exports">
+          <Directory Id="dir_12" Name="accounts">
+          </Directory>
+          <Directory Id="dir_13" Name="legacy">
+          </Directory>
+        </Directory>
+        <Directory Id="dir_14" Name="keystore">
+        </Directory>
+        <Directory Id="dir_15" Name="logs">
+          <Directory Id="dir_16" Name="fetch">
+          </Directory>
+          <Directory Id="dir_17" Name="legacy">
+          </Directory>
+          <Directory Id="dir_18" Name="schedule">
+          </Directory>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="CommonDesktopFolder">
+      <Component Id="DesktopShortcutCmp" Guid="*">
+        <Shortcut Id="DesktopShortcut"
+                  Name="AgentBuddy"
+                  Target="[INSTALLFOLDER]AgentBuddy.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKLM"
+                      Key="Software\AgentBuddy"
+                      Name="installed"
+                      Type="integer"
+                      Value="1"
+                      KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AppComponents">
+      <ComponentRef Id="cmp_1" />
+      <ComponentRef Id="cmp_2" />
+      <ComponentRef Id="cmp_3" />
+      <ComponentRef Id="cmp_4" />
+      <ComponentRef Id="cmp_5" />
+      <ComponentRef Id="cmp_6" />
+      <ComponentRef Id="cmp_7" />
+      <ComponentRef Id="cmp_8" />
+      <ComponentRef Id="cmp_9" />
+      <ComponentRef Id="cmp_10" />
+      <ComponentRef Id="cmp_11" />
+      <ComponentRef Id="cmp_12" />
+      <ComponentRef Id="cmp_13" />
+      <ComponentRef Id="cmp_14" />
+      <ComponentRef Id="cmp_15" />
+      <ComponentRef Id="cmp_16" />
+      <ComponentRef Id="cmp_17" />
+      <ComponentRef Id="cmp_18" />
+      <ComponentRef Id="cmp_19" />
+      <ComponentRef Id="cmp_20" />
+      <ComponentRef Id="cmp_21" />
+      <ComponentRef Id="cmp_22" />
+      <ComponentRef Id="cmp_23" />
+      <ComponentRef Id="cmp_24" />
+      <ComponentRef Id="cmp_25" />
+      <ComponentRef Id="cmp_26" />
+      <ComponentRef Id="cmp_27" />
+      <ComponentRef Id="cmp_28" />
+      <ComponentRef Id="cmp_29" />
+      <ComponentRef Id="cmp_30" />
+      <ComponentRef Id="cmp_31" />
+      <ComponentRef Id="cmp_32" />
+      <ComponentRef Id="cmp_33" />
+      <ComponentRef Id="cmp_34" />
+      <ComponentRef Id="cmp_35" />
+      <ComponentRef Id="cmp_36" />
+      <ComponentRef Id="cmp_37" />
+      <ComponentRef Id="cmp_38" />
+      <ComponentRef Id="cmp_39" />
+      <ComponentRef Id="cmp_40" />
+      <ComponentRef Id="cmp_41" />
+      <ComponentRef Id="cmp_42" />
+      <ComponentRef Id="cmp_43" />
+      <ComponentRef Id="cmp_44" />
+      <ComponentRef Id="cmp_45" />
+      <ComponentRef Id="cmp_46" />
+      <ComponentRef Id="cmp_47" />
+      <ComponentRef Id="cmp_48" />
+      <ComponentRef Id="cmp_49" />
+      <ComponentRef Id="cmp_50" />
+      <ComponentRef Id="cmp_51" />
+      <ComponentRef Id="cmp_52" />
+      <ComponentRef Id="cmp_53" />
+      <ComponentRef Id="cmp_54" />
+      <ComponentRef Id="cmp_55" />
+      <ComponentRef Id="cmp_56" />
+      <ComponentRef Id="cmp_57" />
+      <ComponentRef Id="cmp_58" />
+      <ComponentRef Id="cmp_59" />
+      <ComponentRef Id="cmp_60" />
+      <ComponentRef Id="cmp_61" />
+      <ComponentRef Id="cmp_62" />
+      <ComponentRef Id="cmp_63" />
+      <ComponentRef Id="cmp_64" />
+      <ComponentRef Id="cmp_65" />
+      <ComponentRef Id="cmp_66" />
+      <ComponentRef Id="cmp_67" />
+      <ComponentRef Id="cmp_68" />
+      <ComponentRef Id="cmp_69" />
+      <ComponentRef Id="cmp_70" />
+      <ComponentRef Id="cmp_71" />
+      <ComponentRef Id="cmp_72" />
+      <ComponentRef Id="cmp_73" />
+      <ComponentRef Id="cmp_74" />
+      <ComponentRef Id="cmp_75" />
+      <ComponentRef Id="cmp_76" />
+      <ComponentRef Id="cmp_77" />
+      <ComponentRef Id="cmp_78" />
+      <ComponentRef Id="cmp_79" />
+      <ComponentRef Id="cmp_80" />
+      <ComponentRef Id="cmp_81" />
+      <ComponentRef Id="cmp_82" />
+      <ComponentRef Id="cmp_83" />
+      <ComponentRef Id="cmp_84" />
+      <ComponentRef Id="cmp_85" />
+      <ComponentRef Id="cmp_86" />
+      <ComponentRef Id="cmp_87" />
+      <ComponentRef Id="cmp_88" />
+      <ComponentRef Id="cmp_89" />
+      <ComponentRef Id="cmp_90" />
+      <ComponentRef Id="cmp_91" />
+      <ComponentRef Id="cmp_92" />
+      <ComponentRef Id="cmp_93" />
+      <ComponentRef Id="cmp_94" />
+      <ComponentRef Id="cmp_95" />
+      <ComponentRef Id="cmp_96" />
+      <ComponentRef Id="cmp_97" />
+      <ComponentRef Id="cmp_98" />
+      <ComponentRef Id="cmp_99" />
+      <ComponentRef Id="cmp_100" />
+      <ComponentRef Id="cmp_101" />
+      <ComponentRef Id="cmp_102" />
+      <ComponentRef Id="cmp_103" />
+      <ComponentRef Id="cmp_104" />
+      <ComponentRef Id="cmp_105" />
+      <ComponentRef Id="cmp_106" />
+      <ComponentRef Id="cmp_107" />
+      <ComponentRef Id="cmp_108" />
+      <ComponentRef Id="cmp_109" />
+      <ComponentRef Id="cmp_110" />
+      <ComponentRef Id="cmp_111" />
+      <ComponentRef Id="cmp_112" />
+      <ComponentRef Id="cmp_113" />
+      <ComponentRef Id="cmp_114" />
+      <ComponentRef Id="cmp_115" />
+      <ComponentRef Id="cmp_116" />
+      <ComponentRef Id="cmp_117" />
+      <ComponentRef Id="cmp_118" />
+      <ComponentRef Id="cmp_119" />
+      <ComponentRef Id="cmp_120" />
+      <ComponentRef Id="cmp_121" />
+      <ComponentRef Id="cmp_122" />
+      <ComponentRef Id="cmp_123" />
+      <ComponentRef Id="cmp_124" />
+      <ComponentRef Id="cmp_125" />
+      <ComponentRef Id="cmp_126" />
+      <ComponentRef Id="cmp_127" />
+      <ComponentRef Id="cmp_128" />
+      <ComponentRef Id="cmp_129" />
+      <ComponentRef Id="cmp_130" />
+      <ComponentRef Id="cmp_131" />
+      <ComponentRef Id="cmp_132" />
+      <ComponentRef Id="cmp_133" />
+      <ComponentRef Id="cmp_134" />
+      <ComponentRef Id="cmp_135" />
+      <ComponentRef Id="cmp_136" />
+      <ComponentRef Id="cmp_137" />
+      <ComponentRef Id="cmp_138" />
+      <ComponentRef Id="cmp_139" />
+      <ComponentRef Id="cmp_140" />
+      <ComponentRef Id="cmp_141" />
+      <ComponentRef Id="cmp_142" />
+      <ComponentRef Id="cmp_143" />
+      <ComponentRef Id="cmp_144" />
+      <ComponentRef Id="cmp_145" />
+      <ComponentRef Id="cmp_146" />
+      <ComponentRef Id="cmp_147" />
+      <ComponentRef Id="cmp_148" />
+      <ComponentRef Id="cmp_149" />
+      <ComponentRef Id="cmp_150" />
+      <ComponentRef Id="cmp_151" />
+      <ComponentRef Id="cmp_152" />
+      <ComponentRef Id="cmp_153" />
+      <ComponentRef Id="cmp_154" />
+      <ComponentRef Id="cmp_155" />
+      <ComponentRef Id="cmp_156" />
+      <ComponentRef Id="cmp_157" />
+      <ComponentRef Id="cmp_158" />
+      <ComponentRef Id="cmp_159" />
+      <ComponentRef Id="cmp_160" />
+      <ComponentRef Id="cmp_161" />
+      <ComponentRef Id="cmp_162" />
+      <ComponentRef Id="cmp_163" />
+      <ComponentRef Id="cmp_164" />
+      <ComponentRef Id="cmp_165" />
+      <ComponentRef Id="cmp_166" />
+      <ComponentRef Id="cmp_167" />
+      <ComponentRef Id="cmp_168" />
+      <ComponentRef Id="cmp_169" />
+      <ComponentRef Id="cmp_170" />
+      <ComponentRef Id="cmp_171" />
+      <ComponentRef Id="cmp_172" />
+      <ComponentRef Id="cmp_173" />
+      <ComponentRef Id="cmp_174" />
+      <ComponentRef Id="cmp_175" />
+      <ComponentRef Id="cmp_176" />
+      <ComponentRef Id="cmp_177" />
+      <ComponentRef Id="cmp_178" />
+      <ComponentRef Id="cmp_179" />
+      <ComponentRef Id="cmp_180" />
+      <ComponentRef Id="cmp_181" />
+      <ComponentRef Id="cmp_182" />
+      <ComponentRef Id="cmp_183" />
+      <ComponentRef Id="cmp_184" />
+      <ComponentRef Id="cmp_185" />
+      <ComponentRef Id="cmp_186" />
+      <ComponentRef Id="cmp_187" />
+      <ComponentRef Id="cmp_188" />
+      <ComponentRef Id="cmp_189" />
+      <ComponentRef Id="cmp_190" />
+      <ComponentRef Id="cmp_191" />
+      <ComponentRef Id="cmp_192" />
+      <ComponentRef Id="cmp_193" />
+      <ComponentRef Id="cmp_194" />
+      <ComponentRef Id="cmp_195" />
+      <ComponentRef Id="cmp_196" />
+      <ComponentRef Id="cmp_197" />
+      <ComponentRef Id="cmp_198" />
+      <ComponentRef Id="cmp_199" />
+      <ComponentRef Id="cmp_200" />
+      <ComponentRef Id="cmp_201" />
+      <ComponentRef Id="cmp_202" />
+      <ComponentRef Id="cmp_203" />
+      <ComponentRef Id="cmp_204" />
+      <ComponentRef Id="cmp_205" />
+      <ComponentRef Id="cmp_206" />
+      <ComponentRef Id="cmp_207" />
+      <ComponentRef Id="cmp_208" />
+      <ComponentRef Id="cmp_209" />
+      <ComponentRef Id="cmp_210" />
+      <ComponentRef Id="cmp_211" />
+      <ComponentRef Id="cmp_212" />
+      <ComponentRef Id="cmp_213" />
+      <ComponentRef Id="cmp_214" />
+      <ComponentRef Id="cmp_215" />
+      <ComponentRef Id="cmp_216" />
+      <ComponentRef Id="cmp_217" />
+      <ComponentRef Id="cmp_218" />
+      <ComponentRef Id="cmp_219" />
+      <ComponentRef Id="cmp_220" />
+      <ComponentRef Id="cmp_221" />
+      <ComponentRef Id="cmp_222" />
+      <ComponentRef Id="cmp_223" />
+      <ComponentRef Id="cmp_224" />
+      <ComponentRef Id="cmp_225" />
+      <ComponentRef Id="cmp_226" />
+      <ComponentRef Id="cmp_227" />
+      <ComponentRef Id="cmp_228" />
+      <ComponentRef Id="cmp_229" />
+      <ComponentRef Id="cmp_230" />
+      <ComponentRef Id="cmp_231" />
+      <ComponentRef Id="cmp_232" />
+      <ComponentRef Id="cmp_233" />
+      <ComponentRef Id="cmp_234" />
+      <ComponentRef Id="cmp_235" />
+      <ComponentRef Id="cmp_236" />
+      <ComponentRef Id="DesktopShortcutCmp" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>

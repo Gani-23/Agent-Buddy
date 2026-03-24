@@ -327,6 +327,7 @@ public class PythonService
             process.StartInfo.ArgumentList.Add(NormalizePaymentModeArg(paymentMode));
             process.StartInfo.ArgumentList.Add("--browser");
             process.StartInfo.ArgumentList.Add(browserArg);
+            process.StartInfo.ArgumentList.Add("--no-auto-print");
             if (dopChequeInputs is { Count: > 0 })
             {
                 var normalizedDopCheque = dopChequeInputs
@@ -409,6 +410,104 @@ public class PythonService
                 Success = process.ExitCode == 0,
                 ReferenceNumbers = referenceNumbers,
                 ErrorMessage = process.ExitCode != 0 ? output.ToString() : string.Empty
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ProcessingResult
+            {
+                Success = false,
+                ErrorMessage = $"Error executing script: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<ProcessingResult> GenerateReportsFromReferencesAsync(
+        IReadOnlyCollection<string> references,
+        Action<string>? progressCallback = null)
+    {
+        var scriptPath = Path.Combine(_scriptsPath, "ScheduleArguments.py");
+
+        if (!File.Exists(scriptPath))
+        {
+            return new ProcessingResult
+            {
+                Success = false,
+                ErrorMessage = $"Script not found: {scriptPath}"
+            };
+        }
+
+        var normalizedRefs = references
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (normalizedRefs.Count == 0)
+        {
+            return new ProcessingResult
+            {
+                Success = false,
+                ErrorMessage = "No reference numbers provided."
+            };
+        }
+
+        var output = new StringBuilder();
+
+        try
+        {
+            var browserArg = await GetPreferredBrowserArgAsync();
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _pythonCommand,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    CreateNoWindow = true,
+                    WorkingDirectory = _scriptsPath
+                }
+            };
+            process.StartInfo.Environment["PYTHONUNBUFFERED"] = "1";
+            process.StartInfo.ArgumentList.Add("-u");
+            process.StartInfo.ArgumentList.Add(scriptPath);
+            process.StartInfo.ArgumentList.Add("--generate-reports");
+            process.StartInfo.ArgumentList.Add(JsonSerializer.Serialize(normalizedRefs));
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
+            process.StartInfo.ArgumentList.Add("--no-auto-print");
+            ApplyPythonRuntimeEnvironment(process.StartInfo);
+
+            process.OutputDataReceived += (sender, args) =>
+            {
+                if (args.Data != null)
+                {
+                    output.AppendLine(args.Data);
+                    progressCallback?.Invoke(args.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, args) =>
+            {
+                if (args.Data != null)
+                {
+                    output.AppendLine(args.Data);
+                    progressCallback?.Invoke(args.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+
+            var success = process.ExitCode == 0;
+            return new ProcessingResult
+            {
+                Success = success,
+                ErrorMessage = success ? string.Empty : output.ToString()
             };
         }
         catch (Exception ex)

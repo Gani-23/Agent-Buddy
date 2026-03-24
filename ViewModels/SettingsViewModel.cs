@@ -907,6 +907,10 @@ public class SettingsViewModel : ViewModelBase
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             options.Add("Safari");
+            if (IsMacAppInstalled("Microsoft Edge.app"))
+            {
+                options.Add("Edge");
+            }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -914,6 +918,21 @@ public class SettingsViewModel : ViewModelBase
         }
 
         return options;
+    }
+
+    private static bool IsMacAppInstalled(string appBundleName)
+    {
+        var systemPath = Path.Combine("/Applications", appBundleName);
+        if (Directory.Exists(systemPath))
+        {
+            return true;
+        }
+
+        var userApps = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Applications",
+            appBundleName);
+        return Directory.Exists(userApps);
     }
 
     private static string BrowserLabelFromToken(string token)

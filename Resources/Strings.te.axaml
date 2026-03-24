@@ -41,10 +41,11 @@
         <x:String x:Key="L_Dash_MaturedAccounts">పరిపక్వ ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">మూసిన ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_HalfMonthTitle">అర్ధనెల పెండింగ్ &amp; డిపాజిట్</x:String>
-        <x:String x:Key="L_Dash_FirstHalfPending">మొదటి అర్ధం పెండింగ్ (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfPending">రెండో అర్ధం పెండింగ్ (16-చివరి)</x:String>
-        <x:String x:Key="L_Dash_FirstHalfDeposited">మొదటి అర్ధం డిపాజిట్ (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfDeposited">రెండో అర్ధం డిపాజిట్ (16-చివరి)</x:String>
+        <x:String x:Key="L_Dash_FirstHalfPending">మొదటి అర్ధం పెండింగ్</x:String>
+        <x:String x:Key="L_Dash_SecondHalfPending">రెండో అర్ధం పెండింగ్</x:String>
+        <x:String x:Key="L_Dash_FirstHalfDeposited">మొదటి అర్ధం డిపాజిట్</x:String>
+        <x:String x:Key="L_Dash_SecondHalfDeposited">రెండో అర్ధం డిపాజిట్</x:String>
+        <x:String x:Key="L_Dash_ExtendedAccounts">పొడిగించిన ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_CategorySplit">వర్గాల విభజన</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">నెలవారీ విభజన</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">అప్డేట్: </x:String>
@@ -78,6 +79,7 @@
         <x:String x:Key="L_Report_SetDefaultPrinter">డిఫాల్ట్ ప్రింటర్ సెట్ చేయి</x:String>
         <x:String x:Key="L_Report_PrintAllToday">ఈరోజు అన్నీ ప్రింట్</x:String>
         <x:String x:Key="L_Report_GeneratePayslip">పేస్లిప్ సృష్టించు (ఎంచుకున్నవి)</x:String>
+        <x:String x:Key="L_Report_GenerateMissingPdfs">మిస్సింగ్ PDFలు సృష్టించు</x:String>
         <x:String x:Key="L_Report_Max3A4">ఒక A4 పేజీకి గరిష్టం 3 పేస్లిప్‌లు</x:String>
         <x:String x:Key="L_Report_TodayLists">ఈరోజు జాబితాలు</x:String>
         <x:String x:Key="L_Report_View">చూడండి</x:String>

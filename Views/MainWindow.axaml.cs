@@ -3,10 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using AgentBuddy.Services;
+using AgentBuddy.Models;
 using AgentBuddy.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AgentBuddy.Views;
 
@@ -35,6 +37,35 @@ public partial class MainWindow : Window
     private void OnWindowOpened(object? sender, EventArgs e)
     {
         EnforceMaximized();
+        _ = ShowDailyGreetingAsync();
+    }
+
+    private async Task ShowDailyGreetingAsync()
+    {
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        if (!await vm.ShouldShowDailyGreetingAsync())
+        {
+            return;
+        }
+
+        await vm.MarkDailyGreetingShownAsync();
+
+        var request = new ConfirmDialogRequest(
+            vm.GetDailyGreetingTitle(),
+            vm.GetDailyGreetingMessage(),
+            "Update Now",
+            "Not Now");
+
+        var dialog = new ConfirmDialogWindow(request);
+        var result = await dialog.ShowDialog<bool>(this);
+        if (result)
+        {
+            await vm.RunDatabaseUpdateAsync();
+        }
     }
 
     private void OnDataContextChanged(object? sender, System.EventArgs e)

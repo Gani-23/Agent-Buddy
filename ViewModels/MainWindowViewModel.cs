@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.Reactive;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
@@ -15,6 +17,7 @@ namespace AgentBuddy.ViewModels;
 /// </summary>
 public class MainWindowViewModel : ViewModelBase
 {
+    private const string DailyGreetingDateKey = "daily_greeting_date";
     private ViewModelBase? _currentView;
     private bool _isDarkTheme;
     private bool _isSidebarExpanded = true;
@@ -61,8 +64,8 @@ public class MainWindowViewModel : ViewModelBase
 
         // Initialize view models
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService);
-        ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _notificationService);
-        ReportsViewModel = new ReportsViewModel(_reportsService, _notificationService);
+        ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService);
+        ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
         SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService);
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
@@ -272,7 +275,7 @@ public class MainWindowViewModel : ViewModelBase
     private void ApplyLicenseState(LicenseStatus state, bool notifyWhenLocked)
     {
         IsLicenseActive = state.IsActive;
-        LicenseStatusText = state.Message;
+        LicenseStatusText = BuildLicenseBadgeText(state);
 
         if (!state.IsActive)
         {
@@ -283,5 +286,56 @@ public class MainWindowViewModel : ViewModelBase
                 _notificationService.Warning("License required", "Activate a valid license in Settings.");
             }
         }
+    }
+
+    private static string BuildLicenseBadgeText(LicenseStatus state)
+    {
+        if (state.ExpiresAtUtc.HasValue)
+        {
+            var localExpiry = state.ExpiresAtUtc.Value.ToLocalTime();
+            var label = state.IsActive ? "Next renewal" : "Expired on";
+            return $"{label}: {localExpiry:dd MMM yyyy}";
+        }
+
+        return string.IsNullOrWhiteSpace(state.Message) ? "License status unavailable." : state.Message;
+    }
+
+    public async Task<bool> ShouldShowDailyGreetingAsync()
+    {
+        var saved = await _databaseService.GetAppSettingAsync(DailyGreetingDateKey);
+        var today = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return !string.Equals(saved, today, StringComparison.Ordinal);
+    }
+
+    public Task MarkDailyGreetingShownAsync()
+    {
+        var today = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return _databaseService.SaveAppSettingAsync(DailyGreetingDateKey, today);
+    }
+
+    public string GetDailyGreetingTitle()
+    {
+        var hour = DateTime.Now.Hour;
+        if (hour < 12)
+        {
+            return "Good Morning!";
+        }
+
+        if (hour < 17)
+        {
+            return "Good Afternoon!";
+        }
+
+        return "Good Evening!";
+    }
+
+    public string GetDailyGreetingMessage()
+    {
+        return "Would you like to update the master list now?";
+    }
+
+    public async Task RunDatabaseUpdateAsync()
+    {
+        await DashboardViewModel.UpdateDatabaseCommand.Execute().ToTask();
     }
 }

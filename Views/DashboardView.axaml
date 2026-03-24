@@ -84,7 +84,11 @@
 
                 <Border Classes="SectionCard" Padding="18">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="{DynamicResource L_Dash_HalfMonthTitle}" Classes="SubHeader"/>
+                        <TextBlock Classes="SubHeader">
+                            <Run Text="{DynamicResource L_Dash_HalfMonthTitle}"/>
+                            <Run Text=" "/>
+                            <Run Text="{Binding HalfMonthTitleSuffix}"/>
+                        </TextBlock>
 
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                             <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintDanger">
@@ -308,6 +312,24 @@
                                         <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
                                         <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
                                         <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="2" Grid.Column="2" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_ExtendedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding ExtendedAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding ExtendedAccountsAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
                                     </WrapPanel>
                                 </StackPanel>
                             </Border>

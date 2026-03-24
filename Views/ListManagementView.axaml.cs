@@ -15,6 +15,7 @@ public partial class ListManagementView : UserControl
 {
     private IDisposable? _aslaasPromptHandler;
     private IDisposable? _dopChequePromptHandler;
+    private IDisposable? _confirmPromptHandler;
 
     public ListManagementView()
     {
@@ -112,6 +113,20 @@ public partial class ListManagementView : UserControl
             var result = await dialog.ShowDialog<DopChequePromptResult?>(owner);
             interaction.SetOutput(result);
         });
+
+        _confirmPromptHandler = vm.ConfirmPrompt.RegisterHandler(async interaction =>
+        {
+            var owner = TopLevel.GetTopLevel(this) as Window;
+            if (owner == null)
+            {
+                interaction.SetOutput(false);
+                return;
+            }
+
+            var dialog = new ConfirmDialogWindow(interaction.Input);
+            var result = await dialog.ShowDialog<bool>(owner);
+            interaction.SetOutput(result);
+        });
     }
 
     private void DisposePromptHandler()
@@ -120,5 +135,7 @@ public partial class ListManagementView : UserControl
         _aslaasPromptHandler = null;
         _dopChequePromptHandler?.Dispose();
         _dopChequePromptHandler = null;
+        _confirmPromptHandler?.Dispose();
+        _confirmPromptHandler = null;
     }
 }

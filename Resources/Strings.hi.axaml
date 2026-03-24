@@ -41,10 +41,11 @@
         <x:String x:Key="L_Dash_MaturedAccounts">परिपक्व खाते</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">बंद खाते</x:String>
         <x:String x:Key="L_Dash_HalfMonthTitle">अर्ध-माह लंबित और जमा</x:String>
-        <x:String x:Key="L_Dash_FirstHalfPending">पहला आधा लंबित (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfPending">दूसरा आधा लंबित (16-अंत)</x:String>
-        <x:String x:Key="L_Dash_FirstHalfDeposited">पहला आधा जमा (1-15)</x:String>
-        <x:String x:Key="L_Dash_SecondHalfDeposited">दूसरा आधा जमा (16-अंत)</x:String>
+        <x:String x:Key="L_Dash_FirstHalfPending">पहला आधा लंबित</x:String>
+        <x:String x:Key="L_Dash_SecondHalfPending">दूसरा आधा लंबित</x:String>
+        <x:String x:Key="L_Dash_FirstHalfDeposited">पहला आधा जमा</x:String>
+        <x:String x:Key="L_Dash_SecondHalfDeposited">दूसरा आधा जमा</x:String>
+        <x:String x:Key="L_Dash_ExtendedAccounts">विस्तारित खाते</x:String>
         <x:String x:Key="L_Dash_CategorySplit">श्रेणी विभाजन</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">मासिक विभाजन</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">अपडेट: </x:String>
@@ -78,6 +79,7 @@
         <x:String x:Key="L_Report_SetDefaultPrinter">डिफ़ॉल्ट प्रिंटर सेट करें</x:String>
         <x:String x:Key="L_Report_PrintAllToday">आज सब प्रिंट</x:String>
         <x:String x:Key="L_Report_GeneratePayslip">पेस्लिप बनाएं (चयनित)</x:String>
+        <x:String x:Key="L_Report_GenerateMissingPdfs">मिसिंग PDF बनाएं</x:String>
         <x:String x:Key="L_Report_Max3A4">एक A4 पर अधिकतम 3 पेस्लिप</x:String>
         <x:String x:Key="L_Report_TodayLists">आज की सूचियां</x:String>
         <x:String x:Key="L_Report_View">देखें</x:String>
