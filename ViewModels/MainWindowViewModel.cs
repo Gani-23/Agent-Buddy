@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Reactive;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
@@ -35,6 +36,8 @@ public class MainWindowViewModel : ViewModelBase
     private readonly NotificationService _notificationService;
     private readonly MobileSyncService _mobileSyncService;
     private readonly LocalizationService _localizationService;
+    private readonly UpdateService _updateService;
+    private readonly CancellationTokenSource _updateCts = new();
 
     // View Models
     public DashboardViewModel DashboardViewModel { get; }
@@ -61,6 +64,7 @@ public class MainWindowViewModel : ViewModelBase
         _notificationService = new NotificationService();
         _mobileSyncService = new MobileSyncService();
         _localizationService = new LocalizationService();
+        _updateService = new UpdateService(_databaseService);
 
         // Initialize view models
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService);
@@ -87,6 +91,7 @@ public class MainWindowViewModel : ViewModelBase
         ApplyThemeResources(IsDarkTheme);
         _ = InitializeLocalizationAsync();
         _ = InitializeLicenseAsync();
+        _ = InitializeUpdateChecksAsync();
     }
 
     /// <summary>
@@ -245,6 +250,49 @@ public class MainWindowViewModel : ViewModelBase
         resources["WarningTintBrush"] = new SolidColorBrush(Color.Parse(warningTint));
         resources["DangerTintBrush"] = new SolidColorBrush(Color.Parse(dangerTint));
         resources["InfoTintBrush"] = new SolidColorBrush(Color.Parse(infoTint));
+    }
+
+    private async Task InitializeUpdateChecksAsync()
+    {
+        await CheckAndNotifyUpdatesAsync(force: false);
+        _ = RunUpdateLoopAsync();
+    }
+
+    private async Task RunUpdateLoopAsync()
+    {
+        while (!_updateCts.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(UpdateService.DefaultInterval, _updateCts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
+
+            await CheckAndNotifyUpdatesAsync(force: false);
+        }
+    }
+
+    private async Task CheckAndNotifyUpdatesAsync(bool force)
+    {
+        var result = await _updateService.CheckForUpdatesAsync(force, _updateCts.Token);
+        if (result is { Notified: true })
+        {
+            var message = $"Version {result.LatestVersion} is available. Download from GitHub Releases.";
+            _notificationService.Info("Update available", message);
+        }
+    }
+
+    public void StopUpdateChecks()
+    {
+        if (_updateCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _updateCts.Cancel();
     }
 
     /// <summary>
