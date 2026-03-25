@@ -96,6 +96,10 @@ The app is gated by a JWT license token. When no valid license is detected, navi
 - On macOS/Linux, printing uses `lp` and printer discovery uses `lpstat`.
 - The UI enforces a maximized window on launch.
 
+## Unsigned Builds
+Releases are shipped unsigned to keep the app free and easy to distribute. First‑time launch will show a security warning.
+See `docs/UNSIGNED_INSTALL.md` for the one‑time steps to open the app on Windows and macOS.
+
 ## Repository Map
 - `AgentBuddy.csproj`: Project file and package references.
 - `App.axaml`: Global styles and converters.
