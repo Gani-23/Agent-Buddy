@@ -14,8 +14,12 @@ env:
 
 jobs:
   build-windows:
-    name: Build Windows
+    name: Build Windows (${{ matrix.rid }})
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-x86]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,31 +29,37 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Publish (win-x64)
+      - name: Publish
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
           $version = $tag.TrimStart("v")
-          dotnet publish -c Release -r win-x64 --self-contained true `
+          $rid = "${{ matrix.rid }}"
+          dotnet publish -c Release -r $rid --self-contained true `
             -p:Version=$version -p:AssemblyVersion=$version.0 -p:FileVersion=$version.0 -p:InformationalVersion=$version
 
       - name: Zip artifact
         shell: pwsh
         run: |
-          $publishDir = "bin/Release/net10.0/win-x64/publish"
-          $zipName = "AgentBuddy-win-x64.zip"
+          $rid = "${{ matrix.rid }}"
+          $publishDir = "bin/Release/net10.0/$rid/publish"
+          $zipName = "AgentBuddy-$rid.zip"
           if (Test-Path $zipName) { Remove-Item $zipName }
           Compress-Archive -Path "$publishDir\\*" -DestinationPath $zipName
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AgentBuddy-win-x64
-          path: AgentBuddy-win-x64.zip
+          name: AgentBuddy-${{ matrix.rid }}
+          path: AgentBuddy-${{ matrix.rid }}.zip
 
   build-macos:
-    name: Build macOS
+    name: Build macOS (${{ matrix.rid }})
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [osx-arm64, osx-x64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,18 +69,20 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Publish (osx-arm64)
+      - name: Publish
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          dotnet publish -c Release -r osx-arm64 --self-contained true \
+          RID="${{ matrix.rid }}"
+          dotnet publish -c Release -r "$RID" --self-contained true \
             -p:Version="$VERSION" -p:AssemblyVersion="$VERSION.0" -p:FileVersion="$VERSION.0" -p:InformationalVersion="$VERSION"
 
       - name: Build .app bundle
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          RID="${{ matrix.rid }}"
           APP_NAME="AgentBuddy"
           APP_DIR="$APP_NAME.app"
-          PUBLISH_DIR="bin/Release/net10.0/osx-arm64/publish"
+          PUBLISH_DIR="bin/Release/net10.0/$RID/publish"
 
           mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
           cp "$PUBLISH_DIR/AgentBuddy" "$APP_DIR/Contents/MacOS/AgentBuddy"
@@ -126,14 +138,15 @@ jobs:
 
       - name: Zip artifact
         run: |
-          ZIP_NAME="AgentBuddy-macos-arm64.zip"
+          RID="${{ matrix.rid }}"
+          ZIP_NAME="AgentBuddy-macos-$RID.zip"
           ditto -c -k --sequesterRsrc --keepParent "AgentBuddy.app" "$ZIP_NAME"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AgentBuddy-macos-arm64
-          path: AgentBuddy-macos-arm64.zip
+          name: AgentBuddy-macos-${{ matrix.rid }}
+          path: AgentBuddy-macos-${{ matrix.rid }}.zip
 
   release:
     name: Create GitHub Release
@@ -150,4 +163,6 @@ jobs:
         with:
           files: |
             dist/AgentBuddy-win-x64/AgentBuddy-win-x64.zip
-            dist/AgentBuddy-macos-arm64/AgentBuddy-macos-arm64.zip
+            dist/AgentBuddy-win-x86/AgentBuddy-win-x86.zip
+            dist/AgentBuddy-macos-osx-arm64/AgentBuddy-macos-osx-arm64.zip
+            dist/AgentBuddy-macos-osx-x64/AgentBuddy-macos-osx-x64.zip
