@@ -23,6 +23,8 @@ public class SettingsViewModel : ViewModelBase
     private readonly LocalizationService _localizationService;
     private readonly ReportsService _reportsService;
     private readonly LicenseService _licenseService;
+    private readonly UpdateService _updateService;
+    private readonly NotificationService? _notificationService;
 
     private bool _isDarkTheme;
     private string? _pythonVersion;
@@ -62,19 +64,26 @@ public class SettingsViewModel : ViewModelBase
     private string _licenseStatus = string.Empty;
     private string _licenseSummary = string.Empty;
     private bool _isProcessingLicense;
+    private string _currentVersion = string.Empty;
+    private string _updateCheckStatus = string.Empty;
+    private bool _isCheckingUpdates;
 
     public SettingsViewModel(
         DatabaseService databaseService,
         PythonService pythonService,
         LocalizationService localizationService,
         ReportsService reportsService,
-        LicenseService licenseService)
+        LicenseService licenseService,
+        UpdateService updateService,
+        NotificationService? notificationService = null)
     {
         _databaseService = databaseService;
         _pythonService = pythonService;
         _localizationService = localizationService;
         _reportsService = reportsService;
         _licenseService = licenseService;
+        _updateService = updateService;
+        _notificationService = notificationService;
 
         LanguageOptions = new ObservableCollection<LanguageOption>(_localizationService.AvailableLanguages);
         _selectedLanguage = LanguageOptions.FirstOrDefault(option =>
@@ -95,9 +104,12 @@ public class SettingsViewModel : ViewModelBase
         ActivateLicenseCommand = ReactiveCommand.CreateFromTask(ActivateLicenseAsync);
         ValidateStoredLicenseCommand = ReactiveCommand.CreateFromTask(ValidateStoredLicenseAsync);
         ClearLicenseCommand = ReactiveCommand.CreateFromTask(ClearLicenseAsync);
+        CheckUpdatesCommand = ReactiveCommand.CreateFromTask(CheckForUpdatesAsync);
 
         // Load initial data
         LoadSettings();
+        CurrentVersion = UpdateService.CurrentVersion;
+        UpdateCheckStatus = "Check for updates to see if a newer version is available.";
     }
 
     public bool IsDarkTheme
@@ -324,6 +336,24 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _licenseSummary, value);
     }
 
+    public string CurrentVersion
+    {
+        get => _currentVersion;
+        set => this.RaiseAndSetIfChanged(ref _currentVersion, value);
+    }
+
+    public string UpdateCheckStatus
+    {
+        get => _updateCheckStatus;
+        set => this.RaiseAndSetIfChanged(ref _updateCheckStatus, value);
+    }
+
+    public bool IsCheckingUpdates
+    {
+        get => _isCheckingUpdates;
+        set => this.RaiseAndSetIfChanged(ref _isCheckingUpdates, value);
+    }
+
     public bool IsProcessingLicense
     {
         get => _isProcessingLicense;
@@ -344,6 +374,7 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ActivateLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ValidateStoredLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearLicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit> CheckUpdatesCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
 
     private async void LoadSettings()
@@ -1077,6 +1108,47 @@ public class SettingsViewModel : ViewModelBase
         finally
         {
             IsUpdatingMissingAslaas = false;
+        }
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        if (IsCheckingUpdates)
+        {
+            return;
+        }
+
+        IsCheckingUpdates = true;
+        UpdateCheckStatus = "Checking for updates...";
+
+        try
+        {
+            var result = await _updateService.CheckForUpdatesAsync(force: true);
+            if (result is null)
+            {
+                UpdateCheckStatus = "Update check skipped.";
+                return;
+            }
+
+            if (result.IsUpdateAvailable)
+            {
+                UpdateCheckStatus = $"Update available: v{result.LatestVersion}.";
+                _notificationService?.Info("Update available", $"Version {result.LatestVersion} is available. Download from GitHub Releases.");
+            }
+            else
+            {
+                UpdateCheckStatus = "You're up to date.";
+                _notificationService?.Success("Up to date", "You are already on the latest version.");
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateCheckStatus = $"Update check failed: {ex.Message}";
+            _notificationService?.Error("Update check failed", ex.Message);
+        }
+        finally
+        {
+            IsCheckingUpdates = false;
         }
     }
 

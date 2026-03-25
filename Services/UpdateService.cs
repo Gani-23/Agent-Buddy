@@ -38,6 +38,8 @@ public sealed class UpdateService
 
     public static TimeSpan DefaultInterval => MinCheckInterval;
 
+    public static string CurrentVersion => GetCurrentVersion();
+
     public async Task<UpdateCheckResult?> CheckForUpdatesAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         var currentVersion = GetCurrentVersion();
@@ -145,7 +147,14 @@ public sealed class UpdateService
         }
 
         var normalized = NormalizeVersion(value);
-        return Version.TryParse(normalized, out version);
+        if (Version.TryParse(normalized, out var parsed) && parsed is not null)
+        {
+            version = parsed;
+            return true;
+        }
+
+        version = new Version(0, 0, 0);
+        return false;
     }
 
     private sealed class GitHubRelease

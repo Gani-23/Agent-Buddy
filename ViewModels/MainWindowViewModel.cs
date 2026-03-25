@@ -71,7 +71,7 @@ public class MainWindowViewModel : ViewModelBase
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
-        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService);
+        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService);
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
 
         // Set default view

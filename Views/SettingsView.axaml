@@ -289,6 +289,42 @@
 
                     <Separator/>
 
+                    <TextBlock Text="App Updates"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Current Version"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding CurrentVersion}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding UpdateCheckStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Secondary"
+                            Command="{Binding CheckUpdatesCommand}"
+                            IsEnabled="{Binding !IsCheckingUpdates}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <TextBlock Text="Check for Updates"/>
+                    </Button>
+
+                    <Separator/>
+
                     <TextBlock Text="{DynamicResource L_Set_PrinterConfig}"
                                FontSize="15"
                                FontWeight="SemiBold"
