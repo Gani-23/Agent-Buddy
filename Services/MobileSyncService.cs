@@ -95,6 +95,7 @@ public sealed class MobileSyncService
         string apiBaseUrl,
         string? apiKey,
         IReadOnlyCollection<RDAccount> accounts,
+        IReadOnlyCollection<RDAccount>? closedAccounts = null,
         Action<string>? progressCallback = null,
         int batchSize = 400,
         CancellationToken cancellationToken = default)
@@ -125,6 +126,11 @@ public sealed class MobileSyncService
             .Select(MapRdAccount)
             .ToList();
 
+        var closedRows = (closedAccounts ?? Array.Empty<RDAccount>())
+            .Where(a => !string.IsNullOrWhiteSpace(a.AccountNo))
+            .Select(MapClosedAccount)
+            .ToList();
+
         if (rows.Count == 0)
         {
             return (false, "No valid account rows available for mobile sync.");
@@ -145,14 +151,20 @@ public sealed class MobileSyncService
             var displayIndex = batchIndex + 1;
             progressCallback?.Invoke($"Sync to mobile: batch {displayIndex}/{totalBatches} ({batchRows.Count} accounts)...");
 
-            var payload = new
+            var payload = new Dictionary<string, object>
             {
-                source = "agentbuddy-desktop",
-                batch_index = displayIndex,
-                batch_total = totalBatches,
-                total_accounts = rows.Count,
-                rd_accounts = batchRows
+                ["source"] = "agentbuddy-desktop",
+                ["batch_index"] = displayIndex,
+                ["batch_total"] = totalBatches,
+                ["total_accounts"] = rows.Count,
+                ["rd_accounts"] = batchRows,
             };
+
+            if (displayIndex == 1 && closedRows.Count > 0)
+            {
+                payload["closed_accounts"] = closedRows;
+                payload["closed_total"] = closedRows.Count;
+            }
 
             using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
@@ -269,6 +281,32 @@ public sealed class MobileSyncService
         };
     }
 
+    private static PushClosedAccountDto MapClosedAccount(RDAccount account)
+    {
+        var aslaas = string.IsNullOrWhiteSpace(account.AslaasNo) ? null : account.AslaasNo.Trim();
+        var closedOn = account.LastUpdated == default ? DateTime.Now : account.LastUpdated;
+
+        return new PushClosedAccountDto
+        {
+            AccountNo = (account.AccountNo ?? string.Empty).Trim(),
+            AccountName = account.AccountName ?? string.Empty,
+            Denomination = account.Denomination ?? string.Empty,
+            MonthPaidUpto = account.MonthPaidUpto ?? string.Empty,
+            MonthPaidUptoNum = account.GetMonthPaidNumber(),
+            NextInstallmentDate = account.NextInstallmentDate ?? string.Empty,
+            NextDueDateIso = account.NextDueDateIso ?? string.Empty,
+            Amount = account.GetAmount(),
+            TotalDeposit = account.TotalDeposit > 0 ? account.TotalDeposit : account.GetAmount() * account.GetMonthPaidNumber(),
+            Status = string.IsNullOrWhiteSpace(account.Status) ? "closed" : account.Status,
+            IsActive = false,
+            AslaasNo = aslaas,
+            FirstSeen = account.FirstSeen == default ? null : account.FirstSeen.ToString("yyyy-MM-dd HH:mm:ss"),
+            LastUpdated = account.LastUpdated == default ? null : account.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss"),
+            ClosedOn = closedOn.ToString("yyyy-MM-dd HH:mm:ss"),
+            ClosedReason = "missing_from_popup",
+        };
+    }
+
     private sealed class PushRdAccountDto
     {
         [JsonPropertyName("account_no")]
@@ -312,5 +350,56 @@ public sealed class MobileSyncService
 
         [JsonPropertyName("last_updated")]
         public string? LastUpdated { get; init; }
+    }
+
+    private sealed class PushClosedAccountDto
+    {
+        [JsonPropertyName("account_no")]
+        public string AccountNo { get; init; } = string.Empty;
+
+        [JsonPropertyName("account_name")]
+        public string AccountName { get; init; } = string.Empty;
+
+        [JsonPropertyName("denomination")]
+        public string Denomination { get; init; } = string.Empty;
+
+        [JsonPropertyName("month_paid_upto")]
+        public string MonthPaidUpto { get; init; } = string.Empty;
+
+        [JsonPropertyName("month_paid_upto_num")]
+        public int MonthPaidUptoNum { get; init; }
+
+        [JsonPropertyName("next_installment_date")]
+        public string NextInstallmentDate { get; init; } = string.Empty;
+
+        [JsonPropertyName("next_due_date_iso")]
+        public string NextDueDateIso { get; init; } = string.Empty;
+
+        [JsonPropertyName("amount")]
+        public decimal Amount { get; init; }
+
+        [JsonPropertyName("total_deposit")]
+        public decimal TotalDeposit { get; init; }
+
+        [JsonPropertyName("status")]
+        public string Status { get; init; } = string.Empty;
+
+        [JsonPropertyName("is_active")]
+        public bool IsActive { get; init; }
+
+        [JsonPropertyName("aslaas_no")]
+        public string? AslaasNo { get; init; }
+
+        [JsonPropertyName("first_seen")]
+        public string? FirstSeen { get; init; }
+
+        [JsonPropertyName("last_updated")]
+        public string? LastUpdated { get; init; }
+
+        [JsonPropertyName("closed_on")]
+        public string? ClosedOn { get; init; }
+
+        [JsonPropertyName("closed_reason")]
+        public string? ClosedReason { get; init; }
     }
 }

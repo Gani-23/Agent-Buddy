@@ -1089,11 +1089,13 @@ public class DashboardViewModel : ViewModelBase
                 return;
             }
 
+            var closedAccounts = await _databaseService.GetClosedAccountsAsync();
             UpdateStatus = $"Syncing {accounts.Count} account rows to mobile API...";
             var (success, message) = await _mobileSyncService.PushRdAccountsAsync(
                 apiUrl,
                 apiKey,
                 accounts,
+                closedAccounts,
                 progress => UpdateStatus = progress);
             UpdateStatus = message;
 
