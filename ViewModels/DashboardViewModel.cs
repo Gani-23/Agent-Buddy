@@ -89,6 +89,10 @@ public class DashboardViewModel : ViewModelBase
     private decimal _firstHalfDepositedWindowAmount;
     private int _secondHalfDepositedWindowCount;
     private decimal _secondHalfDepositedWindowAmount;
+    private bool _isUpdateAvailable;
+    private string _latestVersion = string.Empty;
+    private string? _updateReleaseUrl;
+    private string _updateButtonText = "Download Update";
 
     public DashboardViewModel(
         DatabaseService databaseService,
@@ -111,11 +115,44 @@ public class DashboardViewModel : ViewModelBase
         UpdateDatabaseCommand = ReactiveCommand.CreateFromTask(UpdateDatabaseAsync);
         SyncToMobileCommand = ReactiveCommand.CreateFromTask(SyncToMobileAsync);
         ViewAccountDetailsCommand = ReactiveCommand.Create<RDAccount>(ViewAccountDetails);
+        OpenUpdateLinkCommand = ReactiveCommand.Create(OpenUpdateLink);
 
         // Load data on initialization
         HalfMonthTitleSuffix = BuildHalfMonthTitleSuffix(DateTime.Today);
         _ = LoadDataAsync();
     }
+
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isUpdateAvailable, value);
+            this.RaisePropertyChanged(nameof(UpdateButtonText));
+        }
+    }
+
+    public string LatestVersion
+    {
+        get => _latestVersion;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _latestVersion, value);
+            this.RaisePropertyChanged(nameof(UpdateButtonText));
+        }
+    }
+
+    public string? UpdateReleaseUrl
+    {
+        get => _updateReleaseUrl;
+        set => this.RaiseAndSetIfChanged(ref _updateReleaseUrl, value);
+    }
+
+    public string UpdateButtonText => IsUpdateAvailable && !string.IsNullOrWhiteSpace(LatestVersion)
+        ? $"Download Update (v{LatestVersion})"
+        : _updateButtonText;
+
+    public ReactiveCommand<Unit, Unit> OpenUpdateLinkCommand { get; }
 
     public string HalfMonthTitleSuffix
     {
@@ -1120,6 +1157,39 @@ public class DashboardViewModel : ViewModelBase
         {
             IsSyncingToMobile = false;
             UpdateStatus = string.Empty;
+        }
+    }
+
+    public void ApplyUpdateInfo(bool isUpdateAvailable, string latestVersion, string? releaseUrl)
+    {
+        IsUpdateAvailable = isUpdateAvailable;
+        LatestVersion = latestVersion ?? string.Empty;
+        UpdateReleaseUrl = releaseUrl;
+    }
+
+    private void OpenUpdateLink()
+    {
+        if (!IsUpdateAvailable)
+        {
+            _notificationService?.Warning("No update", "No update is available right now.");
+            return;
+        }
+
+        var target = string.IsNullOrWhiteSpace(UpdateReleaseUrl)
+            ? UpdateService.LatestReleasePage
+            : UpdateReleaseUrl;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = target,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService?.Error("Open Failed", ex.Message);
         }
     }
 }

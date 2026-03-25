@@ -67,6 +67,8 @@ public class SettingsViewModel : ViewModelBase
     private string _currentVersion = string.Empty;
     private string _updateCheckStatus = string.Empty;
     private bool _isCheckingUpdates;
+    private string _latestVersion = string.Empty;
+    private bool _isUpdateAvailable;
 
     public SettingsViewModel(
         DatabaseService databaseService,
@@ -110,6 +112,7 @@ public class SettingsViewModel : ViewModelBase
         LoadSettings();
         CurrentVersion = UpdateService.CurrentVersion;
         UpdateCheckStatus = "Check for updates to see if a newer version is available.";
+        LatestVersion = CurrentVersion;
     }
 
     public bool IsDarkTheme
@@ -346,6 +349,18 @@ public class SettingsViewModel : ViewModelBase
     {
         get => _updateCheckStatus;
         set => this.RaiseAndSetIfChanged(ref _updateCheckStatus, value);
+    }
+
+    public string LatestVersion
+    {
+        get => _latestVersion;
+        set => this.RaiseAndSetIfChanged(ref _latestVersion, value);
+    }
+
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        set => this.RaiseAndSetIfChanged(ref _isUpdateAvailable, value);
     }
 
     public bool IsCheckingUpdates
@@ -1133,11 +1148,15 @@ public class SettingsViewModel : ViewModelBase
             if (result.IsUpdateAvailable)
             {
                 UpdateCheckStatus = $"Update available: v{result.LatestVersion}.";
+                LatestVersion = result.LatestVersion;
+                IsUpdateAvailable = true;
                 _notificationService?.Info("Update available", $"Version {result.LatestVersion} is available. Download from GitHub Releases.");
             }
             else
             {
                 UpdateCheckStatus = "You're up to date.";
+                LatestVersion = result.LatestVersion;
+                IsUpdateAvailable = false;
                 _notificationService?.Success("Up to date", "You are already on the latest version.");
             }
         }

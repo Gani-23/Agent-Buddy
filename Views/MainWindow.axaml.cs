@@ -16,6 +16,7 @@ public partial class MainWindow : Window
 {
     private readonly WindowNotificationManager _notificationManager;
     private NotificationService? _notificationService;
+    private MainWindowViewModel? _mainViewModel;
     private bool _enforcingMaximized;
 
     public MainWindow()
@@ -71,6 +72,7 @@ public partial class MainWindow : Window
     private void OnDataContextChanged(object? sender, System.EventArgs e)
     {
         AttachNotificationService();
+        AttachUpdateNotifications();
         HookMainViewModelChanges();
         UpdateNavigationSelection();
     }
@@ -92,6 +94,26 @@ public partial class MainWindow : Window
         if (_notificationService != null)
         {
             _notificationService.NotificationRaised += OnNotificationRaised;
+        }
+    }
+
+    private void AttachUpdateNotifications()
+    {
+        var vm = DataContext as MainWindowViewModel;
+        if (ReferenceEquals(_mainViewModel, vm))
+        {
+            return;
+        }
+
+        if (_mainViewModel != null)
+        {
+            _mainViewModel.UpdateAvailable -= OnUpdateAvailable;
+        }
+
+        _mainViewModel = vm;
+        if (_mainViewModel != null)
+        {
+            _mainViewModel.UpdateAvailable += OnUpdateAvailable;
         }
     }
 
@@ -120,6 +142,12 @@ public partial class MainWindow : Window
             _notificationService.NotificationRaised -= OnNotificationRaised;
             _notificationService = null;
         }
+
+        if (_mainViewModel != null)
+        {
+            _mainViewModel.UpdateAvailable -= OnUpdateAvailable;
+            _mainViewModel = null;
+        }
     }
 
     private void OnNotificationRaised(AppNotification notification)
@@ -131,6 +159,46 @@ public partial class MainWindow : Window
                 notification.Message,
                 ToAvaloniaType(notification.Type)));
         });
+    }
+
+    private void OnUpdateAvailable(UpdateCheckResult result)
+    {
+        _ = Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(result.ReleaseUrl))
+            {
+                return;
+            }
+
+            var request = new ConfirmDialogRequest(
+                "Update available",
+                $"Version {result.LatestVersion} is ready to download.",
+                "Open Release",
+                "Later");
+
+            var dialog = new ConfirmDialogWindow(request);
+            var open = await dialog.ShowDialog<bool>(this);
+            if (open)
+            {
+                OpenUrl(result.ReleaseUrl);
+            }
+        });
+    }
+
+    private void OpenUrl(string url)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService?.Error("Open Failed", ex.Message);
+        }
     }
 
     private static NotificationType ToAvaloniaType(AppNotificationType type)

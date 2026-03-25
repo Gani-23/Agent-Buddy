@@ -38,6 +38,9 @@ public class MainWindowViewModel : ViewModelBase
     private readonly LocalizationService _localizationService;
     private readonly UpdateService _updateService;
     private readonly CancellationTokenSource _updateCts = new();
+    private string _latestVersion = string.Empty;
+    private bool _isUpdateAvailable;
+    private string? _updateReleaseUrl;
 
     // View Models
     public DashboardViewModel DashboardViewModel { get; }
@@ -46,6 +49,7 @@ public class MainWindowViewModel : ViewModelBase
     public SupportViewModel SupportViewModel { get; }
     public SettingsViewModel SettingsViewModel { get; }
     public NotificationService NotificationService => _notificationService;
+    public event Action<UpdateCheckResult>? UpdateAvailable;
 
     public MainWindowViewModel()
     {
@@ -146,6 +150,24 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _licenseStatusText;
         private set => this.RaiseAndSetIfChanged(ref _licenseStatusText, value);
+    }
+
+    public string LatestVersion
+    {
+        get => _latestVersion;
+        private set => this.RaiseAndSetIfChanged(ref _latestVersion, value);
+    }
+
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        private set => this.RaiseAndSetIfChanged(ref _isUpdateAvailable, value);
+    }
+
+    public string? UpdateReleaseUrl
+    {
+        get => _updateReleaseUrl;
+        private set => this.RaiseAndSetIfChanged(ref _updateReleaseUrl, value);
     }
 
     /// <summary>
@@ -278,10 +300,24 @@ public class MainWindowViewModel : ViewModelBase
     private async Task CheckAndNotifyUpdatesAsync(bool force)
     {
         var result = await _updateService.CheckForUpdatesAsync(force, _updateCts.Token);
-        if (result is { Notified: true })
+        if (result is null)
         {
-            var message = $"Version {result.LatestVersion} is available. Download from GitHub Releases.";
-            _notificationService.Info("Update available", message);
+            return;
+        }
+
+        LatestVersion = result.LatestVersion;
+        IsUpdateAvailable = result.IsUpdateAvailable;
+        UpdateReleaseUrl = result.ReleaseUrl;
+        DashboardViewModel.ApplyUpdateInfo(result.IsUpdateAvailable, result.LatestVersion, result.ReleaseUrl);
+        SettingsViewModel.LatestVersion = result.LatestVersion;
+        SettingsViewModel.IsUpdateAvailable = result.IsUpdateAvailable;
+        SettingsViewModel.UpdateCheckStatus = result.IsUpdateAvailable
+            ? $"Update available: v{result.LatestVersion}."
+            : "You're up to date.";
+
+        if (result.Notified)
+        {
+            UpdateAvailable?.Invoke(result);
         }
     }
 

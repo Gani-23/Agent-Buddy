@@ -99,6 +99,7 @@ The app is gated by a JWT license token. When no valid license is detected, navi
 ## Unsigned Builds
 Releases are shipped unsigned to keep the app free and easy to distribute. First‑time launch will show a security warning.
 See `docs/UNSIGNED_INSTALL.md` for the one‑time steps to open the app on Windows and macOS.
+For maintainers, release steps are documented in `docs/RELEASE_CHECKLIST.md`.
 
 ## Repository Map
 - `AgentBuddy.csproj`: Project file and package references.

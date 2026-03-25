@@ -34,6 +34,12 @@
                             Padding="14,8"
                             IsEnabled="{Binding !IsBusy}"
                             Content="{DynamicResource L_Dash_UpdateDatabase}"/>
+                    <Button Classes="Primary"
+                            Command="{Binding OpenUpdateLinkCommand}"
+                            Padding="14,8"
+                            Margin="8,0,0,0"
+                            IsVisible="{Binding IsUpdateAvailable}"
+                            Content="{Binding UpdateButtonText}"/>
                 </WrapPanel>
             </Grid>
 

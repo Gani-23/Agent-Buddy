@@ -40,6 +40,8 @@ public sealed class UpdateService
 
     public static string CurrentVersion => GetCurrentVersion();
 
+    public static string LatestReleasePage => "https://github.com/Gani-23/Agent-Buddy/releases/latest";
+
     public async Task<UpdateCheckResult?> CheckForUpdatesAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         var currentVersion = GetCurrentVersion();

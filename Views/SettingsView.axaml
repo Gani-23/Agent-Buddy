@@ -295,7 +295,7 @@
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*"
-                          RowDefinitions="Auto,Auto"
+                          RowDefinitions="Auto,Auto,Auto"
                           RowSpacing="12"
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
@@ -309,6 +309,16 @@
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="Latest Version"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding LatestVersion}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="2"
                                    Grid.Column="1"
                                    Text="{Binding UpdateCheckStatus}"
                                    TextWrapping="Wrap"
