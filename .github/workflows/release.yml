@@ -241,6 +241,13 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          body: |
+            ⚠️ **Unsigned Builds**
+
+            These builds are unsigned, so Windows/macOS will show a warning the first time you open them.
+            Follow the quick steps here:
+            - docs/UNSIGNED_INSTALL.md
+
           files: |
             dist/AgentBuddy-win-x64/AgentBuddy-win-x64.zip
             dist/AgentBuddy-win-x86/AgentBuddy-win-x86.zip
