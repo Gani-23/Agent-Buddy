@@ -1,4 +1,4 @@
-name: Build and रिलीज़ (Windows + macOS)
+name: Build and रिलीज़ (Windows + macOS + Linux)
 
 on:
   push:
@@ -37,6 +37,18 @@ jobs:
           $rid = "${{ matrix.rid }}"
           dotnet publish -c Release -r $rid --self-contained true `
             -p:Version=$version -p:AssemblyVersion=$version.0 -p:FileVersion=$version.0 -p:InformationalVersion=$version
+
+      - name: Sign Windows executable (optional)
+        if: ${{ secrets.WINDOWS_PFX_BASE64 != '' }}
+        shell: pwsh
+        run: |
+          $rid = "${{ matrix.rid }}"
+          $exePath = "bin/Release/net10.0/$rid/publish/AgentBuddy.exe"
+          if (-not (Test-Path $exePath)) { throw "Executable not found: $exePath" }
+          $pfxPath = "$env:RUNNER_TEMP\\agentbuddy-signing.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.WINDOWS_PFX_BASE64 }}"))
+          $password = "${{ secrets.WINDOWS_PFX_PASSWORD }}"
+          signtool sign /f $pfxPath /p $password /tr http://timestamp.digicert.com /td sha256 /fd sha256 $exePath
 
       - name: Zip artifact
         shell: pwsh
@@ -136,6 +148,38 @@ jobs:
             iconutil -c icns "$ICONSET" -o "$APP_DIR/Contents/Resources/AgentBuddy.icns"
           fi
 
+      - name: Import signing certificate (optional)
+        if: ${{ secrets.MAC_CERT_P12_BASE64 != '' }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/agentbuddy_signing.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/agentbuddy.keychain-db"
+          KEYCHAIN_PASSWORD="agentbuddy-temp"
+          echo "${{ secrets.MAC_CERT_P12_BASE64 }}" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -t 21600 -u "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "${{ secrets.MAC_CERT_PASSWORD }}" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security find-identity -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Codesign app (optional)
+        if: ${{ secrets.MAC_CERT_P12_BASE64 != '' }}
+        run: |
+          /usr/bin/codesign --force --deep --options runtime --sign "${{ secrets.MAC_CERT_NAME }}" "AgentBuddy.app"
+          /usr/bin/codesign --verify --deep --strict "AgentBuddy.app"
+
+      - name: Notarize app (optional)
+        if: ${{ secrets.MAC_NOTARY_APPLE_ID != '' && secrets.MAC_NOTARY_PASSWORD != '' && secrets.MAC_NOTARY_TEAM_ID != '' }}
+        run: |
+          NOTARY_ZIP="AgentBuddy-notary.zip"
+          ditto -c -k --sequesterRsrc --keepParent "AgentBuddy.app" "$NOTARY_ZIP"
+          xcrun notarytool submit "$NOTARY_ZIP" \
+            --apple-id "${{ secrets.MAC_NOTARY_APPLE_ID }}" \
+            --password "${{ secrets.MAC_NOTARY_PASSWORD }}" \
+            --team-id "${{ secrets.MAC_NOTARY_TEAM_ID }}" \
+            --wait
+          xcrun stapler staple "AgentBuddy.app"
+
       - name: Zip artifact
         run: |
           RID="${{ matrix.rid }}"
@@ -148,10 +192,46 @@ jobs:
           name: AgentBuddy-macos-${{ matrix.rid }}
           path: AgentBuddy-macos-${{ matrix.rid }}.zip
 
+  build-linux:
+    name: Build Linux (${{ matrix.rid }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64, linux-arm64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          RID="${{ matrix.rid }}"
+          dotnet publish -c Release -r "$RID" --self-contained true \
+            -p:Version="$VERSION" -p:AssemblyVersion="$VERSION.0" -p:FileVersion="$VERSION.0" -p:InformationalVersion="$VERSION"
+
+      - name: Tar artifact
+        run: |
+          RID="${{ matrix.rid }}"
+          PUBLISH_DIR="bin/Release/net10.0/$RID/publish"
+          TAR_NAME="AgentBuddy-$RID.tar.gz"
+          tar -czf "$TAR_NAME" -C "$PUBLISH_DIR" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AgentBuddy-${{ matrix.rid }}
+          path: AgentBuddy-${{ matrix.rid }}.tar.gz
+
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-windows, build-macos]
+    needs: [build-windows, build-macos, build-linux]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -166,3 +246,5 @@ jobs:
             dist/AgentBuddy-win-x86/AgentBuddy-win-x86.zip
             dist/AgentBuddy-macos-osx-arm64/AgentBuddy-macos-osx-arm64.zip
             dist/AgentBuddy-macos-osx-x64/AgentBuddy-macos-osx-x64.zip
+            dist/AgentBuddy-linux-x64/AgentBuddy-linux-x64.tar.gz
+            dist/AgentBuddy-linux-arm64/AgentBuddy-linux-arm64.tar.gz
