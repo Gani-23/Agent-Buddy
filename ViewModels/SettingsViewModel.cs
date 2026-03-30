@@ -33,6 +33,7 @@ public class SettingsViewModel : ViewModelBase
     private string? _documentsPath;
     private string? _basePath;
     private string? _agentId;
+    private string? _agentName;
     private string? _sourceDatabasePath;
     private string? _targetDatabasePath;
     private string _legacySyncStatus = string.Empty;
@@ -46,6 +47,7 @@ public class SettingsViewModel : ViewModelBase
     private bool _isSavingMobileSyncSettings;
     private bool _isSavingLanguageSettings;
     private string? _editableAgentId;
+    private string? _editableAgentName;
     private string? _editablePassword;
     private string? _mobileSyncApiUrl;
     private string? _mobileSyncApiKey;
@@ -57,6 +59,7 @@ public class SettingsViewModel : ViewModelBase
     private const string PreferredBrowserSettingKey = "preferred_browser";
     private const string PasswordLastChangedKey = "portal_password_last_changed_utc";
     private const int PasswordValidityDays = 180;
+    private const string AgentNameSettingKey = "agent_name";
     private string _browserStatus = string.Empty;
     private bool _isSavingBrowserSettings;
     private string? _selectedBrowser;
@@ -162,6 +165,12 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _agentId, value);
     }
 
+    public string? AgentName
+    {
+        get => _agentName;
+        set => this.RaiseAndSetIfChanged(ref _agentName, value);
+    }
+
     public string? SourceDatabasePath
     {
         get => _sourceDatabasePath;
@@ -226,6 +235,12 @@ public class SettingsViewModel : ViewModelBase
     {
         get => _editableAgentId;
         set => this.RaiseAndSetIfChanged(ref _editableAgentId, value);
+    }
+
+    public string? EditableAgentName
+    {
+        get => _editableAgentName;
+        set => this.RaiseAndSetIfChanged(ref _editableAgentName, value);
     }
 
     public string? EditablePassword
@@ -425,6 +440,9 @@ public class SettingsViewModel : ViewModelBase
         EditableAgentId = AgentId;
         EditablePassword = string.Empty;
 
+        AgentName = await _databaseService.GetAppSettingAsync(AgentNameSettingKey);
+        EditableAgentName = AgentName;
+
         TargetDatabasePath = DatabasePath;
         SourceDatabasePath = ResolveDefaultLegacySourcePath(DocumentsPath);
         LegacySyncStatus = "Select source and target database, then click Sync or Force Full Sync.";
@@ -560,6 +578,7 @@ public class SettingsViewModel : ViewModelBase
 
         var agentId = (EditableAgentId ?? string.Empty).Trim();
         var password = EditablePassword ?? string.Empty;
+        var agentName = (EditableAgentName ?? string.Empty).Trim();
 
         if (string.IsNullOrWhiteSpace(agentId))
         {
@@ -579,7 +598,9 @@ public class SettingsViewModel : ViewModelBase
         try
         {
             await _databaseService.SaveCredentialsAsync(agentId, password);
+            await _databaseService.SaveAppSettingAsync(AgentNameSettingKey, agentName);
             AgentId = agentId;
+            AgentName = agentName;
             EditablePassword = string.Empty;
             CredentialsStatus = "Credentials saved successfully.";
         }

@@ -132,7 +132,7 @@
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource L_Set_AgentIdField}"
                                    VerticalAlignment="Center"
@@ -142,14 +142,22 @@
                                  Watermark="{DynamicResource L_Set_WmAgentId}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="{DynamicResource L_Set_PasswordField}"
+                                   Text="Agent Name"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding EditableAgentName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Agent Name"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="{DynamicResource L_Set_PasswordField}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"
                                  Text="{Binding EditablePassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Watermark="{DynamicResource L_Set_WmPassword}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="1"
+                        <TextBlock Grid.Row="3" Grid.Column="1"
                                    Text="{Binding CredentialsStatus}"
                                    TextWrapping="Wrap"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
