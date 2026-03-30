@@ -56,7 +56,7 @@ public class SettingsViewModel : ViewModelBase
     private string? _selectedDefaultPrinter;
     private const string PreferredBrowserSettingKey = "preferred_browser";
     private const string PasswordLastChangedKey = "portal_password_last_changed_utc";
-    private const int PasswordValidityDays = 68;
+    private const int PasswordValidityDays = 180;
     private string _browserStatus = string.Empty;
     private bool _isSavingBrowserSettings;
     private string? _selectedBrowser;
@@ -429,7 +429,7 @@ public class SettingsViewModel : ViewModelBase
         SourceDatabasePath = ResolveDefaultLegacySourcePath(DocumentsPath);
         LegacySyncStatus = "Select source and target database, then click Sync or Force Full Sync.";
         CredentialsStatus = "Enter Agent ID and password, then click Save Credentials.";
-        PasswordChangeStatus = "Update your portal password before the 68‑day expiry.";
+        PasswordChangeStatus = "Update your portal password before the 180‑day expiry.";
         MobileSyncStatus = "Set API URL and key for mobile sync.";
         AslaasUpdateStatus = "Update missing ASLAAS numbers, or force update all active accounts.";
         LanguageStatus = "Select your preferred language, then click Apply Language.";
