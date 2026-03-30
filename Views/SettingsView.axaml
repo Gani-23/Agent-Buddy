@@ -165,6 +165,22 @@
                         </StackPanel>
                     </Button>
 
+                    <StackPanel Spacing="6">
+                        <Button Classes="Secondary"
+                                Click="ChangePortalPassword_Click"
+                                IsEnabled="{Binding !IsChangingPassword}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
+                            <TextBlock Text="Change Portal Password"/>
+                        </Button>
+                        <TextBlock Text="{Binding PasswordChangeStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding PasswordExpiryNote}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+
                     <Separator/>
 
                     <TextBlock Text="{DynamicResource L_Set_MobileSync}"

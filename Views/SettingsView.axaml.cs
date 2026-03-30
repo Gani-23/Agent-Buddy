@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using AgentBuddy.ViewModels;
+using AgentBuddy.Models;
 
 namespace AgentBuddy.Views;
 
@@ -91,5 +92,26 @@ public partial class SettingsView : UserControl
         }
 
         return fallback;
+    }
+
+    private async void ChangePortalPassword_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel vm)
+        {
+            return;
+        }
+
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        var dialog = new ChangePasswordWindow(vm.AgentId ?? string.Empty);
+        PasswordChangeRequest? result = owner != null
+            ? await dialog.ShowDialog<PasswordChangeRequest?>(owner)
+            : await dialog.ShowDialog<PasswordChangeRequest?>(new Window());
+
+        if (result == null)
+        {
+            return;
+        }
+
+        await vm.ChangePortalPasswordAsync(result);
     }
 }

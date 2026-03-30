@@ -55,6 +55,8 @@ public class SettingsViewModel : ViewModelBase
     private bool _isSavingPrinterSettings;
     private string? _selectedDefaultPrinter;
     private const string PreferredBrowserSettingKey = "preferred_browser";
+    private const string PasswordLastChangedKey = "portal_password_last_changed_utc";
+    private const int PasswordValidityDays = 68;
     private string _browserStatus = string.Empty;
     private bool _isSavingBrowserSettings;
     private string? _selectedBrowser;
@@ -69,6 +71,9 @@ public class SettingsViewModel : ViewModelBase
     private bool _isCheckingUpdates;
     private string _latestVersion = string.Empty;
     private bool _isUpdateAvailable;
+    private string _passwordChangeStatus = string.Empty;
+    private string _passwordExpiryNote = string.Empty;
+    private bool _isChangingPassword;
 
     public SettingsViewModel(
         DatabaseService databaseService,
@@ -363,6 +368,24 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isUpdateAvailable, value);
     }
 
+    public string PasswordChangeStatus
+    {
+        get => _passwordChangeStatus;
+        set => this.RaiseAndSetIfChanged(ref _passwordChangeStatus, value);
+    }
+
+    public string PasswordExpiryNote
+    {
+        get => _passwordExpiryNote;
+        set => this.RaiseAndSetIfChanged(ref _passwordExpiryNote, value);
+    }
+
+    public bool IsChangingPassword
+    {
+        get => _isChangingPassword;
+        set => this.RaiseAndSetIfChanged(ref _isChangingPassword, value);
+    }
+
     public bool IsCheckingUpdates
     {
         get => _isCheckingUpdates;
@@ -406,6 +429,7 @@ public class SettingsViewModel : ViewModelBase
         SourceDatabasePath = ResolveDefaultLegacySourcePath(DocumentsPath);
         LegacySyncStatus = "Select source and target database, then click Sync or Force Full Sync.";
         CredentialsStatus = "Enter Agent ID and password, then click Save Credentials.";
+        PasswordChangeStatus = "Update your portal password before the 68‑day expiry.";
         MobileSyncStatus = "Set API URL and key for mobile sync.";
         AslaasUpdateStatus = "Update missing ASLAAS numbers, or force update all active accounts.";
         LanguageStatus = "Select your preferred language, then click Apply Language.";
@@ -434,6 +458,7 @@ public class SettingsViewModel : ViewModelBase
         await LoadPrintersAsync();
         await LoadBrowserSettingsAsync();
         await LoadLicenseSettingsAsync();
+        await LoadPasswordExpiryAsync();
     }
 
     private async void CheckPython()
@@ -1169,6 +1194,92 @@ public class SettingsViewModel : ViewModelBase
         {
             IsCheckingUpdates = false;
         }
+    }
+
+    public async Task ChangePortalPasswordAsync(PasswordChangeRequest request)
+    {
+        if (IsChangingPassword)
+        {
+            return;
+        }
+
+        if (request == null)
+        {
+            PasswordChangeStatus = "Missing password details.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.AgentId))
+        {
+            PasswordChangeStatus = "Agent ID is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            PasswordChangeStatus = "Enter current and new passwords.";
+            return;
+        }
+
+        IsChangingPassword = true;
+        PasswordChangeStatus = "Opening portal to change password...";
+
+        try
+        {
+            var (success, message) = await _pythonService.ChangePortalPasswordAsync(
+                request.AgentId,
+                request.CurrentPassword,
+                request.NewPassword,
+                line => Dispatcher.UIThread.Post(() => PasswordChangeStatus = line));
+
+            if (!success)
+            {
+                PasswordChangeStatus = string.IsNullOrWhiteSpace(message)
+                    ? "Password change failed."
+                    : message;
+                return;
+            }
+
+            await _databaseService.SaveCredentialsAsync(request.AgentId, request.NewPassword);
+            await _databaseService.SaveAppSettingAsync(PasswordLastChangedKey, DateTime.UtcNow.ToString("O"));
+            PasswordChangeStatus = "Password updated and saved successfully.";
+            UpdatePasswordExpiryNote(DateTime.UtcNow);
+        }
+        catch (Exception ex)
+        {
+            PasswordChangeStatus = $"Password change failed: {ex.Message}";
+        }
+        finally
+        {
+            IsChangingPassword = false;
+        }
+    }
+
+    private async Task LoadPasswordExpiryAsync()
+    {
+        var lastChanged = await _databaseService.GetAppSettingAsync(PasswordLastChangedKey);
+        if (DateTime.TryParse(lastChanged, out var parsed))
+        {
+            UpdatePasswordExpiryNote(parsed);
+            return;
+        }
+
+        PasswordExpiryNote = "Last changed: not recorded.";
+    }
+
+    private void UpdatePasswordExpiryNote(DateTime lastChangedUtc)
+    {
+        var local = DateTime.SpecifyKind(lastChangedUtc, DateTimeKind.Utc).ToLocalTime();
+        var daysElapsed = (DateTime.UtcNow.Date - lastChangedUtc.Date).TotalDays;
+        var daysLeft = PasswordValidityDays - (int)Math.Round(daysElapsed);
+
+        if (daysLeft <= 0)
+        {
+            PasswordExpiryNote = $"Last changed: {local:dd-MMM-yyyy}. Password has expired — change it now.";
+            return;
+        }
+
+        PasswordExpiryNote = $"Last changed: {local:dd-MMM-yyyy}. Days left: {daysLeft}.";
     }
 
     private static string GetFirstMeaningfulLine(string output)

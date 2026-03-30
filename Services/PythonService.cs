@@ -520,6 +520,86 @@ public class PythonService
         }
     }
 
+    public async Task<(bool success, string message)> ChangePortalPasswordAsync(
+        string agentId,
+        string currentPassword,
+        string newPassword,
+        Action<string>? progressCallback = null)
+    {
+        var scriptPath = Path.Combine(_scriptsPath, "ScheduleArguments.py");
+        if (!File.Exists(scriptPath))
+        {
+            return (false, $"Script not found: {scriptPath}");
+        }
+
+        var payload = new
+        {
+            agent_id = agentId,
+            current_password = currentPassword,
+            new_password = newPassword
+        };
+
+        var output = new StringBuilder();
+
+        try
+        {
+            var browserArg = await GetPreferredBrowserArgAsync();
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _pythonCommand,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    CreateNoWindow = true,
+                    WorkingDirectory = _scriptsPath
+                }
+            };
+
+            process.StartInfo.Environment["PYTHONUNBUFFERED"] = "1";
+            process.StartInfo.ArgumentList.Add("-u");
+            process.StartInfo.ArgumentList.Add(scriptPath);
+            process.StartInfo.ArgumentList.Add("--change-password");
+            process.StartInfo.ArgumentList.Add(JsonSerializer.Serialize(payload));
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
+            ApplyPythonRuntimeEnvironment(process.StartInfo);
+
+            process.OutputDataReceived += (sender, args) =>
+            {
+                if (args.Data != null)
+                {
+                    output.AppendLine(args.Data);
+                    progressCallback?.Invoke(args.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, args) =>
+            {
+                if (args.Data != null)
+                {
+                    output.AppendLine(args.Data);
+                    progressCallback?.Invoke(args.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+
+            var success = process.ExitCode == 0;
+            var message = success ? "Password change completed." : output.ToString();
+            return (success, message);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error executing password change: {ex.Message}");
+        }
+    }
+
     /// <summary>
     /// Execute Sync_Legacy_AccountDetail.py to sync old sqlite data.
     /// </summary>
