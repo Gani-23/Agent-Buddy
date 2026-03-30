@@ -6,6 +6,12 @@ namespace AgentBuddy.Views;
 
 public partial class ChangePasswordWindow : Window
 {
+    public ChangePasswordWindow()
+    {
+        InitializeComponent();
+        DataContext = new ChangePasswordViewModel(string.Empty);
+    }
+
     public ChangePasswordWindow(string agentId)
     {
         InitializeComponent();
