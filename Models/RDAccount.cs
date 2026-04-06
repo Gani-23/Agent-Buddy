@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace AgentBuddy.Models;
 
@@ -171,13 +172,29 @@ public class RDAccount
     }
 
     /// <summary>
-    /// Gets the short code (first 2 chars of account name)
+    /// Gets the short code (last 2 digits of account number, fallback to name)
     /// </summary>
     public string GetShortCode()
     {
+        if (!string.IsNullOrWhiteSpace(AccountNo))
+        {
+            var digits = new string(AccountNo.Where(char.IsDigit).ToArray());
+            if (digits.Length >= 2)
+            {
+                return digits.Substring(digits.Length - 2, 2);
+            }
+
+            if (digits.Length == 1)
+            {
+                return $"0{digits}";
+            }
+        }
+
         if (string.IsNullOrEmpty(AccountName) || AccountName.Length < 2)
+        {
             return "??";
-        
+        }
+
         return AccountName.Substring(0, 2).ToUpper();
     }
 
