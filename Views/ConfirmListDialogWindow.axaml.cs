@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AgentBuddy.Models;
+using AgentBuddy.ViewModels;
 
 namespace AgentBuddy.Views;
 
@@ -13,7 +14,7 @@ public partial class ConfirmListDialogWindow : Window
 
     public ConfirmListDialogWindow(ConfirmListDialogRequest request) : this()
     {
-        DataContext = request;
+        DataContext = new ConfirmListDialogViewModel(request);
     }
 
     private void Yes_Click(object? sender, RoutedEventArgs e)

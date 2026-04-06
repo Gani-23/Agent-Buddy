@@ -44,12 +44,13 @@
             </Border>
 
             <Border Grid.Row="2" Classes="Card" Padding="10,8">
-                <Grid ColumnDefinitions="140,*,120,120,150" ColumnSpacing="10">
+                <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
                     <TextBlock Text="{DynamicResource L_Segment_ColumnAccountNo}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="1" Text="{DynamicResource L_Segment_ColumnAccountName}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="2" Text="{DynamicResource L_Segment_ColumnAmount}" FontWeight="SemiBold" TextAlignment="Right"/>
                     <TextBlock Grid.Column="3" Text="{DynamicResource L_Segment_ColumnPaidUpto}" FontWeight="SemiBold" TextAlignment="Center"/>
                     <TextBlock Grid.Column="4" Text="{DynamicResource L_Segment_ColumnNextDue}" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="5" Text="Profile" FontWeight="SemiBold"/>
                 </Grid>
             </Border>
 
@@ -59,12 +60,17 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:RDAccount">
                                 <Border Padding="10,8" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
-                                    <Grid ColumnDefinitions="140,*,120,120,150" ColumnSpacing="10">
+                                    <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
                                         <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
                                         <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
                                         <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
                                         <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
+                                        <Button Grid.Column="5"
+                                                Classes="Secondary"
+                                                Padding="8,4"
+                                                Click="OpenProfile_Click"
+                                                Content="View"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

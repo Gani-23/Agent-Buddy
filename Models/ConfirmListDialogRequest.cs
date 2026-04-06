@@ -5,7 +5,8 @@ namespace AgentBuddy.Models;
 public sealed record ConfirmListItem(
     string ReferenceNumber,
     string ListLabel,
-    string TimestampLabel
+    string TimestampLabel,
+    int AccountCount
 );
 
 public sealed record ConfirmListDialogRequest(

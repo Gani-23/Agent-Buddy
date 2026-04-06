@@ -10,6 +10,7 @@ namespace AgentBuddy.Views;
 public partial class SegmentAccountsWindow : Window
 {
     private readonly bool _focusSearchOnOpen;
+    private readonly bool _isDarkTheme;
 
     public SegmentAccountsWindow()
     {
@@ -29,10 +30,22 @@ public partial class SegmentAccountsWindow : Window
         DataContext = new SegmentAccountsWindowViewModel(title, accounts);
         RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
         _focusSearchOnOpen = focusSearchOnOpen;
+        _isDarkTheme = isDarkTheme;
     }
 
     private void Close_Click(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private async void OpenProfile_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.DataContext is not RDAccount account)
+        {
+            return;
+        }
+
+        var dialog = new AccountDetailsWindow(account, _isDarkTheme);
+        await dialog.ShowDialog(this);
     }
 }

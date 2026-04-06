@@ -1588,11 +1588,11 @@ public class ListManagementViewModel : ViewModelBase
                 var timestampLabel = report.Timestamp == default
                     ? "-"
                     : report.Timestamp.ToString("dd-MMM HH:mm");
-                items.Add(new ConfirmListItem(reference, listLabel, timestampLabel));
+                items.Add(new ConfirmListItem(reference, listLabel, timestampLabel, report.AccountCount));
             }
             else
             {
-                items.Add(new ConfirmListItem(reference, "List -", "-"));
+                items.Add(new ConfirmListItem(reference, "List -", "-", 0));
             }
         }
 
