@@ -1,0 +1,82 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="using:AgentBuddy.Models"
+        x:Class="AgentBuddy.Views.ConfirmListDialogWindow"
+        x:DataType="models:ConfirmListDialogRequest"
+        mc:Ignorable="d"
+        Width="560"
+        Height="380"
+        MinWidth="560"
+        MinHeight="380"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding Title}">
+
+    <Border Classes="DialogBackdrop">
+        <Border Classes="DialogSurface">
+            <StackPanel Spacing="16">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="DialogDot"/>
+                        <TextBlock Text="Action Required"
+                                   Classes="Kicker"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding Title}"
+                               Classes="DialogTitle"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding Message}"
+                           TextWrapping="Wrap"
+                           Classes="DialogBody"/>
+
+                <Border Background="{DynamicResource AppHoverBrush}"
+                        CornerRadius="10"
+                        Padding="10">
+                    <ScrollViewer MaxHeight="160"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                               Margin="0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                    <Run Text="Total: "/>
+                    <Run Text="{Binding Items.Count}"/>
+                </TextBlock>
+
+                <Border Classes="DialogDivider"
+                        Margin="0,2"/>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="10">
+                    <Button Classes="Secondary"
+                            Content="{Binding NoText}"
+                            Click="No_Click"
+                            Padding="16,8"/>
+                    <Button Classes="Primary"
+                            Content="{Binding YesText}"
+                            Click="Yes_Click"
+                            Padding="16,8"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Border>
+</Window>

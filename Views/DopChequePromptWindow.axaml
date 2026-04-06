@@ -10,6 +10,11 @@
         Height="360"
         MinWidth="560"
         MinHeight="360"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Title="{DynamicResource L_Prompt_Dop_Title}">

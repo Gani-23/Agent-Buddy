@@ -9,6 +9,11 @@
         Title="{DynamicResource L_Search_TitleWindow}"
         Width="700"
         Height="600"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
         Background="{DynamicResource AppCardBackgroundBrush}">

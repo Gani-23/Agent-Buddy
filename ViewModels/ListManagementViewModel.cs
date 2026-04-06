@@ -783,6 +783,7 @@ public class ListManagementViewModel : ViewModelBase
     public Interaction<AslaasPromptRequest, string?> AslaasPrompt { get; } = new();
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
     public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
+    public Interaction<ConfirmListDialogRequest, bool> ConfirmListPrompt { get; } = new();
 
     public ReactiveCommand<Unit, Unit> AddNewListCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveLotCommand { get; }
@@ -1414,9 +1415,17 @@ public class ListManagementViewModel : ViewModelBase
 
             if (reportsWithPdf.Count > 0)
             {
-                shouldPrintReports = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+                var printList = runReferences
+                    .Where(reference => !string.IsNullOrWhiteSpace(reference))
+                    .Select(reference => reference.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(reference => reference, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                shouldPrintReports = await ConfirmListPrompt.Handle(new ConfirmListDialogRequest(
                     "Print Reports?",
-                    $"Print all {reportsWithPdf.Count} report PDF(s) for successful lists? This will print 2 copies of each report.",
+                    $"Print all {reportsWithPdf.Count} report PDF(s) for the lists below? This will print 2 copies of each report.",
+                    printList,
                     "Print 2 Copies",
                     "Skip")).ToTask();
             }
@@ -1448,9 +1457,17 @@ public class ListManagementViewModel : ViewModelBase
                 }
             }
 
-            var shouldGeneratePayslips = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+            var payslipList = runReferences
+                .Where(reference => !string.IsNullOrWhiteSpace(reference))
+                .Select(reference => reference.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(reference => reference, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var shouldGeneratePayslips = await ConfirmListPrompt.Handle(new ConfirmListDialogRequest(
                 "Generate Payslips?",
-                "Generate payslips for all successful lists and print 1 copy?",
+                "Generate payslips for the lists below and print 1 copy?",
+                payslipList,
                 "Generate & Print",
                 "Not Now")).ToTask();
 
@@ -1480,6 +1497,10 @@ public class ListManagementViewModel : ViewModelBase
             }
         }
         catch (UnhandledInteractionException<ConfirmDialogRequest, bool>)
+        {
+            // Ignore prompts if the view is not available.
+        }
+        catch (UnhandledInteractionException<ConfirmListDialogRequest, bool>)
         {
             // Ignore prompts if the view is not available.
         }
