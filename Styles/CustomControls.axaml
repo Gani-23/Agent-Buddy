@@ -149,17 +149,48 @@
     </Style>
 
     <Style Selector="Border.DialogBackdrop">
-        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#F4F2EE" Offset="0"/>
+                <GradientStop Color="#EDEAE5" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
         <Setter Property="Padding" Value="26"/>
     </Style>
 
     <Style Selector="Border.DialogSurface">
-        <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFFFFF" Offset="0"/>
+                <GradientStop Color="#F7F6F3" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="BorderBrush" Value="#E3E0DB"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Padding" Value="22"/>
+        <Setter Property="BoxShadow" Value="0 30 90 0 #00000026"/>
+    </Style>
+
+    <Style Selector="ToggleButton.Icon">
+        <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="18"/>
-        <Setter Property="Padding" Value="22"/>
-        <Setter Property="BoxShadow" Value="0 24 56 0 #00000022"/>
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="Width" Value="30"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="ToggleButton.Icon:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+    </Style>
+
+    <Style Selector="ToggleButton.Icon:checked">
+        <Setter Property="Background" Value="{DynamicResource AppPressedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppPressedBrush}"/>
     </Style>
 
     <Style Selector="Border.DialogDivider">

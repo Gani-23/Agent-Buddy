@@ -21,7 +21,7 @@
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Background="{DynamicResource AppCardBackgroundBrush}">
+        Background="{DynamicResource AppHoverBrush}">
 
     <Border Padding="20" Classes="FadeIn DialogSurface">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
@@ -44,13 +44,13 @@
             </Border>
 
             <Border Grid.Row="2" Classes="Card" Padding="10,8">
-                <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
+                <Grid ColumnDefinitions="140,*,120,120,150,60" ColumnSpacing="10">
                     <TextBlock Text="{DynamicResource L_Segment_ColumnAccountNo}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="1" Text="{DynamicResource L_Segment_ColumnAccountName}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="2" Text="{DynamicResource L_Segment_ColumnAmount}" FontWeight="SemiBold" TextAlignment="Right"/>
                     <TextBlock Grid.Column="3" Text="{DynamicResource L_Segment_ColumnPaidUpto}" FontWeight="SemiBold" TextAlignment="Center"/>
                     <TextBlock Grid.Column="4" Text="{DynamicResource L_Segment_ColumnNextDue}" FontWeight="SemiBold"/>
-                    <TextBlock Grid.Column="5" Text="Profile" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="5" Text="View" FontWeight="SemiBold" TextAlignment="Center"/>
                 </Grid>
             </Border>
 
@@ -59,79 +59,85 @@
                     <ItemsControl ItemsSource="{Binding FilteredAccounts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:RDAccount">
-                                <Expander IsExpanded="False">
-                                    <Expander.Header>
+                                <Border BorderThickness="0,0,0,1"
+                                        BorderBrush="{DynamicResource AppBorderBrush}">
+                                    <StackPanel>
                                         <Border Padding="10,8"
-                                                BorderThickness="0,0,0,1"
-                                                BorderBrush="{DynamicResource AppBorderBrush}"
                                                 DoubleTapped="OpenProfile_DoubleTapped">
-                                            <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="140,*,120,120,150,60"
+                                                  ColumnSpacing="10">
                                                 <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
                                                 <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
                                                 <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
                                                 <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
                                                 <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
-                                                <Button Grid.Column="5"
-                                                        Classes="Secondary"
-                                                        Padding="8,4"
-                                                        Click="OpenProfile_Click"
-                                                        Content="View"/>
+                                                <ToggleButton x:Name="ProfileToggle"
+                                                              Grid.Column="5"
+                                                              Classes="Icon"
+                                                              ToolTip.Tip="Quick view">
+                                                    <Path Width="16"
+                                                          Height="16"
+                                                          Stretch="Uniform"
+                                                          Fill="{DynamicResource AppTextSecondaryBrush}"
+                                                          Data="M1.5 12C2.9 7.8 7.1 5 12 5s9.1 2.8 10.5 7c-1.4 4.2-5.6 7-10.5 7S2.9 16.2 1.5 12zm10.5 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                                                </ToggleButton>
                                             </Grid>
                                         </Border>
-                                    </Expander.Header>
-                                    <Border Background="{DynamicResource AppHoverBrush}"
-                                            CornerRadius="8"
-                                            Margin="10,0,10,10"
-                                            Padding="12">
-                                        <Grid ColumnDefinitions="140,*,140,140"
-                                              RowDefinitions="Auto,Auto,Auto"
-                                              RowSpacing="8"
-                                              ColumnSpacing="12">
-                                            <TextBlock Text="Account"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding AccountNo}"
-                                                       FontFamily="Consolas"/>
+                                        <Border Background="{DynamicResource AppHoverBrush}"
+                                                CornerRadius="10"
+                                                Margin="10,0,10,10"
+                                                Padding="12"
+                                                IsVisible="{Binding IsChecked, ElementName=ProfileToggle}">
+                                            <Grid ColumnDefinitions="140,*,140,140"
+                                                  RowDefinitions="Auto,Auto,Auto"
+                                                  RowSpacing="8"
+                                                  ColumnSpacing="12">
+                                                <TextBlock Text="Account"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding AccountNo}"
+                                                           FontFamily="Consolas"/>
 
-                                            <TextBlock Grid.Column="2"
-                                                       Text="Name"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Column="3"
-                                                       Text="{Binding AccountName}"
-                                                       TextWrapping="Wrap"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text="Name"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Column="3"
+                                                           Text="{Binding AccountName}"
+                                                           TextWrapping="Wrap"/>
 
-                                            <TextBlock Grid.Row="1"
-                                                       Text="Amount"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Row="1"
-                                                       Grid.Column="1"
-                                                       Text="{Binding Denomination}"/>
+                                                <TextBlock Grid.Row="1"
+                                                           Text="Amount"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="1"
+                                                           Text="{Binding Denomination}"/>
 
-                                            <TextBlock Grid.Row="1"
-                                                       Grid.Column="2"
-                                                       Text="Paid Upto"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Row="1"
-                                                       Grid.Column="3"
-                                                       Text="{Binding MonthPaidUpto}"/>
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="2"
+                                                           Text="Paid Upto"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="3"
+                                                           Text="{Binding MonthPaidUpto}"/>
 
-                                            <TextBlock Grid.Row="2"
-                                                       Text="Next Due"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Row="2"
-                                                       Grid.Column="1"
-                                                       Text="{Binding NextInstallmentDate}"/>
+                                                <TextBlock Grid.Row="2"
+                                                           Text="Next Due"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Row="2"
+                                                           Grid.Column="1"
+                                                           Text="{Binding NextInstallmentDate}"/>
 
-                                            <TextBlock Grid.Row="2"
-                                                       Grid.Column="2"
-                                                       Text="Short Code"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Grid.Row="2"
-                                                       Grid.Column="3"
-                                                       Text="{Binding ShortCode}"/>
-                                        </Grid>
-                                    </Border>
-                                </Expander>
+                                                <TextBlock Grid.Row="2"
+                                                           Grid.Column="2"
+                                                           Text="Short Code"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Row="2"
+                                                           Grid.Column="3"
+                                                           Text="{Binding ShortCode}"/>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
