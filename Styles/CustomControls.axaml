@@ -149,41 +149,17 @@
     </Style>
 
     <Style Selector="Border.DialogBackdrop">
-        <Setter Property="Background">
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#F6F4F1" Offset="0"/>
-                <GradientStop Color="#EFECE6" Offset="1"/>
-            </LinearGradientBrush>
-        </Setter>
+        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
         <Setter Property="Padding" Value="26"/>
     </Style>
 
-    <Style Selector="Border.DialogBackdrop" ThemeVariant="Dark">
-        <Setter Property="Background" Value="#171717"/>
-    </Style>
-
     <Style Selector="Border.DialogSurface">
-        <Setter Property="Background">
-            <AcrylicBrush TintColor="#FFFFFF"
-                          TintOpacity="0.88"
-                          MaterialOpacity="0.78"
-                          FallbackColor="#FDFDFC"/>
-        </Setter>
-        <Setter Property="BorderBrush" Value="#E3E0DB"/>
+        <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="18"/>
         <Setter Property="Padding" Value="22"/>
-        <Setter Property="BoxShadow" Value="0 28 64 0 #00000026"/>
-    </Style>
-
-    <Style Selector="Border.DialogSurface" ThemeVariant="Dark">
-        <Setter Property="Background">
-            <AcrylicBrush TintColor="#1F1F1F"
-                          TintOpacity="0.92"
-                          MaterialOpacity="0.8"
-                          FallbackColor="#1F1F1F"/>
-        </Setter>
-        <Setter Property="BorderBrush" Value="#2F2F2F"/>
+        <Setter Property="BoxShadow" Value="0 24 56 0 #00000022"/>
     </Style>
 
     <Style Selector="Border.DialogDivider">
