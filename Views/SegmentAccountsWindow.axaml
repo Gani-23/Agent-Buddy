@@ -62,17 +62,26 @@
                                 <Border BorderThickness="0,0,0,1"
                                         BorderBrush="{DynamicResource AppBorderBrush}">
                                     <StackPanel>
-                                        <Border Padding="10,8"
-                                                DoubleTapped="OpenProfile_DoubleTapped">
-                                            <Grid ColumnDefinitions="140,*,120,120,150,60"
-                                                  ColumnSpacing="10">
-                                                <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
+                                        <Grid ColumnDefinitions="140,*,120,120,150,60"
+                                              ColumnSpacing="10">
+                                            <Border Grid.ColumnSpan="5"
+                                                    Padding="10,8"
+                                                    Background="Transparent"
+                                                    DoubleTapped="OpenProfile_DoubleTapped">
+                                                <Grid ColumnDefinitions="140,*,120,120,150"
+                                                      ColumnSpacing="10">
+                                                    <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
+                                                    <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
+                                                </Grid>
+                                            </Border>
+                                            <Border Grid.Column="5"
+                                                    Padding="10,8"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
                                                 <ToggleButton x:Name="ProfileToggle"
-                                                              Grid.Column="5"
                                                               Classes="Icon"
                                                               ToolTip.Tip="Quick view">
                                                     <Path Width="16"
@@ -81,8 +90,8 @@
                                                           Fill="{DynamicResource AppTextSecondaryBrush}"
                                                           Data="M1.5 12C2.9 7.8 7.1 5 12 5s9.1 2.8 10.5 7c-1.4 4.2-5.6 7-10.5 7S2.9 16.2 1.5 12zm10.5 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
                                                 </ToggleButton>
-                                            </Grid>
-                                        </Border>
+                                            </Border>
+                                        </Grid>
                                         <Border Background="{DynamicResource AppHoverBrush}"
                                                 CornerRadius="10"
                                                 Margin="10,0,10,10"

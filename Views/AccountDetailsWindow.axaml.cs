@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Input;
 using Avalonia.Styling;
 using AgentBuddy.Models;
 
@@ -31,5 +32,13 @@ public partial class AccountDetailsWindow : Window
     private void Close_Click(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void Window_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
     }
 }

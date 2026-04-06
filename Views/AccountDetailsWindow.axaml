@@ -16,21 +16,30 @@
         ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         CanResize="False"
-        Background="{DynamicResource AppCardBackgroundBrush}">
+        Background="{DynamicResource AppCardBackgroundBrush}"
+        KeyDown="Window_KeyDown">
 
-    <Border Padding="32" Classes="FadeIn">
+    <Border Padding="28" Classes="FadeIn DialogSurface">
         <StackPanel Spacing="20">
             
             <!-- Header -->
-            <StackPanel Spacing="8">
-                <TextBlock Text="{DynamicResource L_AccountDetails_Kicker}" Classes="Kicker"/>
-                <TextBlock Text="{DynamicResource L_AccountDetails_Title}" 
-                           Classes="SectionHeader"
-                           FontSize="28"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                <Separator Margin="0,8,0,0"/>
-            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{DynamicResource L_AccountDetails_Kicker}" Classes="Kicker"/>
+                    <TextBlock Text="{DynamicResource L_AccountDetails_Title}" 
+                               Classes="SectionHeader"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <Separator Margin="0,8,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Classes="Icon"
+                        Click="Close_Click"
+                        ToolTip.Tip="{DynamicResource L_Common_Close}">
+                    <TextBlock Text="×" FontSize="16" FontWeight="Bold"/>
+                </Button>
+            </Grid>
 
             <!-- Account Information -->
             <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
