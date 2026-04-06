@@ -46,10 +46,13 @@ public sealed class ConfirmListDialogViewModel : ViewModelBase
         get => _filterMode;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _filterMode, value))
+            if (_filterMode == value)
             {
-                ApplyFilter();
+                return;
             }
+
+            this.RaiseAndSetIfChanged(ref _filterMode, value);
+            ApplyFilter();
         }
     }
 
