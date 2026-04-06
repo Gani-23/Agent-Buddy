@@ -1371,11 +1371,7 @@ public class ListManagementViewModel : ViewModelBase
             {
                 await EnsureMissingReportsAsync();
 
-                var runReferences = processableLists
-                    .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
-                    .Select(list => list.ReferenceNumber.Trim())
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
+                var runReferences = GetAllSuccessReferences();
 
                 if (runReferences.Count > 0)
                 {
@@ -1420,7 +1416,7 @@ public class ListManagementViewModel : ViewModelBase
             {
                 shouldPrintReports = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
                     "Print Reports?",
-                    $"Print all {reportsWithPdf.Count} report PDF(s) generated in this run? This will print 2 copies of each report.",
+                    $"Print all {reportsWithPdf.Count} report PDF(s) for successful lists? This will print 2 copies of each report.",
                     "Print 2 Copies",
                     "Skip")).ToTask();
             }
@@ -1454,7 +1450,7 @@ public class ListManagementViewModel : ViewModelBase
 
             var shouldGeneratePayslips = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
                 "Generate Payslips?",
-                "Generate payslips for the current run and print 1 copy?",
+                "Generate payslips for all successful lists and print 1 copy?",
                 "Generate & Print",
                 "Not Now")).ToTask();
 
@@ -1491,11 +1487,7 @@ public class ListManagementViewModel : ViewModelBase
 
     private async Task EnsureMissingReportsAsync()
     {
-        var allReferences = Lists
-            .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
-            .Select(list => list.ReferenceNumber.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var allReferences = GetAllSuccessReferences();
 
         if (allReferences.Count == 0)
         {
@@ -1549,6 +1541,15 @@ public class ListManagementViewModel : ViewModelBase
         ProcessStatus = successMessage;
         AppendProcessingLog(successMessage);
         _notificationService?.Success("Reports Ready", successMessage);
+    }
+
+    private List<string> GetAllSuccessReferences()
+    {
+        return Lists
+            .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
+            .Select(list => list.ReferenceNumber.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private void OnListPropertyChanged(object? sender, PropertyChangedEventArgs e)

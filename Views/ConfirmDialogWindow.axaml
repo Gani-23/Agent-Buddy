@@ -10,6 +10,11 @@
         Height="240"
         MinWidth="520"
         MinHeight="240"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}">
