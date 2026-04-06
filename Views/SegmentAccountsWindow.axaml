@@ -23,7 +23,7 @@
         CanResize="True"
         Background="{DynamicResource AppCardBackgroundBrush}">
 
-    <Border Padding="20" Classes="FadeIn">
+    <Border Padding="20" Classes="FadeIn DialogSurface">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
             <StackPanel Grid.Row="0" Spacing="4">
                 <TextBlock Text="{DynamicResource L_Segment_Kicker}" Classes="Kicker"/>
