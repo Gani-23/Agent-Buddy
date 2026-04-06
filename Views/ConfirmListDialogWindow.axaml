@@ -40,20 +40,53 @@
                 <Border Background="{DynamicResource AppHoverBrush}"
                         CornerRadius="10"
                         Padding="10">
-                    <ScrollViewer MaxHeight="160"
-                                  VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Items}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}"
-                                               FontFamily="Consolas"
-                                               FontSize="12"
-                                               Foreground="{DynamicResource AppTextPrimaryBrush}"
-                                               Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <StackPanel Spacing="6">
+                        <Grid ColumnDefinitions="120,*,140" ColumnSpacing="10">
+                            <TextBlock Text="List"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="Reference"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="Time"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </Grid>
+
+                        <Border Classes="DialogDivider"
+                                Margin="0,0,0,2"/>
+
+                        <ScrollViewer MaxHeight="160"
+                                      VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Items}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="120,*,140" ColumnSpacing="10" Margin="0,2">
+                                            <TextBlock Text="{Binding ListLabel}"
+                                                       FontFamily="Consolas"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding ReferenceNumber}"
+                                                       FontFamily="Consolas"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding TimestampLabel}"
+                                                       FontFamily="Consolas"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
                 </Border>
 
                 <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">

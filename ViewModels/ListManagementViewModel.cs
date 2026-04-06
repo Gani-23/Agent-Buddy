@@ -1415,12 +1415,7 @@ public class ListManagementViewModel : ViewModelBase
 
             if (reportsWithPdf.Count > 0)
             {
-                var printList = runReferences
-                    .Where(reference => !string.IsNullOrWhiteSpace(reference))
-                    .Select(reference => reference.Trim())
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(reference => reference, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
+                var printList = BuildConfirmListItems(runReferences, runReports);
 
                 shouldPrintReports = await ConfirmListPrompt.Handle(new ConfirmListDialogRequest(
                     "Print Reports?",
@@ -1457,12 +1452,7 @@ public class ListManagementViewModel : ViewModelBase
                 }
             }
 
-            var payslipList = runReferences
-                .Where(reference => !string.IsNullOrWhiteSpace(reference))
-                .Select(reference => reference.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(reference => reference, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            var payslipList = BuildConfirmListItems(runReferences, runReports);
 
             var shouldGeneratePayslips = await ConfirmListPrompt.Handle(new ConfirmListDialogRequest(
                 "Generate Payslips?",
@@ -1570,6 +1560,46 @@ public class ListManagementViewModel : ViewModelBase
             .Where(list => list.IsSuccessState && !string.IsNullOrWhiteSpace(list.ReferenceNumber))
             .Select(list => list.ReferenceNumber.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static List<ConfirmListItem> BuildConfirmListItems(
+        IReadOnlyList<string> references,
+        IReadOnlyList<DailyListReport> reports)
+    {
+        var normalized = references
+            .Where(reference => !string.IsNullOrWhiteSpace(reference))
+            .Select(reference => reference.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var byReference = reports
+            .Where(report => !string.IsNullOrWhiteSpace(report.ReferenceNumber))
+            .GroupBy(report => report.ReferenceNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.OrderByDescending(item => item.Timestamp).First())
+            .ToDictionary(item => item.ReferenceNumber.Trim(), item => item, StringComparer.OrdinalIgnoreCase);
+
+        var items = new List<ConfirmListItem>();
+        foreach (var reference in normalized)
+        {
+            if (byReference.TryGetValue(reference, out var report))
+            {
+                var listLabel = report.ListIndex > 0 ? $"List {report.ListIndex}" : "List -";
+                var timestampLabel = report.Timestamp == default
+                    ? "-"
+                    : report.Timestamp.ToString("dd-MMM HH:mm");
+                items.Add(new ConfirmListItem(reference, listLabel, timestampLabel));
+            }
+            else
+            {
+                items.Add(new ConfirmListItem(reference, "List -", "-"));
+            }
+        }
+
+        return items
+            .OrderBy(item => item.TimestampLabel == "-" ? 1 : 0)
+            .ThenBy(item => item.TimestampLabel)
+            .ThenBy(item => item.ReferenceNumber, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 

@@ -10,6 +10,11 @@
         Width="500"
         Height="400"
         WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
         CanResize="False"
         Background="{DynamicResource AppCardBackgroundBrush}">
 

@@ -14,6 +14,11 @@
         Height="680"
         MinWidth="860"
         MinHeight="560"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaChromeHints="NoChrome"
+        ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
         Background="{DynamicResource AppCardBackgroundBrush}">
