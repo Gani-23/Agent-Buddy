@@ -37,9 +37,18 @@
                            TextWrapping="Wrap"
                            Classes="DialogBody"/>
 
-                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Watermark="Search by list or reference..."
-                         FontSize="13"/>
+                <WrapPanel Spacing="10">
+                    <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Width="320"
+                             Watermark="Search by list or reference..."
+                             FontSize="13"/>
+                    <ComboBox Width="200"
+                              SelectedIndex="{Binding FilterMode}">
+                        <ComboBoxItem Content="All lists"/>
+                        <ComboBoxItem Content="With accounts"/>
+                        <ComboBoxItem Content="Missing accounts"/>
+                    </ComboBox>
+                </WrapPanel>
 
                 <Border Background="{DynamicResource AppHoverBrush}"
                         CornerRadius="10"

@@ -8,6 +8,7 @@ namespace AgentBuddy.ViewModels;
 public sealed class ConfirmListDialogViewModel : ViewModelBase
 {
     private string _searchQuery = string.Empty;
+    private int _filterMode;
     private int _totalAccounts;
 
     public ConfirmListDialogViewModel(ConfirmListDialogRequest request)
@@ -40,6 +41,18 @@ public sealed class ConfirmListDialogViewModel : ViewModelBase
         }
     }
 
+    public int FilterMode
+    {
+        get => _filterMode;
+        set
+        {
+            if (this.RaiseAndSetIfChanged(ref _filterMode, value))
+            {
+                ApplyFilter();
+            }
+        }
+    }
+
     public int TotalAccounts
     {
         get => _totalAccounts;
@@ -49,13 +62,19 @@ public sealed class ConfirmListDialogViewModel : ViewModelBase
     private void ApplyFilter()
     {
         var query = (SearchQuery ?? string.Empty).Trim();
-        var filtered = string.IsNullOrWhiteSpace(query)
-            ? Items.ToList()
-            : Items
-                .Where(item =>
-                    item.ReferenceNumber.Contains(query, System.StringComparison.OrdinalIgnoreCase) ||
-                    item.ListLabel.Contains(query, System.StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        var filtered = Items
+            .Where(item =>
+                _filterMode switch
+                {
+                    1 => item.AccountCount > 0,
+                    2 => item.AccountCount == 0,
+                    _ => true
+                })
+            .Where(item =>
+                string.IsNullOrWhiteSpace(query) ||
+                item.ReferenceNumber.Contains(query, System.StringComparison.OrdinalIgnoreCase) ||
+                item.ListLabel.Contains(query, System.StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
         FilteredItems.Clear();
         foreach (var item in filtered)

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Input;
 using Avalonia.Styling;
 using AgentBuddy.Models;
 using AgentBuddy.ViewModels;
@@ -41,6 +42,17 @@ public partial class SegmentAccountsWindow : Window
     private async void OpenProfile_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button button || button.DataContext is not RDAccount account)
+        {
+            return;
+        }
+
+        var dialog = new AccountDetailsWindow(account, _isDarkTheme);
+        await dialog.ShowDialog(this);
+    }
+
+    private async void OpenProfile_DoubleTapped(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Control control || control.DataContext is not RDAccount account)
         {
             return;
         }

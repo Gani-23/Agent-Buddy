@@ -59,20 +59,79 @@
                     <ItemsControl ItemsSource="{Binding FilteredAccounts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:RDAccount">
-                                <Border Padding="10,8" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
-                                    <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
-                                        <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
-                                        <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
-                                        <Button Grid.Column="5"
-                                                Classes="Secondary"
-                                                Padding="8,4"
-                                                Click="OpenProfile_Click"
-                                                Content="View"/>
-                                    </Grid>
-                                </Border>
+                                <Expander IsExpanded="False">
+                                    <Expander.Header>
+                                        <Border Padding="10,8"
+                                                BorderThickness="0,0,0,1"
+                                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                                DoubleTapped="OpenProfile_DoubleTapped">
+                                            <Grid ColumnDefinitions="140,*,120,120,150,100" ColumnSpacing="10">
+                                                <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding NextInstallmentDate}"/>
+                                                <Button Grid.Column="5"
+                                                        Classes="Secondary"
+                                                        Padding="8,4"
+                                                        Click="OpenProfile_Click"
+                                                        Content="View"/>
+                                            </Grid>
+                                        </Border>
+                                    </Expander.Header>
+                                    <Border Background="{DynamicResource AppHoverBrush}"
+                                            CornerRadius="8"
+                                            Margin="10,0,10,10"
+                                            Padding="12">
+                                        <Grid ColumnDefinitions="140,*,140,140"
+                                              RowDefinitions="Auto,Auto,Auto"
+                                              RowSpacing="8"
+                                              ColumnSpacing="12">
+                                            <TextBlock Text="Account"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding AccountNo}"
+                                                       FontFamily="Consolas"/>
+
+                                            <TextBlock Grid.Column="2"
+                                                       Text="Name"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding AccountName}"
+                                                       TextWrapping="Wrap"/>
+
+                                            <TextBlock Grid.Row="1"
+                                                       Text="Amount"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="1"
+                                                       Grid.Column="1"
+                                                       Text="{Binding Denomination}"/>
+
+                                            <TextBlock Grid.Row="1"
+                                                       Grid.Column="2"
+                                                       Text="Paid Upto"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="1"
+                                                       Grid.Column="3"
+                                                       Text="{Binding MonthPaidUpto}"/>
+
+                                            <TextBlock Grid.Row="2"
+                                                       Text="Next Due"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="2"
+                                                       Grid.Column="1"
+                                                       Text="{Binding NextInstallmentDate}"/>
+
+                                            <TextBlock Grid.Row="2"
+                                                       Grid.Column="2"
+                                                       Text="Short Code"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="2"
+                                                       Grid.Column="3"
+                                                       Text="{Binding ShortCode}"/>
+                                        </Grid>
+                                    </Border>
+                                </Expander>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
