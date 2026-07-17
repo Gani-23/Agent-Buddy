@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ReactiveUI;
@@ -10,6 +11,7 @@ namespace AgentBuddy.Models;
 public class ListItem : ReactiveObject
 {
     private bool _isProcessedInCurrentRun;
+    private bool _isDuplicateFocus;
 
     public string AccountNo { get; set; } = string.Empty;
     public int Installment { get; set; } = 1; // Default to 1st installment
@@ -20,6 +22,11 @@ public class ListItem : ReactiveObject
         get => _isProcessedInCurrentRun;
         set => this.RaiseAndSetIfChanged(ref _isProcessedInCurrentRun, value);
     }
+    public bool IsDuplicateFocus
+    {
+        get => _isDuplicateFocus;
+        set => this.RaiseAndSetIfChanged(ref _isDuplicateFocus, value);
+    }
     public int EffectiveInstallment => Installment > 0 ? Installment : 1;
     public decimal TotalAmount => (AccountDetails?.GetAmount() ?? 0) * EffectiveInstallment;
     public string AccountNameDisplay =>
@@ -28,6 +35,17 @@ public class ListItem : ReactiveObject
         string.IsNullOrWhiteSpace(AccountDetails?.Denomination) ? "-" : AccountDetails.Denomination;
     public string NextInstallmentDateDisplay =>
         string.IsNullOrWhiteSpace(AccountDetails?.NextInstallmentDate) ? "-" : AccountDetails.NextInstallmentDate;
+    public PaymentAnalysis PaymentAnalysis =>
+        AccountDetails?.AnalyzePayment(EffectiveInstallment) ??
+        PaymentAnalysis.CreateMissingDueDate(
+            EffectiveInstallment,
+            new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1));
+    public string PaymentCategoryLabel => PaymentAnalysis.CategoryLabel;
+    public string PaymentSummary => PaymentAnalysis.Summary;
+    public string DueMonthDisplay => PaymentAnalysis.DueMonthDisplay;
+    public string NextDueAfterPaymentDisplay => PaymentAnalysis.NextDueMonthAfterPaymentDisplay;
+    public string EstimatedOpeningDateDisplay =>
+        AccountDetails?.EstimatedOpeningDateDisplay ?? "-";
     
     /// <summary>
     /// Gets the formatted string for Python script: AccountNo_Installment
@@ -101,6 +119,7 @@ public class DopChequeInputItem
 {
     public int ListIndex { get; set; }
     public string AccountNo { get; set; } = string.Empty;
+    public string BankName { get; set; } = string.Empty;
     public string ChequeNo { get; set; } = string.Empty;
     public string PaymentAccountNo { get; set; } = string.Empty;
     public string PaymentModeToken { get; set; } = "dop_cheque";

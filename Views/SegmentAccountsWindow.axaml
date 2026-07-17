@@ -14,10 +14,9 @@
         Height="680"
         MinWidth="860"
         MinHeight="560"
-        SystemDecorations="None"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
@@ -35,12 +34,24 @@
                     <Run Text="Rs. "/>
                     <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
                 </TextBlock>
+                <Border Background="{DynamicResource SuccessTintBrush}"
+                        BorderBrush="{StaticResource SuccessBrush}"
+                        BorderThickness="1"
+                        CornerRadius="999"
+                        Padding="10,4"
+                        HorizontalAlignment="Left"
+                        IsVisible="{Binding IsNewAccountsSegment}">
+                    <TextBlock Text="{Binding SegmentHint}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource SuccessBrush}"/>
+                </Border>
             </StackPanel>
 
             <Border Grid.Row="1" Classes="Card" Padding="12,10">
                 <TextBox x:Name="SearchBox"
                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Watermark="{DynamicResource L_Search_Watermark}"/>
+                         PlaceholderText="{DynamicResource L_Search_Watermark}"/>
             </Border>
 
             <Border Grid.Row="2" Classes="Card" Padding="10,8">
@@ -98,7 +109,7 @@
                                                 Padding="12"
                                                 IsVisible="{Binding IsChecked, ElementName=ProfileToggle}">
                                             <Grid ColumnDefinitions="140,*,140,140"
-                                                  RowDefinitions="Auto,Auto,Auto"
+                                                  RowDefinitions="Auto,Auto,Auto,Auto"
                                                   RowSpacing="8"
                                                   ColumnSpacing="12">
                                                 <TextBlock Text="Account"
@@ -143,6 +154,13 @@
                                                 <TextBlock Grid.Row="2"
                                                            Grid.Column="3"
                                                            Text="{Binding ShortCode}"/>
+
+                                                <TextBlock Grid.Row="3"
+                                                           Text="Opened"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Grid.Row="3"
+                                                           Grid.Column="1"
+                                                           Text="{Binding EstimatedOpeningDateDisplay}"/>
                                             </Grid>
                                         </Border>
                                     </StackPanel>

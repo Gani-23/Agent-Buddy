@@ -36,7 +36,7 @@
         <x:String x:Key="L_Dash_PendingMonth">ఈ నెల పెండింగ్</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">తదుపరి నెల కలెక్షన్</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">అడ్వాన్స్ చెల్లింపు</x:String>
-        <x:String x:Key="L_Dash_NewAccountsPaid1">కొత్త ఖాతాలు (Month Paid = 1)</x:String>
+        <x:String x:Key="L_Dash_NewAccountsRecent">కొత్త ఖాతాలు (Last 30 Days)</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">ఫ్రీజ్‌కు దగ్గర</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">పరిపక్వ ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">మూసిన ఖాతాలు</x:String>
@@ -53,8 +53,8 @@
 
         <x:String x:Key="L_List_Kicker">దైనందిన వర్క్‌ఫ్లో</x:String>
         <x:String x:Key="L_List_Title">చెల్లింపు జాబితాలు సృష్టించు</x:String>
-        <x:String x:Key="L_List_SaveLot">లాట్ సేవ్</x:String>
-        <x:String x:Key="L_List_ReloadList">జాబితా రీలోడ్</x:String>
+        <x:String x:Key="L_List_SaveLot">చెక్‌పాయింట్ సేవ్</x:String>
+        <x:String x:Key="L_List_ReloadList">చెక్‌పాయింట్ రీస్టోర్</x:String>
         <x:String x:Key="L_List_DeleteAll">అన్నీ తొలగించు</x:String>
         <x:String x:Key="L_List_StartWalk">ప్రాసెస్ ప్రారంభించు</x:String>
         <x:String x:Key="L_List_RetryFailed">ఫెయిల్ అయినవే మళ్లీ</x:String>
@@ -68,8 +68,10 @@
         <x:String x:Key="L_List_ColumnAccountNo">ఖాతా నంబర్</x:String>
         <x:String x:Key="L_List_ColumnInst">ఇన్‌స్టాల్‌మెంట్</x:String>
         <x:String x:Key="L_List_ClearList">జాబితా క్లియర్</x:String>
-        <x:String x:Key="L_List_LegendPayingAdvance">అడ్వాన్స్ చెల్లింపు</x:String>
-        <x:String x:Key="L_List_LegendAdditionalInst">అదనపు ఇన్‌స్టాల్‌మెంట్</x:String>
+        <x:String x:Key="L_List_LegendAdvancePayment">అడ్వాన్స్: ఈ నెలకు మించి</x:String>
+        <x:String x:Key="L_List_LegendCatchUp">క్యాచ్-అప్: పాత బకాయిలు క్లియర్</x:String>
+        <x:String x:Key="L_List_LegendPartialCatchUp">పాక్షికం: ఇంకా ఈ నెలకు చేరలేదు</x:String>
+        <x:String x:Key="L_List_LegendMissingDue">డ్యూ తేదీ అందుబాటులో లేదు</x:String>
 
         <x:String x:Key="L_Report_Kicker">ఆపరేషన్స్</x:String>
         <x:String x:Key="L_Report_Title">రిపోర్ట్స్</x:String>
@@ -148,7 +150,7 @@
         <x:String x:Key="L_Set_PickSourceDialogTitle">సోర్స్ లెగసీ డేటాబేస్ ఎంచుకోండి</x:String>
         <x:String x:Key="L_Set_PickTargetDialogTitle">టార్గెట్ DOPAgent డేటాబేస్ ఎంచుకోండి</x:String>
         <x:String x:Key="L_Set_AboutTitle">ఏజెంట్ బడ్డి గురించి</x:String>
-        <x:String x:Key="L_Set_VersionText">వెర్షన్ 1.0.0</x:String>
+        <x:String x:Key="L_Set_VersionText">వెర్షన్ 2.0.2</x:String>
         <x:String x:Key="L_Set_AboutDesc">ఇండియా పోస్ట్ DOP ఏజెంట్ పోర్టల్ ఆటోమేషన్ టూల్</x:String>
 
         <x:String x:Key="L_Prompt_Aslaas_Title">ASLAAS అవసరం</x:String>
@@ -196,9 +198,12 @@
         <x:String x:Key="L_AccountDetails_Name">పేరు:</x:String>
         <x:String x:Key="L_AccountDetails_Amount">మొత్తం:</x:String>
         <x:String x:Key="L_AccountDetails_DueDate">బకాయి తేదీ:</x:String>
+        <x:String x:Key="L_AccountDetails_EstimatedOpeningDate">అంచనా ప్రారంభ తేదీ:</x:String>
+        <x:String x:Key="L_AccountDetails_OpeningDateNote">అందుబాటులో ఉన్నప్పుడు తదుపరి బకాయి తేదీ మరియు చెల్లించిన ఇన్‌స్టాల్‌మెంట్ల ఆధారంగా లెక్కించబడింది.</x:String>
         <x:String x:Key="L_AccountDetails_MonthPaidUpto">చెల్లించిన నెల వరకు:</x:String>
         <x:String x:Key="L_AccountDetails_ShortCode">షార్ట్ కోడ్:</x:String>
         <x:String x:Key="L_AccountDetails_FirstSeen">మొదట చూసిన తేదీ:</x:String>
+        <x:String x:Key="L_AccountDetails_FirstSeenInApp">యాప్‌లో మొదట చూసిన తేదీ:</x:String>
         <x:String x:Key="L_AccountDetails_LastUpdated">చివరి అప్డేట్:</x:String>
         <x:String x:Key="L_AccountDetails_AddToList">జాబితాకు జోడించు</x:String>
 
@@ -211,5 +216,6 @@
         <x:String x:Key="L_Segment_ColumnAmount">మొత్తం</x:String>
         <x:String x:Key="L_Segment_ColumnPaidUpto">చెల్లింపు వరకు</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">తదుపరి బకాయి</x:String>
+        <x:String x:Key="L_Segment_ColumnOpened">ప్రారంభం</x:String>
     </Styles.Resources>
 </Styles>

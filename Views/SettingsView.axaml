@@ -8,13 +8,33 @@
              x:DataType="vm:SettingsViewModel">
 
     <ScrollViewer>
-        <StackPanel Spacing="24" Margin="0,0,0,24" MaxWidth="800">
+        <StackPanel Spacing="24" Margin="0,0,0,24" MaxWidth="920">
             
             <!-- Header -->
             <StackPanel Spacing="2">
                 <TextBlock Text="{DynamicResource L_Set_Kicker}" Classes="Kicker"/>
                 <TextBlock Text="{DynamicResource L_Set_Title}" Classes="SectionHeader"/>
             </StackPanel>
+
+            <Border Classes="SectionCard" Padding="20">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="18">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Operational control panel" Classes="SubHeader"/>
+                        <TextBlock Text="Keep the app’s core workflow in one place: language, sync, renewal, retention, printers, browser, and licensing."
+                                   Classes="SectionLead"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Spacing="6" HorizontalAlignment="Right">
+                        <TextBlock Text="Settings tuned for daily operations" Classes="Kicker" HorizontalAlignment="Right"/>
+                        <TextBlock Text="Cleaner hierarchy, fewer scroll trips, clearer actions."
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Right"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   FontSize="13"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
             <!-- Language -->
             <Border Classes="SectionCard" Padding="24">
@@ -128,8 +148,7 @@
                     <Separator/>
 
                     <TextBlock Text="{DynamicResource L_Set_PortalCredentials}"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
@@ -139,7 +158,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding EditableAgentId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmAgentId}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmAgentId}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="Agent Name"
@@ -147,7 +166,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding EditableAgentName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Agent Name"/>
+                                 PlaceholderText="Agent Name"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource L_Set_PasswordField}"
@@ -155,7 +174,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="2" Grid.Column="1"
                                  Text="{Binding EditablePassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmPassword}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmPassword}"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="1"
                                    Text="{Binding CredentialsStatus}"
@@ -192,8 +211,7 @@
                     <Separator/>
 
                     <TextBlock Text="{DynamicResource L_Set_MobileSync}"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
@@ -203,7 +221,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding MobileSyncApiUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmApiUrl}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmApiUrl}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource L_Set_ApiKey}"
@@ -211,7 +229,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding MobileSyncApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmApiKey}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmApiKey}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="1"
                                    Text="{Binding MobileSyncStatus}"
@@ -231,9 +249,102 @@
 
                     <Separator/>
 
+                    <TextBlock Text="Postal RD Certificate Renewal"
+                               Classes="SubHeader"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Next Renewal Date"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Text="{Binding RdCertificateRenewalDateText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="23-May-2026 or 2026-05-23"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="This is for the postal RD certificate renewal only, not the app license."
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Text="{Binding RdCertificateRenewalStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveRdCertificateRenewalCommand}"
+                            IsEnabled="{Binding !IsSavingRdCertificateRenewal}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <TextBlock Text="Save Renewal Date"/>
+                    </Button>
+
+                    <Separator/>
+
+                    <TextBlock Text="Retention &amp; Cleanup"
+                               Classes="SubHeader"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                    <Grid ColumnDefinitions="150,*,150,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Saved Lots"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Text="{Binding SavedLotRetentionDaysText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="1"/>
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="2"
+                                   Text="Reports"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="3"
+                                 Text="{Binding ReportRetentionDaysText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="2"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="3"
+                                   Text="Saved lots auto-purge from the Create Lists screen. Reports auto-purge from the Reports screen."
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="3"
+                                   Text="{Binding RetentionStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+
+                    <Button Classes="Primary"
+                            Command="{Binding SaveRetentionSettingsCommand}"
+                            IsEnabled="{Binding !IsSavingRetentionSettings}"
+                            HorizontalAlignment="Left"
+                            Padding="16,10">
+                        <TextBlock Text="Save Retention Settings"/>
+                    </Button>
+
+                    <Separator/>
+
                     <TextBlock Text="Application License"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*"
@@ -248,7 +359,7 @@
                         <TextBox Grid.Row="0"
                                  Grid.Column="1"
                                  Text="{Binding LicenseServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="https://oauth4-0.onrender.com (optional for offline token checks)"/>
+                                 PlaceholderText="https://oauth4-0.onrender.com (optional for offline token checks)"/>
 
                         <TextBlock Grid.Row="1"
                                    Grid.Column="0"
@@ -258,7 +369,7 @@
                         <TextBox Grid.Row="1"
                                  Grid.Column="1"
                                  Text="{Binding LicenseAppId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="agentbuddy"/>
+                                 PlaceholderText="agentbuddy"/>
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
@@ -268,7 +379,7 @@
                         <TextBox Grid.Row="2"
                                  Grid.Column="1"
                                  Text="{Binding LicenseToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Paste JWT license token"/>
+                                 PlaceholderText="Paste JWT license token"/>
 
                         <TextBlock Grid.Row="3"
                                    Grid.Column="1"
@@ -314,8 +425,7 @@
                     <Separator/>
 
                     <TextBlock Text="App Updates"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*"
@@ -360,8 +470,7 @@
                     <Separator/>
 
                     <TextBlock Text="{DynamicResource L_Set_PrinterConfig}"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*"
@@ -413,8 +522,7 @@
                     <Separator/>
 
                     <TextBlock Text="{DynamicResource L_Set_BrowserConfig}"
-                               FontSize="15"
-                               FontWeight="SemiBold"
+                               Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                     <Grid ColumnDefinitions="150,*"
@@ -513,7 +621,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding SourceDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmSourceDb}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmSourceDb}"/>
                         <Button Grid.Row="0" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseSourceDb_Click"
@@ -526,7 +634,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding TargetDatabasePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{DynamicResource L_Set_WmTargetDb}"/>
+                                 PlaceholderText="{DynamicResource L_Set_WmTargetDb}"/>
                         <Button Grid.Row="1" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseTargetDb_Click"

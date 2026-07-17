@@ -19,8 +19,16 @@ public partial class DopChequePromptWindow : Window
         {
             if (DataContext is DopChequePromptViewModel vm && vm.RequireChequeNo)
             {
-                ChequeNoTextBox.Focus();
-                ChequeNoTextBox.SelectAll();
+                if (vm.ShowBankNameField)
+                {
+                    BankNameTextBox.Focus();
+                    BankNameTextBox.SelectAll();
+                }
+                else
+                {
+                    ChequeNoTextBox.Focus();
+                    ChequeNoTextBox.SelectAll();
+                }
             }
             else
             {
@@ -40,8 +48,16 @@ public partial class DopChequePromptWindow : Window
         }
 
         vm.ClearValidationMessage();
+        var bankName = (vm.BankName ?? string.Empty).Trim();
         var chequeNo = (vm.ChequeNo ?? string.Empty).Trim();
         var paymentAccountNo = (vm.PaymentAccountNo ?? string.Empty).Trim();
+
+        if (vm.ShowBankNameField && string.IsNullOrWhiteSpace(bankName))
+        {
+            vm.SetValidationMessage("Enter bank name.");
+            BankNameTextBox.Focus();
+            return;
+        }
 
         if (vm.RequireChequeNo && string.IsNullOrWhiteSpace(chequeNo))
         {
@@ -60,6 +76,7 @@ public partial class DopChequePromptWindow : Window
         Close(new DopChequePromptResult
         {
             AccountNo = vm.AccountNo,
+            BankName = bankName,
             ChequeNo = chequeNo,
             PaymentAccountNo = paymentAccountNo
         });

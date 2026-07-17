@@ -772,8 +772,37 @@ public class ReportsService
                 key TEXT PRIMARY KEY,
                 value TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )";
+        )";
         command.ExecuteNonQuery();
+    }
+
+    private async Task<int> GetReportRetentionDaysAsync()
+    {
+        var raw = await GetAppSettingAsync(AppSettingKeys.ReportRetentionDays);
+        if (int.TryParse((raw ?? string.Empty).Trim(), out var days) && days > 0)
+        {
+            return Math.Min(days, 3650);
+        }
+
+        return 2;
+    }
+
+    private async Task<string?> GetAppSettingAsync(string key)
+    {
+        EnsureAppSettingsTable();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT value
+            FROM app_settings
+            WHERE key = @key
+            LIMIT 1";
+        command.Parameters.AddWithValue("@key", key);
+
+        var result = await command.ExecuteScalarAsync();
+        return result?.ToString();
     }
 
     private static async Task<(int ExitCode, string StdOut, string StdErr)> RunProcessAsync(string fileName, params string[] args)
@@ -862,6 +891,86 @@ public class ReportsService
         {
             return (true, $"Report removed from list, but PDF delete failed: {ex.Message}");
         }
+    }
+
+    public async Task<int> CleanupExpiredReportsAsync()
+    {
+        var retentionDays = await GetReportRetentionDaysAsync();
+        return await CleanupExpiredReportsAsync(retentionDays);
+    }
+
+    public async Task<int> CleanupExpiredReportsAsync(int retentionDays)
+    {
+        if (retentionDays <= 0 || !File.Exists(_referencesFilePath))
+        {
+            return 0;
+        }
+
+        var content = await File.ReadAllTextAsync(_referencesFilePath);
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return 0;
+        }
+
+        var cutoffDate = DateTime.Today.AddDays(1 - retentionDays);
+        var expiredReferences = new List<string>();
+
+        foreach (Match match in ReportEntryRegex.Matches(content))
+        {
+            var timestampRaw = match.Groups["timestamp"].Value.Trim();
+            var reference = match.Groups["reference"].Value.Trim();
+            if (string.IsNullOrWhiteSpace(reference))
+            {
+                continue;
+            }
+
+            if (!DateTime.TryParse(timestampRaw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var timestamp))
+            {
+                continue;
+            }
+
+            if (timestamp.Date < cutoffDate)
+            {
+                expiredReferences.Add(reference);
+            }
+        }
+
+        if (expiredReferences.Count == 0)
+        {
+            return 0;
+        }
+
+        var updatedContent = content;
+        var deletedCount = 0;
+        foreach (var reference in expiredReferences.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            updatedContent = RemoveReferenceBlock(updatedContent, reference, out var removed);
+            if (!removed)
+            {
+                continue;
+            }
+
+            deletedCount++;
+            var pdfPath = Path.Combine(_pdfDirectoryPath, $"{reference}.pdf");
+            try
+            {
+                if (File.Exists(pdfPath))
+                {
+                    File.Delete(pdfPath);
+                }
+            }
+            catch
+            {
+                // Ignore PDF cleanup failures.
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            await File.WriteAllTextAsync(_referencesFilePath, updatedContent);
+        }
+
+        return deletedCount;
     }
 
     public async Task<(bool Success, string Message, string OutputPdfPath)> GeneratePayslipsAsync(

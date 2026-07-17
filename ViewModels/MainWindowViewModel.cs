@@ -77,6 +77,7 @@ public class MainWindowViewModel : ViewModelBase
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
         SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService);
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
+        SettingsViewModel.RdCertificateRenewalChanged += OnRdCertificateRenewalChanged;
 
         // Set default view
         _currentView = DashboardViewModel;
@@ -202,6 +203,10 @@ public class MainWindowViewModel : ViewModelBase
         {
             _ = ReportsViewModel.LoadTodayReportsAsync();
         }
+        else if (viewName == "Dashboard")
+        {
+            _ = DashboardViewModel.RefreshRdCertificateRenewalAsync();
+        }
 
         CurrentView = viewName switch
         {
@@ -258,6 +263,23 @@ public class MainWindowViewModel : ViewModelBase
         string warningTint = isDark ? "#332A17" : "#FFF4DC";
         string dangerTint = isDark ? "#342121" : "#FDECEC";
         string infoTint = isDark ? "#1A273B" : "#EAF2FF";
+        string listAdvanceTint = isDark ? "#183153" : "#DCEBFF";
+        string listAdvanceBorder = isDark ? "#6EA4FF" : "#145BD6";
+        string listCatchUpTint = isDark ? "#3A2B12" : "#FFF1CF";
+        string listCatchUpBorder = isDark ? "#F1B63C" : "#C98B00";
+        string listMixedTint = isDark ? "#15352F" : "#D8F4EE";
+        string listMixedBorder = isDark ? "#46C2A1" : "#0B8A6A";
+        string listLongOverdueTint = isDark ? "#3E2814" : "#FADFC7";
+        string listLongOverdueBorder = isDark ? "#F09A42" : "#C56000";
+        string listPartialTint = isDark ? "#412220" : "#FFE3E0";
+        string listPartialBorder = isDark ? "#F08C7D" : "#E16A5A";
+        string listLongOverduePartialTint = isDark ? "#4A1C1C" : "#F6C7C1";
+        string listLongOverduePartialBorder = isDark ? "#E57373" : "#A63232";
+        string listMissingDueTint = isDark ? "#2A2A2A" : "#F1F0EE";
+        string listMissingDueBorder = isDark ? "#7A7A7A" : "#A0A0A0";
+        string listDuplicateTint = isDark ? "#331E2A" : "#FCEAF3";
+        string listDuplicateBorder = isDark ? "#D86AA0" : "#C44582";
+        string suggestionBorder = isDark ? "#E78CBC" : "#C44582";
 
         resources["AppBackgroundBrush"] = new SolidColorBrush(Color.Parse(background));
         resources["AppCardBackgroundBrush"] = new SolidColorBrush(Color.Parse(card));
@@ -272,12 +294,34 @@ public class MainWindowViewModel : ViewModelBase
         resources["WarningTintBrush"] = new SolidColorBrush(Color.Parse(warningTint));
         resources["DangerTintBrush"] = new SolidColorBrush(Color.Parse(dangerTint));
         resources["InfoTintBrush"] = new SolidColorBrush(Color.Parse(infoTint));
+        resources["ListAdvanceTintBrush"] = new SolidColorBrush(Color.Parse(listAdvanceTint));
+        resources["ListAdvanceBorderBrush"] = new SolidColorBrush(Color.Parse(listAdvanceBorder));
+        resources["ListCatchUpTintBrush"] = new SolidColorBrush(Color.Parse(listCatchUpTint));
+        resources["ListCatchUpBorderBrush"] = new SolidColorBrush(Color.Parse(listCatchUpBorder));
+        resources["ListMixedTintBrush"] = new SolidColorBrush(Color.Parse(listMixedTint));
+        resources["ListMixedBorderBrush"] = new SolidColorBrush(Color.Parse(listMixedBorder));
+        resources["ListLongOverdueTintBrush"] = new SolidColorBrush(Color.Parse(listLongOverdueTint));
+        resources["ListLongOverdueBorderBrush"] = new SolidColorBrush(Color.Parse(listLongOverdueBorder));
+        resources["ListPartialCatchUpTintBrush"] = new SolidColorBrush(Color.Parse(listPartialTint));
+        resources["ListPartialCatchUpBorderBrush"] = new SolidColorBrush(Color.Parse(listPartialBorder));
+        resources["ListLongOverduePartialTintBrush"] = new SolidColorBrush(Color.Parse(listLongOverduePartialTint));
+        resources["ListLongOverduePartialBorderBrush"] = new SolidColorBrush(Color.Parse(listLongOverduePartialBorder));
+        resources["ListMissingDueTintBrush"] = new SolidColorBrush(Color.Parse(listMissingDueTint));
+        resources["ListMissingDueBorderBrush"] = new SolidColorBrush(Color.Parse(listMissingDueBorder));
+        resources["ListDuplicateTintBrush"] = new SolidColorBrush(Color.Parse(listDuplicateTint));
+        resources["ListDuplicateBorderBrush"] = new SolidColorBrush(Color.Parse(listDuplicateBorder));
+        resources["SuggestionBorderBrush"] = new SolidColorBrush(Color.Parse(suggestionBorder));
     }
 
     private async Task InitializeUpdateChecksAsync()
     {
         await CheckAndNotifyUpdatesAsync(force: false);
         _ = RunUpdateLoopAsync();
+    }
+
+    private void OnRdCertificateRenewalChanged(object? sender, EventArgs e)
+    {
+        _ = DashboardViewModel.RefreshRdCertificateRenewalAsync();
     }
 
     private async Task RunUpdateLoopAsync()

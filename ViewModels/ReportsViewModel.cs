@@ -101,6 +101,7 @@ public class ReportsViewModel : ViewModelBase
 
     public async Task LoadTodayReportsAsync()
     {
+        await _reportsService.CleanupExpiredReportsAsync();
         var reports = await _reportsService.GetReportsForDateAsync(DateTime.Today);
 
         TodayReports.Clear();

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="urn:schemas-microsoft-com:asm.v1"
+           xmlns="urn:schemas-microsoft-com:asm.v1"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:element name="assembly">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="assemblyIdentity" minOccurs="0" maxOccurs="1"/>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="manifestVersion" type="xs:string" use="required"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="assemblyIdentity">
+    <xs:complexType>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

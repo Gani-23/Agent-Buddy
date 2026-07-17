@@ -1,0 +1,96 @@
+#-------------------------------------------------------------------------------#
+#               Qodana analysis is configured by qodana.yaml file               #
+#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
+#-------------------------------------------------------------------------------#
+#################################################################################
+#              WARNING: Do not store sensitive information in this file,        #
+#               as its contents will be included in the Qodana report.          #
+#################################################################################
+version: "1.0"
+#Specify IDE code to run analysis without container (Applied in CI/CD pipeline)
+ide: QDNET
+#Specify inspection profile for code analysis
+profile:
+  name: qodana.starter
+include:
+  - name: ConvertIfStatementToReturnStatement
+  - name: ConvertIfStatementToConditionalTernaryExpression
+  - name: AutoPropertyCanBeMadeGetOnly.Global
+  - name: AsyncVoidEventHandlerMethod
+  - name: AsyncVoidMethod
+  - name: ChangeFieldTypeToSystemThreadingLock
+  - name: ClassNeverInstantiated.Global
+  - name: UseNegatedPatternMatching
+  - name: UsePatternMatching
+  - name: ConvertIfStatementToSwitchStatement
+  - name: ConvertToPrimaryConstructor
+  - name: UseAwaitUsing
+  - name: ConvertToConstant.Local
+  - name: ConvertToAutoPropertyWhenPossible
+  - name: ConvertToAutoPropertyWithPrivateSetter
+  - name: EventNeverSubscribedTo.Global
+  - name: FieldCanBeMadeReadOnly.Local
+  - name: ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+  - name: InlineTemporaryVariable
+  - name: InvertIf
+  - name: LoopCanBeConvertedToQuery
+  - name: MemberCanBePrivate.Global
+  - name: MemberCanBeMadeStatic.Global
+  - name: MemberCanBeMadeStatic.Local
+  - name: MergeIntoNegatedPattern
+  - name: MergeIntoPattern
+  - name: MergeIntoLogicalPattern
+  - name: MergeSequentialChecks
+  - name: ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+  - name: PropertyCanBeMadeInitOnly.Global
+  - name: PropertyCanBeMadeInitOnly.Local
+  - name: RedundantTypeDeclarationBody
+  - name: ArrangeRedundantParentheses
+  - name: ReplaceSubstringWithRangeIndexer
+  - name: UseNullPropagation
+  - name: ReplaceWithFieldKeyword
+  - name: CA1861
+  - name: CA1869
+  - name: SYSLIB1045
+  - name: CA1826
+  - name: CA1822
+  - name: CA1865
+  - name: CA1859
+  - name: CA1862
+  - name: SimplifyConditionalTernaryExpression
+  - name: UnusedType.Global
+  - name: UnusedMember.Global
+  - name: UseCollectionExpression
+  - name: ArrangeTypeModifiers
+  - name: UseObjectOrCollectionInitializer
+  - name: SuggestVarOrType_BuiltInTypes
+  - name: SuggestVarOrType_SimpleTypes
+  - name: ArrangeTrailingCommaInMultilineLists
+  - name: ArrangeObjectCreationWhenTypeEvident
+  - name: UseRawString
+  - name: XmlHighlighting
+
+#Enable inspections
+#include:
+#  - name: <SomeEnabledInspectionId>
+#Disable inspections
+#exclude:
+#  - name: <SomeDisabledInspectionId>
+#    paths:
+#      - <path/where/not/run/inspection>
+#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
+#bootstrap: sh ./prepare-qodana.sh
+#Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
+#plugins:
+#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
+# Quality gate. Will fail the CI/CD pipeline if any condition is not met
+# severityThresholds - configures maximum thresholds for different problem severities
+# testCoverageThresholds - configures minimum code coverage on a whole project and newly added code
+# Code Coverage is available in Ultimate and Ultimate Plus plans
+#failureConditions:
+#  severityThresholds:
+#    any: 15
+#    critical: 5
+#  testCoverageThresholds:
+#    fresh: 70
+#    total: 50

@@ -36,7 +36,7 @@
         <x:String x:Key="L_Dash_PendingMonth">इस माह लंबित</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">अगले माह कलेक्शन</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">एडवांस भुगतान</x:String>
-        <x:String x:Key="L_Dash_NewAccountsPaid1">नए खाते (Month Paid = 1)</x:String>
+        <x:String x:Key="L_Dash_NewAccountsRecent">नए खाते (Last 30 Days)</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">फ्रीज होने वाले</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">परिपक्व खाते</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">बंद खाते</x:String>
@@ -53,8 +53,8 @@
 
         <x:String x:Key="L_List_Kicker">दैनिक कार्यप्रवाह</x:String>
         <x:String x:Key="L_List_Title">भुगतान सूची बनाएं</x:String>
-        <x:String x:Key="L_List_SaveLot">लॉट सेव</x:String>
-        <x:String x:Key="L_List_ReloadList">सूची पुनःलोड</x:String>
+        <x:String x:Key="L_List_SaveLot">चेकपॉइंट सेव</x:String>
+        <x:String x:Key="L_List_ReloadList">चेकपॉइंट रिस्टोर</x:String>
         <x:String x:Key="L_List_DeleteAll">सब हटाएं</x:String>
         <x:String x:Key="L_List_StartWalk">प्रोसेस शुरू करें</x:String>
         <x:String x:Key="L_List_RetryFailed">केवल फेल्ड पुनः प्रयास</x:String>
@@ -68,8 +68,10 @@
         <x:String x:Key="L_List_ColumnAccountNo">खाता नंबर</x:String>
         <x:String x:Key="L_List_ColumnInst">किस्त</x:String>
         <x:String x:Key="L_List_ClearList">सूची साफ करें</x:String>
-        <x:String x:Key="L_List_LegendPayingAdvance">एडवांस भुगतान</x:String>
-        <x:String x:Key="L_List_LegendAdditionalInst">अतिरिक्त किस्त</x:String>
+        <x:String x:Key="L_List_LegendAdvancePayment">अग्रिम: इस माह से आगे</x:String>
+        <x:String x:Key="L_List_LegendCatchUp">भरपाई: पुराने बकाया साफ</x:String>
+        <x:String x:Key="L_List_LegendPartialCatchUp">आंशिक: अभी भी चालू माह तक नहीं</x:String>
+        <x:String x:Key="L_List_LegendMissingDue">देय तिथि उपलब्ध नहीं</x:String>
 
         <x:String x:Key="L_Report_Kicker">ऑपरेशन्स</x:String>
         <x:String x:Key="L_Report_Title">रिपोर्ट</x:String>
@@ -148,7 +150,7 @@
         <x:String x:Key="L_Set_PickSourceDialogTitle">स्रोत लेगेसी डेटाबेस चुनें</x:String>
         <x:String x:Key="L_Set_PickTargetDialogTitle">लक्ष्य DOPAgent डेटाबेस चुनें</x:String>
         <x:String x:Key="L_Set_AboutTitle">एजेंट बडी के बारे में</x:String>
-        <x:String x:Key="L_Set_VersionText">संस्करण 1.0.0</x:String>
+        <x:String x:Key="L_Set_VersionText">संस्करण 2.0.2</x:String>
         <x:String x:Key="L_Set_AboutDesc">इंडिया पोस्ट DOP एजेंट पोर्टल ऑटोमेशन टूल</x:String>
 
         <x:String x:Key="L_Prompt_Aslaas_Title">ASLAAS आवश्यक</x:String>
@@ -196,9 +198,12 @@
         <x:String x:Key="L_AccountDetails_Name">नाम:</x:String>
         <x:String x:Key="L_AccountDetails_Amount">राशि:</x:String>
         <x:String x:Key="L_AccountDetails_DueDate">देय तिथि:</x:String>
+        <x:String x:Key="L_AccountDetails_EstimatedOpeningDate">अनुमानित खोलने की तिथि:</x:String>
+        <x:String x:Key="L_AccountDetails_OpeningDateNote">उपलब्ध होने पर अगली देय तिथि और भुगतान की गई किस्तों से निकाला गया।</x:String>
         <x:String x:Key="L_AccountDetails_MonthPaidUpto">माह भुगतान तक:</x:String>
         <x:String x:Key="L_AccountDetails_ShortCode">शॉर्ट कोड:</x:String>
         <x:String x:Key="L_AccountDetails_FirstSeen">पहली बार देखा:</x:String>
+        <x:String x:Key="L_AccountDetails_FirstSeenInApp">ऐप में पहली बार देखा:</x:String>
         <x:String x:Key="L_AccountDetails_LastUpdated">अंतिम अपडेट:</x:String>
         <x:String x:Key="L_AccountDetails_AddToList">सूची में जोड़ें</x:String>
 
@@ -211,5 +216,6 @@
         <x:String x:Key="L_Segment_ColumnAmount">राशि</x:String>
         <x:String x:Key="L_Segment_ColumnPaidUpto">भुगतान तक</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">अगली देय</x:String>
+        <x:String x:Key="L_Segment_ColumnOpened">खोला गया</x:String>
     </Styles.Resources>
 </Styles>

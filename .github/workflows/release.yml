@@ -86,7 +86,7 @@ jobs:
           PUBLISH_DIR="bin/Release/net10.0/$RID/publish"
 
           mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
-          cp "$PUBLISH_DIR/AgentBuddy" "$APP_DIR/Contents/MacOS/AgentBuddy"
+          cp -R "$PUBLISH_DIR"/. "$APP_DIR/Contents/MacOS/"
           chmod +x "$APP_DIR/Contents/MacOS/AgentBuddy"
 
           cat > "$APP_DIR/Contents/Info.plist" <<EOF

@@ -36,7 +36,7 @@
         <x:String x:Key="L_Dash_PendingMonth">Pending This Month</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">Next Month Collection</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">Advance Paid</x:String>
-        <x:String x:Key="L_Dash_NewAccountsPaid1">New Accounts (Month Paid Upto = 1)</x:String>
+        <x:String x:Key="L_Dash_NewAccountsRecent">New Accounts (Last 30 Days)</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">About To Freeze</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">Matured Accounts</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">Closed Accounts</x:String>
@@ -53,8 +53,8 @@
 
         <x:String x:Key="L_List_Kicker">Daily Workflow</x:String>
         <x:String x:Key="L_List_Title">Create Payment Lists</x:String>
-        <x:String x:Key="L_List_SaveLot">Save Lot</x:String>
-        <x:String x:Key="L_List_ReloadList">Reload List</x:String>
+        <x:String x:Key="L_List_SaveLot">Save Checkpoint</x:String>
+        <x:String x:Key="L_List_ReloadList">Restore Checkpoint</x:String>
         <x:String x:Key="L_List_DeleteAll">Delete All</x:String>
         <x:String x:Key="L_List_StartWalk">Start And Take A Walk</x:String>
         <x:String x:Key="L_List_RetryFailed">Retry Failed Only</x:String>
@@ -68,8 +68,10 @@
         <x:String x:Key="L_List_ColumnAccountNo">Account Number</x:String>
         <x:String x:Key="L_List_ColumnInst">Inst</x:String>
         <x:String x:Key="L_List_ClearList">Clear List</x:String>
-        <x:String x:Key="L_List_LegendPayingAdvance">Paying advance</x:String>
-        <x:String x:Key="L_List_LegendAdditionalInst">Additional Instalment</x:String>
+        <x:String x:Key="L_List_LegendAdvancePayment">Advance: goes beyond this month</x:String>
+        <x:String x:Key="L_List_LegendCatchUp">Catch-up: clears old dues</x:String>
+        <x:String x:Key="L_List_LegendPartialCatchUp">Partial: still not current month</x:String>
+        <x:String x:Key="L_List_LegendMissingDue">Due date unavailable</x:String>
 
         <x:String x:Key="L_Report_Kicker">Operations</x:String>
         <x:String x:Key="L_Report_Title">Reports</x:String>
@@ -148,7 +150,7 @@
         <x:String x:Key="L_Set_PickSourceDialogTitle">Select Source Legacy Database</x:String>
         <x:String x:Key="L_Set_PickTargetDialogTitle">Select Target DOPAgent Database</x:String>
         <x:String x:Key="L_Set_AboutTitle">About Agent Buddy</x:String>
-        <x:String x:Key="L_Set_VersionText">Version 1.0.0</x:String>
+        <x:String x:Key="L_Set_VersionText">Version 2.0.2</x:String>
         <x:String x:Key="L_Set_AboutDesc">India Post DOP Agent Portal Automation Tool</x:String>
 
         <x:String x:Key="L_Prompt_Aslaas_Title">ASLAAS Required</x:String>
@@ -196,9 +198,12 @@
         <x:String x:Key="L_AccountDetails_Name">Name:</x:String>
         <x:String x:Key="L_AccountDetails_Amount">Amount:</x:String>
         <x:String x:Key="L_AccountDetails_DueDate">Due Date:</x:String>
+        <x:String x:Key="L_AccountDetails_EstimatedOpeningDate">Estimated Opening Date:</x:String>
+        <x:String x:Key="L_AccountDetails_OpeningDateNote">Calculated from next due date and paid installments when available.</x:String>
         <x:String x:Key="L_AccountDetails_MonthPaidUpto">Month Paid upto:</x:String>
         <x:String x:Key="L_AccountDetails_ShortCode">Short Code:</x:String>
         <x:String x:Key="L_AccountDetails_FirstSeen">First Seen:</x:String>
+        <x:String x:Key="L_AccountDetails_FirstSeenInApp">First Seen in App:</x:String>
         <x:String x:Key="L_AccountDetails_LastUpdated">Last Updated:</x:String>
         <x:String x:Key="L_AccountDetails_AddToList">Add to List</x:String>
 
@@ -211,5 +216,6 @@
         <x:String x:Key="L_Segment_ColumnAmount">Amount</x:String>
         <x:String x:Key="L_Segment_ColumnPaidUpto">Paid Upto</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">Next Due</x:String>
+        <x:String x:Key="L_Segment_ColumnOpened">Opened</x:String>
     </Styles.Resources>
 </Styles>

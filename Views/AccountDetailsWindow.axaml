@@ -7,20 +7,21 @@
         x:Class="AgentBuddy.Views.AccountDetailsWindow"
         x:DataType="models:RDAccount"
         Title="{DynamicResource L_AccountDetails_Title}"
-        Width="500"
-        Height="400"
+        Width="560"
+        Height="580"
         WindowStartupLocation="CenterOwner"
-        SystemDecorations="None"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         CanResize="False"
         Background="{DynamicResource AppCardBackgroundBrush}"
         KeyDown="Window_KeyDown">
 
     <Border Padding="28" Classes="FadeIn DialogSurface">
-        <StackPanel Spacing="20">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="20">
             
             <!-- Header -->
             <Grid ColumnDefinitions="*,Auto">
@@ -42,7 +43,7 @@
             </Grid>
 
             <!-- Account Information -->
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
                   ColumnDefinitions="150,*"
                   RowSpacing="16">
                 
@@ -83,37 +84,50 @@
                            Text="{Binding NextInstallmentDate}"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                <!-- Month Paid Upto -->
+                <!-- Estimated Opening Date -->
                 <TextBlock Grid.Row="4" Grid.Column="0"
+                           Text="{DynamicResource L_AccountDetails_EstimatedOpeningDate}" 
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <StackPanel Grid.Row="4" Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{Binding EstimatedOpeningDateDisplay}"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <TextBlock Text="{DynamicResource L_AccountDetails_OpeningDateNote}"
+                               FontSize="11"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- Month Paid Upto -->
+                <TextBlock Grid.Row="5" Grid.Column="0"
                            Text="{DynamicResource L_AccountDetails_MonthPaidUpto}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="4" Grid.Column="1"
+                <TextBlock Grid.Row="5" Grid.Column="1"
                            Text="{Binding MonthPaidUpto}"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
+                <!-- First Seen -->
+                <TextBlock Grid.Row="6" Grid.Column="0"
+                           Text="{DynamicResource L_AccountDetails_FirstSeenInApp}" 
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                <TextBlock Grid.Row="6" Grid.Column="1"
+                           Text="{Binding FirstSeen, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
+                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
                 <!-- Short Code -->
-                <TextBlock Grid.Row="5" Grid.Column="0"
+                <TextBlock Grid.Row="7" Grid.Column="0"
                            Text="{DynamicResource L_AccountDetails_ShortCode}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="5" Grid.Column="1"
+                <TextBlock Grid.Row="7" Grid.Column="1"
                            FontFamily="Consolas"
                            Foreground="{DynamicResource AppTextPrimaryBrush}">
                     <Run Text="{Binding ShortCode}"/>
                 </TextBlock>
 
-                <!-- First Seen -->
-                <TextBlock Grid.Row="6" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_FirstSeen}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="6" Grid.Column="1"
-                           Text="{Binding FirstSeen, StringFormat='{}{0:dd-MMM-yyyy}'}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
                 <!-- Last Updated -->
-                <TextBlock Grid.Row="7" Grid.Column="0"
+                <TextBlock Grid.Row="8" Grid.Column="0"
                            Text="{DynamicResource L_AccountDetails_LastUpdated}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="7" Grid.Column="1"
+                <TextBlock Grid.Row="8" Grid.Column="1"
                            Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
@@ -137,6 +151,7 @@
             </StackPanel>
 
         </StackPanel>
+        </ScrollViewer>
     </Border>
 
 </Window>

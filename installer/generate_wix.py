@@ -47,7 +47,7 @@ def generate_wxs(root_dir: str, out_path: str):
     lines.append('     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">')
     lines.append('  <Package Name="AgentBuddy"')
     lines.append('           Manufacturer="AgentBuddy"')
-    lines.append('           Version="1.0.0"')
+    lines.append('           Version="2.0.2"')
     lines.append('           InstallScope="perMachine"')
     lines.append('           UpgradeCode="6B5C94C5-9E3A-46A7-B3A4-0F6F5D8C7E9B">')
     lines.append('    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />')

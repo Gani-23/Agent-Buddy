@@ -20,6 +20,9 @@ public class PythonService
     private static readonly Regex ReferenceRegex = new(
         @"Reference:\s*([A-Z0-9]+)\b",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex AslaasSubmittedRegex = new(
+        @"ASLAAS update submitted:\s*(?<account>[A-Z0-9]+)\s*->\s*(?<aslaas>[A-Z0-9]+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private const string PreferredBrowserSettingKey = "preferred_browser";
 
     private readonly string _pythonCommand;
@@ -194,12 +197,56 @@ public class PythonService
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
 
+            var completedUpdates = ExtractCompletedAslaasUpdates(output.ToString());
+            if (completedUpdates.Count > 0)
+            {
+                await _databaseService.SaveAslaasUpdatesAsync(completedUpdates);
+                _databaseService.NotifyDatabaseChanged();
+            }
+
             return (process.ExitCode == 0, output.ToString());
         }
         catch (Exception ex)
         {
             return (false, $"Error: {ex.Message}");
         }
+    }
+
+    private static List<AslaasUpdateItem> ExtractCompletedAslaasUpdates(string output)
+    {
+        var items = new List<AslaasUpdateItem>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var rawLine in (output ?? string.Empty)
+                     .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            var match = AslaasSubmittedRegex.Match(line);
+            if (!match.Success)
+            {
+                continue;
+            }
+
+            var accountNo = match.Groups["account"].Value.Trim();
+            if (string.IsNullOrWhiteSpace(accountNo) || !seen.Add(accountNo))
+            {
+                continue;
+            }
+
+            var aslaasNo = match.Groups["aslaas"].Value.Trim();
+            items.Add(new AslaasUpdateItem
+            {
+                AccountNo = accountNo,
+                AslaasNo = string.IsNullOrWhiteSpace(aslaasNo) ? "APPLIED" : aslaasNo.ToUpperInvariant()
+            });
+        }
+
+        return items;
     }
 
     /// <summary>
@@ -339,6 +386,7 @@ public class PythonService
                     {
                         list_index = item.ListIndex,
                         account_no = item.AccountNo.Trim(),
+                        bank_name = (item.BankName ?? string.Empty).Trim(),
                         cheque_no = (item.ChequeNo ?? string.Empty).Trim(),
                         payment_account_no = item.PaymentAccountNo.Trim(),
                         payment_mode = NormalizePaymentModeArg(item.PaymentModeToken)

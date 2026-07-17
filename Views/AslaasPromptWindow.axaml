@@ -6,14 +6,13 @@
         x:Class="AgentBuddy.Views.AslaasPromptWindow"
         x:DataType="vm:AslaasPromptViewModel"
         mc:Ignorable="d"
-        Width="520"
-        Height="270"
+        Width="560"
+        Height="340"
         MinWidth="520"
-        MinHeight="270"
-        SystemDecorations="None"
+        MinHeight="300"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
@@ -21,76 +20,79 @@
 
     <Border Classes="DialogBackdrop">
         <Border Classes="DialogSurface">
-            <StackPanel Spacing="16">
-                <StackPanel Spacing="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Classes="DialogDot"/>
-                        <TextBlock Text="Action Required"
-                                   Classes="Kicker"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="DialogDot"/>
+                            <TextBlock Text="Action Required"
+                                       Classes="Kicker"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{DynamicResource L_Prompt_Aslaas_Heading}"
+                                   Classes="DialogTitle"/>
                     </StackPanel>
 
-                    <TextBlock Text="{DynamicResource L_Prompt_Aslaas_Heading}"
-                               Classes="DialogTitle"/>
+                    <Grid ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto"
+                          ColumnSpacing="12"
+                          RowSpacing="10">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_Account}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding AccountNo}"
+                                   FontFamily="Consolas"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_Name}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding AccountName}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{DynamicResource L_Prompt_AslaasLabel}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="2"
+                                 Grid.Column="1"
+                                 x:Name="AslaasTextBox"
+                                 Text="{Binding AslaasNo}"
+                                 PlaceholderText="{DynamicResource L_Prompt_AslaasWatermark}"
+                                 FontFamily="Consolas"
+                                 MaxLength="30"/>
+                    </Grid>
+
+                    <TextBlock Text="{DynamicResource L_Prompt_Aslaas_Hint}"
+                               FontSize="11"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                    <Border Classes="DialogDivider"
+                            Margin="0,2"/>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="10">
+                        <Button Classes="Secondary"
+                                Content="{DynamicResource L_Common_Cancel}"
+                                Click="Cancel_Click"
+                                Padding="16,8"/>
+                        <Button Classes="Primary"
+                                Content="{DynamicResource L_Common_SaveContinue}"
+                                Click="Save_Click"
+                                Padding="16,8"/>
+                    </StackPanel>
                 </StackPanel>
-
-                <Grid ColumnDefinitions="Auto,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="12"
-                      RowSpacing="10">
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_Account}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="1"
-                               Text="{Binding AccountNo}"
-                               FontFamily="Consolas"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_Name}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="1"
-                               Text="{Binding AccountName}"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               VerticalAlignment="Center"
-                               Text="{DynamicResource L_Prompt_AslaasLabel}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBox Grid.Row="2"
-                             Grid.Column="1"
-                             x:Name="AslaasTextBox"
-                             Text="{Binding AslaasNo}"
-                             Watermark="{DynamicResource L_Prompt_AslaasWatermark}"
-                             FontFamily="Consolas"
-                             MaxLength="30"/>
-                </Grid>
-
-                <TextBlock Text="{DynamicResource L_Prompt_Aslaas_Hint}"
-                           FontSize="11"
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-
-                <Border Classes="DialogDivider"
-                        Margin="0,2"/>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Spacing="10">
-                    <Button Classes="Secondary"
-                            Content="{DynamicResource L_Common_Cancel}"
-                            Click="Cancel_Click"
-                            Padding="16,8"/>
-                    <Button Classes="Primary"
-                            Content="{DynamicResource L_Common_SaveContinue}"
-                            Click="Save_Click"
-                            Padding="16,8"/>
-                </StackPanel>
-            </StackPanel>
+            </ScrollViewer>
         </Border>
     </Border>
 </Window>

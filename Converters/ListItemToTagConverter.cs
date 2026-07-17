@@ -31,13 +31,33 @@ public class ListItemToTagConverter : IValueConverter
             return "Duplicate";
         }
 
-        if (item.EffectiveInstallment <= 1)
+        if (item.PaymentAnalysis.Classification == PaymentClassification.MissingDueDate)
         {
-            return "Valid";
+            return "MissingDueDate";
         }
 
-        var rebate = item.AccountDetails?.GetAdvanceRebate(item.EffectiveInstallment) ?? 0m;
-        return rebate > 0 ? "PayingAdvance" : "AdditionalInstallment";
+        if (item.PaymentAnalysis.Classification == PaymentClassification.PartialCatchUp ||
+            item.PaymentAnalysis.Classification == PaymentClassification.LongOverduePartialCatchUp)
+        {
+            return "PartialCatchUpPayment";
+        }
+
+        if (item.PaymentAnalysis.DueMonth.HasValue &&
+            item.PaymentAnalysis.DueMonth.Value < item.PaymentAnalysis.CurrentMonth)
+        {
+            return "CatchUpPayment";
+        }
+
+        if (item.PaymentAnalysis.DueMonth.HasValue &&
+            item.PaymentAnalysis.DueMonth.Value > item.PaymentAnalysis.CurrentMonth)
+        {
+            return "AdvancePayment";
+        }
+
+        return item.PaymentAnalysis.Classification switch
+        {
+            _ => "Valid"
+        };
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

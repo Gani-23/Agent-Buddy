@@ -10,9 +10,10 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
 {
     private string _searchQuery = string.Empty;
 
-    public SegmentAccountsWindowViewModel(string title, IEnumerable<RDAccount> accounts)
+    public SegmentAccountsWindowViewModel(string title, IEnumerable<RDAccount> accounts, string? segmentKey = null)
     {
         Title = title;
+        SegmentKey = segmentKey ?? string.Empty;
         var list = accounts.ToList();
         Accounts = new ObservableCollection<RDAccount>(list);
         FilteredAccounts = new ObservableCollection<RDAccount>(list);
@@ -21,6 +22,11 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
     }
 
     public string Title { get; }
+    public string SegmentKey { get; }
+    public bool IsNewAccountsSegment => string.Equals(SegmentKey, "new-accounts", System.StringComparison.OrdinalIgnoreCase);
+    public string SegmentHint => IsNewAccountsSegment
+        ? "Latest additions are shown first."
+        : string.Empty;
     public int Count { get; private set; }
     public decimal TotalAmount { get; private set; }
     public ObservableCollection<RDAccount> Accounts { get; }

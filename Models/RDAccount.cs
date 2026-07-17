@@ -134,6 +134,49 @@ public class RDAccount
     }
 
     /// <summary>
+    /// Estimates the opening month/date using the next due date and the number of installments paid.
+    /// This is an approximation when the portal does not expose the exact opening date.
+    /// </summary>
+    public DateTime? GetEstimatedOpeningDate()
+    {
+        var dueDate = GetNextInstallmentDate();
+        var paidInstallments = GetMonthPaidNumber();
+
+        if (dueDate.HasValue && paidInstallments > 0)
+        {
+            var dueMonth = new DateTime(dueDate.Value.Year, dueDate.Value.Month, 1);
+            return dueMonth.AddMonths(-paidInstallments);
+        }
+
+        if (FirstSeen != default)
+        {
+            return FirstSeen.Date;
+        }
+
+        return null;
+    }
+
+    public string EstimatedOpeningDateDisplay
+    {
+        get
+        {
+            var estimated = GetEstimatedOpeningDate();
+            return estimated.HasValue
+                ? $"{estimated.Value:dd-MMM-yyyy} (estimated)"
+                : "-";
+        }
+    }
+
+    public string EstimatedOpeningDateShortDisplay
+    {
+        get
+        {
+            var estimated = GetEstimatedOpeningDate();
+            return estimated.HasValue ? estimated.Value.ToString("dd-MMM-yyyy") : "-";
+        }
+    }
+
+    /// <summary>
     /// Suggest installments required to cover overdue months up to the given date.
     /// Returns at least 1.
     /// </summary>
@@ -169,6 +212,61 @@ public class RDAccount
         }
 
         return Math.Max(1, pending);
+    }
+
+    public PaymentAnalysis AnalyzePayment(int installments, DateTime? asOfDate = null, int longOverdueThresholdMonths = 2)
+    {
+        var effectiveInstallments = installments > 0 ? installments : 1;
+        var referenceDate = (asOfDate ?? DateTime.Today).Date;
+        var currentMonth = new DateTime(referenceDate.Year, referenceDate.Month, 1);
+        var dueDate = GetNextInstallmentDate();
+
+        if (!dueDate.HasValue)
+        {
+            return PaymentAnalysis.CreateMissingDueDate(effectiveInstallments, currentMonth);
+        }
+
+        var dueMonth = new DateTime(dueDate.Value.Year, dueDate.Value.Month, 1);
+        var monthDelta = ((currentMonth.Year - dueMonth.Year) * 12) + (currentMonth.Month - dueMonth.Month);
+
+        if (monthDelta < 0)
+        {
+            return new PaymentAnalysis(
+                PaymentClassification.AdvancePayment,
+                currentMonth,
+                dueMonth,
+                effectiveInstallments,
+                0,
+                0,
+                effectiveInstallments,
+                0);
+        }
+
+        var overdueMonths = Math.Max(0, monthDelta);
+        var catchUpInstallments = overdueMonths + 1;
+        var advanceInstallments = Math.Max(0, effectiveInstallments - catchUpInstallments);
+        var remainingOverdueInstallments = Math.Max(0, catchUpInstallments - effectiveInstallments);
+        var isLongOverdue = overdueMonths > longOverdueThresholdMonths;
+
+        var classification = monthDelta == 0 && effectiveInstallments == 1
+            ? PaymentClassification.CurrentMonth
+            : remainingOverdueInstallments > 0
+                ? isLongOverdue ? PaymentClassification.LongOverduePartialCatchUp : PaymentClassification.PartialCatchUp
+                : isLongOverdue
+                    ? PaymentClassification.LongOverdueResolved
+                    : advanceInstallments > 0
+                        ? overdueMonths > 0 ? PaymentClassification.MixedCatchUpAndAdvance : PaymentClassification.AdvancePayment
+                        : PaymentClassification.CatchUpPayment;
+
+        return new PaymentAnalysis(
+            classification,
+            currentMonth,
+            dueMonth,
+            effectiveInstallments,
+            overdueMonths,
+            catchUpInstallments,
+            advanceInstallments,
+            remainingOverdueInstallments);
     }
 
     /// <summary>

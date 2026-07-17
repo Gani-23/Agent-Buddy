@@ -11,26 +11,46 @@ public partial class SegmentAccountsWindow : Window
 {
     private readonly bool _focusSearchOnOpen;
     private readonly bool _isDarkTheme;
+    private readonly string _initialSearchQuery = string.Empty;
 
     public SegmentAccountsWindow()
     {
         InitializeComponent();
         Opened += (_, _) =>
         {
+            if (!string.IsNullOrWhiteSpace(_initialSearchQuery) && DataContext is SegmentAccountsWindowViewModel viewModel)
+            {
+                viewModel.SearchQuery = _initialSearchQuery;
+            }
+
             if (_focusSearchOnOpen)
             {
                 SearchBox.Focus();
-                SearchBox.SelectAll();
+                if (!string.IsNullOrWhiteSpace(SearchBox.Text))
+                {
+                    SearchBox.CaretIndex = SearchBox.Text.Length;
+                }
+                else
+                {
+                    SearchBox.SelectAll();
+                }
             }
         };
     }
 
-    public SegmentAccountsWindow(string title, IEnumerable<RDAccount> accounts, bool isDarkTheme = false, bool focusSearchOnOpen = false) : this()
+    public SegmentAccountsWindow(
+        string title,
+        IEnumerable<RDAccount> accounts,
+        bool isDarkTheme = false,
+        bool focusSearchOnOpen = false,
+        string? initialSearchQuery = null,
+        string? segmentKey = null) : this()
     {
-        DataContext = new SegmentAccountsWindowViewModel(title, accounts);
+        DataContext = new SegmentAccountsWindowViewModel(title, accounts, segmentKey);
         RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
         _focusSearchOnOpen = focusSearchOnOpen;
         _isDarkTheme = isDarkTheme;
+        _initialSearchQuery = initialSearchQuery?.Trim() ?? string.Empty;
     }
 
     private void Close_Click(object? sender, RoutedEventArgs e)

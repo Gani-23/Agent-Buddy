@@ -7,6 +7,7 @@ using AgentBuddy.Models;
 using AgentBuddy.ViewModels;
 using ReactiveUI;
 using System;
+using System.Reactive;
 using System.Linq;
 
 namespace AgentBuddy.Views;
@@ -17,6 +18,7 @@ public partial class ListManagementView : UserControl
     private IDisposable? _dopChequePromptHandler;
     private IDisposable? _confirmPromptHandler;
     private IDisposable? _confirmListPromptHandler;
+    private IDisposable? _duplicateFocusPromptHandler;
 
     public ListManagementView()
     {
@@ -39,6 +41,18 @@ public partial class ListManagementView : UserControl
             .DataContext as ListPanelViewModel;
 
         listOwner?.RemoveAccount(item);
+    }
+
+    private async void DeleteList_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button ||
+            button.DataContext is not ListPanelViewModel listVm ||
+            DataContext is not ListManagementViewModel rootVm)
+        {
+            return;
+        }
+
+        await rootVm.DeleteListAsync(listVm);
     }
 
     private async void PendingField_KeyDown(object? sender, KeyEventArgs e)
@@ -142,6 +156,30 @@ public partial class ListManagementView : UserControl
             var result = await dialog.ShowDialog<bool>(owner);
             interaction.SetOutput(result);
         });
+
+        _duplicateFocusPromptHandler = vm.DuplicateFocusPrompt.RegisterHandler(interaction =>
+        {
+            var request = interaction.Input;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                var listCard = this.GetVisualDescendants()
+                    .OfType<Border>()
+                    .FirstOrDefault(border => border.DataContext is ListPanelViewModel list &&
+                                              list.ListNumber == request.ListNumber);
+
+                listCard?.BringIntoView();
+
+                var row = this.GetVisualDescendants()
+                    .OfType<Border>()
+                    .FirstOrDefault(border => border.DataContext is ListItem item &&
+                                              string.Equals(item.AccountNo, request.AccountNo, StringComparison.OrdinalIgnoreCase));
+
+                row?.BringIntoView();
+            });
+
+            interaction.SetOutput(Unit.Default);
+        });
     }
 
     private void DisposePromptHandler()
@@ -154,5 +192,7 @@ public partial class ListManagementView : UserControl
         _confirmPromptHandler = null;
         _confirmListPromptHandler?.Dispose();
         _confirmListPromptHandler = null;
+        _duplicateFocusPromptHandler?.Dispose();
+        _duplicateFocusPromptHandler = null;
     }
 }

@@ -6,14 +6,13 @@
         x:Class="AgentBuddy.Views.ConfirmListDialogWindow"
         x:DataType="vm:ConfirmListDialogViewModel"
         mc:Ignorable="d"
-        Width="900"
-        Height="520"
+        Width="920"
+        Height="580"
         MinWidth="780"
-        MinHeight="420"
-        SystemDecorations="None"
+        MinHeight="460"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
@@ -21,122 +20,125 @@
 
     <Border Classes="DialogBackdrop">
         <Border Classes="DialogSurface">
-            <StackPanel Spacing="16">
-                <StackPanel Spacing="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Classes="DialogDot"/>
-                        <TextBlock Text="Action Required"
-                                   Classes="Kicker"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="DialogDot"/>
+                            <TextBlock Text="Action Required"
+                                       Classes="Kicker"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Title}"
+                                   Classes="DialogTitle"/>
                     </StackPanel>
 
-                    <TextBlock Text="{Binding Title}"
-                               Classes="DialogTitle"/>
-                </StackPanel>
+                    <TextBlock Text="{Binding Message}"
+                               TextWrapping="Wrap"
+                               Classes="DialogBody"/>
 
-                <TextBlock Text="{Binding Message}"
-                           TextWrapping="Wrap"
-                           Classes="DialogBody"/>
-
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                             Width="320"
-                             Watermark="Search by list or reference..."
-                             FontSize="13"/>
-                    <ComboBox Width="200"
-                              SelectedIndex="{Binding FilterMode}">
-                        <ComboBoxItem Content="All lists"/>
-                        <ComboBoxItem Content="With accounts"/>
-                        <ComboBoxItem Content="Missing accounts"/>
-                    </ComboBox>
-                </StackPanel>
-
-                <Border Background="{DynamicResource AppHoverBrush}"
-                        CornerRadius="10"
-                        Padding="10">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnDefinitions="120,*,120,140" ColumnSpacing="10">
-                            <TextBlock Text="List"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="1"
-                                       Text="Reference"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2"
-                                       Text="Accounts"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                       TextAlignment="Right"/>
-                            <TextBlock Grid.Column="3"
-                                       Text="Time"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        </Grid>
-
-                        <Border Classes="DialogDivider"
-                                Margin="0,0,0,2"/>
-
-                        <ScrollViewer MaxHeight="160"
-                                      VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding FilteredItems}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid ColumnDefinitions="120,*,120,140" ColumnSpacing="10" Margin="0,2">
-                                            <TextBlock Text="{Binding ListLabel}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding ReferenceNumber}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding AccountCount}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
-                                                       TextAlignment="Right"/>
-                                            <TextBlock Grid.Column="3"
-                                                       Text="{Binding TimestampLabel}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="320"
+                                 PlaceholderText="Search by list or reference..."
+                                 FontSize="13"/>
+                        <ComboBox Width="200"
+                                  SelectedIndex="{Binding FilterMode}">
+                            <ComboBoxItem Content="All lists"/>
+                            <ComboBoxItem Content="With accounts"/>
+                            <ComboBoxItem Content="Missing accounts"/>
+                        </ComboBox>
                     </StackPanel>
-                </Border>
 
-                <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                    <Run Text="Lists: "/>
-                    <Run Text="{Binding FilteredCount}"/>
-                    <Run Text="   |   Accounts: "/>
-                    <Run Text="{Binding TotalAccounts}"/>
-                </TextBlock>
+                    <Border Background="{DynamicResource AppHoverBrush}"
+                            CornerRadius="10"
+                            Padding="10">
+                        <StackPanel Spacing="6">
+                            <Grid ColumnDefinitions="120,*,120,140" ColumnSpacing="10">
+                                <TextBlock Text="List"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Reference"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBlock Grid.Column="2"
+                                           Text="Accounts"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           TextAlignment="Right"/>
+                                <TextBlock Grid.Column="3"
+                                           Text="Time"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </Grid>
 
-                <Border Classes="DialogDivider"
-                        Margin="0,2"/>
+                            <Border Classes="DialogDivider"
+                                    Margin="0,0,0,2"/>
 
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Spacing="10">
-                    <Button Classes="Secondary"
-                            Content="{Binding NoText}"
-                            Click="No_Click"
-                            Padding="16,8"/>
-                    <Button Classes="Primary"
-                            Content="{Binding YesText}"
-                            Click="Yes_Click"
-                            Padding="16,8"/>
+                            <ScrollViewer MaxHeight="200"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding FilteredItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="120,*,120,140" ColumnSpacing="10" Margin="0,2">
+                                                <TextBlock Text="{Binding ListLabel}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding ReferenceNumber}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding AccountCount}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                           TextAlignment="Right"/>
+                                                <TextBlock Grid.Column="3"
+                                                           Text="{Binding TimestampLabel}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                        <Run Text="Lists: "/>
+                        <Run Text="{Binding FilteredCount}"/>
+                        <Run Text="   |   Accounts: "/>
+                        <Run Text="{Binding TotalAccounts}"/>
+                    </TextBlock>
+
+                    <Border Classes="DialogDivider"
+                            Margin="0,2"/>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="10">
+                        <Button Classes="Secondary"
+                                Content="{Binding NoText}"
+                                Click="No_Click"
+                                Padding="16,8"/>
+                        <Button Classes="Primary"
+                                Content="{Binding YesText}"
+                                Click="Yes_Click"
+                                Padding="16,8"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+            </ScrollViewer>
         </Border>
     </Border>
 </Window>

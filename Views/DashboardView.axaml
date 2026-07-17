@@ -8,6 +8,24 @@
              x:Class="AgentBuddy.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
 
+    <UserControl.Styles>
+        <Style Selector="Border[Tag=RenewalMissing]">
+            <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border[Tag=RenewalNormal]">
+            <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style Selector="Border[Tag=RenewalUrgent]">
+            <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+    </UserControl.Styles>
+
     <Design.DataContext>
         <vm:DashboardViewModel/>
     </Design.DataContext>
@@ -50,6 +68,38 @@
             </Border>
 
             <StackPanel Spacing="24" IsVisible="{Binding !IsLoading}">
+                <Border Classes="Card"
+                        Padding="18"
+                        Tag="{Binding RdCertificateRenewalTag}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Postal RD Certificate Renewal"
+                                       Classes="Kicker"/>
+                            <TextBlock Text="{Binding RdCertificateRenewalHeadline}"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding RdCertificateRenewalMessage}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Spacing="4"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RdCertificateRenewalCountdown}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding RdCertificateRenewalDateDisplay}"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
                     <Border Grid.Column="0" Classes="MetricCard">
                         <StackPanel Spacing="8">
@@ -83,6 +133,32 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+
+                <Border Classes="Card" Padding="16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Search all accounts"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Find any account by number or name"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding GlobalAccountSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="{DynamicResource L_Search_Watermark}"
+                                 VerticalAlignment="Center"
+                                 KeyDown="SearchAllAccountsBox_KeyDown"/>
+
+                        <Button Grid.Column="2"
+                                Classes="Secondary"
+                                Padding="16,10"
+                                VerticalAlignment="Center"
+                                Click="SearchAllAccounts_Click"
+                                Content="{DynamicResource L_Common_Search}"/>
+                    </Grid>
+                </Border>
 
                 <Border Classes="Card" Padding="16" IsVisible="{Binding HasUpdateStatus}">
                     <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -234,7 +310,24 @@
 
                             <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="New Accounts (Last 2 Months)" FontWeight="SemiBold"/>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBlock Text="{DynamicResource L_Dash_NewAccountsRecent}"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
+                                        <Border Grid.Column="1"
+                                                Background="{DynamicResource SuccessTintBrush}"
+                                                BorderBrush="{StaticResource SuccessBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="999"
+                                                Padding="8,3"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding HasNewAccountsRibbon}">
+                                            <TextBlock Text="NEW"
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource SuccessBrush}"/>
+                                        </Border>
+                                    </Grid>
                                     <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding NewAccounts30DaysCount}"/>
                                         <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>

@@ -3,7 +3,7 @@
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="AgentBuddy"
            Manufacturer="AgentBuddy"
-           Version="1.0.0"
+           Version="2.0.2"
            InstallScope="perMachine"
            UpgradeCode="6B5C94C5-9E3A-46A7-B3A4-0F6F5D8C7E9B">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -89,7 +89,7 @@
         <File Id="fil_20" Source="$(var.SourceDir)/Avalonia.OpenGL.dll" />
       </Component>
       <Component Id="cmp_21" Guid="*">
-        <File Id="fil_21" Source="$(var.SourceDir)/Avalonia.ReactiveUI.dll" />
+        <File Id="fil_21" Source="$(var.SourceDir)/ReactiveUI.Avalonia.dll" />
       </Component>
       <Component Id="cmp_22" Guid="*">
         <File Id="fil_22" Source="$(var.SourceDir)/Avalonia.Remote.Protocol.dll" />

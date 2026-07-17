@@ -24,6 +24,8 @@ public class DatabaseService
     private readonly object _schemaLock = new();
     private bool _schemaEnsured;
 
+    public event EventHandler? DatabaseChanged;
+
     public DatabaseService()
     {
         var dopAgentFolder = AppPaths.BaseDirectory;
@@ -45,6 +47,11 @@ public class DatabaseService
     /// Get database file path
     /// </summary>
     public string GetDatabasePath() => _dbPath;
+
+    public void NotifyDatabaseChanged()
+    {
+        DatabaseChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <summary>
     /// Test database connection
@@ -144,7 +151,11 @@ public class DatabaseService
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
                    COALESCE(status, 'closed')
             FROM closed_accounts
-            ORDER BY COALESCE(closed_on, last_updated) DESC, account_no";
+            ORDER BY
+                CASE WHEN trim(COALESCE(first_seen, '')) = '' THEN 1 ELSE 0 END,
+                datetime(first_seen) ASC,
+                datetime(COALESCE(closed_on, last_updated, first_seen)) DESC,
+                account_no";
 
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -326,6 +337,16 @@ public class DatabaseService
         await transaction.CommitAsync();
     }
 
+    public async Task SaveAslaasUpdateAsync(AslaasUpdateItem update)
+    {
+        if (update == null || string.IsNullOrWhiteSpace(update.AccountNo))
+        {
+            return;
+        }
+
+        await SaveAslaasUpdatesAsync(new[] { update });
+    }
+
     public async Task<List<AslaasUpdateItem>> GetMissingAslaasAccountsAsync(bool activeOnly = true)
     {
         EnsureAnalyticsSchema();
@@ -441,9 +462,9 @@ public class DatabaseService
         if (await reader.ReadAsync())
         {
             var updateValue = GetStringOrEmpty(reader, 0);
-            if (DateTime.TryParse(updateValue, out var parsed))
+            if (TryParseUtcTimestamp(updateValue, out var parsedUtc))
             {
-                return parsed;
+                return parsedUtc.ToLocalTime();
             }
         }
 
@@ -453,6 +474,53 @@ public class DatabaseService
     /// <summary>
     /// Get monthly revenue data from imported reference history (if available)
     /// </summary>
+    private static bool TryParseUtcTimestamp(string raw, out DateTime utcDateTime)
+    {
+        utcDateTime = default;
+        var value = (raw ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var formats = new[]
+        {
+            "O",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm:ss.FFF",
+            "yyyy-MM-ddTHH:mm:ss",
+            "yyyy-MM-ddTHH:mm:ss.FFF",
+            "yyyy-MM-dd HH:mm:ssZ",
+            "yyyy-MM-ddTHH:mm:ssZ"
+        };
+
+        if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var offset))
+        {
+            utcDateTime = offset.UtcDateTime;
+            return true;
+        }
+
+        if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var exact))
+        {
+            utcDateTime = DateTime.SpecifyKind(exact, DateTimeKind.Utc);
+            return true;
+        }
+
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var parsed))
+        {
+            utcDateTime = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+            return true;
+        }
+
+        if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out parsed))
+        {
+            utcDateTime = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+            return true;
+        }
+
+        return false;
+    }
+
     public async Task<List<MonthlyRevenue>> GetMonthlyRevenueDataAsync(int months = 24)
     {
         EnsureAnalyticsSchema();
@@ -714,6 +782,7 @@ public class DatabaseService
             {
                 ListIndex = item.ListIndex,
                 AccountNo = item.AccountNo.Trim(),
+                BankName = (item.BankName ?? string.Empty).Trim(),
                 ChequeNo = (item.ChequeNo ?? string.Empty).Trim(),
                 PaymentAccountNo = item.PaymentAccountNo.Trim(),
                 PaymentModeToken = string.IsNullOrWhiteSpace(item.PaymentModeToken)
@@ -740,6 +809,7 @@ public class DatabaseService
                     list_index,
                     account_no,
                     payment_mode,
+                    bank_name,
                     cheque_no,
                     payment_account_no,
                     captured_at
@@ -748,6 +818,7 @@ public class DatabaseService
                     @listIndex,
                     @accountNo,
                     @paymentMode,
+                    @bankName,
                     @chequeNo,
                     @paymentAccountNo,
                     CURRENT_TIMESTAMP
@@ -755,6 +826,7 @@ public class DatabaseService
             command.Parameters.AddWithValue("@listIndex", item.ListIndex);
             command.Parameters.AddWithValue("@accountNo", item.AccountNo);
             command.Parameters.AddWithValue("@paymentMode", item.PaymentModeToken);
+            command.Parameters.AddWithValue("@bankName", item.BankName);
             command.Parameters.AddWithValue("@chequeNo", item.ChequeNo);
             command.Parameters.AddWithValue("@paymentAccountNo", item.PaymentAccountNo);
             await command.ExecuteNonQueryAsync();
@@ -978,6 +1050,7 @@ public class DatabaseService
                         list_index INTEGER NOT NULL,
                         account_no TEXT NOT NULL,
                         payment_mode TEXT NOT NULL DEFAULT 'dop_cheque',
+                        bank_name TEXT NOT NULL DEFAULT '',
                         cheque_no TEXT NOT NULL,
                         payment_account_no TEXT NOT NULL,
                         captured_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -1006,9 +1079,33 @@ public class DatabaseService
             EnsureColumn(connection, "closed_accounts", "closed_reason", "TEXT DEFAULT 'missing_from_popup'");
             EnsureColumn(connection, "closed_accounts", "source_update_time", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
             EnsureColumn(connection, "dop_cheque_inputs", "payment_mode", "TEXT DEFAULT 'dop_cheque'");
+            EnsureColumn(connection, "dop_cheque_inputs", "bank_name", "TEXT DEFAULT ''");
+            PurgeArchivedClosedAccountsForNewMonth(connection);
 
             _schemaEnsured = true;
         }
+    }
+
+    private static void PurgeArchivedClosedAccountsForNewMonth(SqliteConnection connection)
+    {
+        if (!TableExists(connection, "closed_accounts"))
+        {
+            return;
+        }
+
+        var monthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
+            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        using var deleteCommand = connection.CreateCommand();
+        deleteCommand.CommandText = @"
+            DELETE FROM closed_accounts
+            WHERE date(COALESCE(
+                    NULLIF(trim(closed_on), ''),
+                    NULLIF(trim(last_updated), ''),
+                    NULLIF(trim(first_seen), '')
+                  )) < date(@monthStart)";
+        deleteCommand.Parameters.AddWithValue("@monthStart", monthStart);
+        deleteCommand.ExecuteNonQuery();
     }
 
     private static void EnsureColumn(SqliteConnection connection, string tableName, string columnName, string definition)

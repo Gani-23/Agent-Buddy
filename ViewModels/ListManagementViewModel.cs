@@ -45,6 +45,7 @@ public class ListPanelViewModel : ReactiveObject
     private readonly ValidationService _validationService;
     private readonly Func<ListPanelViewModel, string, int, Task<bool>>? _addAccountHandler;
 
+    private int _listNumber;
     private string _name;
     private int _count;
     private decimal _totalAmount;
@@ -63,6 +64,8 @@ public class ListPanelViewModel : ReactiveObject
     private string _lastProcessedSignature = string.Empty;
     private string _selectedPaymentMode = "Cash";
     private string _lastProcessedPaymentMode = "Cash";
+    private bool _isDuplicateFocus;
+    public event Action? StateChanged;
 
     public ListPanelViewModel(
         int listNumber,
@@ -70,7 +73,7 @@ public class ListPanelViewModel : ReactiveObject
         ValidationService validationService,
         Func<ListPanelViewModel, string, int, Task<bool>>? addAccountHandler = null)
     {
-        ListNumber = Math.Max(1, listNumber);
+        _listNumber = Math.Max(1, listNumber);
         _name = $"List {ListNumber}";
         _databaseService = databaseService;
         _validationService = validationService;
@@ -81,6 +84,7 @@ public class ListPanelViewModel : ReactiveObject
         {
             RecalculateTotals();
             ResetRunStateIfPayloadChanged();
+            NotifyStateChanged();
         };
 
         AddPendingAccountCommand = ReactiveCommand.CreateFromTask(async () => { await SubmitPendingAsync(); });
@@ -88,7 +92,11 @@ public class ListPanelViewModel : ReactiveObject
         ClearCommand = ReactiveCommand.Create(Clear);
     }
 
-    public int ListNumber { get; }
+    public int ListNumber
+    {
+        get => _listNumber;
+        private set => this.RaiseAndSetIfChanged(ref _listNumber, value);
+    }
 
     public string Name
     {
@@ -126,6 +134,7 @@ public class ListPanelViewModel : ReactiveObject
 
             this.RaiseAndSetIfChanged(ref _pendingAccountNo, normalized);
             _ = RefreshInstallmentSuggestionAsync(normalized);
+            NotifyStateChanged();
         }
     }
 
@@ -143,6 +152,7 @@ public class ListPanelViewModel : ReactiveObject
 
             var parsed = ParseInstallment(normalized);
             SetInstallmentSuggestionState(_suggestedInstallment > 1 && parsed == _suggestedInstallment);
+            NotifyStateChanged();
         }
     }
 
@@ -187,6 +197,11 @@ public class ListPanelViewModel : ReactiveObject
     }
 
     public IReadOnlyList<string> PaymentModes => PaymentModeOptions;
+    public bool IsDuplicateFocus
+    {
+        get => _isDuplicateFocus;
+        set => this.RaiseAndSetIfChanged(ref _isDuplicateFocus, value);
+    }
 
     public string SelectedPaymentMode
     {
@@ -204,6 +219,7 @@ public class ListPanelViewModel : ReactiveObject
                 this.RaisePropertyChanged(nameof(IsFull));
                 this.RaisePropertyChanged(nameof(AmountLimitText));
                 ResetRunStateIfModeChanged();
+                NotifyStateChanged();
             }
         }
     }
@@ -292,6 +308,8 @@ public class ListPanelViewModel : ReactiveObject
             return false;
         }
 
+        var paymentAnalysis = account.AnalyzePayment(installment);
+
         Items.Add(new ListItem
         {
             AccountNo = accountNo,
@@ -300,11 +318,7 @@ public class ListPanelViewModel : ReactiveObject
             AccountDetails = account
         });
 
-        SetEntrySuccessMessage(status switch
-        {
-            AccountValidationStatus.DueSoon => $"{accountNo} added (due soon).",
-            _ => $"{accountNo} added."
-        });
+        SetEntrySuccessMessage(BuildAddedMessage(accountNo, status, paymentAnalysis));
 
         return true;
     }
@@ -364,6 +378,15 @@ public class ListPanelViewModel : ReactiveObject
         }
     }
 
+    public void ClearDuplicateFocus()
+    {
+        IsDuplicateFocus = false;
+        foreach (var item in Items)
+        {
+            item.IsDuplicateFocus = false;
+        }
+    }
+
     public void SetEntryMessage(string message)
     {
         SetEntryMessageInternal(message, EntryMessageTone.Neutral);
@@ -419,14 +442,14 @@ public class ListPanelViewModel : ReactiveObject
         ReferenceNumber = string.Empty;
         FailureReason = string.Empty;
         ResetProcessingMarkers();
-        Name = $"List {ListNumber}";
+        RefreshDisplayName();
     }
 
     public void MarkProcessing()
     {
         RunState = ListRunState.Processing;
         FailureReason = string.Empty;
-        Name = $"List {ListNumber}";
+        RefreshDisplayName();
     }
 
     public void MarkSuccess(string referenceNumber)
@@ -437,7 +460,7 @@ public class ListPanelViewModel : ReactiveObject
         MarkAllAccountsProcessed();
         _lastProcessedSignature = GetPayloadSignature();
         _lastProcessedPaymentMode = SelectedPaymentMode;
-        Name = string.IsNullOrWhiteSpace(ReferenceNumber) ? $"List {ListNumber}" : ReferenceNumber;
+        RefreshDisplayName();
     }
 
     public void MarkFailed(string reason)
@@ -446,7 +469,26 @@ public class ListPanelViewModel : ReactiveObject
         RunState = ListRunState.Failed;
         _lastProcessedSignature = GetPayloadSignature();
         _lastProcessedPaymentMode = SelectedPaymentMode;
-        Name = $"List {ListNumber}";
+        RefreshDisplayName();
+    }
+
+    public void UpdateListNumber(int newListNumber)
+    {
+        var normalized = Math.Max(1, newListNumber);
+        if (normalized == ListNumber)
+        {
+            return;
+        }
+
+        ListNumber = normalized;
+        RefreshDisplayName();
+    }
+
+    private void RefreshDisplayName()
+    {
+        Name = RunState == ListRunState.Success && !string.IsNullOrWhiteSpace(ReferenceNumber)
+            ? ReferenceNumber
+            : $"List {ListNumber}";
     }
 
     private void RecalculateTotals()
@@ -519,6 +561,26 @@ public class ListPanelViewModel : ReactiveObject
         return AddPendingAccountAsync();
     }
 
+    private static string BuildAddedMessage(
+        string accountNo,
+        AccountValidationStatus status,
+        PaymentAnalysis analysis)
+    {
+        var suffix = status == AccountValidationStatus.DueSoon ? " (due soon)." : ".";
+
+        return analysis.Classification switch
+        {
+            PaymentClassification.AdvancePayment => $"{accountNo} added with advance coverage{suffix}",
+            PaymentClassification.CatchUpPayment => $"{accountNo} added for catch-up payment{suffix}",
+            PaymentClassification.MixedCatchUpAndAdvance => $"{accountNo} added with catch-up + advance coverage{suffix}",
+            PaymentClassification.LongOverdueResolved => $"{accountNo} added for a long-overdue account. Review carefully before processing.",
+            PaymentClassification.PartialCatchUp => $"{accountNo} added, but the account will still remain overdue after this payment.",
+            PaymentClassification.LongOverduePartialCatchUp => $"{accountNo} added, but the long-overdue account will still remain pending after this payment.",
+            PaymentClassification.MissingDueDate => $"{accountNo} added. Due date is unavailable; review before processing.",
+            _ => $"{accountNo} added{suffix}"
+        };
+    }
+
     private static string NormalizeAccountInput(string? value)
     {
         var input = value ?? string.Empty;
@@ -587,7 +649,7 @@ public class ListPanelViewModel : ReactiveObject
         }
 
         _installmentSuggestionHint =
-            $"Suggested pending installments: {suggestedInstallments}. You can edit this value.";
+            $"Suggested to clear dues: {suggestedInstallments}. Edit if needed.";
         this.RaisePropertyChanged(nameof(InstallmentSuggestionHint));
         this.RaisePropertyChanged(nameof(HasInstallmentSuggestionHint));
 
@@ -668,12 +730,20 @@ public class ListPanelViewModel : ReactiveObject
             _ => "cash"
         };
     }
+
+    private void NotifyStateChanged()
+    {
+        StateChanged?.Invoke();
+    }
 }
 
 public class ListManagementViewModel : ViewModelBase
 {
     private const string DopChequeDefaultChequeNoKey = "dop_cheque_default_cheque_no";
     private const string DopChequeDefaultPaymentAccountNoKey = "dop_cheque_default_payment_account_no";
+    private const string DopChequeDefaultBankNameKey = "dop_cheque_default_bank_name";
+    private const string SavedLotRetentionDaysKey = AppSettingKeys.SavedLotRetentionDays;
+    private const int AutoSaveIntervalSeconds = 20;
 
     private static readonly Regex ProcessingListRegex = new(
         @"PROCESSING LIST #\s*(\d+)",
@@ -712,13 +782,25 @@ public class ListManagementViewModel : ViewModelBase
     private readonly NotificationService? _notificationService;
     private readonly string _processingStatePath;
     private readonly string _lotSnapshotPath;
+    private readonly string _lotCheckpointDirectory;
+    private readonly string _autoSaveSnapshotPath;
     private readonly string _referencesFilePath;
     private readonly Dictionary<string, PersistedListRunState> _persistedStates = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _pendingAslaasUpdates = new(StringComparer.OrdinalIgnoreCase);
+    private readonly DispatcherTimer _autoSaveTimer;
 
     private bool _isDarkTheme;
     private bool _isProcessing;
+    private bool _isUpdatingDatabase;
+    private bool _isAutoSaving;
+    private bool _hasPendingAutoSave;
+    private bool _isRestoringAutoSave;
     private string _processStatus = string.Empty;
+    private DateTime? _lastAutoSaveAt;
+    private DateTime? _lastSavedLotAt;
+    private DateTime? _databaseLastUpdated;
+    private bool _hasStaleDatabaseOverride;
+    private int _duplicateHighlightVersion;
 
     public ListManagementViewModel(
         DatabaseService databaseService,
@@ -737,9 +819,17 @@ public class ListManagementViewModel : ViewModelBase
         Directory.CreateDirectory(stateDirectory);
         _processingStatePath = Path.Combine(stateDirectory, "list_processing_state.json");
         _lotSnapshotPath = Path.Combine(stateDirectory, "list_lot_snapshot.json");
+        _lotCheckpointDirectory = Path.Combine(stateDirectory, "lot_checkpoints");
+        _autoSaveSnapshotPath = Path.Combine(stateDirectory, "list_autosave.json");
         _referencesFilePath = Path.Combine(AppPaths.BaseDirectory, "Reports", "references", "payment_references.txt");
+        _autoSaveTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(AutoSaveIntervalSeconds)
+        };
+        _autoSaveTimer.Tick += AutoSaveTimer_Tick;
 
         LoadPersistedState();
+        LoadLatestSavedLotStatus();
 
         Lists = new ObservableCollection<ListPanelViewModel>();
         ReferenceNumbers = new ObservableCollection<string>();
@@ -752,8 +842,16 @@ public class ListManagementViewModel : ViewModelBase
         DeleteAllListsCommand = ReactiveCommand.Create(DeleteAllLists);
         ProcessAllListsCommand = ReactiveCommand.CreateFromTask(ProcessAllListsAsync);
         RetryFailedListsCommand = ReactiveCommand.CreateFromTask(RetryFailedListsAsync);
+        RefreshDatabaseStatusCommand = ReactiveCommand.CreateFromTask(RefreshDatabaseStatusAsync);
+        UpdateDatabaseCommand = ReactiveCommand.CreateFromTask(UpdateDatabaseAsync);
+        OverrideDatabaseGuardCommand = ReactiveCommand.Create(EnableStaleDatabaseOverride);
 
         AddNewList();
+        _databaseService.DatabaseChanged += OnDatabaseChanged;
+        _autoSaveTimer.Start();
+        _ = RestoreAutoSaveAsync();
+        _ = RefreshDatabaseStatusAsync();
+        _ = CleanupSavedLotSnapshotsAsync();
     }
 
     public bool IsDarkTheme
@@ -765,7 +863,12 @@ public class ListManagementViewModel : ViewModelBase
     public bool IsProcessing
     {
         get => _isProcessing;
-        set => this.RaiseAndSetIfChanged(ref _isProcessing, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isProcessing, value);
+            this.RaisePropertyChanged(nameof(CanProcessLists));
+            this.RaisePropertyChanged(nameof(CanRetryFailedLists));
+        }
     }
 
     public string ProcessStatus
@@ -774,8 +877,74 @@ public class ListManagementViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _processStatus, value);
     }
 
+    public bool IsUpdatingDatabase
+    {
+        get => _isUpdatingDatabase;
+        private set => this.RaiseAndSetIfChanged(ref _isUpdatingDatabase, value);
+    }
+
+    public DateTime? DatabaseLastUpdated
+    {
+        get => _databaseLastUpdated;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _databaseLastUpdated, value);
+            RaiseDatabaseGuardProperties();
+        }
+    }
+
+    public bool HasStaleDatabaseOverride
+    {
+        get => _hasStaleDatabaseOverride;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _hasStaleDatabaseOverride, value);
+            RaiseDatabaseGuardProperties();
+        }
+    }
+
     public bool HasFailedLists => Lists.Any(list => list.IsFailedState);
     public bool HasProcessingLogs => ProcessingLogs.Count > 0;
+    public bool IsDatabaseFresh => DatabaseLastUpdated.HasValue && DatabaseLastUpdated.Value.Date >= DateTime.Today;
+    public bool CanEditLists => IsDatabaseFresh || HasStaleDatabaseOverride;
+    public bool CanProcessLists => CanEditLists && !HasFailedLists && !IsProcessing;
+    public bool CanRetryFailedLists => CanEditLists && HasFailedLists && !IsProcessing;
+    public bool ShowRetryFailedWarning => HasFailedLists;
+    public bool ShowDatabaseGuard => !IsDatabaseFresh;
+    public bool ShowOverrideButton => ShowDatabaseGuard && !HasStaleDatabaseOverride;
+    public bool ShowOverrideWarning => ShowDatabaseGuard && HasStaleDatabaseOverride;
+    public DateTime? LastAutoSaveAt
+    {
+        get => _lastAutoSaveAt;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _lastAutoSaveAt, value);
+            this.RaisePropertyChanged(nameof(AutoSaveStatusText));
+        }
+    }
+
+    public DateTime? LastSavedLotAt
+    {
+        get => _lastSavedLotAt;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _lastSavedLotAt, value);
+            this.RaisePropertyChanged(nameof(SavedLotStatusText));
+        }
+    }
+
+    public string AutoSaveStatusText => LastAutoSaveAt.HasValue
+        ? $"Autosaved {LastAutoSaveAt.Value:dd-MMM hh:mm tt}"
+        : "Autosave on";
+    public string SavedLotStatusText => LastSavedLotAt.HasValue
+        ? $"Checkpoint saved {LastSavedLotAt.Value:dd-MMM hh:mm tt}"
+        : "Checkpoint not saved yet";
+    public string DatabaseStatusTitle => IsDatabaseFresh ? "Database updated today" : "Database update required";
+    public string DatabaseStatusMessage => IsDatabaseFresh
+        ? $"Last updated: {DatabaseLastUpdated:dd-MMM-yyyy hh:mm tt}"
+        : DatabaseLastUpdated.HasValue
+            ? $"Last updated on {DatabaseLastUpdated:dd-MMM-yyyy hh:mm tt}. Update the database before creating lists, or override carefully."
+            : "No database update history found. Update the database before creating lists, or override carefully.";
 
     public ObservableCollection<ListPanelViewModel> Lists { get; }
     public ObservableCollection<string> ReferenceNumbers { get; }
@@ -784,6 +953,7 @@ public class ListManagementViewModel : ViewModelBase
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
     public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
     public Interaction<ConfirmListDialogRequest, bool> ConfirmListPrompt { get; } = new();
+    public Interaction<DuplicateFocusRequest, Unit> DuplicateFocusPrompt { get; } = new();
 
     public ReactiveCommand<Unit, Unit> AddNewListCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveLotCommand { get; }
@@ -791,14 +961,25 @@ public class ListManagementViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> DeleteAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> ProcessAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> RetryFailedListsCommand { get; }
+    public ReactiveCommand<Unit, Unit> RefreshDatabaseStatusCommand { get; }
+    public ReactiveCommand<Unit, Unit> UpdateDatabaseCommand { get; }
+    public ReactiveCommand<Unit, Unit> OverrideDatabaseGuardCommand { get; }
 
     private void AddNewList()
     {
+        if (Lists.Count > 0 && !CanEditLists)
+        {
+            ProcessStatus = "Update the database before creating new lists, or use Proceed Anyway.";
+            _notificationService?.Warning("Database Update Needed", "Update the database before creating new lists.");
+            return;
+        }
+
         var index = Lists.Count + 1;
-        var list = CreateListPanel(index, applyPersistedState: true);
+        var list = CreateListPanel(index, applyPersistedState: false);
         Lists.Add(list);
         RefreshReferenceNumbersFromLists();
         RaiseListStateProperties();
+        ScheduleAutoSave();
     }
 
     private void DeleteAllLists()
@@ -809,37 +990,78 @@ public class ListManagementViewModel : ViewModelBase
         SavePersistedState();
 
         AddNewList();
+        ScheduleAutoSave();
+    }
+
+    public async Task DeleteListAsync(ListPanelViewModel? list)
+    {
+        if (list == null)
+        {
+            return;
+        }
+
+        if (IsProcessing)
+        {
+            ProcessStatus = "Cannot delete lists while processing is running.";
+            return;
+        }
+
+        if (!CanEditLists)
+        {
+            ProcessStatus = "Update the database before modifying lists, or use Proceed Anyway.";
+            _notificationService?.Warning("Database Update Needed", "Update the database before modifying lists.");
+            return;
+        }
+
+        var needsConfirmation = list.Count > 0 || list.IsSuccessState || list.IsFailedState;
+        if (needsConfirmation)
+        {
+            var message = list.Count > 0
+                ? $"{list.Name} has {list.Count} account(s). Delete this entire list?"
+                : $"Delete {list.Name}?";
+
+            var confirmed = false;
+            try
+            {
+                confirmed = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+                    "Delete list?",
+                    message,
+                    "Delete",
+                    "Keep")).ToTask();
+            }
+            catch (UnhandledInteractionException<ConfirmDialogRequest, bool>)
+            {
+                confirmed = false;
+            }
+
+            if (!confirmed)
+            {
+                return;
+            }
+        }
+
+        list.PropertyChanged -= OnListPropertyChanged;
+        PersistNeutralListState(list);
+        Lists.Remove(list);
+        RenumberLists();
+        RefreshReferenceNumbersFromLists();
+        RaiseListStateProperties();
+
+        if (Lists.Count == 0)
+        {
+            AddNewList();
+        }
+
+        ProcessStatus = $"{list.Name} deleted.";
+        _notificationService?.Success("List Deleted", $"{list.Name} removed.");
+        ScheduleAutoSave();
     }
 
     private async Task SaveLotAsync()
     {
         try
         {
-            var snapshot = new LotSnapshot
-            {
-                GeneratedAtUtc = DateTime.UtcNow,
-                PendingAslaasUpdates = _pendingAslaasUpdates
-                    .Select(entry => new LotAslaasSnapshot
-                    {
-                        AccountNo = entry.Key,
-                        AslaasNo = entry.Value
-                    })
-                    .OrderBy(entry => entry.AccountNo, StringComparer.OrdinalIgnoreCase)
-                    .ToList(),
-                Lists = Lists.Select(list => new LotListSnapshot
-                {
-                    ListNumber = list.ListNumber,
-                    PaymentMode = list.SelectedPaymentMode,
-                    Status = list.RunState.ToString(),
-                    ReferenceNumber = list.ReferenceNumber,
-                    FailureReason = list.FailureReason,
-                    Items = list.Items.Select(item => new LotItemSnapshot
-                    {
-                        AccountNo = item.AccountNo,
-                        Installment = item.EffectiveInstallment
-                    }).ToList()
-                }).ToList()
-            };
+            var snapshot = BuildLotSnapshot();
 
             var json = JsonSerializer.Serialize(snapshot, new JsonSerializerOptions
             {
@@ -847,13 +1069,21 @@ public class ListManagementViewModel : ViewModelBase
             });
 
             await File.WriteAllTextAsync(_lotSnapshotPath, json);
-            ProcessStatus = $"Lot saved to: {_lotSnapshotPath}";
-            _notificationService?.Success("Lot Saved", $"{snapshot.Lists.Count} list(s) saved.");
+            Directory.CreateDirectory(_lotCheckpointDirectory);
+
+            var checkpointName = $"lot_{snapshot.GeneratedAtUtc:yyyyMMdd_HHmmss_fff}.json";
+            var checkpointPath = Path.Combine(_lotCheckpointDirectory, checkpointName);
+            await File.WriteAllTextAsync(checkpointPath, json);
+
+            LastSavedLotAt = snapshot.GeneratedAtUtc.ToLocalTime();
+            ProcessStatus = $"Checkpoint saved at {LastSavedLotAt:dd-MMM hh:mm tt}.";
+            _notificationService?.Success("Checkpoint Saved", $"{snapshot.Lists.Count} list(s) saved.");
+            _ = CleanupOldLotCheckpointsAsync();
         }
         catch (Exception ex)
         {
-            ProcessStatus = $"Save lot failed: {ex.Message}";
-            _notificationService?.Error("Save Lot Failed", ex.Message);
+            ProcessStatus = $"Checkpoint save failed: {ex.Message}";
+            _notificationService?.Error("Save Checkpoint Failed", ex.Message);
         }
     }
 
@@ -865,17 +1095,48 @@ public class ListManagementViewModel : ViewModelBase
             return;
         }
 
-        if (!File.Exists(_lotSnapshotPath))
+        var latestSnapshotPath = GetLatestSavedLotSnapshotPath();
+        if (latestSnapshotPath == null)
         {
-            ProcessStatus = "No saved lot found. Use Save Lot first.";
-            _notificationService?.Warning("No Saved Lot", "Save a lot before reloading.");
+            ProcessStatus = "No saved checkpoint found. Use Save Lot first.";
+            _notificationService?.Warning("No Saved Checkpoint", "Save a checkpoint before restoring.");
+            return;
+        }
+
+        var confirmed = false;
+        try
+        {
+            confirmed = await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+                "Restore checkpoint?",
+                "This will replace the open lists with the saved checkpoint. Autosave stays separate.",
+                "Restore",
+                "Cancel")).ToTask();
+        }
+        catch (UnhandledInteractionException<ConfirmDialogRequest, bool>)
+        {
+            confirmed = false;
+        }
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var snapshotPath = latestSnapshotPath;
+        if (string.IsNullOrWhiteSpace(snapshotPath))
+        {
             return;
         }
 
         try
         {
-            var json = await File.ReadAllTextAsync(_lotSnapshotPath);
+            var json = await File.ReadAllTextAsync(snapshotPath);
             var snapshot = JsonSerializer.Deserialize<LotSnapshot>(json);
+            var generatedAtUtc = snapshot?.GeneratedAtUtc;
+            if (generatedAtUtc.HasValue && generatedAtUtc.Value != default)
+            {
+                LastSavedLotAt = generatedAtUtc.Value.ToLocalTime();
+            }
             var savedLists = snapshot?.Lists?
                 .OrderBy(list => list.ListNumber)
                 .ToList() ?? new List<LotListSnapshot>();
@@ -894,6 +1155,7 @@ public class ListManagementViewModel : ViewModelBase
                     _pendingAslaasUpdates[pending.AccountNo.Trim()] = NormalizeAslaasValue(pending.AslaasNo);
                 }
             }
+            ScheduleAutoSave();
 
             var skippedAccounts = new List<string>();
             foreach (var saved in savedLists)
@@ -913,7 +1175,9 @@ public class ListManagementViewModel : ViewModelBase
                     var wasAdded = await AddSingleAccountToListAsync(
                         list,
                         savedItem.AccountNo.Trim(),
-                        Math.Max(1, savedItem.Installment));
+                        Math.Max(1, savedItem.Installment),
+                        skipAdvanceConfirmation: true,
+                        skipDatabaseGuard: true);
 
                     if (!wasAdded)
                     {
@@ -921,6 +1185,10 @@ public class ListManagementViewModel : ViewModelBase
                     }
                 }
 
+                list.PendingAccountNo = saved.PendingAccountNo;
+                list.PendingInstallmentText = string.IsNullOrWhiteSpace(saved.PendingInstallmentText)
+                    ? "1"
+                    : saved.PendingInstallmentText;
                 ApplySnapshotStatus(list, saved);
                 PersistListState(list);
             }
@@ -930,7 +1198,6 @@ public class ListManagementViewModel : ViewModelBase
                 AddNewList();
             }
 
-            ReconcileFromReferenceLog(Lists);
             RefreshReferenceNumbersFromLists();
             RaiseListStateProperties();
 
@@ -938,6 +1205,8 @@ public class ListManagementViewModel : ViewModelBase
                 ? $"Reloaded {Lists.Count} list(s) from saved lot."
                 : $"Reloaded {Lists.Count} list(s); skipped {skippedAccounts.Count} invalid/duplicate account(s).";
             _notificationService?.Info("Lot Reloaded", ProcessStatus);
+            ScheduleAutoSave();
+            _ = CleanupOldLotCheckpointsAsync();
         }
         catch (Exception ex)
         {
@@ -972,13 +1241,127 @@ public class ListManagementViewModel : ViewModelBase
         }
     }
 
+    private async Task RefreshDatabaseStatusAsync()
+    {
+        try
+        {
+            DatabaseLastUpdated = await _databaseService.GetLastUpdateTimeAsync();
+            if (IsDatabaseFresh)
+            {
+                HasStaleDatabaseOverride = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            ProcessStatus = $"Could not read database update status: {ex.Message}";
+        }
+    }
+
+    private async Task UpdateDatabaseAsync()
+    {
+        if (IsUpdatingDatabase || IsProcessing)
+        {
+            return;
+        }
+
+        IsUpdatingDatabase = true;
+        ProcessStatus = "Checking Python installation...";
+
+        try
+        {
+            var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();
+            if (!isInstalled)
+            {
+                ProcessStatus = "Python not found! Please install Python 3.x";
+                _notificationService?.Error("Update Failed", "Python 3.x was not found.");
+                return;
+            }
+
+            var (fetchExists, _) = _pythonService.CheckScriptsExist();
+            if (!fetchExists)
+            {
+                ProcessStatus = "Fetch_RDAccounts.py not found in DOPAgent folder.";
+                _notificationService?.Error("Update Failed", "Fetch_RDAccounts.py was not found.");
+                return;
+            }
+
+            ProcessStatus = "Checking required Python packages...";
+            var hasPackages = await _pythonService.CheckRequiredPackagesAsync();
+            if (!hasPackages)
+            {
+                ProcessStatus = "Installing missing Python packages...";
+                _notificationService?.Info("Python Setup", "Installing missing packages...");
+
+                var (installed, installOutput) = await _pythonService.InstallRequiredPackagesAsync();
+                if (!installed)
+                {
+                    ProcessStatus = "Package installation failed. Check internet and pip.";
+                    var firstLine = string.IsNullOrWhiteSpace(installOutput)
+                        ? "Could not install required Python packages."
+                        : installOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "Could not install required Python packages.";
+                    _notificationService?.Error("Package Install Failed", firstLine);
+                    return;
+                }
+
+                _notificationService?.Success("Python Setup", "Required packages installed.");
+            }
+
+            ProcessStatus = $"Python {version} ready. Starting update...";
+            var (success, output) = await _pythonService.UpdateDatabaseAsync(progress =>
+            {
+                var trimmed = (progress ?? string.Empty).Trim();
+                if (!string.IsNullOrWhiteSpace(trimmed))
+                {
+                    ProcessStatus = trimmed;
+                }
+            });
+
+            if (!success)
+            {
+                ProcessStatus = $"Update failed: {output}";
+                _notificationService?.Error("Update Failed", "Fetch_RDAccounts.py did not complete successfully.");
+                return;
+            }
+
+            _databaseService.NotifyDatabaseChanged();
+            await RefreshDatabaseStatusAsync();
+            ProcessStatus = "Database updated successfully. You can continue creating lists.";
+            _notificationService?.Success("Database Updated", "Active account data was refreshed successfully.");
+        }
+        catch (Exception ex)
+        {
+            ProcessStatus = $"Update failed: {ex.Message}";
+            _notificationService?.Error("Update Error", ex.Message);
+        }
+        finally
+        {
+            IsUpdatingDatabase = false;
+        }
+    }
+
+    private void EnableStaleDatabaseOverride()
+    {
+        HasStaleDatabaseOverride = true;
+        ProcessStatus = "Proceeding with a stale database. Review accounts carefully.";
+        _notificationService?.Warning("Stale Database Override", "Proceeding without today's database update.");
+    }
+
     private async Task<bool> AddSingleAccountToListAsync(
         ListPanelViewModel list,
         string accountNo,
-        int installment)
+        int installment,
+        bool skipAdvanceConfirmation = false,
+        bool skipDatabaseGuard = false)
     {
         if (list == null)
         {
+            return false;
+        }
+
+        if (!skipDatabaseGuard && !CanEditLists)
+        {
+            list.SetEntryErrorMessage("Update the database first, or use Proceed Anyway.");
+            _notificationService?.Warning("Database Update Needed", "Update the database before creating lists.");
             return false;
         }
 
@@ -986,6 +1369,16 @@ public class ListManagementViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(normalizedAccountNo))
         {
             list.SetEntryErrorMessage("Enter an account number.");
+            return false;
+        }
+
+        var duplicateMatch = FindOpenListDuplicate(normalizedAccountNo);
+        if (duplicateMatch != null)
+        {
+            await HighlightDuplicateAsync(duplicateMatch.Value.list, duplicateMatch.Value.item);
+            var listLabel = $"List {duplicateMatch.Value.list.ListNumber}";
+            list.SetEntryErrorMessage($"{normalizedAccountNo} already exists in {listLabel}.");
+            _notificationService?.Warning("Duplicate In Open Lists", $"{normalizedAccountNo} already exists in {listLabel}.");
             return false;
         }
 
@@ -1009,11 +1402,52 @@ public class ListManagementViewModel : ViewModelBase
                     }
 
                     _pendingAslaasUpdates[normalizedAccountNo] = NormalizeAslaasValue(queuedAslaas);
+                    ScheduleAutoSave();
+                }
+            }
+
+            if (account != null)
+            {
+                var paymentAnalysis = account.AnalyzePayment(installment);
+                if (!skipAdvanceConfirmation &&
+                    ShouldConfirmAdvancePayment(paymentAnalysis) &&
+                    !await ConfirmAdvancePaymentAsync(account, paymentAnalysis))
+                {
+                    list.SetEntryMessage("Review the installment count before adding this account.");
+                    return false;
                 }
             }
         }
 
         return await list.AddAccountWithInstallmentAsync(normalizedAccountNo, installment, existingAccounts);
+    }
+
+    private async Task<bool> ConfirmAdvancePaymentAsync(RDAccount account, PaymentAnalysis analysis)
+    {
+        if (!ShouldConfirmAdvancePayment(analysis))
+        {
+            return true;
+        }
+
+        var lines = new List<string>
+        {
+            $"{account.AccountNo}",
+            $"Already paid till {analysis.DueMonthDisplay}",
+            $"Entered {analysis.EnteredInstallments} more installment(s)",
+            $"Next due after pay: {analysis.NextDueMonthAfterPaymentDisplay}"
+        };
+
+        return await ConfirmPrompt.Handle(new ConfirmDialogRequest(
+            "Pay more advance?",
+            string.Join(Environment.NewLine, lines),
+            "Continue",
+            "Review Entry")).ToTask();
+    }
+
+    private static bool ShouldConfirmAdvancePayment(PaymentAnalysis analysis)
+    {
+        return analysis.DueMonth.HasValue &&
+               analysis.DueMonth.Value > analysis.CurrentMonth;
     }
 
     private async Task<string?> RequestAslaasValueAsync(RDAccount account)
@@ -1093,8 +1527,19 @@ public class ListManagementViewModel : ViewModelBase
             return;
         }
 
-        ApplyPersistedStatesToLists();
-        ReconcileFromReferenceLog(Lists);
+        if (!retryFailedOnly && HasFailedLists)
+        {
+            ProcessStatus = "Failed lists exist. Use Retry Failed Only to avoid report conflicts.";
+            _notificationService?.Warning("Retry Failed Lists Only", ProcessStatus);
+            return;
+        }
+
+        if (!CanEditLists)
+        {
+            ProcessStatus = "Update the database before processing lists, or use Proceed Anyway.";
+            _notificationService?.Warning("Database Update Needed", ProcessStatus);
+            return;
+        }
 
         var processableLists = Lists
             .Where(list =>
@@ -1341,6 +1786,7 @@ public class ListManagementViewModel : ViewModelBase
             {
                 _pendingAslaasUpdates.Remove(update.AccountNo);
             }
+            ScheduleAutoSave();
 
             foreach (var list in processableLists.Where(list => !list.IsSuccessState))
             {
@@ -1618,6 +2064,26 @@ public class ListManagementViewModel : ViewModelBase
             RefreshReferenceNumbersFromLists();
             RaiseListStateProperties();
         }
+
+        if (e.PropertyName is nameof(ListPanelViewModel.RunState)
+            or nameof(ListPanelViewModel.ReferenceNumber)
+            or nameof(ListPanelViewModel.FailureReason)
+            or nameof(ListPanelViewModel.PendingAccountNo)
+            or nameof(ListPanelViewModel.PendingInstallmentText)
+            or nameof(ListPanelViewModel.SelectedPaymentMode))
+        {
+            ScheduleAutoSave();
+        }
+    }
+
+    private void OnListStateChanged()
+    {
+        ScheduleAutoSave();
+    }
+
+    private void OnDatabaseChanged(object? sender, EventArgs e)
+    {
+        _ = RefreshDatabaseStatusAsync();
     }
 
     private ListPanelViewModel CreateListPanel(int listNumber, bool applyPersistedState)
@@ -1626,14 +2092,14 @@ public class ListManagementViewModel : ViewModelBase
             Math.Max(1, listNumber),
             _databaseService,
             _validationService,
-            AddSingleAccountToListAsync);
+            (panel, accountNo, installment) => AddSingleAccountToListAsync(panel, accountNo, installment));
 
         list.PropertyChanged += OnListPropertyChanged;
+        list.StateChanged += OnListStateChanged;
 
         if (applyPersistedState)
         {
             ApplyPersistedState(list);
-            ReconcileFromReferenceLog(new[] { list });
         }
 
         return list;
@@ -1644,11 +2110,20 @@ public class ListManagementViewModel : ViewModelBase
         foreach (var list in Lists)
         {
             list.PropertyChanged -= OnListPropertyChanged;
+            list.StateChanged -= OnListStateChanged;
         }
 
         Lists.Clear();
         ReferenceNumbers.Clear();
         RaiseListStateProperties();
+    }
+
+    private void RenumberLists()
+    {
+        for (var index = 0; index < Lists.Count; index++)
+        {
+            Lists[index].UpdateListNumber(index + 1);
+        }
     }
 
     private static void ApplySnapshotStatus(ListPanelViewModel list, LotListSnapshot snapshot)
@@ -1673,6 +2148,80 @@ public class ListManagementViewModel : ViewModelBase
     private void RaiseListStateProperties()
     {
         this.RaisePropertyChanged(nameof(HasFailedLists));
+        this.RaisePropertyChanged(nameof(CanProcessLists));
+        this.RaisePropertyChanged(nameof(CanRetryFailedLists));
+        this.RaisePropertyChanged(nameof(ShowRetryFailedWarning));
+    }
+
+    private void RaiseDatabaseGuardProperties()
+    {
+        this.RaisePropertyChanged(nameof(IsDatabaseFresh));
+        this.RaisePropertyChanged(nameof(CanEditLists));
+        this.RaisePropertyChanged(nameof(CanProcessLists));
+        this.RaisePropertyChanged(nameof(CanRetryFailedLists));
+        this.RaisePropertyChanged(nameof(ShowDatabaseGuard));
+        this.RaisePropertyChanged(nameof(ShowOverrideButton));
+        this.RaisePropertyChanged(nameof(ShowOverrideWarning));
+        this.RaisePropertyChanged(nameof(DatabaseStatusTitle));
+        this.RaisePropertyChanged(nameof(DatabaseStatusMessage));
+    }
+
+    private (ListPanelViewModel list, ListItem item)? FindOpenListDuplicate(string accountNo)
+    {
+        var normalized = (accountNo ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        foreach (var list in Lists)
+        {
+            var item = list.Items.FirstOrDefault(existing =>
+                string.Equals(existing.AccountNo?.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
+            if (item != null)
+            {
+                return (list, item);
+            }
+        }
+
+        return null;
+    }
+
+    private async Task HighlightDuplicateAsync(ListPanelViewModel targetList, ListItem targetItem)
+    {
+        var version = ++_duplicateHighlightVersion;
+
+        foreach (var list in Lists)
+        {
+            list.ClearDuplicateFocus();
+        }
+
+        targetList.IsDuplicateFocus = true;
+        targetItem.IsDuplicateFocus = true;
+
+        try
+        {
+            await DuplicateFocusPrompt.Handle(new DuplicateFocusRequest(targetList.ListNumber, targetItem.AccountNo)).ToTask();
+        }
+        catch (UnhandledInteractionException<DuplicateFocusRequest, Unit>)
+        {
+            // Ignore if the view is not available.
+        }
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(3000);
+            if (version != _duplicateHighlightVersion)
+            {
+                return;
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                targetItem.IsDuplicateFocus = false;
+                targetList.IsDuplicateFocus = false;
+            });
+        });
     }
 
     private void ClearProcessingLogs()
@@ -1798,6 +2347,20 @@ public class ListManagementViewModel : ViewModelBase
         }
     }
 
+    private void PersistNeutralListState(ListPanelViewModel list)
+    {
+        var signature = list.GetPayloadSignature();
+        if (string.IsNullOrWhiteSpace(signature))
+        {
+            return;
+        }
+
+        if (_persistedStates.Remove(signature))
+        {
+            SavePersistedState();
+        }
+    }
+
     private void LoadPersistedState()
     {
         _persistedStates.Clear();
@@ -1854,6 +2417,390 @@ public class ListManagementViewModel : ViewModelBase
         {
             // Ignore persistence failures.
         }
+    }
+
+    private LotSnapshot BuildLotSnapshot()
+    {
+        return new LotSnapshot
+        {
+            GeneratedAtUtc = DateTime.UtcNow,
+            PendingAslaasUpdates = _pendingAslaasUpdates
+                .Select(entry => new LotAslaasSnapshot
+                {
+                    AccountNo = entry.Key,
+                    AslaasNo = entry.Value
+                })
+                .OrderBy(entry => entry.AccountNo, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            Lists = Lists.Select(list => new LotListSnapshot
+            {
+                ListNumber = list.ListNumber,
+                PaymentMode = list.SelectedPaymentMode,
+                Status = list.RunState.ToString(),
+                ReferenceNumber = list.ReferenceNumber,
+                FailureReason = list.FailureReason,
+                PendingAccountNo = list.PendingAccountNo,
+                PendingInstallmentText = list.PendingInstallmentText,
+                Items = list.Items.Select(item => new LotItemSnapshot
+                {
+                    AccountNo = item.AccountNo,
+                    Installment = item.EffectiveInstallment
+                }).ToList()
+            }).ToList()
+        };
+    }
+
+    private static bool HasMeaningfulSnapshotContent(LotSnapshot? snapshot)
+    {
+        if (snapshot == null)
+        {
+            return false;
+        }
+
+        if (snapshot.PendingAslaasUpdates.Any())
+        {
+            return true;
+        }
+
+        foreach (var list in snapshot.Lists)
+        {
+            if (list.Items.Any())
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(list.PendingAccountNo))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void ScheduleAutoSave()
+    {
+        if (_isRestoringAutoSave)
+        {
+            return;
+        }
+
+        _hasPendingAutoSave = true;
+    }
+
+    private async void AutoSaveTimer_Tick(object? sender, EventArgs e)
+    {
+        await PersistAutoSaveAsync();
+    }
+
+    private async Task PersistAutoSaveAsync()
+    {
+        if (_isRestoringAutoSave || _isAutoSaving || !_hasPendingAutoSave)
+        {
+            return;
+        }
+
+        _isAutoSaving = true;
+        try
+        {
+            var snapshot = BuildLotSnapshot();
+            if (!HasMeaningfulSnapshotContent(snapshot))
+            {
+                _hasPendingAutoSave = false;
+                DeleteAutoSaveSnapshot();
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(snapshot, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            var tempPath = $"{_autoSaveSnapshotPath}.tmp";
+            await File.WriteAllTextAsync(tempPath, json);
+            File.Move(tempPath, _autoSaveSnapshotPath, true);
+            _hasPendingAutoSave = false;
+            LastAutoSaveAt = DateTime.Now;
+        }
+        catch
+        {
+            // Ignore autosave failures; user workflow should continue.
+        }
+        finally
+        {
+            _isAutoSaving = false;
+        }
+    }
+
+    private void DeleteAutoSaveSnapshot()
+    {
+        try
+        {
+            if (File.Exists(_autoSaveSnapshotPath))
+            {
+                File.Delete(_autoSaveSnapshotPath);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup failures.
+        }
+    }
+
+    private async Task RestoreAutoSaveAsync()
+    {
+        if (!File.Exists(_autoSaveSnapshotPath) || IsProcessing)
+        {
+            return;
+        }
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(_autoSaveSnapshotPath);
+            var snapshot = JsonSerializer.Deserialize<LotSnapshot>(json);
+            if (!HasMeaningfulSnapshotContent(snapshot))
+            {
+                DeleteAutoSaveSnapshot();
+                return;
+            }
+
+            _isRestoringAutoSave = true;
+            var savedLists = snapshot?.Lists?
+                .OrderBy(list => list.ListNumber)
+                .ToList() ?? new List<LotListSnapshot>();
+
+            ClearListPanels();
+            _pendingAslaasUpdates.Clear();
+            if (snapshot?.PendingAslaasUpdates != null)
+            {
+                foreach (var pending in snapshot.PendingAslaasUpdates)
+                {
+                    if (string.IsNullOrWhiteSpace(pending.AccountNo))
+                    {
+                        continue;
+                    }
+
+                    _pendingAslaasUpdates[pending.AccountNo.Trim()] = NormalizeAslaasValue(pending.AslaasNo);
+                }
+            }
+
+            var skippedAccounts = new List<string>();
+            foreach (var saved in savedLists)
+            {
+                var listNumber = saved.ListNumber > 0 ? saved.ListNumber : Lists.Count + 1;
+                var list = CreateListPanel(listNumber, applyPersistedState: false);
+                list.SelectedPaymentMode = saved.PaymentMode;
+                Lists.Add(list);
+
+                foreach (var savedItem in saved.Items)
+                {
+                    if (string.IsNullOrWhiteSpace(savedItem.AccountNo))
+                    {
+                        continue;
+                    }
+
+                    var wasAdded = await AddSingleAccountToListAsync(
+                        list,
+                        savedItem.AccountNo.Trim(),
+                        Math.Max(1, savedItem.Installment),
+                        skipAdvanceConfirmation: true,
+                        skipDatabaseGuard: true);
+
+                    if (!wasAdded)
+                    {
+                        skippedAccounts.Add(savedItem.AccountNo.Trim());
+                    }
+                }
+
+                list.PendingAccountNo = saved.PendingAccountNo;
+                list.PendingInstallmentText = string.IsNullOrWhiteSpace(saved.PendingInstallmentText)
+                    ? "1"
+                    : saved.PendingInstallmentText;
+                ApplySnapshotStatus(list, saved);
+                PersistListState(list);
+            }
+
+            if (Lists.Count == 0)
+            {
+                AddNewList();
+            }
+
+            RefreshReferenceNumbersFromLists();
+            RaiseListStateProperties();
+
+            ProcessStatus = skippedAccounts.Count == 0
+                ? $"Restored {Lists.Count} checkpoint list(s)."
+                : $"Restored {Lists.Count} checkpoint list(s); skipped {skippedAccounts.Count} invalid/duplicate account(s).";
+            _notificationService?.Info("Checkpoint Restored", ProcessStatus);
+            _hasPendingAutoSave = false;
+        }
+        catch
+        {
+            // Ignore invalid autosave files.
+        }
+        finally
+        {
+            _isRestoringAutoSave = false;
+        }
+    }
+
+    private async Task CleanupSavedLotSnapshotsAsync()
+    {
+        try
+        {
+            var retentionDays = await GetSavedLotRetentionDaysAsync();
+            if (retentionDays <= 0)
+            {
+                retentionDays = 1;
+            }
+
+            await CleanupSnapshotIfExpiredAsync(_lotSnapshotPath, retentionDays);
+            await CleanupSnapshotIfExpiredAsync(_autoSaveSnapshotPath, retentionDays);
+            await CleanupOldLotCheckpointsAsync(retentionDays);
+        }
+        catch
+        {
+            // Ignore retention cleanup failures.
+        }
+    }
+
+    private async Task<int> GetSavedLotRetentionDaysAsync()
+    {
+        var raw = await _databaseService.GetAppSettingAsync(SavedLotRetentionDaysKey);
+        return ParsePositiveRetentionDays(raw, 1);
+    }
+
+    private static int ParsePositiveRetentionDays(string? raw, int defaultValue)
+    {
+        if (int.TryParse((raw ?? string.Empty).Trim(), out var days) && days > 0)
+        {
+            return Math.Min(days, 3650);
+        }
+
+        return defaultValue;
+    }
+
+    private async Task CleanupSnapshotIfExpiredAsync(string snapshotPath, int retentionDays)
+    {
+        if (!File.Exists(snapshotPath))
+        {
+            return;
+        }
+
+        try
+        {
+            var snapshot = JsonSerializer.Deserialize<LotSnapshot>(await File.ReadAllTextAsync(snapshotPath));
+            var generatedAt = snapshot?.GeneratedAtUtc;
+            var generatedDate = generatedAt == null || generatedAt == default
+                ? File.GetLastWriteTimeUtc(snapshotPath)
+                : DateTime.SpecifyKind(generatedAt.Value, DateTimeKind.Utc);
+
+            var cutoff = DateTime.UtcNow.Date.AddDays(1 - retentionDays);
+            if (generatedDate.Date >= cutoff)
+            {
+                return;
+            }
+
+            File.Delete(snapshotPath);
+        }
+        catch
+        {
+            // Ignore cleanup failures.
+        }
+    }
+
+    private void LoadLatestSavedLotStatus()
+    {
+        var latestSnapshotPath = GetLatestSavedLotSnapshotPath();
+        if (string.IsNullOrWhiteSpace(latestSnapshotPath))
+        {
+            return;
+        }
+
+        var snapshotPath = latestSnapshotPath;
+        try
+        {
+            var snapshot = JsonSerializer.Deserialize<LotSnapshot>(File.ReadAllText(snapshotPath));
+            var generatedAtUtc = snapshot?.GeneratedAtUtc;
+            if (generatedAtUtc.HasValue && generatedAtUtc.Value != default)
+            {
+                LastSavedLotAt = generatedAtUtc.Value.ToLocalTime();
+            }
+            else
+            {
+                LastSavedLotAt = File.GetLastWriteTime(snapshotPath);
+            }
+        }
+        catch
+        {
+            LastSavedLotAt = File.Exists(snapshotPath) ? File.GetLastWriteTime(snapshotPath) : null;
+        }
+    }
+
+    private string? GetLatestSavedLotSnapshotPath()
+    {
+        try
+        {
+            var candidates = new List<string>();
+            if (File.Exists(_lotSnapshotPath))
+            {
+                candidates.Add(_lotSnapshotPath);
+            }
+
+            if (Directory.Exists(_lotCheckpointDirectory))
+            {
+                candidates.AddRange(Directory.EnumerateFiles(_lotCheckpointDirectory, "lot_*.json"));
+            }
+
+            return candidates
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .FirstOrDefault();
+        }
+        catch
+        {
+            return File.Exists(_lotSnapshotPath) ? _lotSnapshotPath : null;
+        }
+    }
+
+    private async Task CleanupOldLotCheckpointsAsync()
+    {
+        var retentionDays = await GetSavedLotRetentionDaysAsync();
+        await CleanupOldLotCheckpointsAsync(retentionDays);
+    }
+
+    private Task CleanupOldLotCheckpointsAsync(int retentionDays)
+    {
+        return Task.Run(() =>
+        {
+            try
+            {
+                if (!Directory.Exists(_lotCheckpointDirectory))
+                {
+                    return;
+                }
+
+                var cutoff = DateTime.UtcNow.Date.AddDays(1 - Math.Max(1, retentionDays));
+                foreach (var file in Directory.EnumerateFiles(_lotCheckpointDirectory, "lot_*.json"))
+                {
+                    try
+                    {
+                        var writeTime = File.GetLastWriteTimeUtc(file);
+                        if (writeTime.Date < cutoff)
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore checkpoint cleanup failures.
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore checkpoint cleanup failures.
+            }
+        });
     }
 
     private void ReconcileFromReferenceLog(IEnumerable<ListPanelViewModel> lists)
@@ -1995,7 +2942,7 @@ public class ListManagementViewModel : ViewModelBase
         IReadOnlyList<ListPanelViewModel> processableLists)
     {
         var result = new List<DopChequeInputItem>();
-        var (lastChequeNo, lastPaymentAccountNo) = await GetDopChequeDefaultsAsync();
+        var (lastBankName, lastChequeNo, lastPaymentAccountNo) = await GetDopChequeDefaultsAsync();
 
         for (var index = 0; index < processableLists.Count; index++)
         {
@@ -2022,7 +2969,8 @@ public class ListManagementViewModel : ViewModelBase
                     AccountName = item.AccountNameDisplay,
                     Installment = item.EffectiveInstallment,
                     PaymentModeToken = paymentModeToken,
-                    RequireChequeNo = isDopChequeMode,
+                    RequireChequeNo = true,
+                    SuggestedBankName = lastBankName,
                     SuggestedChequeNo = lastChequeNo,
                     SuggestedPaymentAccountNo = lastPaymentAccountNo
                 }).ToTask();
@@ -2034,14 +2982,24 @@ public class ListManagementViewModel : ViewModelBase
 
                 var chequeNo = (response.ChequeNo ?? string.Empty).Trim();
                 var paymentAccountNo = (response.PaymentAccountNo ?? string.Empty).Trim();
+                var bankName = (response.BankName ?? string.Empty).Trim();
                 var accountNo = (response.AccountNo ?? string.Empty).Trim();
                 if (string.IsNullOrWhiteSpace(accountNo) ||
-                    (isDopChequeMode && string.IsNullOrWhiteSpace(chequeNo)) ||
+                    string.IsNullOrWhiteSpace(chequeNo) ||
                     string.IsNullOrWhiteSpace(paymentAccountNo))
                 {
                     return null;
                 }
 
+                if (isNonDopChequeMode && string.IsNullOrWhiteSpace(bankName))
+                {
+                    return null;
+                }
+
+                if (!string.IsNullOrWhiteSpace(bankName))
+                {
+                    lastBankName = bankName;
+                }
                 if (!string.IsNullOrWhiteSpace(chequeNo))
                 {
                     lastChequeNo = chequeNo;
@@ -2052,6 +3010,7 @@ public class ListManagementViewModel : ViewModelBase
                 {
                     ListIndex = index + 1,
                     AccountNo = accountNo,
+                    BankName = bankName,
                     ChequeNo = chequeNo,
                     PaymentAccountNo = paymentAccountNo,
                     PaymentModeToken = paymentModeToken
@@ -2061,37 +3020,46 @@ public class ListManagementViewModel : ViewModelBase
 
         if (result.Count > 0)
         {
-            await SaveDopChequeDefaultsAsync(lastChequeNo, lastPaymentAccountNo);
+            await SaveDopChequeDefaultsAsync(lastBankName, lastChequeNo, lastPaymentAccountNo);
         }
 
         return result;
     }
 
-    private async Task<(string chequeNo, string paymentAccountNo)> GetDopChequeDefaultsAsync()
+    private async Task<(string bankName, string chequeNo, string paymentAccountNo)> GetDopChequeDefaultsAsync()
     {
         try
         {
+            var bankName = (await _databaseService.GetAppSettingAsync(DopChequeDefaultBankNameKey) ?? string.Empty).Trim();
             var chequeNo = (await _databaseService.GetAppSettingAsync(DopChequeDefaultChequeNoKey) ?? string.Empty).Trim();
             var paymentAccountNo = (await _databaseService.GetAppSettingAsync(DopChequeDefaultPaymentAccountNoKey) ?? string.Empty).Trim();
-            return (chequeNo, paymentAccountNo);
+            return (bankName, chequeNo, paymentAccountNo);
         }
         catch
         {
-            return (string.Empty, string.Empty);
+            return (string.Empty, string.Empty, string.Empty);
         }
     }
 
-    private async Task SaveDopChequeDefaultsAsync(string chequeNo, string paymentAccountNo)
+    private async Task SaveDopChequeDefaultsAsync(string bankName, string chequeNo, string paymentAccountNo)
     {
+        var normalizedBankName = (bankName ?? string.Empty).Trim();
         var normalizedChequeNo = (chequeNo ?? string.Empty).Trim();
         var normalizedPaymentAccountNo = (paymentAccountNo ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(normalizedChequeNo) && string.IsNullOrWhiteSpace(normalizedPaymentAccountNo))
+        if (string.IsNullOrWhiteSpace(normalizedBankName) &&
+            string.IsNullOrWhiteSpace(normalizedChequeNo) &&
+            string.IsNullOrWhiteSpace(normalizedPaymentAccountNo))
         {
             return;
         }
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(normalizedBankName))
+            {
+                await _databaseService.SaveAppSettingAsync(DopChequeDefaultBankNameKey, normalizedBankName);
+            }
+
             if (!string.IsNullOrWhiteSpace(normalizedChequeNo))
             {
                 await _databaseService.SaveAppSettingAsync(DopChequeDefaultChequeNoKey, normalizedChequeNo);
@@ -2143,6 +3111,8 @@ public class ListManagementViewModel : ViewModelBase
         public string Status { get; set; } = string.Empty;
         public string ReferenceNumber { get; set; } = string.Empty;
         public string FailureReason { get; set; } = string.Empty;
+        public string PendingAccountNo { get; set; } = string.Empty;
+        public string PendingInstallmentText { get; set; } = "1";
         public List<LotItemSnapshot> Items { get; set; } = new();
     }
 

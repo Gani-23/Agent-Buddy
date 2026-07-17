@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -60,6 +61,7 @@ public class SettingsViewModel : ViewModelBase
     private const string PasswordLastChangedKey = "portal_password_last_changed_utc";
     private const int PasswordValidityDays = 180;
     private const string AgentNameSettingKey = "agent_name";
+    private const string RdCertificateRenewalDateKey = "rd_certificate_renewal_date";
     private string _browserStatus = string.Empty;
     private bool _isSavingBrowserSettings;
     private string? _selectedBrowser;
@@ -77,6 +79,13 @@ public class SettingsViewModel : ViewModelBase
     private string _passwordChangeStatus = string.Empty;
     private string _passwordExpiryNote = string.Empty;
     private bool _isChangingPassword;
+    private string? _rdCertificateRenewalDateText;
+    private string _rdCertificateRenewalStatus = string.Empty;
+    private bool _isSavingRdCertificateRenewal;
+    private string? _savedLotRetentionDaysText;
+    private string? _reportRetentionDaysText;
+    private string _retentionStatus = string.Empty;
+    private bool _isSavingRetentionSettings;
 
     public SettingsViewModel(
         DatabaseService databaseService,
@@ -111,6 +120,8 @@ public class SettingsViewModel : ViewModelBase
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
         SaveDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SaveDefaultPrinterAsync);
         SaveBrowserSettingsCommand = ReactiveCommand.CreateFromTask(SaveBrowserSettingsAsync);
+        SaveRdCertificateRenewalCommand = ReactiveCommand.CreateFromTask(SaveRdCertificateRenewalAsync);
+        SaveRetentionSettingsCommand = ReactiveCommand.CreateFromTask(SaveRetentionSettingsAsync);
         ActivateLicenseCommand = ReactiveCommand.CreateFromTask(ActivateLicenseAsync);
         ValidateStoredLicenseCommand = ReactiveCommand.CreateFromTask(ValidateStoredLicenseAsync);
         ClearLicenseCommand = ReactiveCommand.CreateFromTask(ClearLicenseAsync);
@@ -317,6 +328,48 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _browserStatus, value);
     }
 
+    public string? RdCertificateRenewalDateText
+    {
+        get => _rdCertificateRenewalDateText;
+        set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalDateText, value);
+    }
+
+    public string RdCertificateRenewalStatus
+    {
+        get => _rdCertificateRenewalStatus;
+        set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalStatus, value);
+    }
+
+    public bool IsSavingRdCertificateRenewal
+    {
+        get => _isSavingRdCertificateRenewal;
+        set => this.RaiseAndSetIfChanged(ref _isSavingRdCertificateRenewal, value);
+    }
+
+    public string? SavedLotRetentionDaysText
+    {
+        get => _savedLotRetentionDaysText;
+        set => this.RaiseAndSetIfChanged(ref _savedLotRetentionDaysText, value);
+    }
+
+    public string? ReportRetentionDaysText
+    {
+        get => _reportRetentionDaysText;
+        set => this.RaiseAndSetIfChanged(ref _reportRetentionDaysText, value);
+    }
+
+    public string RetentionStatus
+    {
+        get => _retentionStatus;
+        set => this.RaiseAndSetIfChanged(ref _retentionStatus, value);
+    }
+
+    public bool IsSavingRetentionSettings
+    {
+        get => _isSavingRetentionSettings;
+        set => this.RaiseAndSetIfChanged(ref _isSavingRetentionSettings, value);
+    }
+
     public bool IsSavingBrowserSettings
     {
         get => _isSavingBrowserSettings;
@@ -424,11 +477,14 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveDefaultPrinterCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveBrowserSettingsCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveRdCertificateRenewalCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveRetentionSettingsCommand { get; }
     public ReactiveCommand<Unit, Unit> ActivateLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ValidateStoredLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckUpdatesCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
+    public event EventHandler? RdCertificateRenewalChanged;
 
     private async void LoadSettings()
     {
@@ -453,6 +509,8 @@ public class SettingsViewModel : ViewModelBase
         LanguageStatus = "Select your preferred language, then click Apply Language.";
         LicenseStatus = "Enter token and activate license.";
         LicenseSummary = "No active license.";
+        RdCertificateRenewalStatus = "Enter the next postal RD certificate renewal date, then save it.";
+        RetentionStatus = "Set how long to keep saved lots and reports before cleanup runs.";
 
         var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();
         PythonVersion = isInstalled ? version : "Not installed";
@@ -475,6 +533,8 @@ public class SettingsViewModel : ViewModelBase
 
         await LoadPrintersAsync();
         await LoadBrowserSettingsAsync();
+        await LoadRdCertificateRenewalAsync();
+        await LoadRetentionSettingsAsync();
         await LoadLicenseSettingsAsync();
         await LoadPasswordExpiryAsync();
     }
@@ -703,6 +763,191 @@ public class SettingsViewModel : ViewModelBase
         {
             IsSavingMobileSyncSettings = false;
         }
+    }
+
+    private async Task LoadRdCertificateRenewalAsync()
+    {
+        var saved = (await _databaseService.GetAppSettingAsync(RdCertificateRenewalDateKey) ?? string.Empty).Trim();
+        if (TryParseRdCertificateRenewalDate(saved, out var renewalDate))
+        {
+            RdCertificateRenewalDateText = renewalDate.ToString("dd-MMM-yyyy");
+            var remainingDays = (renewalDate.Date - DateTime.Today).Days;
+            RdCertificateRenewalStatus = remainingDays switch
+            {
+                < 0 => $"Renewal expired {-remainingDays} day(s) ago on {renewalDate:dd-MMM-yyyy}.",
+                0 => $"Renewal is due today ({renewalDate:dd-MMM-yyyy}).",
+                _ => $"{remainingDays} day(s) remaining until {renewalDate:dd-MMM-yyyy}."
+            };
+            return;
+        }
+
+        RdCertificateRenewalDateText = string.Empty;
+        RdCertificateRenewalStatus = "Enter the next postal RD certificate renewal date, then save it.";
+    }
+
+    private async Task LoadRetentionSettingsAsync()
+    {
+        var savedLotDays = await _databaseService.GetAppSettingAsync(AppSettingKeys.SavedLotRetentionDays);
+        var reportDays = await _databaseService.GetAppSettingAsync(AppSettingKeys.ReportRetentionDays);
+
+        SavedLotRetentionDaysText = ParseRetentionText(savedLotDays, 1);
+        ReportRetentionDaysText = ParseRetentionText(reportDays, 2);
+        RetentionStatus = "Saved lots are cleaned automatically on the list screen. Reports are cleaned when the reports page opens.";
+    }
+
+    private async Task SaveRetentionSettingsAsync()
+    {
+        if (IsSavingRetentionSettings)
+        {
+            return;
+        }
+
+        if (!TryParseRetentionDays(SavedLotRetentionDaysText, 1, out var savedLotDays, out var savedLotError))
+        {
+            RetentionStatus = savedLotError;
+            return;
+        }
+
+        if (!TryParseRetentionDays(ReportRetentionDaysText, 2, out var reportDays, out var reportError))
+        {
+            RetentionStatus = reportError;
+            return;
+        }
+
+        IsSavingRetentionSettings = true;
+        RetentionStatus = "Saving retention settings...";
+
+        try
+        {
+            await _databaseService.SaveAppSettingAsync(AppSettingKeys.SavedLotRetentionDays, savedLotDays.ToString(CultureInfo.InvariantCulture));
+            await _databaseService.SaveAppSettingAsync(AppSettingKeys.ReportRetentionDays, reportDays.ToString(CultureInfo.InvariantCulture));
+            SavedLotRetentionDaysText = savedLotDays.ToString(CultureInfo.InvariantCulture);
+            ReportRetentionDaysText = reportDays.ToString(CultureInfo.InvariantCulture);
+            RetentionStatus = $"Saved lots kept for {savedLotDays} day(s). Reports kept for {reportDays} day(s).";
+        }
+        catch (Exception ex)
+        {
+            RetentionStatus = $"Failed to save retention settings: {ex.Message}";
+        }
+        finally
+        {
+            IsSavingRetentionSettings = false;
+        }
+    }
+
+    private static string ParseRetentionText(string? raw, int defaultValue)
+    {
+        return TryParseRetentionDays(raw, defaultValue, out var days, out _) 
+            ? days.ToString(CultureInfo.InvariantCulture)
+            : defaultValue.ToString(CultureInfo.InvariantCulture);
+    }
+
+    private static bool TryParseRetentionDays(string? raw, int defaultValue, out int days, out string error)
+    {
+        var trimmed = (raw ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            days = defaultValue;
+            error = string.Empty;
+            return true;
+        }
+
+        if (!int.TryParse(trimmed, out days) || days <= 0)
+        {
+            days = defaultValue;
+            error = "Enter a whole number of day(s) greater than zero.";
+            return false;
+        }
+
+        days = Math.Min(days, 3650);
+        error = string.Empty;
+        return true;
+    }
+
+    private async Task SaveRdCertificateRenewalAsync()
+    {
+        if (IsSavingRdCertificateRenewal)
+        {
+            return;
+        }
+
+        var raw = (RdCertificateRenewalDateText ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            IsSavingRdCertificateRenewal = true;
+            RdCertificateRenewalStatus = "Clearing renewal date...";
+            try
+            {
+                await _databaseService.SaveAppSettingAsync(RdCertificateRenewalDateKey, string.Empty);
+                RdCertificateRenewalDateText = string.Empty;
+                RdCertificateRenewalStatus = "Renewal date cleared. Set a new date when available.";
+                RdCertificateRenewalChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                RdCertificateRenewalStatus = $"Failed to clear renewal date: {ex.Message}";
+            }
+            finally
+            {
+                IsSavingRdCertificateRenewal = false;
+            }
+
+            return;
+        }
+
+        if (!TryParseRdCertificateRenewalDate(raw, out var renewalDate))
+        {
+            RdCertificateRenewalStatus = "Enter a valid date like 23-May-2026 or 2026-05-23.";
+            return;
+        }
+
+        IsSavingRdCertificateRenewal = true;
+        RdCertificateRenewalStatus = "Saving renewal date...";
+
+        try
+        {
+            await _databaseService.SaveAppSettingAsync(
+                RdCertificateRenewalDateKey,
+                renewalDate.ToString("yyyy-MM-dd"));
+            RdCertificateRenewalDateText = renewalDate.ToString("dd-MMM-yyyy");
+            var remainingDays = (renewalDate.Date - DateTime.Today).Days;
+            RdCertificateRenewalStatus = remainingDays switch
+            {
+                < 0 => $"Renewal saved. It expired {-remainingDays} day(s) ago on {renewalDate:dd-MMM-yyyy}.",
+                0 => $"Renewal saved. It is due today ({renewalDate:dd-MMM-yyyy}).",
+                _ => $"Renewal saved. {remainingDays} day(s) remaining until {renewalDate:dd-MMM-yyyy}."
+            };
+            RdCertificateRenewalChanged?.Invoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            RdCertificateRenewalStatus = $"Failed to save renewal date: {ex.Message}";
+        }
+        finally
+        {
+            IsSavingRdCertificateRenewal = false;
+        }
+    }
+
+    private static bool TryParseRdCertificateRenewalDate(string raw, out DateTime renewalDate)
+    {
+        var formats = new[]
+        {
+            "dd-MMM-yyyy",
+            "dd-MM-yyyy",
+            "dd/MM/yyyy",
+            "yyyy-MM-dd",
+            "yyyy/MM/dd"
+        };
+
+        return DateTime.TryParseExact(
+                   raw,
+                   formats,
+                   CultureInfo.InvariantCulture,
+                   DateTimeStyles.AllowWhiteSpaces,
+                   out renewalDate)
+               || DateTime.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out renewalDate)
+               || DateTime.TryParse(raw, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out renewalDate);
     }
 
     private async Task LoadPrintersAsync()
@@ -1153,14 +1398,17 @@ public class SettingsViewModel : ViewModelBase
             if (!success)
             {
                 var reason = GetFirstMeaningfulLine(output);
-                AslaasUpdateStatus = $"ASLAAS update failed: {reason}";
+                var savedSome = (output ?? string.Empty).IndexOf(
+                    "ASLAAS update submitted:",
+                    StringComparison.OrdinalIgnoreCase) >= 0;
+                AslaasUpdateStatus = savedSome
+                    ? $"ASLAAS update failed after saving some account(s): {reason}"
+                    : $"ASLAAS update failed: {reason}";
                 return;
             }
-
-            await _databaseService.SaveAslaasUpdatesAsync(accountsToUpdate);
             AslaasUpdateStatus = forceAllActiveAccounts
-                ? $"Force-updated {accountsToUpdate.Count} active account(s). Local ASLAAS values refreshed."
-                : $"Updated {accountsToUpdate.Count} account(s). Missing ASLAAS list is now cleared locally.";
+                ? $"Force-updated {accountsToUpdate.Count} active account(s). Saved portal-confirmed updates locally."
+                : $"Updated {accountsToUpdate.Count} account(s). Saved portal-confirmed updates locally.";
         }
         catch (Exception ex)
         {

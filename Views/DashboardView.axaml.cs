@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
+using Avalonia.Input;
 using AgentBuddy.ViewModels;
 
 namespace AgentBuddy.Views;
@@ -58,9 +58,12 @@ public partial class DashboardView : UserControl
 
         var accounts = ViewModel.GetAccountsForSegment(segmentKey);
         var title = ViewModel.GetSegmentTitle(segmentKey);
+        var initialSearchQuery = string.Equals(segmentKey, "all-accounts", System.StringComparison.OrdinalIgnoreCase)
+            ? ViewModel.GlobalAccountSearchQuery
+            : null;
 
-        var window = new SegmentAccountsWindow(title, accounts, ViewModel.IsDarkTheme, focusSearch);
-        var owner = this.GetVisualRoot() as Window;
+        var window = new SegmentAccountsWindow(title, accounts, ViewModel.IsDarkTheme, focusSearch, initialSearchQuery, segmentKey);
+        var owner = TopLevel.GetTopLevel(this) as Window;
         if (owner != null)
         {
             await window.ShowDialog(owner);
@@ -69,5 +72,21 @@ public partial class DashboardView : UserControl
         {
             window.Show();
         }
+    }
+
+    private async void SearchAllAccounts_Click(object? sender, RoutedEventArgs e)
+    {
+        await OpenSegmentAsync("all-accounts", focusSearch: true);
+    }
+
+    private async void SearchAllAccountsBox_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        await OpenSegmentAsync("all-accounts", focusSearch: true);
     }
 }

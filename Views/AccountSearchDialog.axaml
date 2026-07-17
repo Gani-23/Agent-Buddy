@@ -9,10 +9,9 @@
         Title="{DynamicResource L_Search_TitleWindow}"
         Width="700"
         Height="600"
-        SystemDecorations="None"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
@@ -44,7 +43,7 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <TextBox Grid.Column="0"
                                  Text="{Binding SearchQuery}"
-                                 Watermark="{DynamicResource L_Search_Watermark}"
+                                 PlaceholderText="{DynamicResource L_Search_Watermark}"
                                  Classes="Notion"
                                  FontSize="14"/>
                         <Button Grid.Column="1"

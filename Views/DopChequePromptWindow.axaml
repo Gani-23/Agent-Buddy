@@ -6,130 +6,148 @@
         x:Class="AgentBuddy.Views.DopChequePromptWindow"
         x:DataType="vm:DopChequePromptViewModel"
         mc:Ignorable="d"
-        Width="560"
-        Height="360"
-        MinWidth="560"
-        MinHeight="360"
-        SystemDecorations="None"
+        Width="640"
+        Height="520"
+        MinWidth="580"
+        MinHeight="460"
+        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
-        ExtendClientAreaChromeHints="NoChrome"
         ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
-        Title="{DynamicResource L_Prompt_Dop_Title}">
+        Title="{Binding WindowTitle}">
 
     <Border Classes="DialogBackdrop">
         <Border Classes="DialogSurface">
-            <StackPanel Spacing="16">
-                <StackPanel Spacing="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Classes="DialogDot"/>
-                        <TextBlock Text="Action Required"
-                                   Classes="Kicker"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="DialogDot"/>
+                            <TextBlock Text="Action Required"
+                                       Classes="Kicker"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Heading}"
+                                   Classes="DialogTitle"/>
                     </StackPanel>
 
-                    <TextBlock Text="{Binding Heading}"
-                               Classes="DialogTitle"/>
-                </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="12"
+                          RowSpacing="10">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_List}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding ListName}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                <Grid ColumnDefinitions="Auto,*"
-                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-                      ColumnSpacing="12"
-                      RowSpacing="10">
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_List}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="1"
-                               Text="{Binding ListName}"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_Account}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding AccountNo}"
+                                   FontFamily="Consolas"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_Account}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="1"
-                               Text="{Binding AccountNo}"
-                               FontFamily="Consolas"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_Name}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Text="{Binding AccountName}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_Name}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="1"
-                               Text="{Binding AccountName}"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="0"
+                                   Text="{DynamicResource L_Prompt_Installments}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   Text="{Binding Installment}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Grid.Row="3"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_Installments}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBlock Grid.Row="3"
-                               Grid.Column="1"
-                               Text="{Binding Installment}"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Text="{Binding BankNameLabel}"
+                                   IsVisible="{Binding ShowBankNameField}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="4"
+                                 Grid.Column="1"
+                                 x:Name="BankNameTextBox"
+                                 Text="{Binding BankName}"
+                                 IsVisible="{Binding ShowBankNameField}"
+                                 PlaceholderText="{Binding BankNameWatermark}"
+                                 TabIndex="0"
+                                 MaxLength="60"/>
 
-                    <TextBlock Grid.Row="4"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_ChequeNo}"
-                               IsVisible="{Binding ShowChequeNoField}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBox Grid.Row="4"
-                             Grid.Column="1"
-                             x:Name="ChequeNoTextBox"
-                             Text="{Binding ChequeNo}"
-                             IsVisible="{Binding ShowChequeNoField}"
-                             Watermark="{DynamicResource L_Prompt_ChequeWatermark}"
-                             FontFamily="Consolas"
-                             MaxLength="30"/>
+                        <TextBlock Grid.Row="5"
+                                   Grid.Column="0"
+                                   Text="{Binding ChequeNoLabel}"
+                                   IsVisible="{Binding ShowChequeNoField}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="5"
+                                 Grid.Column="1"
+                                 x:Name="ChequeNoTextBox"
+                                 Text="{Binding ChequeNo}"
+                                 IsVisible="{Binding ShowChequeNoField}"
+                                 PlaceholderText="{Binding ChequeNoWatermark}"
+                                 TabIndex="1"
+                                 FontFamily="Consolas"
+                                 MaxLength="30"/>
 
-                    <TextBlock Grid.Row="5"
-                               Grid.Column="0"
-                               Text="{DynamicResource L_Prompt_PaymentAccount}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    <TextBox Grid.Row="5"
-                             Grid.Column="1"
-                             x:Name="PaymentAccountTextBox"
-                             Text="{Binding PaymentAccountNo}"
-                             Watermark="{DynamicResource L_Prompt_PaymentWatermark}"
-                             FontFamily="Consolas"
-                             MaxLength="30"/>
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="0"
+                                   Text="{Binding PaymentAccountLabel}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBox Grid.Row="6"
+                                 Grid.Column="1"
+                                 x:Name="PaymentAccountTextBox"
+                                 Text="{Binding PaymentAccountNo}"
+                                 PlaceholderText="{Binding PaymentAccountWatermark}"
+                                 TabIndex="2"
+                                 FontFamily="Consolas"
+                                 MaxLength="30"/>
 
-                    <TextBlock Grid.Row="6"
-                               Grid.Column="1"
-                               Text="{Binding ValidationMessage}"
-                               IsVisible="{Binding HasValidationMessage}"
-                               Foreground="#C62828"
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="1"
+                                   Text="{Binding ValidationMessage}"
+                                   IsVisible="{Binding HasValidationMessage}"
+                                   Foreground="#C62828"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"/>
+                    </Grid>
+
+                    <TextBlock Text="{Binding Hint}"
                                FontSize="11"
-                               TextWrapping="Wrap"/>
-                </Grid>
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
 
-                <TextBlock Text="{Binding Hint}"
-                           FontSize="11"
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    <Border Classes="DialogDivider"
+                            Margin="0,2"/>
 
-                <Border Classes="DialogDivider"
-                        Margin="0,2"/>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Spacing="10">
-                    <Button Classes="Secondary"
-                            Content="{DynamicResource L_Common_Cancel}"
-                            Click="Cancel_Click"
-                            Padding="16,8"/>
-                    <Button Classes="Primary"
-                            Content="{DynamicResource L_Common_SaveContinue}"
-                            Click="Save_Click"
-                            Padding="16,8"/>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="10">
+                        <Button Classes="Secondary"
+                                Content="{DynamicResource L_Common_Cancel}"
+                                Click="Cancel_Click"
+                                Padding="16,8"/>
+                        <Button Classes="Primary"
+                                Content="{DynamicResource L_Common_SaveContinue}"
+                                Click="Save_Click"
+                                Padding="16,8"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+            </ScrollViewer>
         </Border>
     </Border>
 </Window>

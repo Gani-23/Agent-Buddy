@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 using ReactiveUI;
 using AgentBuddy.Models;
 using AgentBuddy.Services;
@@ -26,7 +27,8 @@ public class DashboardViewModel : ViewModelBase
 {
     private const int MaturedInstallmentThreshold = 120;
     private const int AboutToMatureInstallmentThreshold = 108;
-    private const int RecentAccountInstallmentWindow = 2;
+    private const int RecentAccountDaysWindow = 30;
+    private const string RdCertificateRenewalDateKey = "rd_certificate_renewal_date";
 
     private readonly DatabaseService _databaseService;
     private readonly MetricsCalculator _metricsCalculator;
@@ -40,6 +42,12 @@ public class DashboardViewModel : ViewModelBase
     private bool _isSyncingToMobile;
     private string _updateStatus = string.Empty;
     private string _halfMonthTitleSuffix = string.Empty;
+    private string _globalAccountSearchQuery = string.Empty;
+    private DateTime? _rdCertificateRenewalDate;
+    private string _rdCertificateRenewalHeadline = "Renewal date not set";
+    private string _rdCertificateRenewalMessage = "Set the next postal RD certificate renewal date in Settings.";
+    private string _rdCertificateRenewalCountdown = "No renewal date";
+    private string _rdCertificateRenewalTag = "RenewalMissing";
     private int _totalAccounts;
     private decimal _totalAmount;
     private DateTime? _lastUpdated;
@@ -107,6 +115,8 @@ public class DashboardViewModel : ViewModelBase
         _mobileSyncService = mobileSyncService;
         _notificationService = notificationService;
 
+        _databaseService.DatabaseChanged += OnDatabaseChanged;
+
         CategoryData = new ObservableCollection<CategoryData>();
         MonthlyRevenues = new ObservableCollection<MonthlyRevenue>();
         AccountsDueSoon = new ObservableCollection<RDAccount>();
@@ -158,6 +168,46 @@ public class DashboardViewModel : ViewModelBase
     {
         get => _halfMonthTitleSuffix;
         private set => this.RaiseAndSetIfChanged(ref _halfMonthTitleSuffix, value);
+    }
+
+    public string GlobalAccountSearchQuery
+    {
+        get => _globalAccountSearchQuery;
+        set => this.RaiseAndSetIfChanged(ref _globalAccountSearchQuery, value);
+    }
+
+    public DateTime? RdCertificateRenewalDate
+    {
+        get => _rdCertificateRenewalDate;
+        private set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalDate, value);
+    }
+
+    public string RdCertificateRenewalHeadline
+    {
+        get => _rdCertificateRenewalHeadline;
+        private set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalHeadline, value);
+    }
+
+    public string RdCertificateRenewalMessage
+    {
+        get => _rdCertificateRenewalMessage;
+        private set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalMessage, value);
+    }
+
+    public string RdCertificateRenewalCountdown
+    {
+        get => _rdCertificateRenewalCountdown;
+        private set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalCountdown, value);
+    }
+
+    public string RdCertificateRenewalDateDisplay => RdCertificateRenewalDate.HasValue
+        ? $"Renewal date: {RdCertificateRenewalDate:dd-MMM-yyyy}"
+        : "Renewal date: not set";
+
+    public string RdCertificateRenewalTag
+    {
+        get => _rdCertificateRenewalTag;
+        private set => this.RaiseAndSetIfChanged(ref _rdCertificateRenewalTag, value);
     }
 
     public bool IsDarkTheme
@@ -366,6 +416,8 @@ public class DashboardViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _newAccounts30DaysAmount, value);
     }
 
+    public bool HasNewAccountsRibbon => NewAccounts30DaysCount > 0;
+
     public int AboutToFreezeCount
     {
         get => _aboutToFreezeCount;
@@ -483,6 +535,16 @@ public class DashboardViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SyncToMobileCommand { get; }
     public ReactiveCommand<RDAccount, Unit> ViewAccountDetailsCommand { get; }
 
+    public async Task RefreshRdCertificateRenewalAsync()
+    {
+        await LoadRdCertificateRenewalAsync();
+    }
+
+    private void OnDatabaseChanged(object? sender, EventArgs e)
+    {
+        _ = LoadDataAsync();
+    }
+
     private async Task LoadDataAsync()
     {
         IsLoading = true;
@@ -506,6 +568,7 @@ public class DashboardViewModel : ViewModelBase
             TotalAccounts = metrics.TotalAccounts;
             TotalAmount = metrics.TotalAmount;
             LastUpdated = await _databaseService.GetLastUpdateTimeAsync();
+            await LoadRdCertificateRenewalAsync();
 
             // Update summary metrics
             FirstHalfPending = metrics.FirstHalfPendingCount;
@@ -554,6 +617,71 @@ public class DashboardViewModel : ViewModelBase
         {
             IsLoading = false;
         }
+    }
+
+    private async Task LoadRdCertificateRenewalAsync()
+    {
+        var saved = (await _databaseService.GetAppSettingAsync(RdCertificateRenewalDateKey) ?? string.Empty).Trim();
+        if (!TryParseRdCertificateRenewalDate(saved, out var renewalDate))
+        {
+            RdCertificateRenewalDate = null;
+            this.RaisePropertyChanged(nameof(RdCertificateRenewalDateDisplay));
+            RdCertificateRenewalHeadline = "Renewal date not set";
+            RdCertificateRenewalMessage = "Set the next postal RD certificate renewal date in Settings.";
+            RdCertificateRenewalCountdown = "No renewal date";
+            RdCertificateRenewalTag = "RenewalMissing";
+            return;
+        }
+
+        RdCertificateRenewalDate = renewalDate.Date;
+        this.RaisePropertyChanged(nameof(RdCertificateRenewalDateDisplay));
+        var daysRemaining = (renewalDate.Date - DateTime.Today).Days;
+
+        if (daysRemaining < 0)
+        {
+            RdCertificateRenewalHeadline = "Renew immediately";
+            RdCertificateRenewalMessage = $"Postal RD certificate renewal expired on {renewalDate:dd-MMM-yyyy}.";
+            RdCertificateRenewalCountdown = $"{-daysRemaining} day(s) overdue";
+            RdCertificateRenewalTag = "RenewalUrgent";
+            return;
+        }
+
+        if (daysRemaining <= 10)
+        {
+            RdCertificateRenewalHeadline = "Urgent renewal warning";
+            RdCertificateRenewalMessage = $"Renew postal RD certificate by {renewalDate:dd-MMM-yyyy}.";
+            RdCertificateRenewalCountdown = daysRemaining == 0
+                ? "Due today"
+                : $"{daysRemaining} day(s) left";
+            RdCertificateRenewalTag = "RenewalUrgent";
+            return;
+        }
+
+        RdCertificateRenewalHeadline = "RD certificate renewal";
+        RdCertificateRenewalMessage = $"Next postal certificate renewal date: {renewalDate:dd-MMM-yyyy}.";
+        RdCertificateRenewalCountdown = $"{daysRemaining} day(s) remaining";
+        RdCertificateRenewalTag = "RenewalNormal";
+    }
+
+    private static bool TryParseRdCertificateRenewalDate(string raw, out DateTime renewalDate)
+    {
+        var formats = new[]
+        {
+            "yyyy-MM-dd",
+            "dd-MMM-yyyy",
+            "dd-MM-yyyy",
+            "dd/MM/yyyy",
+            "yyyy/MM/dd"
+        };
+
+        return DateTime.TryParseExact(
+                   raw,
+                   formats,
+                   CultureInfo.InvariantCulture,
+                   DateTimeStyles.AllowWhiteSpaces,
+                   out renewalDate)
+               || DateTime.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out renewalDate)
+               || DateTime.TryParse(raw, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out renewalDate);
     }
 
     private void BuildActionableSegments(List<RDAccount> accounts, List<RDAccount> closedAccounts)
@@ -644,10 +772,10 @@ public class DashboardViewModel : ViewModelBase
         var newAccounts30Days = accounts
             .Where(a =>
             {
-                var paid = a.GetMonthPaidNumber();
-                return paid > 0 && paid <= RecentAccountInstallmentWindow;
+                return a.FirstSeen.Date >= today.AddDays(-RecentAccountDaysWindow);
             })
-            .OrderBy(a => a.GetMonthPaidNumber())
+            .OrderByDescending(a => a.FirstSeen)
+            .ThenByDescending(a => a.LastUpdated)
             .ThenBy(a => a.AccountNo)
             .ToList();
 
@@ -702,15 +830,15 @@ public class DashboardViewModel : ViewModelBase
         _segmentAccounts["pending-month"] = pendingThisMonth;
         _segmentAccounts["next-month"] = nextMonthCollection;
         _segmentAccounts["advanced-paid"] = advancedPaid;
+        _segmentAccounts["all-accounts"] = accounts
+            .OrderBy(a => a.AccountNo)
+            .ToList();
         _segmentAccounts["new-accounts"] = newAccounts30Days;
         _segmentAccounts["freeze-risk"] = aboutToFreeze;
         _segmentAccounts["about-to-mature"] = aboutToMature;
         _segmentAccounts["matured"] = matured;
         _segmentAccounts["extended-accounts"] = extendedAccounts;
-        _segmentAccounts["closed-accounts"] = closedAccounts
-            .OrderByDescending(a => a.LastUpdated)
-            .ThenBy(a => a.AccountNo)
-            .ToList();
+        _segmentAccounts["closed-accounts"] = closedAccounts.ToList();
         _segmentAccounts["pending-first-half"] = firstHalfPendingWindow;
         _segmentAccounts["pending-second-half"] = secondHalfPendingWindow;
         _segmentAccounts["deposited-first-half"] = firstHalfDepositedWindow;
@@ -728,6 +856,7 @@ public class DashboardViewModel : ViewModelBase
         AdvancedPaidAmount = advancedPaid.Sum(a => a.GetAmount());
         NewAccounts30DaysCount = newAccounts30Days.Count;
         NewAccounts30DaysAmount = newAccounts30Days.Sum(a => a.GetAmount());
+        this.RaisePropertyChanged(nameof(HasNewAccountsRibbon));
         AboutToFreezeCount = aboutToFreeze.Count;
         AboutToFreezeAmount = aboutToFreeze.Sum(a => a.GetAmount());
         AboutToMatureCount = aboutToMature.Count;
@@ -767,7 +896,8 @@ public class DashboardViewModel : ViewModelBase
             "pending-month" => "Pending - Current Month",
             "next-month" => "Next Month Collection",
             "advanced-paid" => "Advance Paid Accounts",
-            "new-accounts" => "New Accounts (Last 2 Months)",
+            "all-accounts" => "All Active Accounts",
+            "new-accounts" => "New Accounts (Last 30 Days)",
             "freeze-risk" => "About To Freeze Accounts",
             "about-to-mature" => "About To Mature Accounts",
             "matured" => "Matured Accounts",
@@ -1071,8 +1201,8 @@ public class DashboardViewModel : ViewModelBase
             {
                 UpdateStatus = "Update successful! Refreshing dashboard...";
                 await Task.Delay(1000);
-                await LoadDataAsync();
-                UpdateStatus = "Dashboard refreshed!";
+                _databaseService.NotifyDatabaseChanged();
+                UpdateStatus = "Database refreshed!";
                 _notificationService?.Success("Database Updated", "Active account data was refreshed successfully.");
                 await Task.Delay(2000);
             }
