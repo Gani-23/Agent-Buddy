@@ -24,42 +24,121 @@
             <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
+        <Style Selector="Border.DashboardHeader">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="BoxShadow" Value="0 2 8 0 #00000008"/>
+        </Style>
+        <Style Selector="Border.DashboardSearch">
+            <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+        <Style Selector="Border.DashboardBadge">
+            <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="999"/>
+            <Setter Property="Padding" Value="10,5"/>
+        </Style>
+        <Style Selector="Border.MetricCard.FeaturedMetric">
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+        </Style>
+        <Style Selector="Border.MetricIcon">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </UserControl.Styles>
 
     <Design.DataContext>
         <vm:DashboardViewModel/>
     </Design.DataContext>
 
-    <ScrollViewer>
-        <StackPanel Spacing="24" Margin="0,0,0,24">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="18" Margin="0,0,0,24" HorizontalAlignment="Stretch">
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="{DynamicResource L_Dash_Kicker}" Classes="Kicker"/>
-                    <TextBlock Text="{DynamicResource L_Dash_Title}" Classes="SectionHeader"/>
-                </StackPanel>
+            <Border Classes="DashboardHeader">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
+                        <StackPanel Grid.Column="0" Spacing="4" Width="310">
+                            <TextBlock Text="{DynamicResource L_Dash_Kicker}" Classes="Kicker"/>
+                            <TextBlock Text="{DynamicResource L_Dash_Title}"
+                                       FontSize="26"
+                                       FontWeight="Bold"
+                                       LineHeight="30"
+                                       Margin="0"/>
+                        </StackPanel>
 
-                <WrapPanel Grid.Column="1" IsVisible="{Binding !IsLoading}">
-                    <Button Classes="Secondary" Command="{Binding RefreshCommand}" Padding="14,8" Margin="0,0,8,0" Content="{DynamicResource L_Common_Refresh}"/>
-                    <Button Classes="Secondary"
-                            Command="{Binding SyncToMobileCommand}"
-                            Padding="14,8"
-                            Margin="0,0,8,0"
-                            IsEnabled="{Binding !IsBusy}"
-                            Content="{DynamicResource L_Dash_SyncToMobile}"/>
-                    <Button Classes="Primary"
-                            Command="{Binding UpdateDatabaseCommand}"
-                            Padding="14,8"
-                            IsEnabled="{Binding !IsBusy}"
-                            Content="{DynamicResource L_Dash_UpdateDatabase}"/>
-                    <Button Classes="Primary"
-                            Command="{Binding OpenUpdateLinkCommand}"
-                            Padding="14,8"
-                            Margin="8,0,0,0"
-                            IsVisible="{Binding IsUpdateAvailable}"
-                            Content="{Binding UpdateButtonText}"/>
-                </WrapPanel>
-            </Grid>
+                        <TextBlock Grid.Column="1"
+                                   Text="{DynamicResource L_Dash_Subtitle}"
+                                   Classes="SectionLead"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="620"
+                                   VerticalAlignment="Bottom"
+                                   Margin="0,0,0,3"/>
+
+                        <WrapPanel Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Top"
+                                   IsVisible="{Binding !IsLoading}">
+                            <Button Classes="Secondary" Command="{Binding RefreshCommand}" Padding="12,7" Margin="0,0,8,0" Content="{DynamicResource L_Common_Refresh}"/>
+                            <Button Classes="Secondary"
+                                    Command="{Binding SyncToMobileCommand}"
+                                    Padding="12,7"
+                                    Margin="0,0,8,0"
+                                    IsEnabled="{Binding !IsBusy}"
+                                    Content="{DynamicResource L_Dash_SyncToMobile}"/>
+                            <Button Classes="Primary"
+                                    Command="{Binding UpdateDatabaseCommand}"
+                                    Padding="12,7"
+                                    Margin="0"
+                                    IsEnabled="{Binding !IsBusy}"
+                                    Content="{DynamicResource L_Dash_UpdateDatabase}"/>
+                            <Button Classes="Primary"
+                                    Command="{Binding OpenUpdateLinkCommand}"
+                                    Padding="12,7"
+                                    Margin="8,0,0,0"
+                                    IsVisible="{Binding IsUpdateAvailable}"
+                                    Content="{Binding UpdateButtonText}"/>
+                        </WrapPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" Classes="DashboardSearch" IsVisible="{Binding !IsLoading}">
+                        <Grid ColumnDefinitions="230,*,Auto" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="Search all accounts"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Text="Find by account number or customer name"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </StackPanel>
+
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding GlobalAccountSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     PlaceholderText="{DynamicResource L_Search_Watermark}"
+                                     VerticalAlignment="Center"
+                                     KeyDown="SearchAllAccountsBox_KeyDown"/>
+
+                            <Button Grid.Column="2"
+                                    Classes="Secondary"
+                                    Padding="14,8"
+                                    VerticalAlignment="Center"
+                                    Click="SearchAllAccounts_Click"
+                                    Content="{DynamicResource L_Common_Search}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
 
             <Border Classes="Card" Padding="28" IsVisible="{Binding IsLoading}">
                 <StackPanel Spacing="8" HorizontalAlignment="Center">
@@ -67,105 +146,166 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Spacing="24" IsVisible="{Binding !IsLoading}">
+            <StackPanel Spacing="18" IsVisible="{Binding !IsLoading}">
                 <Border Classes="Card"
-                        Padding="18"
-                        Tag="{Binding RdCertificateRenewalTag}">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Postal RD Certificate Renewal"
-                                       Classes="Kicker"/>
-                            <TextBlock Text="{Binding RdCertificateRenewalHeadline}"
-                                       FontSize="22"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Text="{Binding RdCertificateRenewalMessage}"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1"
-                                    Spacing="4"
-                                    HorizontalAlignment="Right"
+                        Padding="0"
+                        Background="{DynamicResource WarningTintBrush}"
+                        BorderBrush="{StaticResource WarningBrush}"
+                        BorderThickness="1"
+                        IsVisible="{Binding HasNewAccountsMissingAslaasNotice}">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource WarningBrush}" CornerRadius="12,0,0,12"/>
+                        <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="14,12">
+                            <Border Width="40"
+                                    Height="40"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource AppCardBackgroundBrush}"
+                                    BorderBrush="{StaticResource WarningBrush}"
+                                    BorderThickness="1"
                                     VerticalAlignment="Center">
-                            <TextBlock Text="{Binding RdCertificateRenewalCountdown}"
-                                       FontSize="24"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Text="{Binding RdCertificateRenewalDateDisplay}"
-                                       HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        </StackPanel>
+                                <TextBlock Text="!"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource WarningBrush}"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource L_Dash_AslaasReminderTitle}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                    <Run Text="{Binding NewAccountsMissingAslaasCount}"/>
+                                    <Run Text="{DynamicResource L_Dash_AslaasReminderBody}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <WrapPanel Grid.Column="2"
+                                   Margin="0,12,14,4"
+                                   VerticalAlignment="Center">
+                                <Button Classes="Primary"
+                                        Padding="14,8"
+                                        Command="{Binding UpdateNewAccountAslaasCommand}"
+                                        IsEnabled="{Binding !IsBusy}"
+                                        Content="{DynamicResource L_Dash_UpdateAslaasNow}"
+                                        Margin="0,0,8,8"/>
+                                <Button Classes="Secondary"
+                                        Padding="14,8"
+                                        Tag="new-accounts"
+                                        Click="OpenSegment_Click"
+                                        Content="{DynamicResource L_Common_ViewAccounts}"
+                                        Margin="0,0,0,8"/>
+                            </WrapPanel>
                     </Grid>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
-                    <Border Grid.Column="0" Classes="MetricCard">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="{DynamicResource L_Dash_TotalAccounts}" Classes="Kicker"/>
-                            <TextBlock Text="{Binding TotalAccounts}" Classes="MetricValue"/>
-                            <TextBlock FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                <Run Text="{DynamicResource L_Dash_UpdatedPrefix}"/>
-                                <Run Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM HH:mm}'}"/>
-                            </TextBlock>
-                        </StackPanel>
+                <Border Classes="Card"
+                        Padding="0"
+                        Tag="{Binding RdCertificateRenewalTag}">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource AccentBlueBrush}" CornerRadius="12,0,0,12"/>
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="14,12">
+                                <TextBlock Text="Postal RD Certificate Renewal"
+                                           Classes="Kicker"/>
+                                <TextBlock Text="{Binding RdCertificateRenewalHeadline}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding RdCertificateRenewalMessage}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </StackPanel>
+
+                            <Border Grid.Column="2"
+                                    Classes="DashboardBadge"
+                                    Margin="0,12,14,12"
+                                    VerticalAlignment="Center">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{Binding RdCertificateRenewalCountdown}"
+                                               FontSize="17"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Text="{Binding RdCertificateRenewalDateDisplay}"
+                                               FontSize="12"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
+                    <Border Grid.Column="0" Classes="MetricCard FeaturedMetric">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="{DynamicResource L_Dash_TotalAccounts}" Classes="Kicker" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource InfoTintBrush}">
+                                    <TextBlock Text="#"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AccentBlueBrush}"/>
+                                </Border>
+                            </Grid>
+                            <TextBlock Grid.Row="1" Text="{Binding TotalAccounts}" Classes="MetricValue"/>
+                            <TextBlock Grid.Row="2" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                    <Run Text="{DynamicResource L_Dash_UpdatedPrefix}"/>
+                                    <Run Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM HH:mm}'}"/>
+                                </TextBlock>
+                        </Grid>
                     </Border>
 
-                    <Border Grid.Column="1" Classes="MetricCard">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="{DynamicResource L_Dash_ActiveAmount}" Classes="Kicker"/>
-                            <TextBlock Classes="MetricValue" Foreground="{StaticResource AccentBlueBrush}">
-                                <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
-                            </TextBlock>
-                        </StackPanel>
+                    <Border Grid.Column="1" Classes="MetricCard FeaturedMetric">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="{DynamicResource L_Dash_ActiveAmount}" Classes="Kicker" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource SuccessTintBrush}">
+                                    <TextBlock Text="Rs"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource SuccessBrush}"/>
+                                </Border>
+                            </Grid>
+                            <TextBlock Grid.Row="1" Classes="MetricValue" Foreground="{StaticResource AccentBlueBrush}">
+                                    <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            <TextBlock Grid.Row="2" Text="{DynamicResource L_Dash_ActiveValueHint}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </Grid>
                     </Border>
 
-                    <Border Grid.Column="2" Classes="MetricCard">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="{DynamicResource L_Dash_Due30Days}" Classes="Kicker"/>
-                            <TextBlock Text="{Binding AccountsDueSoon.Count}" Classes="MetricValue" Foreground="{StaticResource WarningBrush}"/>
-                            <WrapPanel>
-                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
-                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
-                                <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
-                            </WrapPanel>
-                        </StackPanel>
+                    <Border Grid.Column="2" Classes="MetricCard FeaturedMetric">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="{DynamicResource L_Dash_Due30Days}" Classes="Kicker" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource WarningTintBrush}">
+                                    <TextBlock Text="!"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource WarningBrush}"/>
+                                </Border>
+                            </Grid>
+                            <TextBlock Grid.Row="1" Text="{Binding AccountsDueSoon.Count}" Classes="MetricValue" Foreground="{StaticResource WarningBrush}"/>
+                            <WrapPanel Grid.Row="2">
+                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                </WrapPanel>
+                        </Grid>
                     </Border>
                 </Grid>
-
-                <Border Classes="Card" Padding="16">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="Search all accounts"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Text="Find any account by number or name"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        </StackPanel>
-
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding GlobalAccountSearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="{DynamicResource L_Search_Watermark}"
-                                 VerticalAlignment="Center"
-                                 KeyDown="SearchAllAccountsBox_KeyDown"/>
-
-                        <Button Grid.Column="2"
-                                Classes="Secondary"
-                                Padding="16,10"
-                                VerticalAlignment="Center"
-                                Click="SearchAllAccounts_Click"
-                                Content="{DynamicResource L_Common_Search}"/>
-                    </Grid>
-                </Border>
 
                 <Border Classes="Card" Padding="16" IsVisible="{Binding HasUpdateStatus}">
                     <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </Border>
 
-                <Border Classes="SectionCard" Padding="18">
-                    <StackPanel Spacing="14">
+                <Border Classes="SectionCard" Padding="16">
+                    <StackPanel Spacing="12">
                         <TextBlock Classes="SubHeader">
                             <Run Text="{DynamicResource L_Dash_HalfMonthTitle}"/>
                             <Run Text=" "/>
@@ -248,8 +388,8 @@
                     </StackPanel>
                 </Border>
 
-                <Border Classes="SectionCard" Padding="18">
-                    <StackPanel Spacing="14">
+                <Border Classes="SectionCard" Padding="16">
+                    <StackPanel Spacing="12">
                         <TextBlock Text="{DynamicResource L_Dash_ActionCenter}" Classes="SubHeader"/>
 
                         <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">

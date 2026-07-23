@@ -1406,6 +1406,10 @@ public class SettingsViewModel : ViewModelBase
                     : $"ASLAAS update failed: {reason}";
                 return;
             }
+
+            await _databaseService.SaveAslaasUpdatesAsync(accountsToUpdate);
+            _databaseService.NotifyDatabaseChanged();
+
             AslaasUpdateStatus = forceAllActiveAccounts
                 ? $"Force-updated {accountsToUpdate.Count} active account(s). Saved portal-confirmed updates locally."
                 : $"Updated {accountsToUpdate.Count} account(s). Saved portal-confirmed updates locally.";

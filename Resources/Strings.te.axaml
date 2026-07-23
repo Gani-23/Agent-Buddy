@@ -26,17 +26,22 @@
 
         <x:String x:Key="L_Dash_Kicker">అవలోకనం</x:String>
         <x:String x:Key="L_Dash_Title">డ్యాష్‌బోర్డ్</x:String>
+        <x:String x:Key="L_Dash_Subtitle">ఖాతాలు, బకాయిలు, రిన్యూవల్స్ మరియు రోజువారీ కలెక్షన్ పనిని ఒకే చోట చూడండి.</x:String>
         <x:String x:Key="L_Dash_SyncToMobile">మొబైల్ సింక్</x:String>
         <x:String x:Key="L_Dash_UpdateDatabase">డేటాబేస్ అప్డేట్</x:String>
         <x:String x:Key="L_Dash_Loading">డ్యాష్‌బోర్డ్ డేటా లోడ్ అవుతోంది...</x:String>
         <x:String x:Key="L_Dash_TotalAccounts">మొత్తం ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_ActiveAmount">సక్రియ మొత్తం</x:String>
+        <x:String x:Key="L_Dash_ActiveValueHint">ప్రస్తుత సక్రియ RD పోర్ట్‌ఫోలియో విలువ</x:String>
         <x:String x:Key="L_Dash_Due30Days">30 రోజుల్లో బకాయి</x:String>
         <x:String x:Key="L_Dash_ActionCenter">యాక్షన్ సెంటర్</x:String>
         <x:String x:Key="L_Dash_PendingMonth">ఈ నెల పెండింగ్</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">తదుపరి నెల కలెక్షన్</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">అడ్వాన్స్ చెల్లింపు</x:String>
         <x:String x:Key="L_Dash_NewAccountsRecent">కొత్త ఖాతాలు (Last 30 Days)</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderTitle">కొత్త ఖాతాల ASLAAS అప్డేట్ చేయండి</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderBody"> కొత్త ఖాతాలకు ASLAAS నంబర్ లేదు. చెల్లింపు జాబితా ప్రాసెస్ చేసే ముందు అప్డేట్ చేయండి.</x:String>
+        <x:String x:Key="L_Dash_UpdateAslaasNow">ASLAAS అప్డేట్</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">ఫ్రీజ్‌కు దగ్గర</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">పరిపక్వ ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">మూసిన ఖాతాలు</x:String>
@@ -93,11 +98,14 @@
 
         <x:String x:Key="L_Support_Kicker">సహాయం</x:String>
         <x:String x:Key="L_Support_Title">సపోర్ట్</x:String>
+        <x:String x:Key="L_Support_Subtitle">సెటప్, రిపోర్టులు, చెల్లింపులు మరియు రోజువారీ AgentBuddy పనులకు సహాయం పొందండి.</x:String>
         <x:String x:Key="L_Support_Contact">సంప్రదింపు</x:String>
+        <x:String x:Key="L_Support_ContactHint">వివరమైన సమస్యలకు ఈమెయిల్ లేదా త్వరిత చాట్ సపోర్ట్ కోసం వాట్సాప్ ఎంచుకోండి.</x:String>
         <x:String x:Key="L_Support_SendEmail">ఈమెయిల్ పంపండి</x:String>
         <x:String x:Key="L_Support_OpenWhatsapp">వాట్సాప్ ఓపెన్</x:String>
         <x:String x:Key="L_Support_WhatsappQr">వాట్సాప్ QR</x:String>
         <x:String x:Key="L_Support_QrHint">చాట్ ప్రారంభించడానికి QR స్కాన్ చేయండి.</x:String>
+        <x:String x:Key="L_Support_DirectLink">డైరెక్ట్ లింక్</x:String>
 
         <x:String x:Key="L_Set_Kicker">కాన్ఫిగరేషన్</x:String>
         <x:String x:Key="L_Set_Title">సెట్టింగ్స్</x:String>

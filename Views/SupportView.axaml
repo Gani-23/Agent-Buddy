@@ -7,76 +7,196 @@
              x:Class="AgentBuddy.Views.SupportView"
              x:DataType="vm:SupportViewModel">
 
-    <ScrollViewer>
-        <StackPanel Spacing="20" Margin="0,0,0,24" MaxWidth="820">
-            <StackPanel Spacing="2">
-                <TextBlock Text="{DynamicResource L_Support_Kicker}" Classes="Kicker"/>
-                <TextBlock Text="{DynamicResource L_Support_Title}" Classes="SectionHeader"/>
-            </StackPanel>
-
-            <Border Classes="SectionCard" Padding="20">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="{DynamicResource L_Support_Contact}" Classes="SubHeader"/>
-
-                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource L_Common_Name}" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource L_Common_Email}" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Email}" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource L_Common_Address}" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Address}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                    </Grid>
-
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button Classes="Primary"
-                                Command="{Binding OpenEmailCommand}"
-                                Padding="16,10">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="{DynamicResource L_Support_SendEmail}"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Classes="Success"
-                                Command="{Binding OpenWhatsAppCommand}"
-                                Padding="16,10">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="{DynamicResource L_Support_OpenWhatsapp}"/>
-                            </StackPanel>
-                        </Button>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="22" Margin="0,0,0,24" MaxWidth="1040">
+            <Border Classes="SectionCard" Padding="26">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+                    <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource L_Support_Kicker}" Classes="Kicker"/>
+                        <TextBlock Text="{DynamicResource L_Support_Title}" Classes="SectionHeader" Margin="0"/>
+                        <TextBlock Text="{DynamicResource L_Support_Subtitle}"
+                                   Classes="SectionLead"
+                                   MaxWidth="620"
+                                   HorizontalAlignment="Left"
+                                   TextAlignment="Left"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
-                </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Width="76"
+                            Height="76"
+                            CornerRadius="38"
+                            Padding="0"
+                            Background="#E7F8EF"
+                            BorderBrush="#BDECCF"
+                            BorderThickness="1"
+                            ClipToBounds="True"
+                            VerticalAlignment="Center">
+                        <Image Source="avares://AgentBuddy/Assets/WhatsAppLogo.png"
+                               Stretch="Uniform"/>
+                    </Border>
+                </Grid>
             </Border>
 
-            <Border Classes="SectionCard" Padding="20">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="{DynamicResource L_Support_WhatsappQr}" Classes="SubHeader"/>
-                    <TextBlock Text="{DynamicResource L_Support_QrHint}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+            <Grid ColumnDefinitions="*,340" ColumnSpacing="18">
+                <StackPanel Grid.Column="0" Spacing="18">
+                    <Border Classes="SectionCard" Padding="22">
+                        <StackPanel Spacing="18">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Width="42"
+                                        Height="42"
+                                        CornerRadius="12"
+                                        Background="{DynamicResource InfoTintBrush}"
+                                        BorderBrush="{StaticResource AccentBlueBrush}"
+                                        BorderThickness="1">
+                                    <TextBlock Text="@"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AccentBlueBrush}"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="3">
+                                    <TextBlock Text="{DynamicResource L_Support_Contact}" Classes="SubHeader"/>
+                                    <TextBlock Text="{DynamicResource L_Support_ContactHint}"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Grid>
 
-                    <Border Width="250"
-                            Height="250"
-                            BorderBrush="{DynamicResource AppBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="8"
-                            HorizontalAlignment="Left"
-                            Background="{DynamicResource AppCardBackgroundBrush}">
-                        <Image Source="avares://AgentBuddy/Assets/WhatsApp.png" Stretch="Uniform"/>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                                <Border Grid.Row="0" Grid.Column="0"
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="14">
+                                    <StackPanel Spacing="5">
+                                        <TextBlock Text="{DynamicResource L_Common_Name}" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="0" Grid.Column="1"
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="14">
+                                    <StackPanel Spacing="5">
+                                        <TextBlock Text="{DynamicResource L_Common_Email}" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding Email}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="1" Grid.ColumnSpan="2"
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="14">
+                                    <StackPanel Spacing="5">
+                                        <TextBlock Text="{DynamicResource L_Common_Address}" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding Address}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <WrapPanel>
+                                <Button Classes="Primary"
+                                        Command="{Binding OpenEmailCommand}"
+                                        Padding="18,11"
+                                        Margin="0,0,10,10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="@"/>
+                                        <TextBlock Text="{DynamicResource L_Support_SendEmail}"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Classes="Success"
+                                        Command="{Binding OpenWhatsAppCommand}"
+                                        Padding="18,11"
+                                        Margin="0,0,10,10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Width="18"
+                                                Height="18"
+                                                CornerRadius="9"
+                                                ClipToBounds="True">
+                                            <Image Source="avares://AgentBuddy/Assets/WhatsAppLogo.png"
+                                                   Stretch="Uniform"/>
+                                        </Border>
+                                        <TextBlock Text="{DynamicResource L_Support_OpenWhatsapp}"/>
+                                    </StackPanel>
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
                     </Border>
 
-                    <TextBlock Text="{Binding WhatsAppUrl}"
-                               FontFamily="Consolas"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    <Border Classes="SectionCard" Padding="18" IsVisible="{Binding HasStatusMessage}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Width="10"
+                                    Height="10"
+                                    CornerRadius="5"
+                                    Background="{StaticResource AccentGreenBrush}"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding StatusMessage}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
-            </Border>
 
-            <Border Classes="SectionCard" Padding="16" IsVisible="{Binding HasStatusMessage}">
-                <TextBlock Text="{Binding StatusMessage}"
-                           TextWrapping="Wrap"
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-            </Border>
+                <Border Grid.Column="1" Classes="SectionCard" Padding="22">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Width="44"
+                                    Height="44"
+                                    CornerRadius="22"
+                                    Padding="0"
+                                    Background="#E7F8EF"
+                                    BorderBrush="#BDECCF"
+                                    BorderThickness="1"
+                                    ClipToBounds="True">
+                                <Image Source="avares://AgentBuddy/Assets/WhatsAppLogo.png"
+                                       Stretch="Uniform"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource L_Support_WhatsappQr}" Classes="SubHeader"/>
+                                <TextBlock Text="{DynamicResource L_Support_QrHint}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Width="268"
+                                Height="268"
+                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Padding="12"
+                                HorizontalAlignment="Center"
+                                Background="White">
+                            <Image Source="avares://AgentBuddy/Assets/WhatsApp.png" Stretch="Uniform"/>
+                        </Border>
+
+                        <Border Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{DynamicResource L_Support_DirectLink}" Classes="Kicker"/>
+                                <TextBlock Text="{Binding WhatsAppUrl}"
+                                           FontFamily="Consolas"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

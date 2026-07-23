@@ -26,17 +26,22 @@
 
         <x:String x:Key="L_Dash_Kicker">Overview</x:String>
         <x:String x:Key="L_Dash_Title">Dashboard</x:String>
+        <x:String x:Key="L_Dash_Subtitle">Monitor account health, upcoming dues, renewals, and daily collection work from one place.</x:String>
         <x:String x:Key="L_Dash_SyncToMobile">Sync To Mobile</x:String>
         <x:String x:Key="L_Dash_UpdateDatabase">Update Database</x:String>
         <x:String x:Key="L_Dash_Loading">Loading dashboard data...</x:String>
         <x:String x:Key="L_Dash_TotalAccounts">TOTAL ACCOUNTS</x:String>
         <x:String x:Key="L_Dash_ActiveAmount">ACTIVE AMOUNT</x:String>
+        <x:String x:Key="L_Dash_ActiveValueHint">Current active RD portfolio value</x:String>
         <x:String x:Key="L_Dash_Due30Days">DUE WITHIN 30 DAYS</x:String>
         <x:String x:Key="L_Dash_ActionCenter">Action Center</x:String>
         <x:String x:Key="L_Dash_PendingMonth">Pending This Month</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">Next Month Collection</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">Advance Paid</x:String>
         <x:String x:Key="L_Dash_NewAccountsRecent">New Accounts (Last 30 Days)</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderTitle">Update ASLAAS for new accounts</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderBody"> new account(s) are missing ASLAAS number. Update them before payment list processing.</x:String>
+        <x:String x:Key="L_Dash_UpdateAslaasNow">Update ASLAAS</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">About To Freeze</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">Matured Accounts</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">Closed Accounts</x:String>
@@ -93,11 +98,14 @@
 
         <x:String x:Key="L_Support_Kicker">Help</x:String>
         <x:String x:Key="L_Support_Title">Support</x:String>
+        <x:String x:Key="L_Support_Subtitle">Get help with setup, reports, payments, and day-to-day AgentBuddy workflows.</x:String>
         <x:String x:Key="L_Support_Contact">Contact</x:String>
+        <x:String x:Key="L_Support_ContactHint">Choose email for detailed issues or WhatsApp for quick chat support.</x:String>
         <x:String x:Key="L_Support_SendEmail">Send Email</x:String>
         <x:String x:Key="L_Support_OpenWhatsapp">Open WhatsApp</x:String>
         <x:String x:Key="L_Support_WhatsappQr">WhatsApp QR</x:String>
         <x:String x:Key="L_Support_QrHint">Scan the QR to start chat quickly.</x:String>
+        <x:String x:Key="L_Support_DirectLink">Direct link</x:String>
 
         <x:String x:Key="L_Set_Kicker">Configuration</x:String>
         <x:String x:Key="L_Set_Title">Settings</x:String>

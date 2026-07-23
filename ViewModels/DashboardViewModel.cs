@@ -39,6 +39,7 @@ public class DashboardViewModel : ViewModelBase
     private bool _isDarkTheme;
     private bool _isLoading;
     private bool _isUpdating;
+    private bool _isUpdatingAslaas;
     private bool _isSyncingToMobile;
     private string _updateStatus = string.Empty;
     private string _halfMonthTitleSuffix = string.Empty;
@@ -79,6 +80,7 @@ public class DashboardViewModel : ViewModelBase
     private decimal _advancedPaidAmount;
     private int _newAccounts30DaysCount;
     private decimal _newAccounts30DaysAmount;
+    private int _newAccountsMissingAslaasCount;
     private int _aboutToFreezeCount;
     private decimal _aboutToFreezeAmount;
     private int _aboutToMatureCount;
@@ -123,6 +125,7 @@ public class DashboardViewModel : ViewModelBase
 
         RefreshCommand = ReactiveCommand.CreateFromTask(LoadDataAsync);
         UpdateDatabaseCommand = ReactiveCommand.CreateFromTask(UpdateDatabaseAsync);
+        UpdateNewAccountAslaasCommand = ReactiveCommand.CreateFromTask(UpdateNewAccountAslaasAsync);
         SyncToMobileCommand = ReactiveCommand.CreateFromTask(SyncToMobileAsync);
         ViewAccountDetailsCommand = ReactiveCommand.Create<RDAccount>(ViewAccountDetails);
         OpenUpdateLinkCommand = ReactiveCommand.Create(OpenUpdateLink);
@@ -240,6 +243,18 @@ public class DashboardViewModel : ViewModelBase
         }
     }
 
+    public bool IsUpdatingAslaas
+    {
+        get => _isUpdatingAslaas;
+        set
+        {
+            if (this.RaiseAndSetIfChanged(ref _isUpdatingAslaas, value))
+            {
+                this.RaisePropertyChanged(nameof(IsBusy));
+            }
+        }
+    }
+
     public bool IsSyncingToMobile
     {
         get => _isSyncingToMobile;
@@ -252,7 +267,7 @@ public class DashboardViewModel : ViewModelBase
         }
     }
 
-    public bool IsBusy => IsUpdating || IsSyncingToMobile;
+    public bool IsBusy => IsUpdating || IsUpdatingAslaas || IsSyncingToMobile;
 
     public string UpdateStatus
     {
@@ -418,6 +433,18 @@ public class DashboardViewModel : ViewModelBase
 
     public bool HasNewAccountsRibbon => NewAccounts30DaysCount > 0;
 
+    public int NewAccountsMissingAslaasCount
+    {
+        get => _newAccountsMissingAslaasCount;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _newAccountsMissingAslaasCount, value);
+            this.RaisePropertyChanged(nameof(HasNewAccountsMissingAslaasNotice));
+        }
+    }
+
+    public bool HasNewAccountsMissingAslaasNotice => NewAccountsMissingAslaasCount > 0;
+
     public int AboutToFreezeCount
     {
         get => _aboutToFreezeCount;
@@ -532,6 +559,7 @@ public class DashboardViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
     public ReactiveCommand<Unit, Unit> UpdateDatabaseCommand { get; }
+    public ReactiveCommand<Unit, Unit> UpdateNewAccountAslaasCommand { get; }
     public ReactiveCommand<Unit, Unit> SyncToMobileCommand { get; }
     public ReactiveCommand<RDAccount, Unit> ViewAccountDetailsCommand { get; }
 
@@ -779,6 +807,10 @@ public class DashboardViewModel : ViewModelBase
             .ThenBy(a => a.AccountNo)
             .ToList();
 
+        var newAccountsMissingAslaas = newAccounts30Days
+            .Where(IsAslaasMissing)
+            .ToList();
+
         var aboutToFreeze = accounts
             .Where(a =>
             {
@@ -856,6 +888,7 @@ public class DashboardViewModel : ViewModelBase
         AdvancedPaidAmount = advancedPaid.Sum(a => a.GetAmount());
         NewAccounts30DaysCount = newAccounts30Days.Count;
         NewAccounts30DaysAmount = newAccounts30Days.Sum(a => a.GetAmount());
+        NewAccountsMissingAslaasCount = newAccountsMissingAslaas.Count;
         this.RaisePropertyChanged(nameof(HasNewAccountsRibbon));
         AboutToFreezeCount = aboutToFreeze.Count;
         AboutToFreezeAmount = aboutToFreeze.Sum(a => a.GetAmount());
@@ -875,6 +908,116 @@ public class DashboardViewModel : ViewModelBase
         FirstHalfDepositedWindowAmount = firstHalfDepositedWindow.Sum(a => a.GetAmount());
         SecondHalfDepositedWindowCount = secondHalfDepositedWindow.Count;
         SecondHalfDepositedWindowAmount = secondHalfDepositedWindow.Sum(a => a.GetAmount());
+    }
+
+    private static bool IsAslaasMissing(RDAccount account)
+    {
+        return string.IsNullOrWhiteSpace((account.AslaasNo ?? string.Empty).Trim());
+    }
+
+    private static string GetFirstMeaningfulLine(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return "Unknown error.";
+        }
+
+        var firstLine = output
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Trim())
+            .FirstOrDefault(line => !string.IsNullOrWhiteSpace(line));
+
+        return string.IsNullOrWhiteSpace(firstLine) ? "Unknown error." : firstLine;
+    }
+
+    private async Task UpdateNewAccountAslaasAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsUpdatingAslaas = true;
+        UpdateStatus = "Checking new accounts with missing ASLAAS...";
+
+        try
+        {
+            var today = DateTime.Today;
+            var accountsToUpdate = (await _databaseService.GetAllActiveAccountsAsync())
+                .Where(a => a.FirstSeen.Date >= today.AddDays(-RecentAccountDaysWindow))
+                .Where(IsAslaasMissing)
+                .OrderByDescending(a => a.FirstSeen)
+                .ThenBy(a => a.AccountNo)
+                .Select(a => new AslaasUpdateItem
+                {
+                    AccountNo = (a.AccountNo ?? string.Empty).Trim(),
+                    AslaasNo = "APPLIED"
+                })
+                .Where(a => !string.IsNullOrWhiteSpace(a.AccountNo))
+                .ToList();
+
+            if (accountsToUpdate.Count == 0)
+            {
+                UpdateStatus = "No new accounts are missing ASLAAS.";
+                _notificationService?.Info("ASLAAS", "No new accounts are missing ASLAAS.");
+                await Task.Delay(2500);
+                return;
+            }
+
+            var (isPythonInstalled, _) = await _pythonService.CheckPythonInstalledAsync();
+            if (!isPythonInstalled)
+            {
+                UpdateStatus = "Python is not installed. Install Python 3.x and retry.";
+                _notificationService?.Error("ASLAAS Update Failed", "Python 3.x was not found.");
+                await Task.Delay(4000);
+                return;
+            }
+
+            UpdateStatus = $"Found {accountsToUpdate.Count} new account(s). Opening portal for ASLAAS update...";
+            var (success, output) = await _pythonService.UpdateMissingAslaasAsync(
+                accountsToUpdate,
+                progress =>
+                {
+                    var trimmed = (progress ?? string.Empty).Trim();
+                    if (!string.IsNullOrWhiteSpace(trimmed))
+                    {
+                        UpdateStatus = trimmed;
+                    }
+                });
+
+            if (!success)
+            {
+                var reason = GetFirstMeaningfulLine(output);
+                var savedSome = (output ?? string.Empty).IndexOf(
+                    "ASLAAS update submitted:",
+                    StringComparison.OrdinalIgnoreCase) >= 0;
+                UpdateStatus = savedSome
+                    ? $"ASLAAS update failed after saving some account(s): {reason}"
+                    : $"ASLAAS update failed: {reason}";
+                _notificationService?.Error("ASLAAS Update Failed", reason);
+                await Task.Delay(5000);
+                return;
+            }
+
+            await _databaseService.SaveAslaasUpdatesAsync(accountsToUpdate);
+
+            UpdateStatus = $"Updated {accountsToUpdate.Count} new account(s). Refreshing dashboard...";
+            _notificationService?.Success("ASLAAS Updated", "New account ASLAAS updates were saved locally.");
+            _databaseService.NotifyDatabaseChanged();
+            await LoadDataAsync();
+            await Task.Delay(2500);
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus = $"ASLAAS update failed: {ex.Message}";
+            _notificationService?.Error("ASLAAS Update Failed", ex.Message);
+            await Task.Delay(5000);
+        }
+        finally
+        {
+            IsUpdatingAslaas = false;
+            UpdateStatus = string.Empty;
+        }
     }
 
     public IReadOnlyList<RDAccount> GetAccountsForSegment(string? segmentKey)

@@ -26,17 +26,22 @@
 
         <x:String x:Key="L_Dash_Kicker">ओवरव्यू</x:String>
         <x:String x:Key="L_Dash_Title">डैशबोर्ड</x:String>
+        <x:String x:Key="L_Dash_Subtitle">खाते, देय भुगतान, नवीनीकरण और दैनिक कलेक्शन काम एक जगह देखें।</x:String>
         <x:String x:Key="L_Dash_SyncToMobile">मोबाइल सिंक</x:String>
         <x:String x:Key="L_Dash_UpdateDatabase">डेटाबेस अपडेट</x:String>
         <x:String x:Key="L_Dash_Loading">डैशबोर्ड डेटा लोड हो रहा है...</x:String>
         <x:String x:Key="L_Dash_TotalAccounts">कुल खाते</x:String>
         <x:String x:Key="L_Dash_ActiveAmount">सक्रिय राशि</x:String>
+        <x:String x:Key="L_Dash_ActiveValueHint">वर्तमान सक्रिय RD पोर्टफोलियो मूल्य</x:String>
         <x:String x:Key="L_Dash_Due30Days">30 दिनों में देय</x:String>
         <x:String x:Key="L_Dash_ActionCenter">एक्शन सेंटर</x:String>
         <x:String x:Key="L_Dash_PendingMonth">इस माह लंबित</x:String>
         <x:String x:Key="L_Dash_NextMonthCollection">अगले माह कलेक्शन</x:String>
         <x:String x:Key="L_Dash_AdvancePaid">एडवांस भुगतान</x:String>
         <x:String x:Key="L_Dash_NewAccountsRecent">नए खाते (Last 30 Days)</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderTitle">नए खातों का ASLAAS अपडेट करें</x:String>
+        <x:String x:Key="L_Dash_AslaasReminderBody"> नए खातों में ASLAAS नंबर नहीं है। भुगतान सूची प्रोसेस करने से पहले अपडेट करें।</x:String>
+        <x:String x:Key="L_Dash_UpdateAslaasNow">ASLAAS अपडेट करें</x:String>
         <x:String x:Key="L_Dash_AboutToFreeze">फ्रीज होने वाले</x:String>
         <x:String x:Key="L_Dash_MaturedAccounts">परिपक्व खाते</x:String>
         <x:String x:Key="L_Dash_ClosedAccounts">बंद खाते</x:String>
@@ -93,11 +98,14 @@
 
         <x:String x:Key="L_Support_Kicker">मदद</x:String>
         <x:String x:Key="L_Support_Title">सहायता</x:String>
+        <x:String x:Key="L_Support_Subtitle">सेटअप, रिपोर्ट, भुगतान और रोज़मर्रा के AgentBuddy कामों में मदद पाएं।</x:String>
         <x:String x:Key="L_Support_Contact">संपर्क</x:String>
+        <x:String x:Key="L_Support_ContactHint">विस्तृत समस्या के लिए ईमेल या तुरंत चैट सहायता के लिए व्हाट्सऐप चुनें।</x:String>
         <x:String x:Key="L_Support_SendEmail">ईमेल भेजें</x:String>
         <x:String x:Key="L_Support_OpenWhatsapp">व्हाट्सऐप खोलें</x:String>
         <x:String x:Key="L_Support_WhatsappQr">व्हाट्सऐप QR</x:String>
         <x:String x:Key="L_Support_QrHint">चैट शुरू करने के लिए QR स्कैन करें।</x:String>
+        <x:String x:Key="L_Support_DirectLink">सीधा लिंक</x:String>
 
         <x:String x:Key="L_Set_Kicker">कॉन्फ़िगरेशन</x:String>
         <x:String x:Key="L_Set_Title">सेटिंग्स</x:String>
