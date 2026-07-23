@@ -585,8 +585,30 @@
                                        Margin="0,-6,0,0"/>
                             <lvc:PieChart Series="{Binding CategorySeries}"
                                           Height="260"
-                                          LegendPosition="Bottom"
+                                          LegendPosition="Hidden"
                                           LegendTextPaint="{Binding ChartLegendTextPaint}"/>
+                            <WrapPanel HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Default" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource WarningBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Mature" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource ErrorBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Freeze Risk" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Advanced" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource AccentPinkBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="New" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </WrapPanel>
                         </StackPanel>
                     </Border>
 
@@ -600,8 +622,18 @@
                                                 XAxes="{Binding RevenueXAxes}"
                                                 YAxes="{Binding RevenueYAxes}"
                                                 Height="260"
-                                                LegendPosition="Top"
+                                                LegendPosition="Hidden"
                                                 LegendTextPaint="{Binding ChartLegendTextPaint}"/>
+                            <WrapPanel HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,0">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Default accounts" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Earnings (Rs.)" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </WrapPanel>
                         </StackPanel>
                     </Border>
                 </Grid>

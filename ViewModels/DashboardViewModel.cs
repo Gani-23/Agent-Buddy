@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using Avalonia;
 using ReactiveUI;
 using AgentBuddy.Models;
 using AgentBuddy.Services;
@@ -1063,6 +1064,7 @@ public class DashboardViewModel : ViewModelBase
     private void CreateCategoryChart(List<CategoryData> categories)
     {
         var series = new List<ISeries>();
+        var isDark = IsChartDarkTheme();
         var palette = new[]
         {
             SKColor.Parse("#2F76E6"),
@@ -1079,7 +1081,7 @@ public class DashboardViewModel : ViewModelBase
                 Values = new[] { category.value.Count },
                 Name = category.value.CategoryName,
                 Fill = new SolidColorPaint(palette[category.index % palette.Length]),
-                Stroke = new SolidColorPaint(IsDarkTheme ? SKColor.Parse("#202020") : SKColors.White) { StrokeThickness = 2 },
+                Stroke = new SolidColorPaint(isDark ? SKColor.Parse("#202020") : SKColors.White) { StrokeThickness = 2 },
                 DataLabelsPaint = new SolidColorPaint(SKColors.White),
                 DataLabelsSize = 13,
                 DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
@@ -1099,8 +1101,9 @@ public class DashboardViewModel : ViewModelBase
         var defaultCountValues = last12Months.Select(r => (double)r.DefaultCount).ToArray();
         var earningsValues = last12Months.Select(r => (double)r.Total).ToArray();
         var labels = last12Months.Select(r => ShortMonthLabel(r.MonthName)).ToArray();
-        var axisLabelColor = IsDarkTheme ? SKColor.Parse("#D4D4D4") : SKColor.Parse("#5F6368");
-        var separatorColor = IsDarkTheme ? SKColor.Parse("#424242") : SKColor.Parse("#D9D9D9");
+        var isDark = IsChartDarkTheme();
+        var axisLabelColor = isDark ? SKColor.Parse("#D4D4D4") : SKColor.Parse("#2F3437");
+        var separatorColor = isDark ? SKColor.Parse("#424242") : SKColor.Parse("#B7B7B7");
 
         RevenueSeries = new ISeries[]
         {
@@ -1122,7 +1125,7 @@ public class DashboardViewModel : ViewModelBase
                 Fill = null,
                 GeometrySize = 7,
                 GeometryStroke = new SolidColorPaint(SKColor.Parse("#1F8A62")) { StrokeThickness = 2 },
-                GeometryFill = new SolidColorPaint(IsDarkTheme ? SKColor.Parse("#202020") : SKColors.White),
+                GeometryFill = new SolidColorPaint(isDark ? SKColor.Parse("#202020") : SKColors.White),
                 Stroke = new SolidColorPaint(SKColor.Parse("#1F8A62")) { StrokeThickness = 3 },
                 DataLabelsSize = 0
             }
@@ -1172,7 +1175,8 @@ public class DashboardViewModel : ViewModelBase
 
     private void ApplyChartTheme()
     {
-        var legendColor = IsDarkTheme ? SKColor.Parse("#ECECEC") : SKColor.Parse("#2F3437");
+        var isDark = IsChartDarkTheme();
+        var legendColor = isDark ? SKColor.Parse("#ECECEC") : SKColor.Parse("#2F3437");
         ChartLegendTextPaint = new SolidColorPaint(legendColor);
 
         if (CategoryData.Count > 0)
@@ -1184,6 +1188,21 @@ public class DashboardViewModel : ViewModelBase
         {
             CreateRevenueChart(MonthlyRevenues.ToList());
         }
+    }
+
+    private bool IsChartDarkTheme()
+    {
+        if (Application.Current?.RequestedThemeVariant == Avalonia.Styling.ThemeVariant.Dark)
+        {
+            return true;
+        }
+
+        if (Application.Current?.RequestedThemeVariant == Avalonia.Styling.ThemeVariant.Light)
+        {
+            return false;
+        }
+
+        return IsDarkTheme;
     }
 
     private void ViewAccountDetails(RDAccount account)
