@@ -174,9 +174,9 @@
                             <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                                 <TextBlock Text="{DynamicResource L_Dash_AslaasReminderTitle}"
                                            FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                           Foreground="{DynamicResource TintTextBrush}"/>
                                 <TextBlock TextWrapping="Wrap"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                           Foreground="{DynamicResource TintTextBrush}">
                                     <Run Text="{Binding NewAccountsMissingAslaasCount}"/>
                                     <Run Text="{DynamicResource L_Dash_AslaasReminderBody}"/>
                                 </TextBlock>
@@ -213,10 +213,10 @@
                                 <TextBlock Text="{Binding RdCertificateRenewalHeadline}"
                                            FontSize="22"
                                            FontWeight="Bold"
-                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                           Foreground="{DynamicResource TintTextBrush}"/>
                                 <TextBlock Text="{Binding RdCertificateRenewalMessage}"
                                            TextWrapping="Wrap"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                           Foreground="{DynamicResource TintTextBrush}"/>
                             </StackPanel>
 
                             <Border Grid.Column="2"
@@ -579,7 +579,10 @@
                 <Grid ColumnDefinitions="*,1.4*" ColumnSpacing="16">
                     <Border Grid.Column="0" Classes="Card">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="{DynamicResource L_Dash_CategorySplit}" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_PortfolioRiskSplit}" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_PortfolioRiskHint}"
+                                       Classes="SectionLead"
+                                       Margin="0,-6,0,0"/>
                             <lvc:PieChart Series="{Binding CategorySeries}"
                                           Height="260"
                                           LegendPosition="Bottom"
@@ -589,7 +592,10 @@
 
                     <Border Grid.Column="1" Classes="Card">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="{DynamicResource L_Dash_MonthlyCollections}" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_MonthlyWorkloadTrend}" Classes="SubHeader"/>
+                            <TextBlock Text="{DynamicResource L_Dash_MonthlyWorkloadHint}"
+                                       Classes="SectionLead"
+                                       Margin="0,-6,0,0"/>
                             <lvc:CartesianChart Series="{Binding RevenueSeries}"
                                                 XAxes="{Binding RevenueXAxes}"
                                                 YAxes="{Binding RevenueYAxes}"

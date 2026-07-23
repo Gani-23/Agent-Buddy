@@ -53,6 +53,10 @@
         <x:String x:Key="L_Dash_ExtendedAccounts">పొడిగించిన ఖాతాలు</x:String>
         <x:String x:Key="L_Dash_CategorySplit">వర్గాల విభజన</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">నెలవారీ విభజన</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskSplit">పోర్ట్‌ఫోలియో రిస్క్ విభజన</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskHint">ప్రస్తుత స్థితి ప్రకారం శ్రద్ధ అవసరమైన సక్రియ ఖాతాలు.</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadTrend">నెలవారీ వర్క్‌లోడ్ ట్రెండ్</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadHint">గత 12 నెలల డిఫాల్ట్ ఖాతాల సంఖ్య మరియు ఆదాయం ట్రెండ్.</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">అప్డేట్: </x:String>
         <x:String x:Key="L_Dash_AccountsSuffix"> ఖాతాలు</x:String>
 

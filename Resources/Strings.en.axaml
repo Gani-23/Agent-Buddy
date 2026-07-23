@@ -53,6 +53,10 @@
         <x:String x:Key="L_Dash_ExtendedAccounts">Extended Accounts</x:String>
         <x:String x:Key="L_Dash_CategorySplit">Category Split</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">Monthly Split</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskSplit">Portfolio Risk Split</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskHint">Where active accounts need attention by current status.</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadTrend">Monthly Workload Trend</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadHint">Default-account count with earnings trend for the last 12 months.</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">Updated: </x:String>
         <x:String x:Key="L_Dash_AccountsSuffix"> accounts</x:String>
 

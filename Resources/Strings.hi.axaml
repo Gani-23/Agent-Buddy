@@ -53,6 +53,10 @@
         <x:String x:Key="L_Dash_ExtendedAccounts">विस्तारित खाते</x:String>
         <x:String x:Key="L_Dash_CategorySplit">श्रेणी विभाजन</x:String>
         <x:String x:Key="L_Dash_MonthlyCollections">मासिक विभाजन</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskSplit">पोर्टफोलियो जोखिम विभाजन</x:String>
+        <x:String x:Key="L_Dash_PortfolioRiskHint">वर्तमान स्थिति के अनुसार किन सक्रिय खातों पर ध्यान देना है।</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadTrend">मासिक कार्यभार ट्रेंड</x:String>
+        <x:String x:Key="L_Dash_MonthlyWorkloadHint">पिछले 12 महीनों के डिफॉल्ट खातों की संख्या और कमाई ट्रेंड।</x:String>
         <x:String x:Key="L_Dash_UpdatedPrefix">अपडेट: </x:String>
         <x:String x:Key="L_Dash_AccountsSuffix"> खाते</x:String>
 

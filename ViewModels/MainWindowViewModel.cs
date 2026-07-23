@@ -263,6 +263,7 @@ public class MainWindowViewModel : ViewModelBase
         string warningTint = isDark ? "#332A17" : "#FFF4DC";
         string dangerTint = isDark ? "#342121" : "#FDECEC";
         string infoTint = isDark ? "#1A273B" : "#EAF2FF";
+        string tintText = isDark ? "#ECECEC" : "#2F3437";
         string listAdvanceTint = isDark ? "#183153" : "#DCEBFF";
         string listAdvanceBorder = isDark ? "#6EA4FF" : "#145BD6";
         string listCatchUpTint = isDark ? "#3A2B12" : "#FFF1CF";
@@ -294,6 +295,7 @@ public class MainWindowViewModel : ViewModelBase
         resources["WarningTintBrush"] = new SolidColorBrush(Color.Parse(warningTint));
         resources["DangerTintBrush"] = new SolidColorBrush(Color.Parse(dangerTint));
         resources["InfoTintBrush"] = new SolidColorBrush(Color.Parse(infoTint));
+        resources["TintTextBrush"] = new SolidColorBrush(Color.Parse(tintText));
         resources["ListAdvanceTintBrush"] = new SolidColorBrush(Color.Parse(listAdvanceTint));
         resources["ListAdvanceBorderBrush"] = new SolidColorBrush(Color.Parse(listAdvanceBorder));
         resources["ListCatchUpTintBrush"] = new SolidColorBrush(Color.Parse(listCatchUpTint));

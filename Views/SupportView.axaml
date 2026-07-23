@@ -27,8 +27,8 @@
                             Height="76"
                             CornerRadius="38"
                             Padding="0"
-                            Background="#E7F8EF"
-                            BorderBrush="#BDECCF"
+                            Background="{DynamicResource SuccessTintBrush}"
+                            BorderBrush="{StaticResource SuccessBrush}"
                             BorderThickness="1"
                             ClipToBounds="True"
                             VerticalAlignment="Center">
@@ -154,8 +154,8 @@
                                     Height="44"
                                     CornerRadius="22"
                                     Padding="0"
-                                    Background="#E7F8EF"
-                                    BorderBrush="#BDECCF"
+                                    Background="{DynamicResource SuccessTintBrush}"
+                                    BorderBrush="{StaticResource SuccessBrush}"
                                     BorderThickness="1"
                                     ClipToBounds="True">
                                 <Image Source="avares://AgentBuddy/Assets/WhatsAppLogo.png"

@@ -64,6 +64,7 @@
         <SolidColorBrush x:Key="WarningTintBrush" Color="#FFF4DC"/>
         <SolidColorBrush x:Key="DangerTintBrush" Color="#FDECEC"/>
         <SolidColorBrush x:Key="InfoTintBrush" Color="#EAF2FF"/>
+        <SolidColorBrush x:Key="TintTextBrush" Color="#2F3437"/>
         <SolidColorBrush x:Key="ListAdvanceTintBrush" Color="#DCEBFF"/>
         <SolidColorBrush x:Key="ListAdvanceBorderBrush" Color="#145BD6"/>
         <SolidColorBrush x:Key="ListCatchUpTintBrush" Color="#FFF1CF"/>

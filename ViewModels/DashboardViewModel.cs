@@ -1063,17 +1063,28 @@ public class DashboardViewModel : ViewModelBase
     private void CreateCategoryChart(List<CategoryData> categories)
     {
         var series = new List<ISeries>();
+        var palette = new[]
+        {
+            SKColor.Parse("#2F76E6"),
+            SKColor.Parse("#D4A017"),
+            SKColor.Parse("#D94848"),
+            SKColor.Parse("#1F8A62"),
+            SKColor.Parse("#C44582")
+        };
 
-        foreach (var category in categories)
+        foreach (var category in categories.Where(c => c.Count > 0).Select((value, index) => (value, index)))
         {
             series.Add(new PieSeries<int>
             {
-                Values = new[] { category.Count },
-                Name = category.CategoryName,
+                Values = new[] { category.value.Count },
+                Name = category.value.CategoryName,
+                Fill = new SolidColorPaint(palette[category.index % palette.Length]),
+                Stroke = new SolidColorPaint(IsDarkTheme ? SKColor.Parse("#202020") : SKColors.White) { StrokeThickness = 2 },
                 DataLabelsPaint = new SolidColorPaint(SKColors.White),
-                DataLabelsSize = 14,
+                DataLabelsSize = 13,
                 DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                DataLabelsFormatter = point => $"{category.Count}"
+                DataLabelsFormatter = _ => category.value.Count >= 10 ? $"{category.value.Count}" : string.Empty,
+                HoverPushout = 4
             });
         }
 
@@ -1085,9 +1096,9 @@ public class DashboardViewModel : ViewModelBase
         // Take last 12 months
         var last12Months = revenues.TakeLast(12).ToList();
 
-        var commissionValues = last12Months.Select(r => (double)r.Commission).ToArray();
-        var rebateValues = last12Months.Select(r => (double)r.Rebate).ToArray();
-        var labels = last12Months.Select(r => r.MonthName).ToArray();
+        var defaultCountValues = last12Months.Select(r => (double)r.DefaultCount).ToArray();
+        var earningsValues = last12Months.Select(r => (double)r.Total).ToArray();
+        var labels = last12Months.Select(r => ShortMonthLabel(r.MonthName)).ToArray();
         var axisLabelColor = IsDarkTheme ? SKColor.Parse("#D4D4D4") : SKColor.Parse("#5F6368");
         var separatorColor = IsDarkTheme ? SKColor.Parse("#424242") : SKColor.Parse("#D9D9D9");
 
@@ -1095,19 +1106,25 @@ public class DashboardViewModel : ViewModelBase
         {
             new ColumnSeries<double>
             {
-                Name = "Collections",
-                Values = commissionValues,
-                Fill = new SolidColorPaint(SKColor.Parse("#5DADE2")),
+                Name = "Default accounts",
+                Values = defaultCountValues,
+                Fill = new SolidColorPaint(SKColor.Parse("#2F76E6")),
                 Stroke = null,
-                MaxBarWidth = 40
+                MaxBarWidth = 34,
+                DataLabelsSize = 11,
+                DataLabelsPaint = new SolidColorPaint(axisLabelColor),
+                DataLabelsFormatter = point => point.Model > 0 ? $"{point.Model:0}" : string.Empty
             },
-            new ColumnSeries<double>
+            new LineSeries<double>
             {
-                Name = "Adjustments",
-                Values = rebateValues,
-                Fill = new SolidColorPaint(SKColor.Parse("#85C1E2")),
-                Stroke = null,
-                MaxBarWidth = 40
+                Name = "Earnings (Rs.)",
+                Values = earningsValues,
+                Fill = null,
+                GeometrySize = 7,
+                GeometryStroke = new SolidColorPaint(SKColor.Parse("#1F8A62")) { StrokeThickness = 2 },
+                GeometryFill = new SolidColorPaint(IsDarkTheme ? SKColor.Parse("#202020") : SKColors.White),
+                Stroke = new SolidColorPaint(SKColor.Parse("#1F8A62")) { StrokeThickness = 3 },
+                DataLabelsSize = 0
             }
         };
 
@@ -1132,6 +1149,7 @@ public class DashboardViewModel : ViewModelBase
             new Axis
             {
                 TextSize = 12,
+                Name = "Accounts / Rs.",
                 LabelsPaint = new SolidColorPaint(axisLabelColor),
                 SeparatorsPaint = new SolidColorPaint(separatorColor)
                 {
@@ -1140,6 +1158,16 @@ public class DashboardViewModel : ViewModelBase
                 }
             }
         };
+    }
+
+    private static string ShortMonthLabel(string monthName)
+    {
+        if (string.IsNullOrWhiteSpace(monthName))
+        {
+            return string.Empty;
+        }
+
+        return monthName.Length <= 3 ? monthName : monthName[..3];
     }
 
     private void ApplyChartTheme()
