@@ -1,6 +1,21 @@
 name: Build and release binaries
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 2.0.3 or v2.0.3"
+        required: true
+        type: string
+      draft:
+        description: "Create the GitHub release as a draft"
+        required: false
+        default: false
+        type: boolean
+      prerelease:
+        description: "Mark the GitHub release as a prerelease"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -10,9 +25,58 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  prepare-release:
+    name: Prepare release tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or validate release tag
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ inputs.version }}"
+          VERSION="${VERSION#v}"
+
+          if [[ -z "$VERSION" ]]; then
+            echo "Release version is required." >&2
+            exit 1
+          fi
+
+          TAG="v$VERSION"
+          CURRENT_SHA="$(git rev-parse HEAD)"
+
+          git fetch --tags --force
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            TAG_SHA="$(git rev-list -n 1 "$TAG")"
+            if [[ "$TAG_SHA" != "$CURRENT_SHA" ]]; then
+              echo "Tag $TAG already exists at $TAG_SHA, not current commit $CURRENT_SHA." >&2
+              exit 1
+            fi
+            echo "Using existing tag $TAG."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
   build-windows:
     name: Build Windows (${{ matrix.rid }})
     runs-on: windows-latest
+    needs: prepare-release
     strategy:
       fail-fast: false
       matrix:
@@ -29,8 +93,7 @@ jobs:
       - name: Publish
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}"
-          $version = $tag.TrimStart("v")
+          $version = "${{ needs.prepare-release.outputs.version }}"
           $rid = "${{ matrix.rid }}"
           dotnet publish -c Release -r $rid --self-contained true `
             -p:Version=$version -p:AssemblyVersion=$version.0 -p:FileVersion=$version.0 -p:InformationalVersion=$version
@@ -51,6 +114,7 @@ jobs:
   build-macos:
     name: Build macOS (${{ matrix.rid }})
     runs-on: macos-latest
+    needs: prepare-release
     strategy:
       fail-fast: false
       matrix:
@@ -66,13 +130,13 @@ jobs:
 
       - name: Publish
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ needs.prepare-release.outputs.version }}"
           RID="${{ matrix.rid }}"
           dotnet publish -c Release -r "$RID" --self-contained true \
             -p:Version="$VERSION" -p:AssemblyVersion="$VERSION.0" -p:FileVersion="$VERSION.0" -p:InformationalVersion="$VERSION"
       - name: Build .app bundle
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ needs.prepare-release.outputs.version }}"
           RID="${{ matrix.rid }}"
           APP_NAME="AgentBuddy"
           APP_DIR="$APP_NAME.app"
@@ -140,6 +204,7 @@ jobs:
   build-linux:
     name: Build Linux (${{ matrix.rid }})
     runs-on: ubuntu-latest
+    needs: prepare-release
     strategy:
       fail-fast: false
       matrix:
@@ -155,7 +220,7 @@ jobs:
 
       - name: Publish
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ needs.prepare-release.outputs.version }}"
           RID="${{ matrix.rid }}"
           dotnet publish -c Release -r "$RID" --self-contained true \
             -p:Version="$VERSION" -p:AssemblyVersion="$VERSION.0" -p:FileVersion="$VERSION.0" -p:InformationalVersion="$VERSION"
@@ -174,7 +239,7 @@ jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-windows, build-macos, build-linux]
+    needs: [prepare-release, build-windows, build-macos, build-linux]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -184,6 +249,10 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.prepare-release.outputs.tag }}
+          name: AgentBuddy ${{ needs.prepare-release.outputs.tag }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
           body: |
             ⚠️ **Unsigned Builds**
             These builds are unsigned, so Windows/macOS will show a warning the first time you open them.
