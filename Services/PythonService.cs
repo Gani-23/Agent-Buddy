@@ -835,7 +835,27 @@ public class PythonService
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
 
-            return (process.ExitCode == 0, output.ToString());
+            var outputText = output.ToString();
+            var completedUpdates = ExtractCompletedAslaasUpdates(outputText);
+            if (completedUpdates.Count > 0)
+            {
+                await _databaseService.SaveAslaasUpdatesAsync(completedUpdates);
+                _databaseService.NotifyDatabaseChanged();
+            }
+
+            if (process.ExitCode != 0)
+            {
+                return (false, outputText);
+            }
+
+            if (completedUpdates.Count == 0)
+            {
+                return (false, string.IsNullOrWhiteSpace(outputText)
+                    ? "ASLAAS update finished without portal-confirmed submissions. Local database was not changed."
+                    : $"{outputText.Trim()}\nASLAAS update finished without portal-confirmed submissions. Local database was not changed.");
+            }
+
+            return (true, outputText);
         }
         catch (Exception ex)
         {

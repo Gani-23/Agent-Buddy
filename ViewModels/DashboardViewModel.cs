@@ -1000,11 +1000,8 @@ public class DashboardViewModel : ViewModelBase
                 return;
             }
 
-            await _databaseService.SaveAslaasUpdatesAsync(accountsToUpdate);
-
-            UpdateStatus = $"Updated {accountsToUpdate.Count} new account(s). Refreshing dashboard...";
-            _notificationService?.Success("ASLAAS Updated", "New account ASLAAS updates were saved locally.");
-            _databaseService.NotifyDatabaseChanged();
+            UpdateStatus = "Saved portal-confirmed ASLAAS updates. Refreshing dashboard...";
+            _notificationService?.Success("ASLAAS Updated", "Portal-confirmed ASLAAS updates were saved locally.");
             await LoadDataAsync();
             await Task.Delay(2500);
         }

@@ -1407,12 +1407,9 @@ public class SettingsViewModel : ViewModelBase
                 return;
             }
 
-            await _databaseService.SaveAslaasUpdatesAsync(accountsToUpdate);
-            _databaseService.NotifyDatabaseChanged();
-
             AslaasUpdateStatus = forceAllActiveAccounts
-                ? $"Force-updated {accountsToUpdate.Count} active account(s). Saved portal-confirmed updates locally."
-                : $"Updated {accountsToUpdate.Count} account(s). Saved portal-confirmed updates locally.";
+                ? "Saved portal-confirmed ASLAAS updates from the force update."
+                : "Saved portal-confirmed ASLAAS updates locally.";
         }
         catch (Exception ex)
         {
