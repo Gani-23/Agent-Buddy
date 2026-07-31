@@ -1,0 +1,178 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        xmlns:models="using:AgentBuddy.Models"
+        mc:Ignorable="d"
+        d:DesignWidth="1100"
+        d:DesignHeight="720"
+        x:Class="AgentBuddy.Views.OverdueBalanceWindow"
+        x:DataType="vm:OverdueBalanceWindowViewModel"
+        Title="Balance Buddy"
+        Width="1100"
+        Height="720"
+        MinWidth="940"
+        MinHeight="600"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="{DynamicResource AppHoverBrush}">
+
+    <Border Padding="20" Classes="FadeIn DialogSurface">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Balance Buddy" Classes="Kicker"/>
+                    <TextBlock Text="Overdue Balance Accounts" FontSize="26" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding SummaryText}"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Count, StringFormat='{}{0} shown'}"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding TotalBalanceAmount, StringFormat='Balance Rs. {0:N0}'}"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                               HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="1" Classes="Card" Padding="12">
+                <Grid ColumnDefinitions="*,180,220,Auto" ColumnSpacing="10">
+                    <TextBox x:Name="SearchBox"
+                             Grid.Column="0"
+                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="Search account number or name"/>
+
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding MonthFilterOptions}"
+                              SelectedItem="{Binding SelectedMonthFilter}"
+                              VerticalAlignment="Center"/>
+
+                    <ComboBox Grid.Column="2"
+                              ItemsSource="{Binding SortOptions}"
+                              SelectedItem="{Binding SelectedSortOption}"
+                              VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="3"
+                            Classes="Secondary"
+                            Command="{Binding RefreshCommand}"
+                            Padding="14,8"
+                            Content="Refresh"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Classes="Card" Padding="12,8">
+                <TextBlock Text="{Binding StatusMessage}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+            </Border>
+
+            <Border Grid.Row="3" Classes="Card" Padding="0">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource AppSidebarBackgroundBrush}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,10">
+                        <Grid ColumnDefinitions="130,*,105,105,120,100,120,90,210"
+                              ColumnSpacing="10">
+                            <TextBlock Grid.Column="0" Text="Account" Classes="Kicker"/>
+                            <TextBlock Grid.Column="1" Text="Name" Classes="Kicker"/>
+                            <TextBlock Grid.Column="2" Text="Balance" Classes="Kicker"/>
+                            <TextBlock Grid.Column="3" Text="Paid Upto" Classes="Kicker"/>
+                            <TextBlock Grid.Column="4" Text="Next Due" Classes="Kicker"/>
+                            <TextBlock Grid.Column="5" Text="Amount" Classes="Kicker"/>
+                            <TextBlock Grid.Column="6" Text="Balance Amt" Classes="Kicker"/>
+                            <TextBlock Grid.Column="7" Text="ASLAAS" Classes="Kicker"/>
+                            <TextBlock Grid.Column="8" Text="Actions" Classes="Kicker"/>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding FilteredAccounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:OverdueBalanceAccount">
+                                    <Border BorderBrush="{DynamicResource AppBorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="12,10">
+                                        <Grid ColumnDefinitions="130,*,105,105,120,100,120,90,210"
+                                              ColumnSpacing="10"
+                                              VerticalAlignment="Center">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding AccountNo}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding AccountName}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Grid.Column="2"
+                                                    Background="{DynamicResource AppWarningSoftBrush}"
+                                                    CornerRadius="8"
+                                                    Padding="8,5"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding BalanceLabel}"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource AppWarningBrush}"/>
+                                            </Border>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding MonthPaidUpto}"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4"
+                                                       Text="{Binding NextInstallmentDate}"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5"
+                                                       Text="{Binding AmountDisplay}"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="6"
+                                                       Text="{Binding BalanceAmountDisplay}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="7"
+                                                       Text="{Binding AslaasDisplay}"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="8"
+                                                        Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        VerticalAlignment="Center">
+                                                <Button Classes="Secondary"
+                                                        Padding="8,5"
+                                                        Click="Copy_Click"
+                                                        Content="Copy"/>
+                                                <Button Classes="Primary"
+                                                        Padding="8,5"
+                                                        Click="Add_Click"
+                                                        Content="Add"/>
+                                                <Button Classes="Secondary"
+                                                        Padding="8,5"
+                                                        Click="View_Click"
+                                                        Content="View"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="{DynamicResource L_Common_Close}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

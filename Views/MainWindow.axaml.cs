@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AgentBuddy.Services;
 using AgentBuddy.Models;
@@ -199,6 +200,22 @@ public partial class MainWindow : Window
         {
             _notificationService?.Error("Open Failed", ex.Message);
         }
+    }
+
+    private async void OpenBalanceBuddy_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        var dialog = new OverdueBalanceWindow(
+            vm.DatabaseService,
+            vm.ListManagementViewModel,
+            vm.IsDarkTheme,
+            vm.NotificationService);
+
+        await dialog.ShowDialog(this);
     }
 
     private static NotificationType ToAvaloniaType(AppNotificationType type)

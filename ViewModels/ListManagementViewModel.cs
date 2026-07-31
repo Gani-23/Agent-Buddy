@@ -1241,6 +1241,37 @@ public class ListManagementViewModel : ViewModelBase
         }
     }
 
+    public async Task<bool> AddOverdueAccountToBestListAsync(string accountNo, int balanceMonths)
+    {
+        if (!CanEditLists)
+        {
+            ProcessStatus = "Update the database before adding overdue accounts, or use Proceed Anyway.";
+            _notificationService?.Warning("Database Update Needed", "Update the database before adding overdue accounts.");
+            return false;
+        }
+
+        var installment = Math.Max(1, balanceMonths);
+        var targetLists = Lists.Where(list => !list.IsFull).ToList();
+        if (targetLists.Count == 0)
+        {
+            AddNewList();
+            targetLists = Lists.Where(list => !list.IsFull).ToList();
+        }
+
+        foreach (var list in targetLists)
+        {
+            if (await AddSingleAccountToListAsync(list, accountNo, installment))
+            {
+                ProcessStatus = $"Added {accountNo} to {list.Name} with {installment} installment(s).";
+                ScheduleAutoSave();
+                return true;
+            }
+        }
+
+        ProcessStatus = $"Could not add {accountNo}. Review duplicate, ASLAAS, or amount-limit warnings in the list.";
+        return false;
+    }
+
     private async Task RefreshDatabaseStatusAsync()
     {
         try

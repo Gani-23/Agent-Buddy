@@ -49,6 +49,7 @@ public class MainWindowViewModel : ViewModelBase
     public SupportViewModel SupportViewModel { get; }
     public SettingsViewModel SettingsViewModel { get; }
     public NotificationService NotificationService => _notificationService;
+    public DatabaseService DatabaseService => _databaseService;
     public event Action<UpdateCheckResult>? UpdateAvailable;
 
     public MainWindowViewModel()

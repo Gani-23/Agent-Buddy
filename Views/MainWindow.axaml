@@ -144,6 +144,22 @@
             </Border>
         </Border>
 
+        <Button Grid.Column="1"
+                Classes="Primary"
+                Width="118"
+                Height="42"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,36,34"
+                IsEnabled="{Binding IsLicenseActive}"
+                Click="OpenBalanceBuddy_Click"
+                ToolTip.Tip="Open overdue balance accounts">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="BB"/>
+                <TextBlock Text="Balance"/>
+            </StackPanel>
+        </Button>
+
     </Grid>
 
 </Window>
