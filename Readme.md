@@ -7,7 +7,7 @@ Agent Buddy is a cross-platform Avalonia desktop app that helps India Post DOP a
 - Create and process payment lists with validation, installments, and payment modes (Cash, DOP Cheque, Non DOP Cheque).
 - Report management with PDF viewing, printing, and payslip generation.
 - Mobile sync to a dashboard API (default: [rd-base](https://rd-base.vercel.app)).
-- Localization support for English, Hindi, and Telugu.
+- Localization support for English, Hindi, Telugu, and Kannada.
 - Built-in licensing flow using JWT tokens (optional online validation).
 
 ## Screenshots

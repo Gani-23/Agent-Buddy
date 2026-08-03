@@ -22,7 +22,8 @@ public sealed class LocalizationService
     [
         new LanguageOption("en", "English"),
         new LanguageOption("hi", "हिन्दी"),
-        new LanguageOption("te", "తెలుగు")
+        new LanguageOption("te", "తెలుగు"),
+        new LanguageOption("kn", "ಕನ್ನಡ")
     ];
 
     public async Task InitializeAsync(DatabaseService databaseService)
@@ -82,6 +83,7 @@ public sealed class LocalizationService
         {
             "hi" => "hi",
             "te" => "te",
+            "kn" => "kn",
             _ => "en"
         };
     }
