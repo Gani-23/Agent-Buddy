@@ -184,7 +184,9 @@
             </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="2">
+        <ScrollViewer Grid.Row="2"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="24" Margin="0,0,0,24">
 
             <!-- Processing Status -->
@@ -214,8 +216,10 @@
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     <Border Background="{DynamicResource AppHoverBrush}"
                             CornerRadius="6"
-                            Padding="10">
+                            Padding="10"
+                            ClipToBounds="True">
                         <ScrollViewer MaxHeight="170"
+                                      HorizontalScrollBarVisibility="Disabled"
                                       VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding ProcessingLogs}">
                                 <ItemsControl.ItemTemplate>
@@ -223,6 +227,7 @@
                                         <TextBlock Text="{Binding}"
                                                    FontFamily="Consolas"
                                                    FontSize="11"
+                                                   TextWrapping="Wrap"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
