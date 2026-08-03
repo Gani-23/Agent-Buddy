@@ -39,19 +39,22 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="TextWrapping" Value="NoWrap"/>
+        <Setter Property="LineHeight" Value="14"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <Style Selector="TextBlock.SubHeader">
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="LineHeight" Value="22"/>
+        <Setter Property="LineHeight" Value="26"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <Style Selector="TextBlock.DialogTitle">
         <Setter Property="FontSize" Value="21"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="LineHeight" Value="26"/>
+        <Setter Property="LineHeight" Value="30"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <Style Selector="TextBlock.SectionLead">
@@ -366,8 +369,9 @@
         <Setter Property="FontSize" Value="32"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
-        <Setter Property="LineHeight" Value="36"/>
-        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="LineHeight" Value="44"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
 
     <Style Selector="Border.MetricCard">

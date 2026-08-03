@@ -34,9 +34,11 @@
         <Grid ColumnDefinitions="*,320"
               ColumnSpacing="16">
             <StackPanel Spacing="8">
-                <StackPanel Spacing="2">
+                <StackPanel Spacing="4">
                     <TextBlock Text="{DynamicResource L_List_Kicker}" Classes="Kicker"/>
-                    <TextBlock Text="{DynamicResource L_List_Title}" Classes="SectionHeader"/>
+                    <TextBlock Text="{DynamicResource L_List_Title}"
+                               Classes="SectionHeader"
+                               MaxWidth="760"/>
                 </StackPanel>
 
                 <WrapPanel>
@@ -103,17 +105,18 @@
                                    Foreground="{DynamicResource WarningBrush}"/>
                     </StackPanel>
 
-                    <WrapPanel ItemHeight="36"
-                               VerticalAlignment="Center">
+                    <WrapPanel VerticalAlignment="Center">
                         <Button Classes="Primary"
                                 Command="{Binding UpdateDatabaseCommand}"
                                 Content="Update Database"
                                 IsEnabled="{Binding !IsUpdatingDatabase}"
+                                MinHeight="40"
                                 Margin="0,0,10,0"/>
                         <Button Classes="Secondary"
                                 Command="{Binding RefreshDatabaseStatusCommand}"
                                 IsEnabled="{Binding !IsUpdatingDatabase}"
                                 Content="Recheck"
+                                MinHeight="40"
                                 Margin="0,0,10,0"/>
                         <Button Classes="Danger"
                                 Command="{Binding OverrideDatabaseGuardCommand}"
@@ -129,46 +132,58 @@
                 Classes="Card"
                 Padding="14">
             <StackPanel Spacing="12">
-                <Grid ColumnDefinitions="Auto,Auto,Auto,12,Auto,Auto,Auto"
-                      ColumnSpacing="10">
+                <WrapPanel>
                     <Button Classes="Primary" 
                             Command="{Binding AddNewListCommand}"
                             IsEnabled="{Binding CanEditLists}"
+                            MinHeight="42"
+                            MinWidth="118"
                             Padding="16,10"
+                            Margin="0,0,10,10"
                             Content="{DynamicResource L_List_AddList}"/>
 
-                    <Button Grid.Column="1"
-                            Classes="Success" 
+                    <Button Classes="Success" 
                             Command="{Binding ProcessAllListsCommand}"
                             Padding="18,10"
+                            MinHeight="42"
+                            MinWidth="138"
+                            Margin="0,0,10,10"
                             IsEnabled="{Binding CanProcessLists}"
                             Content="{DynamicResource L_List_StartWalk}"/>
 
-                    <Button Grid.Column="2"
-                            Classes="Secondary"
+                    <Button Classes="Secondary"
                             Command="{Binding RetryFailedListsCommand}"
                             IsEnabled="{Binding CanRetryFailedLists}"
+                            MinHeight="42"
+                            MinWidth="138"
                             Padding="16,10"
+                            Margin="0,0,22,10"
                             Content="{DynamicResource L_List_RetryFailed}"/>
 
-                    <Button Grid.Column="4"
-                            Classes="Secondary" 
+                    <Button Classes="Secondary" 
                             Command="{Binding SaveLotCommand}"
+                            MinHeight="42"
+                            MinWidth="118"
                             Padding="14,10"
+                            Margin="0,0,10,10"
                             Content="{DynamicResource L_List_SaveLot}"/>
 
-                    <Button Grid.Column="5"
-                            Classes="Secondary" 
+                    <Button Classes="Secondary" 
                             Command="{Binding ReloadLotCommand}"
+                            MinHeight="42"
+                            MinWidth="126"
                             Padding="14,10"
+                            Margin="0,0,10,10"
                             Content="{DynamicResource L_List_ReloadList}"/>
 
-                    <Button Grid.Column="6"
-                            Classes="Danger" 
+                    <Button Classes="Danger" 
                             Command="{Binding DeleteAllListsCommand}"
+                            MinHeight="42"
+                            MinWidth="108"
                             Padding="14,10"
+                            Margin="0,0,0,10"
                             Content="{DynamicResource L_List_DeleteAll}"/>
-                </Grid>
+                </WrapPanel>
 
                 <Border Background="{DynamicResource WarningTintBrush}"
                         BorderBrush="{StaticResource WarningBrush}"

@@ -35,10 +35,14 @@
                         <TextBlock Text="{DynamicResource L_Main_AppName}"
                                    FontSize="26"
                                    FontWeight="Bold"
+                                   TextWrapping="Wrap"
+                                   LineHeight="34"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{DynamicResource L_Main_Subtitle}"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                   FontSize="12"/>
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   LineHeight="18"/>
                     </StackPanel>
                 </Border>
 
@@ -53,7 +57,7 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Dashboard">
-                        <TextBlock Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap" LineHeight="20"/>
                     </Button>
 
                     <Button x:Name="ListsNavButton"
@@ -61,7 +65,7 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Lists">
-                        <TextBlock Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap" LineHeight="20"/>
                     </Button>
 
                     <Button x:Name="ReportsNavButton"
@@ -69,7 +73,7 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Reports">
-                        <TextBlock Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap" LineHeight="20"/>
                     </Button>
 
                     <Button x:Name="SupportNavButton"
@@ -77,14 +81,14 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Support">
-                        <TextBlock Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap" LineHeight="20"/>
                     </Button>
 
                     <Button x:Name="SettingsNavButton"
                             Classes="NavItem"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Settings">
-                        <TextBlock Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap" LineHeight="20"/>
                     </Button>
                 </StackPanel>
 
@@ -112,7 +116,7 @@
                             Padding="8">
                         <Button Classes="NavItem"
                                 Command="{Binding ToggleThemeCommand}">
-                            <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap"/>
+                            <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap" LineHeight="20"/>
                         </Button>
                     </Border>
                 </StackPanel>
