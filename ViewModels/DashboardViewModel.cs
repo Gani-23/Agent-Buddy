@@ -73,6 +73,8 @@ public class DashboardViewModel : ViewModelBase
 
     // Actionable segments
     private readonly Dictionary<string, List<RDAccount>> _segmentAccounts = new(StringComparer.OrdinalIgnoreCase);
+    private DashboardSummaryOption? _selectedDefaultSummaryOption;
+    private DashboardSortOption? _selectedDefaultSummarySortOption;
     private int _pendingThisMonthCount;
     private decimal _pendingThisMonthAmount;
     private int _nextMonthCollectionCount;
@@ -123,6 +125,38 @@ public class DashboardViewModel : ViewModelBase
         CategoryData = new ObservableCollection<CategoryData>();
         MonthlyRevenues = new ObservableCollection<MonthlyRevenue>();
         AccountsDueSoon = new ObservableCollection<RDAccount>();
+        DefaultSummaryOptions = new ObservableCollection<DashboardSummaryOption>
+        {
+            new("all-accounts", "All Active Accounts", "Complete active RD portfolio."),
+            new("due-soon", "Due Within 30 Days", "Immediate collection attention."),
+            new("pending-month", "Pending This Month", "Current month collection workload."),
+            new("pending-first-half", "First Half Pending", "Due from day 1 to 15 this month."),
+            new("pending-second-half", "Second Half Pending", "Due from day 16 onward this month."),
+            new("deposited-first-half", "First Half Deposited", "Already moved beyond this month, first-half due cycle."),
+            new("deposited-second-half", "Second Half Deposited", "Already moved beyond this month, second-half due cycle."),
+            new("next-month", "Next Month Collection", "Upcoming collection for next month."),
+            new("advanced-paid", "Advance Paid", "Accounts paid ahead of next month."),
+            new("new-accounts", "New Accounts", "Accounts first seen in the last 30 days."),
+            new("freeze-risk", "About To Freeze", "Older unpaid dues needing urgent attention."),
+            new("about-to-mature", "About To Mature", "Accounts near 120 installments."),
+            new("matured", "Matured", "Matured active accounts."),
+            new("extended-accounts", "Extended", "Matured accounts also present in closed archive."),
+            new("closed-accounts", "Closed", "Archived closed accounts.")
+        };
+        DefaultSummarySortOptions = new ObservableCollection<DashboardSortOption>
+        {
+            new("account-number", "Account number"),
+            new("name", "Customer name"),
+            new("amount-high", "Amount high to low"),
+            new("amount-low", "Amount low to high"),
+            new("next-due-oldest", "Next due oldest"),
+            new("next-due-newest", "Next due newest"),
+            new("paid-high", "Paid installments high"),
+            new("paid-low", "Paid installments low"),
+            new("recently-updated", "Recently updated")
+        };
+        _selectedDefaultSummaryOption = DefaultSummaryOptions.FirstOrDefault();
+        _selectedDefaultSummarySortOption = DefaultSummarySortOptions.FirstOrDefault();
 
         RefreshCommand = ReactiveCommand.CreateFromTask(LoadDataAsync);
         UpdateDatabaseCommand = ReactiveCommand.CreateFromTask(UpdateDatabaseAsync);
@@ -557,6 +591,35 @@ public class DashboardViewModel : ViewModelBase
     public ObservableCollection<CategoryData> CategoryData { get; }
     public ObservableCollection<MonthlyRevenue> MonthlyRevenues { get; }
     public ObservableCollection<RDAccount> AccountsDueSoon { get; }
+    public ObservableCollection<DashboardSummaryOption> DefaultSummaryOptions { get; }
+    public ObservableCollection<DashboardSortOption> DefaultSummarySortOptions { get; }
+
+    public DashboardSummaryOption? SelectedDefaultSummaryOption
+    {
+        get => _selectedDefaultSummaryOption;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedDefaultSummaryOption, value ?? DefaultSummaryOptions.FirstOrDefault());
+            RaiseDefaultSummaryProperties();
+        }
+    }
+
+    public DashboardSortOption? SelectedDefaultSummarySortOption
+    {
+        get => _selectedDefaultSummarySortOption;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedDefaultSummarySortOption, value ?? DefaultSummarySortOptions.FirstOrDefault());
+            RaiseDefaultSummaryProperties();
+        }
+    }
+
+    public string SelectedDefaultSummaryKey => SelectedDefaultSummaryOption?.SegmentKey ?? "all-accounts";
+    public string DefaultSummaryTitle => SelectedDefaultSummaryOption?.Title ?? "All Active Accounts";
+    public string DefaultSummaryHint => SelectedDefaultSummaryOption?.Hint ?? string.Empty;
+    public int DefaultSummaryCount => GetDefaultSummaryAccounts().Count;
+    public decimal DefaultSummaryAmount => GetDefaultSummaryAccounts().Sum(account => account.GetAmount());
+    public string DefaultSummarySortLabel => SelectedDefaultSummarySortOption?.Title ?? "Account number";
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
     public ReactiveCommand<Unit, Unit> UpdateDatabaseCommand { get; }
@@ -909,6 +972,7 @@ public class DashboardViewModel : ViewModelBase
         FirstHalfDepositedWindowAmount = firstHalfDepositedWindow.Sum(a => a.GetAmount());
         SecondHalfDepositedWindowCount = secondHalfDepositedWindow.Count;
         SecondHalfDepositedWindowAmount = secondHalfDepositedWindow.Sum(a => a.GetAmount());
+        RaiseDefaultSummaryProperties();
     }
 
     private static bool IsAslaasMissing(RDAccount account)
@@ -1028,6 +1092,16 @@ public class DashboardViewModel : ViewModelBase
         return _segmentAccounts.TryGetValue(segmentKey, out var list)
             ? list
             : Array.Empty<RDAccount>();
+    }
+
+    public IReadOnlyList<RDAccount> GetDefaultSummaryAccounts()
+    {
+        return ApplyDefaultSummarySort(GetAccountsForSegment(SelectedDefaultSummaryKey)).ToList();
+    }
+
+    public string GetDefaultSummaryTitle()
+    {
+        return DefaultSummaryTitle;
     }
 
     public string GetSegmentTitle(string? segmentKey)
@@ -1202,6 +1276,32 @@ public class DashboardViewModel : ViewModelBase
         return IsDarkTheme;
     }
 
+    private IEnumerable<RDAccount> ApplyDefaultSummarySort(IEnumerable<RDAccount> accounts)
+    {
+        return SelectedDefaultSummarySortOption?.Key switch
+        {
+            "name" => accounts.OrderBy(a => a.AccountName).ThenBy(a => a.AccountNo),
+            "amount-high" => accounts.OrderByDescending(a => a.GetAmount()).ThenBy(a => a.AccountNo),
+            "amount-low" => accounts.OrderBy(a => a.GetAmount()).ThenBy(a => a.AccountNo),
+            "next-due-oldest" => accounts.OrderBy(a => a.GetNextInstallmentDate() ?? DateTime.MaxValue).ThenBy(a => a.AccountNo),
+            "next-due-newest" => accounts.OrderByDescending(a => a.GetNextInstallmentDate() ?? DateTime.MinValue).ThenBy(a => a.AccountNo),
+            "paid-high" => accounts.OrderByDescending(a => a.GetMonthPaidNumber()).ThenBy(a => a.AccountNo),
+            "paid-low" => accounts.OrderBy(a => a.GetMonthPaidNumber()).ThenBy(a => a.AccountNo),
+            "recently-updated" => accounts.OrderByDescending(a => a.LastUpdated).ThenBy(a => a.AccountNo),
+            _ => accounts.OrderBy(a => a.AccountNo)
+        };
+    }
+
+    private void RaiseDefaultSummaryProperties()
+    {
+        this.RaisePropertyChanged(nameof(SelectedDefaultSummaryKey));
+        this.RaisePropertyChanged(nameof(DefaultSummaryTitle));
+        this.RaisePropertyChanged(nameof(DefaultSummaryHint));
+        this.RaisePropertyChanged(nameof(DefaultSummaryCount));
+        this.RaisePropertyChanged(nameof(DefaultSummaryAmount));
+        this.RaisePropertyChanged(nameof(DefaultSummarySortLabel));
+    }
+
     private void ViewAccountDetails(RDAccount account)
     {
         // This will be called from the view to show account details
@@ -1211,6 +1311,17 @@ public class DashboardViewModel : ViewModelBase
     public async Task<(bool success, string message)> PrintSegmentAsync(string? segmentKey)
     {
         var accounts = GetAccountsForSegment(segmentKey);
+        return await PrintAccountsAsync(accounts, GetSegmentTitle(segmentKey));
+    }
+
+    public async Task<(bool success, string message)> PrintDefaultSummaryAsync()
+    {
+        var accounts = GetDefaultSummaryAccounts();
+        return await PrintAccountsAsync(accounts, DefaultSummaryTitle);
+    }
+
+    private async Task<(bool success, string message)> PrintAccountsAsync(IReadOnlyList<RDAccount> accounts, string title)
+    {
         if (accounts.Count == 0)
         {
             return (false, "No accounts available to print.");
@@ -1222,7 +1333,6 @@ public class DashboardViewModel : ViewModelBase
             preferredPrinter = ((await _databaseService.GetAppSettingAsync("reports_default_printer")) ?? string.Empty).Trim();
         }
 
-        var title = GetSegmentTitle(segmentKey);
         var safeTitle = new string(title
             .Select(ch => char.IsLetterOrDigit(ch) ? ch : '_')
             .ToArray())
@@ -1508,5 +1618,15 @@ public class DashboardViewModel : ViewModelBase
         {
             _notificationService?.Error("Open Failed", ex.Message);
         }
+    }
+
+    public sealed record DashboardSummaryOption(string SegmentKey, string Title, string Hint)
+    {
+        public override string ToString() => Title;
+    }
+
+    public sealed record DashboardSortOption(string Key, string Title)
+    {
+        public override string ToString() => Title;
     }
 }

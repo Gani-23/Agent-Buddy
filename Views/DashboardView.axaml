@@ -57,6 +57,21 @@
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+        <Style Selector="Border.DefaultSummaryCard">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BoxShadow" Value="0 4 14 0 #0000000A"/>
+        </Style>
+        <Style Selector="Border.SummaryMiniStat">
+            <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+        </Style>
     </UserControl.Styles>
 
     <Design.DataContext>
@@ -299,6 +314,88 @@
                         </Grid>
                     </Border>
                 </Grid>
+
+                <Border Classes="DefaultSummaryCard">
+                    <Grid ColumnDefinitions="1.35*,1*,Auto" ColumnSpacing="16">
+                        <StackPanel Grid.Column="0" Spacing="10">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Default Summary" Classes="Kicker"/>
+                                <TextBlock Text="{Binding DefaultSummaryTitle}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           LineHeight="28"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding DefaultSummaryHint}"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <ComboBox Grid.Column="0"
+                                          ItemsSource="{Binding DefaultSummaryOptions}"
+                                          SelectedItem="{Binding SelectedDefaultSummaryOption}"
+                                          VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding DefaultSummarySortOptions}"
+                                          SelectedItem="{Binding SelectedDefaultSummarySortOption}"
+                                          VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <Grid Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="10" VerticalAlignment="Stretch">
+                            <Border Grid.Column="0" Classes="SummaryMiniStat">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Accounts" Classes="Kicker"/>
+                                    <TextBlock Text="{Binding DefaultSummaryCount}"
+                                               FontSize="30"
+                                               FontWeight="Bold"
+                                               LineHeight="36"/>
+                                    <TextBlock Text="{Binding DefaultSummarySortLabel, StringFormat='Sorted: {0}'}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" Classes="SummaryMiniStat">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Amount" Classes="Kicker"/>
+                                    <TextBlock FontSize="25"
+                                               FontWeight="Bold"
+                                               LineHeight="32"
+                                               Foreground="{StaticResource AccentBlueBrush}">
+                                        <Run Text="Rs. "/>
+                                        <Run Text="{Binding DefaultSummaryAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Printable account set"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <StackPanel Grid.Column="2"
+                                    Spacing="8"
+                                    Width="126"
+                                    VerticalAlignment="Center">
+                            <Button Classes="Primary"
+                                    Padding="14,8"
+                                    HorizontalAlignment="Stretch"
+                                    Click="OpenDefaultSummary_Click"
+                                    Content="{DynamicResource L_Common_ViewAccounts}"/>
+                            <Button Classes="Secondary"
+                                    Padding="14,8"
+                                    HorizontalAlignment="Stretch"
+                                    Click="SearchDefaultSummary_Click"
+                                    Content="{DynamicResource L_Common_Search}"/>
+                            <Button Classes="Secondary"
+                                    Padding="14,8"
+                                    HorizontalAlignment="Stretch"
+                                    Click="PrintDefaultSummary_Click"
+                                    Content="{DynamicResource L_Common_Print}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
                 <Border Classes="Card" Padding="16" IsVisible="{Binding HasUpdateStatus}">
                     <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>

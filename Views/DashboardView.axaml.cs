@@ -49,6 +49,52 @@ public partial class DashboardView : UserControl
         }
     }
 
+    private async void OpenDefaultSummary_Click(object? sender, RoutedEventArgs e)
+    {
+        await OpenDefaultSummaryAsync(focusSearch: false);
+    }
+
+    private async void SearchDefaultSummary_Click(object? sender, RoutedEventArgs e)
+    {
+        await OpenDefaultSummaryAsync(focusSearch: true);
+    }
+
+    private async void PrintDefaultSummary_Click(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        var (success, message) = await ViewModel.PrintDefaultSummaryAsync();
+        ViewModel.UpdateStatus = message;
+        if (!success)
+        {
+            return;
+        }
+    }
+
+    private async System.Threading.Tasks.Task OpenDefaultSummaryAsync(bool focusSearch)
+    {
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        var accounts = ViewModel.GetDefaultSummaryAccounts();
+        var title = ViewModel.GetDefaultSummaryTitle();
+        var window = new SegmentAccountsWindow(title, accounts, ViewModel.IsDarkTheme, focusSearch, null, ViewModel.SelectedDefaultSummaryKey);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
+
     private async System.Threading.Tasks.Task OpenSegmentAsync(string? segmentKey, bool focusSearch)
     {
         if (ViewModel is null)
