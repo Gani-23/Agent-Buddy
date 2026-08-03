@@ -41,6 +41,7 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="LineHeight" Value="14"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
     </Style>
 
     <Style Selector="TextBlock.SubHeader">
@@ -48,6 +49,7 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LineHeight" Value="26"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,0,0,10"/>
     </Style>
 
     <Style Selector="TextBlock.DialogTitle">
@@ -55,6 +57,7 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LineHeight" Value="30"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
 
     <Style Selector="TextBlock.SectionLead">
@@ -371,7 +374,7 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="LineHeight" Value="44"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
-        <Setter Property="Margin" Value="0,0,0,12"/>
+        <Setter Property="Margin" Value="0,0,0,20"/>
     </Style>
 
     <Style Selector="Border.MetricCard">
