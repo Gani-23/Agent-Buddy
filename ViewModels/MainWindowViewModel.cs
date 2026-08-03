@@ -50,6 +50,7 @@ public class MainWindowViewModel : ViewModelBase
     public SettingsViewModel SettingsViewModel { get; }
     public NotificationService NotificationService => _notificationService;
     public DatabaseService DatabaseService => _databaseService;
+    public LocalizationService LocalizationService => _localizationService;
     public event Action<UpdateCheckResult>? UpdateAvailable;
 
     public MainWindowViewModel()

@@ -213,6 +213,7 @@ public partial class MainWindow : Window
             vm.DatabaseService,
             vm.ListManagementViewModel,
             vm.IsDarkTheme,
+            vm.LocalizationService,
             vm.NotificationService);
 
         await dialog.ShowDialog(this);

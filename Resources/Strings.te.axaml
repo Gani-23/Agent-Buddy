@@ -229,5 +229,41 @@
         <x:String x:Key="L_Segment_ColumnPaidUpto">చెల్లింపు వరకు</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">తదుపరి బకాయి</x:String>
         <x:String x:Key="L_Segment_ColumnOpened">ప్రారంభం</x:String>
+
+        <x:String x:Key="L_Balance_WindowTitle">బ్యాలెన్స్ బడ్డి</x:String>
+        <x:String x:Key="L_Balance_Kicker">బ్యాలెన్స్ బడ్డి</x:String>
+        <x:String x:Key="L_Balance_Title">బకాయి బ్యాలెన్స్ ఖాతాలు</x:String>
+        <x:String x:Key="L_Balance_DefaultSummary">డిఫాల్ట్ సారాంశం</x:String>
+        <x:String x:Key="L_Balance_DefaultSummaryBody">ప్రారంభ వీక్షణ {0} నెలల వరకు ఉన్న ఖాతాలను చూపిస్తుంది. ఎక్కువ నెలల ఫిల్టర్లు ఇంకా అందుబాటులో ఉంటాయి.</x:String>
+        <x:String x:Key="L_Balance_ShownLabel">చూపించినవి</x:String>
+        <x:String x:Key="L_Balance_TotalLabel">బ్యాలెన్స్</x:String>
+        <x:String x:Key="L_Balance_ShownFormat">{0} చూపిస్తున్నాయి</x:String>
+        <x:String x:Key="L_Balance_TotalFormat">బ్యాలెన్స్ Rs. {0:N0}</x:String>
+        <x:String x:Key="L_Balance_SummaryFormat">{0} ఖాతాలు, అత్యధిక బ్యాలెన్స్ {1} నెలలు</x:String>
+        <x:String x:Key="L_Balance_Empty">బకాయి బ్యాలెన్స్ ఖాతాలు లేవు.</x:String>
+        <x:String x:Key="L_Balance_Loading">బకాయి ఖాతాలు లోడ్ అవుతున్నాయి...</x:String>
+        <x:String x:Key="L_Balance_ReadyFormat">సిద్ధంగా ఉంది. ముందుగా {0} నెలల వరకు ఖాతాలు చూపిస్తున్నాం. అత్యధిక బ్యాలెన్స్ {1} నెలలు.</x:String>
+        <x:String x:Key="L_Balance_LoadFailedFormat">బకాయి ఖాతాలు లోడ్ కాలేదు: {0}</x:String>
+        <x:String x:Key="L_Balance_SearchWatermark">ఖాతా నంబర్ లేదా పేరుతో వెతకండి</x:String>
+        <x:String x:Key="L_Balance_FilterAll">అన్ని నెలలు</x:String>
+        <x:String x:Key="L_Balance_FilterUpToFormat">{0} నెలల వరకు</x:String>
+        <x:String x:Key="L_Balance_FilterOneMonth">1 నెల</x:String>
+        <x:String x:Key="L_Balance_FilterMonthsFormat">{0} నెలలు</x:String>
+        <x:String x:Key="L_Balance_SortLowest">తక్కువ బ్యాలెన్స్ ముందు</x:String>
+        <x:String x:Key="L_Balance_SortHighest">ఎక్కువ బ్యాలెన్స్ ముందు</x:String>
+        <x:String x:Key="L_Balance_SortAccount">ఖాతా నంబర్</x:String>
+        <x:String x:Key="L_Balance_SortName">పేరు</x:String>
+        <x:String x:Key="L_Balance_SortNextDue">పాత బకాయి తేదీ ముందు</x:String>
+        <x:String x:Key="L_Balance_SortAmount">మొత్తం ఎక్కువ నుండి తక్కువ</x:String>
+        <x:String x:Key="L_Balance_ColumnAccount">ఖాతా</x:String>
+        <x:String x:Key="L_Balance_ColumnName">పేరు</x:String>
+        <x:String x:Key="L_Balance_ColumnBalance">బ్యాలెన్స్</x:String>
+        <x:String x:Key="L_Balance_ColumnPaidUpto">చెల్లింపు వరకు</x:String>
+        <x:String x:Key="L_Balance_ColumnNextDue">తదుపరి బకాయి</x:String>
+        <x:String x:Key="L_Balance_ColumnActions">చర్యలు</x:String>
+        <x:String x:Key="L_Balance_MonthsSuffix">నెలలు</x:String>
+        <x:String x:Key="L_Balance_Copy">కాపీ</x:String>
+        <x:String x:Key="L_Balance_Add">జోడించు</x:String>
+        <x:String x:Key="L_Balance_View">చూడండి</x:String>
     </Styles.Resources>
 </Styles>

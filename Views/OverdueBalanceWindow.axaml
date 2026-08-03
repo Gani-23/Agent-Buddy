@@ -9,7 +9,7 @@
         d:DesignHeight="640"
         x:Class="AgentBuddy.Views.OverdueBalanceWindow"
         x:DataType="vm:OverdueBalanceWindowViewModel"
-        Title="Balance Buddy"
+        Title="{DynamicResource L_Balance_WindowTitle}"
         Width="940"
         Height="640"
         MinWidth="820"
@@ -23,32 +23,59 @@
         Background="{DynamicResource AppHoverBrush}">
 
     <Border Padding="18" Classes="FadeIn DialogSurface">
-        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+            <Grid Grid.Row="0">
                 <StackPanel Spacing="2">
-                    <TextBlock Text="Balance Buddy" Classes="Kicker"/>
-                    <TextBlock Text="Overdue Balance Accounts" FontSize="24" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding SummaryText}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Count, StringFormat='{}{0} shown'}"
-                               FontSize="18"
+                    <TextBlock Text="{DynamicResource L_Balance_Kicker}" Classes="Kicker"/>
+                    <TextBlock Text="{DynamicResource L_Balance_Title}"
+                               FontSize="24"
                                FontWeight="Bold"
-                               HorizontalAlignment="Right"/>
-                    <TextBlock Text="{Binding TotalBalanceAmount, StringFormat='Balance Rs. {0:N0}'}"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"
-                               HorizontalAlignment="Right"/>
+                               TextWrapping="Wrap"
+                               LineHeight="32"/>
+                    <TextBlock Text="{Binding SummaryText}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </StackPanel>
             </Grid>
 
-            <Border Grid.Row="1" Classes="Card" Padding="12">
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <Border Classes="Card" Padding="12,9">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding StarterSummaryTitle}" Classes="Kicker"/>
+                        <TextBlock Text="{Binding StarterSummaryText}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="Card" Padding="14,9" MinWidth="112">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{DynamicResource L_Balance_ShownLabel}" Classes="Kicker"/>
+                        <TextBlock Text="{Binding CountDisplay}"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Classes="Card" Padding="14,9" MinWidth="180">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{DynamicResource L_Balance_TotalLabel}" Classes="Kicker"/>
+                        <TextBlock Text="{Binding TotalBalanceDisplay}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2" Classes="Card" Padding="12">
                 <Grid ColumnDefinitions="*,150,190,Auto" ColumnSpacing="10">
                     <TextBox x:Name="SearchBox"
                              Grid.Column="0"
                              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                             PlaceholderText="Search account number or name"/>
+                             PlaceholderText="{DynamicResource L_Balance_SearchWatermark}"/>
 
                     <ComboBox Grid.Column="1"
                               ItemsSource="{Binding MonthFilterOptions}"
@@ -64,11 +91,11 @@
                             Classes="Secondary"
                             Command="{Binding RefreshCommand}"
                             Padding="14,8"
-                            Content="Refresh"/>
+                            Content="{DynamicResource L_Common_Refresh}"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2" Classes="Card" Padding="0">
+            <Border Grid.Row="3" Classes="Card" Padding="0">
                 <Grid RowDefinitions="Auto,*">
                     <Border Grid.Row="0"
                             Background="{DynamicResource AppSidebarBackgroundBrush}"
@@ -77,12 +104,12 @@
                             Padding="12,10">
                         <Grid ColumnDefinitions="135,*,105,95,120,175"
                               ColumnSpacing="10">
-                            <TextBlock Grid.Column="0" Text="Account" Classes="Kicker"/>
-                            <TextBlock Grid.Column="1" Text="Name" Classes="Kicker"/>
-                            <TextBlock Grid.Column="2" Text="Balance" Classes="Kicker"/>
-                            <TextBlock Grid.Column="3" Text="Paid Upto" Classes="Kicker"/>
-                            <TextBlock Grid.Column="4" Text="Next Due" Classes="Kicker"/>
-                            <TextBlock Grid.Column="5" Text="Actions" Classes="Kicker"/>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource L_Balance_ColumnAccount}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Balance_ColumnName}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="2" Text="{DynamicResource L_Balance_ColumnBalance}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="3" Text="{DynamicResource L_Balance_ColumnPaidUpto}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="4" Text="{DynamicResource L_Balance_ColumnNextDue}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="5" Text="{DynamicResource L_Balance_ColumnActions}" Classes="Kicker"/>
                         </Grid>
                     </Border>
 
@@ -112,9 +139,12 @@
                                                     Padding="8,4"
                                                     HorizontalAlignment="Left"
                                                     VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding BalanceLabel}"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppWarningBrush}"/>
+                                                <TextBlock FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource AppWarningBrush}">
+                                                    <Run Text="{Binding BalanceMonths}"/>
+                                                    <Run Text=" "/>
+                                                    <Run Text="{DynamicResource L_Balance_MonthsSuffix}"/>
+                                                </TextBlock>
                                             </Border>
                                             <TextBlock Grid.Column="3"
                                                        Text="{Binding MonthPaidUpto}"
@@ -132,15 +162,15 @@
                                                 <Button Classes="Secondary"
                                                         Padding="8,5"
                                                         Click="Copy_Click"
-                                                        Content="Copy"/>
+                                                        Content="{DynamicResource L_Balance_Copy}"/>
                                                 <Button Classes="Primary"
                                                         Padding="8,5"
                                                         Click="Add_Click"
-                                                        Content="Add"/>
+                                                        Content="{DynamicResource L_Balance_Add}"/>
                                                 <Button Classes="Secondary"
                                                         Padding="8,5"
                                                         Click="View_Click"
-                                                        Content="View"/>
+                                                        Content="{DynamicResource L_Balance_View}"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -151,7 +181,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="3" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="10">
                 <TextBlock Text="{Binding StatusMessage}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"

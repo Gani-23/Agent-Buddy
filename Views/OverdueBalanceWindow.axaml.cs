@@ -24,6 +24,7 @@ public partial class OverdueBalanceWindow : Window
         DatabaseService databaseService,
         ListManagementViewModel listManagementViewModel,
         bool isDarkTheme,
+        LocalizationService localizationService,
         NotificationService? notificationService = null) : this()
     {
         DataContext = new OverdueBalanceWindowViewModel(databaseService);

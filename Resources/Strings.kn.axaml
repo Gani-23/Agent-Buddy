@@ -229,5 +229,41 @@
         <x:String x:Key="L_Segment_ColumnPaidUpto">ಪಾವತಿಸಿದ ತಿಂಗಳು</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">ಮುಂದಿನ ಬಾಕಿ</x:String>
         <x:String x:Key="L_Segment_ColumnOpened">ಆರಂಭ</x:String>
+
+        <x:String x:Key="L_Balance_WindowTitle">ಬ್ಯಾಲೆನ್ಸ್ ಬಡ್ಡಿ</x:String>
+        <x:String x:Key="L_Balance_Kicker">ಬ್ಯಾಲೆನ್ಸ್ ಬಡ್ಡಿ</x:String>
+        <x:String x:Key="L_Balance_Title">ಬಾಕಿ ಬ್ಯಾಲೆನ್ಸ್ ಖಾತೆಗಳು</x:String>
+        <x:String x:Key="L_Balance_DefaultSummary">ಡೀಫಾಲ್ಟ್ ಸಾರಾಂಶ</x:String>
+        <x:String x:Key="L_Balance_DefaultSummaryBody">ಪ್ರಾರಂಭಿಕ ವೀಕ್ಷಣೆ {0} ತಿಂಗಳವರೆಗಿನ ಖಾತೆಗಳನ್ನು ತೋರಿಸುತ್ತದೆ. ಹೆಚ್ಚಿನ ತಿಂಗಳ ಫಿಲ್ಟರ್‌ಗಳು ಇನ್ನೂ ಲಭ್ಯ.</x:String>
+        <x:String x:Key="L_Balance_ShownLabel">ತೋರಿಸಿದವು</x:String>
+        <x:String x:Key="L_Balance_TotalLabel">ಬ್ಯಾಲೆನ್ಸ್</x:String>
+        <x:String x:Key="L_Balance_ShownFormat">{0} ತೋರಿಸಲಾಗಿದೆ</x:String>
+        <x:String x:Key="L_Balance_TotalFormat">ಬ್ಯಾಲೆನ್ಸ್ Rs. {0:N0}</x:String>
+        <x:String x:Key="L_Balance_SummaryFormat">{0} ಖಾತೆಗಳು, ಗರಿಷ್ಠ ಬ್ಯಾಲೆನ್ಸ್ {1} ತಿಂಗಳು</x:String>
+        <x:String x:Key="L_Balance_Empty">ಬಾಕಿ ಬ್ಯಾಲೆನ್ಸ್ ಖಾತೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ.</x:String>
+        <x:String x:Key="L_Balance_Loading">ಬಾಕಿ ಖಾತೆಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...</x:String>
+        <x:String x:Key="L_Balance_ReadyFormat">ಸಿದ್ಧ. ಮೊದಲು {0} ತಿಂಗಳವರೆಗಿನ ಖಾತೆಗಳನ್ನು ತೋರಿಸುತ್ತಿದೆ. ಗರಿಷ್ಠ ಬ್ಯಾಲೆನ್ಸ್ {1} ತಿಂಗಳು.</x:String>
+        <x:String x:Key="L_Balance_LoadFailedFormat">ಬಾಕಿ ಖಾತೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ: {0}</x:String>
+        <x:String x:Key="L_Balance_SearchWatermark">ಖಾತೆ ಸಂಖ್ಯೆ ಅಥವಾ ಹೆಸರಿನಿಂದ ಹುಡುಕಿ</x:String>
+        <x:String x:Key="L_Balance_FilterAll">ಎಲ್ಲ ತಿಂಗಳುಗಳು</x:String>
+        <x:String x:Key="L_Balance_FilterUpToFormat">{0} ತಿಂಗಳವರೆಗೆ</x:String>
+        <x:String x:Key="L_Balance_FilterOneMonth">1 ತಿಂಗಳು</x:String>
+        <x:String x:Key="L_Balance_FilterMonthsFormat">{0} ತಿಂಗಳುಗಳು</x:String>
+        <x:String x:Key="L_Balance_SortLowest">ಕಡಿಮೆ ಬ್ಯಾಲೆನ್ಸ್ ಮೊದಲು</x:String>
+        <x:String x:Key="L_Balance_SortHighest">ಹೆಚ್ಚು ಬ್ಯಾಲೆನ್ಸ್ ಮೊದಲು</x:String>
+        <x:String x:Key="L_Balance_SortAccount">ಖಾತೆ ಸಂಖ್ಯೆ</x:String>
+        <x:String x:Key="L_Balance_SortName">ಹೆಸರು</x:String>
+        <x:String x:Key="L_Balance_SortNextDue">ಹಳೆಯ ಬಾಕಿ ದಿನಾಂಕ ಮೊದಲು</x:String>
+        <x:String x:Key="L_Balance_SortAmount">ಮೊತ್ತ ಹೆಚ್ಚುದಿಂದ ಕಡಿಮೆ</x:String>
+        <x:String x:Key="L_Balance_ColumnAccount">ಖಾತೆ</x:String>
+        <x:String x:Key="L_Balance_ColumnName">ಹೆಸರು</x:String>
+        <x:String x:Key="L_Balance_ColumnBalance">ಬ್ಯಾಲೆನ್ಸ್</x:String>
+        <x:String x:Key="L_Balance_ColumnPaidUpto">ಪಾವತಿಸಿದ ತಿಂಗಳು</x:String>
+        <x:String x:Key="L_Balance_ColumnNextDue">ಮುಂದಿನ ಬಾಕಿ</x:String>
+        <x:String x:Key="L_Balance_ColumnActions">ಕ್ರಿಯೆಗಳು</x:String>
+        <x:String x:Key="L_Balance_MonthsSuffix">ತಿಂಗಳು</x:String>
+        <x:String x:Key="L_Balance_Copy">ಕಾಪಿ</x:String>
+        <x:String x:Key="L_Balance_Add">ಸೇರಿಸಿ</x:String>
+        <x:String x:Key="L_Balance_View">ನೋಡಿ</x:String>
     </Styles.Resources>
 </Styles>

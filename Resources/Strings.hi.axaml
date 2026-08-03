@@ -229,5 +229,41 @@
         <x:String x:Key="L_Segment_ColumnPaidUpto">भुगतान तक</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">अगली देय</x:String>
         <x:String x:Key="L_Segment_ColumnOpened">खोला गया</x:String>
+
+        <x:String x:Key="L_Balance_WindowTitle">बैलेंस बडी</x:String>
+        <x:String x:Key="L_Balance_Kicker">बैलेंस बडी</x:String>
+        <x:String x:Key="L_Balance_Title">ओवरड्यू बैलेंस खाते</x:String>
+        <x:String x:Key="L_Balance_DefaultSummary">डिफॉल्ट सारांश</x:String>
+        <x:String x:Key="L_Balance_DefaultSummaryBody">शुरुआती दृश्य {0} महीने तक के खाते दिखाता है। ज्यादा महीनों के फिल्टर भी उपलब्ध हैं।</x:String>
+        <x:String x:Key="L_Balance_ShownLabel">दिखाए गए</x:String>
+        <x:String x:Key="L_Balance_TotalLabel">बैलेंस</x:String>
+        <x:String x:Key="L_Balance_ShownFormat">{0} दिखाए गए</x:String>
+        <x:String x:Key="L_Balance_TotalFormat">बैलेंस Rs. {0:N0}</x:String>
+        <x:String x:Key="L_Balance_SummaryFormat">{0} खाते, सबसे ज्यादा बैलेंस {1} महीने</x:String>
+        <x:String x:Key="L_Balance_Empty">कोई ओवरड्यू बैलेंस खाता नहीं मिला।</x:String>
+        <x:String x:Key="L_Balance_Loading">ओवरड्यू खाते लोड हो रहे हैं...</x:String>
+        <x:String x:Key="L_Balance_ReadyFormat">तैयार। पहले {0} महीने तक के खाते दिख रहे हैं। सबसे ज्यादा बैलेंस {1} महीने है।</x:String>
+        <x:String x:Key="L_Balance_LoadFailedFormat">ओवरड्यू खाते लोड नहीं हो सके: {0}</x:String>
+        <x:String x:Key="L_Balance_SearchWatermark">खाता नंबर या नाम से खोजें</x:String>
+        <x:String x:Key="L_Balance_FilterAll">सभी महीने</x:String>
+        <x:String x:Key="L_Balance_FilterUpToFormat">{0} महीने तक</x:String>
+        <x:String x:Key="L_Balance_FilterOneMonth">1 महीना</x:String>
+        <x:String x:Key="L_Balance_FilterMonthsFormat">{0} महीने</x:String>
+        <x:String x:Key="L_Balance_SortLowest">कम बैलेंस पहले</x:String>
+        <x:String x:Key="L_Balance_SortHighest">ज्यादा बैलेंस पहले</x:String>
+        <x:String x:Key="L_Balance_SortAccount">खाता नंबर</x:String>
+        <x:String x:Key="L_Balance_SortName">नाम</x:String>
+        <x:String x:Key="L_Balance_SortNextDue">पुरानी देय तिथि पहले</x:String>
+        <x:String x:Key="L_Balance_SortAmount">राशि ज्यादा से कम</x:String>
+        <x:String x:Key="L_Balance_ColumnAccount">खाता</x:String>
+        <x:String x:Key="L_Balance_ColumnName">नाम</x:String>
+        <x:String x:Key="L_Balance_ColumnBalance">बैलेंस</x:String>
+        <x:String x:Key="L_Balance_ColumnPaidUpto">भुगतान तक</x:String>
+        <x:String x:Key="L_Balance_ColumnNextDue">अगली देय</x:String>
+        <x:String x:Key="L_Balance_ColumnActions">कार्य</x:String>
+        <x:String x:Key="L_Balance_MonthsSuffix">महीने</x:String>
+        <x:String x:Key="L_Balance_Copy">कॉपी</x:String>
+        <x:String x:Key="L_Balance_Add">जोड़ें</x:String>
+        <x:String x:Key="L_Balance_View">देखें</x:String>
     </Styles.Resources>
 </Styles>

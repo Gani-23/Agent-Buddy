@@ -229,5 +229,41 @@
         <x:String x:Key="L_Segment_ColumnPaidUpto">Paid Upto</x:String>
         <x:String x:Key="L_Segment_ColumnNextDue">Next Due</x:String>
         <x:String x:Key="L_Segment_ColumnOpened">Opened</x:String>
+
+        <x:String x:Key="L_Balance_WindowTitle">Balance Buddy</x:String>
+        <x:String x:Key="L_Balance_Kicker">Balance Buddy</x:String>
+        <x:String x:Key="L_Balance_Title">Overdue Balance Accounts</x:String>
+        <x:String x:Key="L_Balance_DefaultSummary">Default summary</x:String>
+        <x:String x:Key="L_Balance_DefaultSummaryBody">Starter view shows accounts up to {0} months. Higher month filters are still available.</x:String>
+        <x:String x:Key="L_Balance_ShownLabel">Shown</x:String>
+        <x:String x:Key="L_Balance_TotalLabel">Balance</x:String>
+        <x:String x:Key="L_Balance_ShownFormat">{0} shown</x:String>
+        <x:String x:Key="L_Balance_TotalFormat">Balance Rs. {0:N0}</x:String>
+        <x:String x:Key="L_Balance_SummaryFormat">{0} account(s), highest balance {1} month(s)</x:String>
+        <x:String x:Key="L_Balance_Empty">No overdue balance accounts found.</x:String>
+        <x:String x:Key="L_Balance_Loading">Loading overdue accounts...</x:String>
+        <x:String x:Key="L_Balance_ReadyFormat">Ready. Showing accounts up to {0} months first. Highest balance is {1} month(s).</x:String>
+        <x:String x:Key="L_Balance_LoadFailedFormat">Could not load overdue accounts: {0}</x:String>
+        <x:String x:Key="L_Balance_SearchWatermark">Search account number or name</x:String>
+        <x:String x:Key="L_Balance_FilterAll">All months</x:String>
+        <x:String x:Key="L_Balance_FilterUpToFormat">Up to {0} months</x:String>
+        <x:String x:Key="L_Balance_FilterOneMonth">1 month</x:String>
+        <x:String x:Key="L_Balance_FilterMonthsFormat">{0} months</x:String>
+        <x:String x:Key="L_Balance_SortLowest">Lowest balance first</x:String>
+        <x:String x:Key="L_Balance_SortHighest">Highest balance first</x:String>
+        <x:String x:Key="L_Balance_SortAccount">Account number</x:String>
+        <x:String x:Key="L_Balance_SortName">Name</x:String>
+        <x:String x:Key="L_Balance_SortNextDue">Next due oldest first</x:String>
+        <x:String x:Key="L_Balance_SortAmount">Amount high to low</x:String>
+        <x:String x:Key="L_Balance_ColumnAccount">Account</x:String>
+        <x:String x:Key="L_Balance_ColumnName">Name</x:String>
+        <x:String x:Key="L_Balance_ColumnBalance">Balance</x:String>
+        <x:String x:Key="L_Balance_ColumnPaidUpto">Paid Upto</x:String>
+        <x:String x:Key="L_Balance_ColumnNextDue">Next Due</x:String>
+        <x:String x:Key="L_Balance_ColumnActions">Actions</x:String>
+        <x:String x:Key="L_Balance_MonthsSuffix">month(s)</x:String>
+        <x:String x:Key="L_Balance_Copy">Copy</x:String>
+        <x:String x:Key="L_Balance_Add">Add</x:String>
+        <x:String x:Key="L_Balance_View">View</x:String>
     </Styles.Resources>
 </Styles>
