@@ -7,7 +7,7 @@ using AgentBuddy.Models;
 using AgentBuddy.ViewModels;
 using ReactiveUI;
 using System;
-using System.Reactive;
+using Unit = ReactiveUI.Primitives.RxVoid;
 using System.Linq;
 
 namespace AgentBuddy.Views;
@@ -178,7 +178,7 @@ public partial class ListManagementView : UserControl
                 row?.BringIntoView();
             });
 
-            interaction.SetOutput(Unit.Default);
+            interaction.SetOutput(default);
         });
     }
 
