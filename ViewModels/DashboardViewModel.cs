@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Unit = ReactiveUI.Primitives.RxVoid;
+using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,6 +45,7 @@ public class DashboardViewModel : ViewModelBase
     private string _updateStatus = string.Empty;
     private string _halfMonthTitleSuffix = string.Empty;
     private string _globalAccountSearchQuery = string.Empty;
+    private string _agentPhoneNumber = string.Empty;
     private DateTime? _rdCertificateRenewalDate;
     private string _rdCertificateRenewalHeadline = "Renewal date not set";
     private string _rdCertificateRenewalMessage = "Set the next postal RD certificate renewal date in Settings.";
@@ -119,6 +120,9 @@ public class DashboardViewModel : ViewModelBase
         _pythonService = pythonService;
         _mobileSyncService = mobileSyncService;
         _notificationService = notificationService;
+        
+        var settings = Services.AppSettings.Load();
+        _agentPhoneNumber = settings.AgentPhoneNumber;
 
         _databaseService.DatabaseChanged += OnDatabaseChanged;
 
@@ -137,6 +141,13 @@ public class DashboardViewModel : ViewModelBase
             new("next-month", "Next Month Collection", "Upcoming collection for next month."),
             new("advanced-paid", "Advance Paid", "Accounts paid ahead of next month."),
             new("new-accounts", "New Accounts", "Accounts first seen in the last 30 days."),
+            new("vip-accounts", "VIP High Value", "Accounts with Denomination >= Rs. 5000."),
+            new("rebate-upsell", "Rebate Upsell Prospects", "On-time accounts prime for 6-month advance pitch."),
+            new("critical-discontinuation", "Critical Discontinuation", "Accounts 5-6 months overdue, last chance before permanent default."),
+            new("at-risk-accounts", "At Risk (1-3 Mo Overdue)", "Accounts gathering monthly penalties."),
+            new("defaulters", "Defaulters (4+ Mo Overdue)", "Accounts requiring revival fees."),
+            new("loan-eligible", "Eligible for 50% Loan", "Accounts with 12+ installments paid."),
+            new("premature-closure", "Premature Closure", "Accounts with 36+ installments paid."),
             new("freeze-risk", "About To Freeze", "Older unpaid dues needing urgent attention."),
             new("about-to-mature", "About To Mature", "Accounts near 120 installments."),
             new("matured", "Matured", "Matured active accounts."),
@@ -212,6 +223,18 @@ public class DashboardViewModel : ViewModelBase
     {
         get => _globalAccountSearchQuery;
         set => this.RaiseAndSetIfChanged(ref _globalAccountSearchQuery, value);
+    }
+    
+    public string AgentPhoneNumber
+    {
+        get => _agentPhoneNumber;
+        set 
+        {
+            this.RaiseAndSetIfChanged(ref _agentPhoneNumber, value);
+            var settings = Services.AppSettings.Load();
+            settings.AgentPhoneNumber = value;
+            settings.Save();
+        }
     }
 
     public DateTime? RdCertificateRenewalDate
@@ -480,6 +503,35 @@ public class DashboardViewModel : ViewModelBase
 
     public bool HasNewAccountsMissingAslaasNotice => NewAccountsMissingAslaasCount > 0;
 
+    public int DefaulterAccountsCount { get; private set; }
+    public decimal DefaulterAccountsAmount { get; private set; }
+
+    public int EligibleForLoanCount { get; private set; }
+    public decimal EligibleForLoanAmount { get; private set; }
+
+    public int EligibleForPrematureClosureCount { get; private set; }
+    public decimal EligibleForPrematureClosureAmount { get; private set; }
+
+    public int VipAccountsCount { get; private set; }
+    public decimal VipAccountsAmount { get; private set; }
+
+    public int AtRiskAccountsCount { get; private set; }
+    public decimal AtRiskAccountsAmount { get; private set; }
+
+    public int RebateUpsellCount { get; private set; }
+    public decimal RebateUpsellAmount { get; private set; }
+
+    public int CriticalDiscontinuationCount { get; private set; }
+    public decimal CriticalDiscontinuationAmount { get; private set; }
+    
+    public int FirstHalfDeadlineCount { get; private set; }
+    public decimal FirstHalfDeadlineAmount { get; private set; }
+    
+    public int SecondHalfDeadlineCount { get; private set; }
+    public decimal SecondHalfDeadlineAmount { get; private set; }
+
+    public decimal PendingCommissionForecast { get; private set; }
+
     public int AboutToFreezeCount
     {
         get => _aboutToFreezeCount;
@@ -671,6 +723,10 @@ public class DashboardViewModel : ViewModelBase
             SecondHalfPendingAmount = metrics.SecondHalfPendingAmount;
             SecondHalfDeposited = metrics.SecondHalfDepositedCount;
             SecondHalfDepositedAmount = metrics.SecondHalfDepositedAmount;
+
+            DefaulterAccountsCount = metrics.DefaulterAccounts;
+            EligibleForLoanCount = metrics.EligibleForLoanAccounts;
+            EligibleForPrematureClosureCount = metrics.EligibleForPrematureClosureAccounts;
 
             // Load category data
             CategoryData.Clear();
@@ -943,9 +999,69 @@ public class DashboardViewModel : ViewModelBase
             .Where(a => a.IsDueWithinDays(30))
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
+            
+        // Agent Insights logic
+        var currentMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        _segmentAccounts["defaulters"] = accounts.Where(a => {
+            var next = a.GetNextInstallmentDate();
+            if(!next.HasValue) return false;
+            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
+            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+            return overdue >= 4;
+        }).ToList();
+        
+        _segmentAccounts["loan-eligible"] = accounts.Where(a => a.GetMonthPaidNumber() >= 12 && a.GetMonthPaidNumber() < 60).ToList();
+        _segmentAccounts["premature-closure"] = accounts.Where(a => a.GetMonthPaidNumber() >= 36 && a.GetMonthPaidNumber() < 60).ToList();
+        _segmentAccounts["vip-accounts"] = accounts.Where(a => a.GetAmount() >= 5000).ToList();
+        _segmentAccounts["at-risk-accounts"] = accounts.Where(a => {
+            var next = a.GetNextInstallmentDate();
+            if(!next.HasValue) return false;
+            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
+            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+            return overdue >= 1 && overdue <= 3;
+        }).ToList();
+
+        _segmentAccounts["rebate-upsell"] = accounts.Where(a => {
+            var next = a.GetNextInstallmentDate();
+            if(!next.HasValue) return false;
+            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
+            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+            return overdue <= 0; // Completely on-time or advance
+        }).ToList();
+        
+        _segmentAccounts["critical-discontinuation"] = accounts.Where(a => {
+            var next = a.GetNextInstallmentDate();
+            if(!next.HasValue) return false;
+            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
+            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+            return overdue == 5 || overdue == 6; // Last chance before default limit
+        }).ToList();
 
         PendingThisMonthCount = pendingThisMonth.Count;
         PendingThisMonthAmount = pendingThisMonth.Sum(a => a.GetAmount());
+        PendingCommissionForecast = PendingThisMonthAmount * 0.04m;
+        
+        var vipAccounts = _segmentAccounts["vip-accounts"];
+        VipAccountsCount = vipAccounts.Count;
+        VipAccountsAmount = vipAccounts.Sum(a => a.GetAmount());
+        
+        var atRiskAccounts = _segmentAccounts["at-risk-accounts"];
+        AtRiskAccountsCount = atRiskAccounts.Count;
+        AtRiskAccountsAmount = atRiskAccounts.Sum(a => a.GetAmount());
+
+        var rebateUpsell = _segmentAccounts["rebate-upsell"];
+        RebateUpsellCount = rebateUpsell.Count;
+        RebateUpsellAmount = rebateUpsell.Sum(a => a.GetAmount() * 6); // Potential 6-month collection
+
+        var criticalDiscontinuation = _segmentAccounts["critical-discontinuation"];
+        CriticalDiscontinuationCount = criticalDiscontinuation.Count;
+        CriticalDiscontinuationAmount = criticalDiscontinuation.Sum(a => a.GetAmount());
+        
+        FirstHalfDeadlineCount = firstHalfPendingWindow.Count;
+        FirstHalfDeadlineAmount = firstHalfPendingWindow.Sum(a => a.GetAmount());
+        SecondHalfDeadlineCount = secondHalfPendingWindow.Count;
+        SecondHalfDeadlineAmount = secondHalfPendingWindow.Sum(a => a.GetAmount());
+
         NextMonthCollectionCount = nextMonthCollection.Count;
         NextMonthCollectionAmount = nextMonthCollection.Sum(a => a.GetAmount());
         AdvancedPaidCount = advancedPaid.Count;
@@ -1457,7 +1573,7 @@ public class DashboardViewModel : ViewModelBase
             var (fetchExists, _) = _pythonService.CheckScriptsExist();
             if (!fetchExists)
             {
-                UpdateStatus = "Fetch_RDAccounts.py not found in DOPAgent folder.";
+                UpdateStatus = "Fetch_RDAccounts.py not found in DOPAgent-Dev folder.";
                 _notificationService?.Error("Update Failed", "Fetch_RDAccounts.py was not found.");
                 await Task.Delay(4000);
                 return;

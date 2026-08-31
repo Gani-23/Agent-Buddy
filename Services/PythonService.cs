@@ -23,6 +23,12 @@ public class PythonService
     private static readonly Regex AslaasSubmittedRegex = new(
         @"ASLAAS update submitted:\s*(?<account>[A-Z0-9]+)\s*->\s*(?<aslaas>[A-Z0-9]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex PopupFetchCountRegex = new(
+        @"NEXT_ACCOUNTS popup fetch collected\s+(?<count>\d+)\s+unique accounts",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex FinalFetchCountRegex = new(
+        @"Update completed successfully!\s*Fetched\s+(?<count>\d+)\s+account\(s\)\.",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private const string PreferredBrowserSettingKey = "preferred_browser";
 
     private readonly string _pythonCommand;
@@ -315,13 +321,53 @@ public class PythonService
             process.StandardInput.Close();
             
             await process.WaitForExitAsync();
+            var outputText = output.ToString();
+            if (process.ExitCode != 0 || !LooksLikeSuccessfulDatabaseUpdate(outputText))
+            {
+                return (false, outputText);
+            }
 
-            return (process.ExitCode == 0, output.ToString());
+            return (true, outputText);
         }
         catch (Exception ex)
         {
             return (false, $"Error executing script: {ex.Message}");
         }
+    }
+
+    private static bool LooksLikeSuccessfulDatabaseUpdate(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return false;
+        }
+
+        if (output.Contains("No data extracted via NEXT_ACCOUNTS + popup flow", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("Navigation failed", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("Login failed", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("Could not ensure Agent Enquire & Update Screen", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var popupCount = ExtractCount(output, PopupFetchCountRegex);
+        var finalCount = ExtractCount(output, FinalFetchCountRegex);
+        var fetchedCount = finalCount ?? popupCount;
+
+        return fetchedCount.HasValue &&
+               fetchedCount.Value > 0 &&
+               output.Contains("Update completed successfully!", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int? ExtractCount(string output, Regex regex)
+    {
+        var match = regex.Match(output ?? string.Empty);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        return int.TryParse(match.Groups["count"].Value, out var count) ? count : null;
     }
 
     /// <summary>

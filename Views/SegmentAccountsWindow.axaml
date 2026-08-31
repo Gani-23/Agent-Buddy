@@ -24,16 +24,49 @@
 
     <Border Padding="20" Classes="FadeIn DialogSurface">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
-            <StackPanel Grid.Row="0" Spacing="4">
-                <TextBlock Text="{DynamicResource L_Segment_Kicker}" Classes="Kicker"/>
-                <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="Bold"/>
-                <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
-                    <Run Text="{DynamicResource L_Segment_AccountsPrefix}"/>
-                    <Run Text="{Binding Count}"/>
-                    <Run Text="{DynamicResource L_Segment_TotalAmountPrefix}"/>
-                    <Run Text="Rs. "/>
-                    <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
-                </TextBlock>
+            <StackPanel Grid.Row="0" Spacing="8">
+                <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,8">
+                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource L_Segment_Kicker}" Classes="Kicker"/>
+                        
+                        <!-- Segment Dropdown -->
+                        <ComboBox Classes="Ghost"
+                                  ItemsSource="{Binding DashboardContext.DefaultSummaryOptions}"
+                                  SelectedItem="{Binding DashboardContext.SelectedDefaultSummaryOption, Mode=TwoWay}"
+                                  DisplayMemberBinding="{Binding Title}"
+                                  FontSize="26" FontWeight="Bold"
+                                  Padding="0"
+                                  BorderThickness="0"
+                                  MaxDropDownHeight="350"
+                                  Background="Transparent">
+                            <ComboBox.Styles>
+                                <Style Selector="ComboBoxItem">
+                                    <Setter Property="FontSize" Value="14"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Padding" Value="12,8"/>
+                                </Style>
+                            </ComboBox.Styles>
+                        </ComboBox>
+                                  
+                        <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="2,4,0,0">
+                            <Run Text="{DynamicResource L_Segment_AccountsPrefix}"/>
+                            <Run Text="{Binding Count}"/>
+                            <Run Text="{DynamicResource L_Segment_TotalAmountPrefix}"/>
+                            <Run Text="Rs. "/>
+                            <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Sort Dropdown -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                        <TextBlock Text="Sort by:" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
+                        <ComboBox ItemsSource="{Binding DashboardContext.DefaultSummarySortOptions}"
+                                  SelectedItem="{Binding DashboardContext.SelectedDefaultSummarySortOption, Mode=TwoWay}"
+                                  DisplayMemberBinding="{Binding Title}"
+                                  Width="180"/>
+                    </StackPanel>
+                </Grid>
+
                 <Border Background="{DynamicResource SuccessTintBrush}"
                         BorderBrush="{StaticResource SuccessBrush}"
                         BorderThickness="1"
@@ -161,6 +194,17 @@
                                                 <TextBlock Grid.Row="3"
                                                            Grid.Column="1"
                                                            Text="{Binding EstimatedOpeningDateDisplay}"/>
+
+                                                <Button Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2"
+                                                        Classes="Secondary"
+                                                        Padding="12,6"
+                                                        Command="{Binding $parent[Window].((vm:SegmentAccountsWindowViewModel)DataContext).SendWhatsAppCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Right">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="Send WhatsApp Reminder" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                                                    </StackPanel>
+                                                </Button>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -171,7 +215,12 @@
                 </ScrollViewer>
             </Border>
 
-            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Classes="Secondary" Padding="16,8" Command="{Binding SendBulkWhatsAppCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Bulk WhatsApp List" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
                 <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="{DynamicResource L_Common_Close}"/>
             </StackPanel>
         </Grid>

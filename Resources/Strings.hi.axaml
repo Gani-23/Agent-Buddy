@@ -67,6 +67,7 @@
         <x:String x:Key="L_List_DeleteAll">सब हटाएं</x:String>
         <x:String x:Key="L_List_StartWalk">प्रोसेस शुरू करें</x:String>
         <x:String x:Key="L_List_RetryFailed">केवल फेल्ड पुनः प्रयास</x:String>
+        <x:String x:Key="L_List_ValidateAccounts">Check Accounts</x:String>
         <x:String x:Key="L_List_AddList">सूची जोड़ें</x:String>
         <x:String x:Key="L_List_Processing">प्रोसेस हो रहा है...</x:String>
         <x:String x:Key="L_List_ReferenceNumbers">रेफरेंस नंबर</x:String>
@@ -81,6 +82,12 @@
         <x:String x:Key="L_List_LegendCatchUp">भरपाई: पुराने बकाया साफ</x:String>
         <x:String x:Key="L_List_LegendPartialCatchUp">आंशिक: अभी भी चालू माह तक नहीं</x:String>
         <x:String x:Key="L_List_LegendMissingDue">देय तिथि उपलब्ध नहीं</x:String>
+        <x:String x:Key="L_List_ValidationTitle">Account Check</x:String>
+        <x:String x:Key="L_List_ValidationHint">Checks every staged account against the current database and processing rules.</x:String>
+        <x:String x:Key="L_List_ValidationChecked">Checked:</x:String>
+        <x:String x:Key="L_List_ValidationReady">Ready:</x:String>
+        <x:String x:Key="L_List_ValidationReview">Review:</x:String>
+        <x:String x:Key="L_List_ValidationBlocked">Blocked:</x:String>
 
         <x:String x:Key="L_Report_Kicker">ऑपरेशन्स</x:String>
         <x:String x:Key="L_Report_Title">रिपोर्ट</x:String>

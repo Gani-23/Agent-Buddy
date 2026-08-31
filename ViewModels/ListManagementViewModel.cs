@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Unit = ReactiveUI.Primitives.RxVoid;
+using System.Reactive;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -23,6 +23,23 @@ public enum ListRunState
     Processing,
     Success,
     Failed
+}
+
+public enum AccountCheckSeverity
+{
+    Ready,
+    Review,
+    Blocked
+}
+
+public sealed class AccountCheckResult
+{
+    public string ListLabel { get; init; } = string.Empty;
+    public string AccountNo { get; init; } = string.Empty;
+    public string AccountName { get; init; } = string.Empty;
+    public string StatusTag { get; init; } = "Ready";
+    public string StatusText { get; init; } = "Ready";
+    public string DetailText { get; init; } = string.Empty;
 }
 
 public class ListPanelViewModel : ReactiveObject
@@ -66,6 +83,7 @@ public class ListPanelViewModel : ReactiveObject
     private string _lastProcessedPaymentMode = "Cash";
     private bool _isDuplicateFocus;
     public event Action? StateChanged;
+    public event Action? ContentChanged;
 
     public ListPanelViewModel(
         int listNumber,
@@ -85,6 +103,7 @@ public class ListPanelViewModel : ReactiveObject
             RecalculateTotals();
             ResetRunStateIfPayloadChanged();
             NotifyStateChanged();
+            NotifyContentChanged();
         };
 
         AddPendingAccountCommand = ReactiveCommand.CreateFromTask(async () => { await SubmitPendingAsync(); });
@@ -333,6 +352,7 @@ public class ListPanelViewModel : ReactiveObject
         if (Items.Remove(item))
         {
             SetEntrySuccessMessage($"{item.AccountNo} removed.");
+            NotifyContentChanged();
         }
     }
 
@@ -341,6 +361,7 @@ public class ListPanelViewModel : ReactiveObject
         Items.Clear();
         ClearInstallmentSuggestion(resetInstallmentValue: true);
         SetEntrySuccessMessage("List cleared.");
+        NotifyContentChanged();
     }
 
     public void ResetProcessingMarkers()
@@ -735,6 +756,11 @@ public class ListPanelViewModel : ReactiveObject
     {
         StateChanged?.Invoke();
     }
+
+    private void NotifyContentChanged()
+    {
+        ContentChanged?.Invoke();
+    }
 }
 
 public class ListManagementViewModel : ViewModelBase
@@ -795,10 +821,21 @@ public class ListManagementViewModel : ViewModelBase
     private bool _isAutoSaving;
     private bool _hasPendingAutoSave;
     private bool _isRestoringAutoSave;
+    private bool _isValidatingLists;
+    private bool _hasValidationSnapshot;
+    private bool _isValidationPanelOpen;
     private string _processStatus = string.Empty;
+    private string _validationSummaryMessage = string.Empty;
+    private string _validationStatusTag = "Idle";
+    private string _validationStatusText = "Run check";
+    private int _validationCheckedCount;
+    private int _validationReadyCount;
+    private int _validationReviewCount;
+    private int _validationBlockedCount;
     private DateTime? _lastAutoSaveAt;
     private DateTime? _lastSavedLotAt;
     private DateTime? _databaseLastUpdated;
+    private DateTime? _lastValidationAt;
     private bool _hasStaleDatabaseOverride;
     private int _duplicateHighlightVersion;
 
@@ -842,11 +879,17 @@ public class ListManagementViewModel : ViewModelBase
         DeleteAllListsCommand = ReactiveCommand.Create(DeleteAllLists);
         ProcessAllListsCommand = ReactiveCommand.CreateFromTask(ProcessAllListsAsync);
         RetryFailedListsCommand = ReactiveCommand.CreateFromTask(RetryFailedListsAsync);
+        ValidateAllAccountsCommand = ReactiveCommand.CreateFromTask(ValidateAllAccountsAsync);
+        OpenValidationPanelCommand = ReactiveCommand.Create(OpenValidationPanel);
+        CloseValidationPanelCommand = ReactiveCommand.Create(CloseValidationPanel);
+        ToggleValidationPanelCommand = ReactiveCommand.Create(ToggleValidationPanel);
         RefreshDatabaseStatusCommand = ReactiveCommand.CreateFromTask(RefreshDatabaseStatusAsync);
         UpdateDatabaseCommand = ReactiveCommand.CreateFromTask(UpdateDatabaseAsync);
         OverrideDatabaseGuardCommand = ReactiveCommand.Create(EnableStaleDatabaseOverride);
 
         AddNewList();
+        ValidationChecks = new ObservableCollection<AccountCheckResult>();
+        ValidationChecks.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(HasValidationSnapshot));
         _databaseService.DatabaseChanged += OnDatabaseChanged;
         _autoSaveTimer.Start();
         _ = RestoreAutoSaveAsync();
@@ -868,6 +911,17 @@ public class ListManagementViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _isProcessing, value);
             this.RaisePropertyChanged(nameof(CanProcessLists));
             this.RaisePropertyChanged(nameof(CanRetryFailedLists));
+            this.RaisePropertyChanged(nameof(CanValidateLists));
+        }
+    }
+
+    public bool IsValidatingLists
+    {
+        get => _isValidatingLists;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isValidatingLists, value);
+            this.RaisePropertyChanged(nameof(CanValidateLists));
         }
     }
 
@@ -905,10 +959,24 @@ public class ListManagementViewModel : ViewModelBase
 
     public bool HasFailedLists => Lists.Any(list => list.IsFailedState);
     public bool HasProcessingLogs => ProcessingLogs.Count > 0;
+    public bool HasValidationSnapshot => _hasValidationSnapshot;
+    public bool IsValidationPanelOpen
+    {
+        get => _isValidationPanelOpen;
+        private set
+        {
+            if (this.RaiseAndSetIfChanged(ref _isValidationPanelOpen, value))
+            {
+                this.RaisePropertyChanged(nameof(ShowValidationLauncher));
+            }
+        }
+    }
+    public bool ShowValidationLauncher => HasValidationSnapshot && !IsValidationPanelOpen;
     public bool IsDatabaseFresh => DatabaseLastUpdated.HasValue && DatabaseLastUpdated.Value.Date >= DateTime.Today;
     public bool CanEditLists => IsDatabaseFresh || HasStaleDatabaseOverride;
     public bool CanProcessLists => CanEditLists && !HasFailedLists && !IsProcessing;
     public bool CanRetryFailedLists => CanEditLists && HasFailedLists && !IsProcessing;
+    public bool CanValidateLists => !IsProcessing && !IsValidatingLists && Lists.Any(list => list.Items.Count > 0);
     public bool ShowRetryFailedWarning => HasFailedLists;
     public bool ShowDatabaseGuard => !IsDatabaseFresh;
     public bool ShowOverrideButton => ShowDatabaseGuard && !HasStaleDatabaseOverride;
@@ -945,10 +1013,19 @@ public class ListManagementViewModel : ViewModelBase
         : DatabaseLastUpdated.HasValue
             ? $"Last updated on {DatabaseLastUpdated:dd-MMM-yyyy hh:mm tt}. Update the database before creating lists, or override carefully."
             : "No database update history found. Update the database before creating lists, or override carefully.";
+    public string ValidationSummaryMessage => _validationSummaryMessage;
+    public string ValidationStatusTag => _validationStatusTag;
+    public string ValidationStatusText => _validationStatusText;
+    public int ValidationCheckedCount => _validationCheckedCount;
+    public int ValidationReadyCount => _validationReadyCount;
+    public int ValidationReviewCount => _validationReviewCount;
+    public int ValidationBlockedCount => _validationBlockedCount;
+    public DateTime? LastValidationAt => _lastValidationAt;
 
     public ObservableCollection<ListPanelViewModel> Lists { get; }
     public ObservableCollection<string> ReferenceNumbers { get; }
     public ObservableCollection<string> ProcessingLogs { get; }
+    public ObservableCollection<AccountCheckResult> ValidationChecks { get; }
     public Interaction<AslaasPromptRequest, string?> AslaasPrompt { get; } = new();
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
     public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
@@ -961,6 +1038,10 @@ public class ListManagementViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> DeleteAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> ProcessAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> RetryFailedListsCommand { get; }
+    public ReactiveCommand<Unit, Unit> ValidateAllAccountsCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenValidationPanelCommand { get; }
+    public ReactiveCommand<Unit, Unit> CloseValidationPanelCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleValidationPanelCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshDatabaseStatusCommand { get; }
     public ReactiveCommand<Unit, Unit> UpdateDatabaseCommand { get; }
     public ReactiveCommand<Unit, Unit> OverrideDatabaseGuardCommand { get; }
@@ -988,6 +1069,7 @@ public class ListManagementViewModel : ViewModelBase
         _pendingAslaasUpdates.Clear();
         _persistedStates.Clear();
         SavePersistedState();
+        ResetValidationResults();
 
         AddNewList();
         ScheduleAutoSave();
@@ -1041,11 +1123,13 @@ public class ListManagementViewModel : ViewModelBase
         }
 
         list.PropertyChanged -= OnListPropertyChanged;
+        list.ContentChanged -= OnListContentChanged;
         PersistNeutralListState(list);
         Lists.Remove(list);
         RenumberLists();
         RefreshReferenceNumbersFromLists();
         RaiseListStateProperties();
+        InvalidateValidationResultsIfSnapshotExists();
 
         if (Lists.Count == 0)
         {
@@ -1311,7 +1395,7 @@ public class ListManagementViewModel : ViewModelBase
             var (fetchExists, _) = _pythonService.CheckScriptsExist();
             if (!fetchExists)
             {
-                ProcessStatus = "Fetch_RDAccounts.py not found in DOPAgent folder.";
+                ProcessStatus = "Fetch_RDAccounts.py not found in DOPAgent-Dev folder.";
                 _notificationService?.Error("Update Failed", "Fetch_RDAccounts.py was not found.");
                 return;
             }
@@ -1375,6 +1459,275 @@ public class ListManagementViewModel : ViewModelBase
         HasStaleDatabaseOverride = true;
         ProcessStatus = "Proceeding with a stale database. Review accounts carefully.";
         _notificationService?.Warning("Stale Database Override", "Proceeding without today's database update.");
+    }
+
+    private async Task ValidateAllAccountsAsync()
+    {
+        if (IsProcessing || IsValidatingLists)
+        {
+            return;
+        }
+
+        var stagedItems = Lists
+            .SelectMany(list => list.Items.Select(item => new { list, item }))
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.item.AccountNo))
+            .ToList();
+
+        if (stagedItems.Count == 0)
+        {
+            ResetValidationResults();
+            ProcessStatus = "Add at least one account before running the check.";
+            _notificationService?.Warning("Nothing To Check", "Add at least one account before running the check.");
+            return;
+        }
+
+        IsValidatingLists = true;
+        ProcessStatus = "Checking every staged account...";
+
+        try
+        {
+            var seenAccounts = new List<string>();
+            var results = new List<AccountCheckResult>();
+
+            foreach (var entry in stagedItems)
+            {
+                var accountNo = entry.item.AccountNo.Trim();
+                var existingAccounts = seenAccounts.ToList();
+                var (validationStatus, account) = await _validationService.ValidateAccountAsync(accountNo, existingAccounts);
+
+                var pendingAslaas = GetPendingAslaasValue(accountNo);
+                var result = BuildAccountCheckResult(entry.list, entry.item, validationStatus, account, pendingAslaas);
+                results.Add(result);
+
+                if ((validationStatus == AccountValidationStatus.Valid ||
+                     validationStatus == AccountValidationStatus.DueSoon) &&
+                    account != null)
+                {
+                    seenAccounts.Add(accountNo);
+                }
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                ValidationChecks.Clear();
+                foreach (var result in results)
+                {
+                    ValidationChecks.Add(result);
+                }
+
+                _hasValidationSnapshot = true;
+                _lastValidationAt = DateTime.Now;
+                _validationCheckedCount = results.Count;
+                _validationReadyCount = results.Count(item => string.Equals(item.StatusTag, nameof(AccountCheckSeverity.Ready), StringComparison.OrdinalIgnoreCase));
+                _validationReviewCount = results.Count(item => string.Equals(item.StatusTag, nameof(AccountCheckSeverity.Review), StringComparison.OrdinalIgnoreCase));
+                _validationBlockedCount = results.Count(item => string.Equals(item.StatusTag, nameof(AccountCheckSeverity.Blocked), StringComparison.OrdinalIgnoreCase));
+                _validationStatusTag = _validationBlockedCount > 0
+                    ? nameof(AccountCheckSeverity.Blocked)
+                    : _validationReviewCount > 0
+                        ? nameof(AccountCheckSeverity.Review)
+                        : nameof(AccountCheckSeverity.Ready);
+                _validationStatusText = _validationStatusTag switch
+                {
+                    nameof(AccountCheckSeverity.Blocked) => "Blocked",
+                    nameof(AccountCheckSeverity.Review) => "Review",
+                    _ => "OK"
+                };
+                _validationSummaryMessage = $"{_validationCheckedCount} account(s) checked across {Lists.Count(list => list.Items.Count > 0)} list(s). " +
+                                            $"{_validationReadyCount} ready, {_validationReviewCount} review, {_validationBlockedCount} blocked.";
+                IsValidationPanelOpen = true;
+
+                RaiseValidationProperties();
+            });
+
+            if (_validationBlockedCount > 0)
+            {
+                ProcessStatus = $"Validation blocked: {_validationBlockedCount} account(s) need attention.";
+                _notificationService?.Warning("Validation Blocked", ProcessStatus);
+            }
+            else if (_validationReviewCount > 0)
+            {
+                ProcessStatus = $"Validation complete with {_validationReviewCount} review item(s).";
+                _notificationService?.Info("Validation Review", ProcessStatus);
+            }
+            else
+            {
+                ProcessStatus = "Validation complete. All staged accounts are ready.";
+                _notificationService?.Success("Validation OK", ProcessStatus);
+            }
+        }
+        catch (Exception ex)
+        {
+            ResetValidationResults();
+            ProcessStatus = $"Validation failed: {ex.Message}";
+            _notificationService?.Error("Validation Failed", ex.Message);
+        }
+        finally
+        {
+            IsValidatingLists = false;
+        }
+    }
+
+    private string? GetPendingAslaasValue(string accountNo)
+    {
+        if (string.IsNullOrWhiteSpace(accountNo))
+        {
+            return null;
+        }
+
+        return _pendingAslaasUpdates.TryGetValue(accountNo.Trim(), out var value)
+            ? NormalizeAslaasValue(value)
+            : null;
+    }
+
+    private static AccountCheckSeverity MaxSeverity(AccountCheckSeverity first, AccountCheckSeverity second)
+    {
+        return (AccountCheckSeverity)Math.Max((int)first, (int)second);
+    }
+
+    private AccountCheckResult BuildAccountCheckResult(
+        ListPanelViewModel list,
+        ListItem item,
+        AccountValidationStatus validationStatus,
+        RDAccount? account,
+        string? pendingAslaasValue)
+    {
+        var notes = new List<string>();
+        var severity = AccountCheckSeverity.Ready;
+        var accountName = account?.AccountName?.Trim();
+        if (string.IsNullOrWhiteSpace(accountName))
+        {
+            accountName = item.AccountNameDisplay;
+        }
+
+        if (validationStatus == AccountValidationStatus.Invalid)
+        {
+            return new AccountCheckResult
+            {
+                ListLabel = list.Name,
+                AccountNo = item.AccountNo,
+                AccountName = accountName,
+                StatusTag = nameof(AccountCheckSeverity.Blocked),
+                StatusText = "Blocked",
+                DetailText = "Account not found in database."
+            };
+        }
+
+        if (validationStatus == AccountValidationStatus.Duplicate)
+        {
+            return new AccountCheckResult
+            {
+                ListLabel = list.Name,
+                AccountNo = item.AccountNo,
+                AccountName = accountName,
+                StatusTag = nameof(AccountCheckSeverity.Blocked),
+                StatusText = "Blocked",
+                DetailText = "Already staged in another list."
+            };
+        }
+
+        if (validationStatus == AccountValidationStatus.Closed)
+        {
+            return new AccountCheckResult
+            {
+                ListLabel = list.Name,
+                AccountNo = item.AccountNo,
+                AccountName = accountName,
+                StatusTag = nameof(AccountCheckSeverity.Blocked),
+                StatusText = "Blocked",
+                DetailText = "Account is already closed."
+            };
+        }
+
+        if (validationStatus == AccountValidationStatus.Matured)
+        {
+            return new AccountCheckResult
+            {
+                ListLabel = list.Name,
+                AccountNo = item.AccountNo,
+                AccountName = accountName,
+                StatusTag = nameof(AccountCheckSeverity.Blocked),
+                StatusText = "Blocked",
+                DetailText = "Account is already fully matured."
+            };
+        }
+
+        if (validationStatus == AccountValidationStatus.DueSoon)
+        {
+            severity = AccountCheckSeverity.Review;
+            notes.Add("Due within 30 days.");
+        }
+
+        var effectiveAslaas = !string.IsNullOrWhiteSpace(pendingAslaasValue)
+            ? pendingAslaasValue
+            : account?.AslaasNo;
+
+        if (string.IsNullOrWhiteSpace(effectiveAslaas))
+        {
+            severity = AccountCheckSeverity.Blocked;
+            notes.Add("ASLAAS number is missing.");
+        }
+        else if (!string.IsNullOrWhiteSpace(pendingAslaasValue) &&
+                 string.IsNullOrWhiteSpace(account?.AslaasNo))
+        {
+            notes.Add($"ASLAAS queued as {effectiveAslaas}.");
+        }
+
+        if (account != null)
+        {
+            var analysis = account.AnalyzePayment(item.EffectiveInstallment);
+            switch (analysis.Classification)
+            {
+                case PaymentClassification.MissingDueDate:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("Due date unavailable.");
+                    break;
+
+                case PaymentClassification.AdvancePayment:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("Will prompt for advance payment confirmation.");
+                    break;
+
+                case PaymentClassification.MixedCatchUpAndAdvance:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("Will prompt and still leave some future installments unpaid.");
+                    break;
+
+                case PaymentClassification.PartialCatchUp:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("This installment will not fully clear overdue months.");
+                    break;
+
+                case PaymentClassification.LongOverduePartialCatchUp:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("Long overdue balance will remain after this payment.");
+                    break;
+
+                case PaymentClassification.LongOverdueResolved:
+                    severity = MaxSeverity(severity, AccountCheckSeverity.Review);
+                    notes.Add("Long overdue account. Review carefully before processing.");
+                    break;
+            }
+        }
+
+        if (notes.Count == 0)
+        {
+            notes.Add("Ready for list processing.");
+        }
+
+        return new AccountCheckResult
+        {
+            ListLabel = list.Name,
+            AccountNo = item.AccountNo,
+            AccountName = accountName,
+            StatusTag = severity.ToString(),
+            StatusText = severity switch
+            {
+                AccountCheckSeverity.Blocked => "Blocked",
+                AccountCheckSeverity.Review => "Review",
+                _ => "Ready"
+            },
+            DetailText = string.Join(" • ", notes.Distinct(StringComparer.Ordinal))
+        };
     }
 
     private async Task<bool> AddSingleAccountToListAsync(
@@ -2112,8 +2465,15 @@ public class ListManagementViewModel : ViewModelBase
         ScheduleAutoSave();
     }
 
+    private void OnListContentChanged()
+    {
+        InvalidateValidationResultsIfSnapshotExists();
+        this.RaisePropertyChanged(nameof(CanValidateLists));
+    }
+
     private void OnDatabaseChanged(object? sender, EventArgs e)
     {
+        InvalidateValidationResultsIfSnapshotExists();
         _ = RefreshDatabaseStatusAsync();
     }
 
@@ -2127,6 +2487,7 @@ public class ListManagementViewModel : ViewModelBase
 
         list.PropertyChanged += OnListPropertyChanged;
         list.StateChanged += OnListStateChanged;
+        list.ContentChanged += OnListContentChanged;
 
         if (applyPersistedState)
         {
@@ -2142,11 +2503,13 @@ public class ListManagementViewModel : ViewModelBase
         {
             list.PropertyChanged -= OnListPropertyChanged;
             list.StateChanged -= OnListStateChanged;
+            list.ContentChanged -= OnListContentChanged;
         }
 
         Lists.Clear();
         ReferenceNumbers.Clear();
         RaiseListStateProperties();
+        ResetValidationResults();
     }
 
     private void RenumberLists()
@@ -2182,6 +2545,61 @@ public class ListManagementViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanProcessLists));
         this.RaisePropertyChanged(nameof(CanRetryFailedLists));
         this.RaisePropertyChanged(nameof(ShowRetryFailedWarning));
+        this.RaisePropertyChanged(nameof(CanValidateLists));
+    }
+
+    private void ResetValidationResults()
+    {
+        _hasValidationSnapshot = false;
+        _isValidationPanelOpen = false;
+        _lastValidationAt = null;
+        _validationSummaryMessage = "Run the check to verify every staged account.";
+        _validationStatusTag = "Idle";
+        _validationStatusText = "Run check";
+        _validationCheckedCount = 0;
+        _validationReadyCount = 0;
+        _validationReviewCount = 0;
+        _validationBlockedCount = 0;
+
+        ValidationChecks.Clear();
+        RaiseValidationProperties();
+    }
+
+    private void InvalidateValidationResultsIfSnapshotExists()
+    {
+        if (!_hasValidationSnapshot)
+        {
+            return;
+        }
+
+        _isValidationPanelOpen = false;
+        _validationSummaryMessage = _lastValidationAt.HasValue
+            ? $"Last check at {_lastValidationAt.Value:dd-MMM hh:mm tt} is now stale. Run it again after editing lists."
+            : "Run the check to verify every staged account.";
+        _validationStatusTag = "Idle";
+        _validationStatusText = "Refresh required";
+        _validationCheckedCount = 0;
+        _validationReadyCount = 0;
+        _validationReviewCount = 0;
+        _validationBlockedCount = 0;
+
+        ValidationChecks.Clear();
+        RaiseValidationProperties();
+    }
+
+    private void RaiseValidationProperties()
+    {
+        this.RaisePropertyChanged(nameof(HasValidationSnapshot));
+        this.RaisePropertyChanged(nameof(ValidationSummaryMessage));
+        this.RaisePropertyChanged(nameof(ValidationStatusTag));
+        this.RaisePropertyChanged(nameof(ValidationStatusText));
+        this.RaisePropertyChanged(nameof(ValidationCheckedCount));
+        this.RaisePropertyChanged(nameof(ValidationReadyCount));
+        this.RaisePropertyChanged(nameof(ValidationReviewCount));
+        this.RaisePropertyChanged(nameof(ValidationBlockedCount));
+        this.RaisePropertyChanged(nameof(LastValidationAt));
+        this.RaisePropertyChanged(nameof(IsValidationPanelOpen));
+        this.RaisePropertyChanged(nameof(ShowValidationLauncher));
     }
 
     private void RaiseDatabaseGuardProperties()
@@ -2216,6 +2634,31 @@ public class ListManagementViewModel : ViewModelBase
         }
 
         return null;
+    }
+
+    private void OpenValidationPanel()
+    {
+        if (!HasValidationSnapshot)
+        {
+            return;
+        }
+
+        IsValidationPanelOpen = true;
+    }
+
+    private void CloseValidationPanel()
+    {
+        IsValidationPanelOpen = false;
+    }
+
+    private void ToggleValidationPanel()
+    {
+        if (!HasValidationSnapshot)
+        {
+            return;
+        }
+
+        IsValidationPanelOpen = !IsValidationPanelOpen;
     }
 
     private async Task HighlightDuplicateAsync(ListPanelViewModel targetList, ListItem targetItem)

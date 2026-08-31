@@ -225,8 +225,19 @@
         <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Padding" Value="14"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <Style Selector="Border.StatTile:pointerover">
+        <Setter Property="RenderTransform" Value="translate(0px, -2px)"/>
+        <Setter Property="BoxShadow" Value="0 6 12 0 #0000001A"/>
     </Style>
 
     <Style Selector="Border.TintDanger">

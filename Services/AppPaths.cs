@@ -14,7 +14,7 @@ public static class AppPaths
 
     private static string ResolveBaseDirectory()
     {
-        return EnsureDirectory(Path.Combine(DocumentsDirectory, "DOPAgent"));
+        return EnsureDirectory(Path.Combine(DocumentsDirectory, "DOPAgent-Dev"));
     }
 
     private static string ResolveDocumentsDirectory()

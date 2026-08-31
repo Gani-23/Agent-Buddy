@@ -39,14 +39,13 @@ public partial class SegmentAccountsWindow : Window
     }
 
     public SegmentAccountsWindow(
-        string title,
-        IEnumerable<RDAccount> accounts,
+        DashboardViewModel dashboardViewModel,
         bool isDarkTheme = false,
         bool focusSearchOnOpen = false,
         string? initialSearchQuery = null,
         string? segmentKey = null) : this()
     {
-        DataContext = new SegmentAccountsWindowViewModel(title, accounts, segmentKey);
+        DataContext = new SegmentAccountsWindowViewModel(dashboardViewModel, segmentKey);
         RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
         _focusSearchOnOpen = focusSearchOnOpen;
         _isDarkTheme = isDarkTheme;

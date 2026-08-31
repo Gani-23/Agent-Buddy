@@ -1,4 +1,4 @@
-using Unit = ReactiveUI.Primitives.RxVoid;
+using System.Reactive;
 using System.Threading.Tasks;
 using AgentBuddy.Services;
 using ReactiveUI;

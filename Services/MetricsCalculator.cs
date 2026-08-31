@@ -51,31 +51,50 @@ public class MetricsCalculator
     private void CalculateCategories(List<RDAccount> accounts, DashboardMetrics metrics)
     {
         var currentDate = DateTime.Today;
+        var currentMonthStart = new DateTime(currentDate.Year, currentDate.Month, 1);
 
         foreach (var account in accounts)
         {
             var nextDate = account.GetNextInstallmentDate();
-            if (!nextDate.HasValue) continue;
-
             var monthsPaid = account.GetMonthPaidNumber();
 
-            if (monthsPaid >= 40)
+            // Defaulter: unpaid for 4+ months
+            if (nextDate.HasValue)
             {
-                metrics.DefaultAccounts++;
+                var dueMonthStart = new DateTime(nextDate.Value.Year, nextDate.Value.Month, 1);
+                var monthsOverdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+                if (monthsOverdue >= 4)
+                {
+                    metrics.DefaulterAccounts++;
+                    metrics.DefaultAccounts++; // Keep for backward compatibility if bound
+                }
             }
-            else if (monthsPaid >= 22)
+
+            if (monthsPaid >= 60)
             {
                 metrics.MatureAccounts++;
             }
-            else if (nextDate.Value.Date < currentDate.AddMonths(-3))
+            else
+            {
+                if (monthsPaid >= 36)
+                {
+                    metrics.EligibleForPrematureClosureAccounts++;
+                }
+                if (monthsPaid >= 12)
+                {
+                    metrics.EligibleForLoanAccounts++;
+                }
+            }
+
+            if (nextDate.HasValue && nextDate.Value.Date < currentDate.AddMonths(-3))
             {
                 metrics.AboutToFreezeAccounts++;
             }
-            else if (nextDate.Value.Date > currentDate.AddMonths(1))
+            if (nextDate.HasValue && nextDate.Value.Date > currentDate.AddMonths(1))
             {
                 metrics.AdvancedAccounts++;
             }
-            else if (monthsPaid == 1)
+            if (monthsPaid == 1)
             {
                 metrics.NewlyOpenedAccounts++;
             }
@@ -95,8 +114,20 @@ public class MetricsCalculator
             if (!nextDate.HasValue) continue;
 
             var amount = account.GetAmount();
-            var isPending = nextDate.Value.Date < today;
-            var isFirstHalf = nextDate.Value.Month is >= 1 and <= 6;
+            var isPending = nextDate.Value.Date <= today;
+            
+            // In India Post, RD accounts are divided by opening day (1-15 vs 16-end)
+            var openingDate = account.GetEstimatedOpeningDate();
+            // If opening date is unknown, fallback to next installment date's day, though standard RD due dates are always end of month.
+            // Actually, the portal sets next_due_date to either the 15th or the last day of the month based on account creation.
+            var isFirstHalf = nextDate.Value.Day <= 15;
+            
+            // Wait, standard next installment date might just be the actual exact date. 
+            // If opening date is known, use that.
+            if (openingDate.HasValue)
+            {
+                isFirstHalf = openingDate.Value.Day <= 15;
+            }
 
             if (isFirstHalf)
             {

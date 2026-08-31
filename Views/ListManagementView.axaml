@@ -25,6 +25,26 @@
             <Setter Property="Background" Value="#26FFFFFF"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
         </Style>
+        <Style Selector="Border[Tag=Ready]">
+            <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border[Tag=Review]">
+            <Setter Property="Background" Value="{DynamicResource WarningTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border[Tag=Blocked]">
+            <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border[Tag=Idle]">
+            <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
@@ -160,6 +180,15 @@
                             Margin="0,0,22,10"
                             Content="{DynamicResource L_List_RetryFailed}"/>
 
+                    <Button Classes="Secondary"
+                            Command="{Binding ValidateAllAccountsCommand}"
+                            IsEnabled="{Binding CanValidateLists}"
+                            MinHeight="42"
+                            MinWidth="150"
+                            Padding="16,10"
+                            Margin="0,0,10,10"
+                            Content="{DynamicResource L_List_ValidateAccounts}"/>
+
                     <Button Classes="Secondary" 
                             Command="{Binding SaveLotCommand}"
                             MinHeight="42"
@@ -196,6 +225,7 @@
                                TextWrapping="Wrap"
                                Foreground="{StaticResource WarningBrush}"/>
                 </Border>
+
             </StackPanel>
         </Border>
 
@@ -676,6 +706,179 @@
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </Grid>
         </Border>
+
+        <Grid Grid.RowSpan="4"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Bottom"
+              Margin="0,0,36,118"
+              Panel.ZIndex="60">
+            <StackPanel Spacing="10"
+                        HorizontalAlignment="Right">
+                <Button Classes="Primary"
+                        MinWidth="168"
+                        Height="52"
+                        Padding="16,10"
+                        IsVisible="{Binding ShowValidationLauncher}"
+                        Command="{Binding OpenValidationPanelCommand}"
+                        ToolTip.Tip="Open account check">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{DynamicResource L_List_ValidationTitle}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding ValidationSummaryMessage}"
+                                   FontSize="10"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="220"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Button>
+
+                <Border Classes="Card"
+                        Width="540"
+                        Padding="14"
+                        IsVisible="{Binding IsValidationPanelOpen}">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{DynamicResource L_List_ValidationTitle}"
+                                           Classes="SubHeader"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Text="{DynamicResource L_List_ValidationHint}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1"
+                                    Classes="Secondary"
+                                    MinWidth="64"
+                                    Height="34"
+                                    Command="{Binding CloseValidationPanelCommand}"
+                                    Content="OK"
+                                    VerticalAlignment="Top"/>
+                        </Grid>
+
+                        <TextBlock Text="{Binding ValidationSummaryMessage}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   TextWrapping="Wrap"/>
+
+                        <WrapPanel>
+                            <Border CornerRadius="999"
+                                    Padding="10,5"
+                                    Margin="0,0,8,8"
+                                    Tag="Idle">
+                                <TextBlock FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
+                                    <Run Text="{DynamicResource L_List_ValidationChecked}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding ValidationCheckedCount}"/>
+                                </TextBlock>
+                            </Border>
+                            <Border CornerRadius="999"
+                                    Padding="10,5"
+                                    Margin="0,0,8,8"
+                                    Tag="Ready">
+                                <TextBlock FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
+                                    <Run Text="{DynamicResource L_List_ValidationReady}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding ValidationReadyCount}"/>
+                                </TextBlock>
+                            </Border>
+                            <Border CornerRadius="999"
+                                    Padding="10,5"
+                                    Margin="0,0,8,8"
+                                    Tag="Review">
+                                <TextBlock FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
+                                    <Run Text="{DynamicResource L_List_ValidationReview}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding ValidationReviewCount}"/>
+                                </TextBlock>
+                            </Border>
+                            <Border CornerRadius="999"
+                                    Padding="10,5"
+                                    Margin="0,0,8,8"
+                                    Tag="Blocked">
+                                <TextBlock FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
+                                    <Run Text="{DynamicResource L_List_ValidationBlocked}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding ValidationBlockedCount}"/>
+                                </TextBlock>
+                            </Border>
+                        </WrapPanel>
+
+                        <Border Background="{DynamicResource AppHoverBrush}"
+                                CornerRadius="8"
+                                Padding="10"
+                                ClipToBounds="True">
+                            <ScrollViewer MaxHeight="230"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding ValidationChecks}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AccountCheckResult">
+                                            <Border Tag="{Binding StatusTag}"
+                                                    CornerRadius="8"
+                                                    Padding="10"
+                                                    Margin="0,0,0,8">
+                                                <Grid ColumnDefinitions="96,*,92" ColumnSpacing="10">
+                                                    <StackPanel Spacing="2">
+                                                        <TextBlock Text="{Binding ListLabel}"
+                                                                   FontSize="11"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                        <TextBlock Text="{Binding AccountNo}"
+                                                                   FontFamily="Consolas"
+                                                                   FontSize="13"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock Text="{Binding AccountName}"
+                                                                   FontSize="13"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                        <TextBlock Text="{Binding DetailText}"
+                                                                   FontSize="11"
+                                                                   TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="2"
+                                                            Tag="{Binding StatusTag}"
+                                                            CornerRadius="999"
+                                                            Padding="10,6"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                                   FontSize="11"
+                                                                   FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center"
+                                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
 
     </Grid>
 

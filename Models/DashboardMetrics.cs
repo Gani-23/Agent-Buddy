@@ -11,11 +11,17 @@ public class DashboardMetrics
     public decimal TotalAmount { get; set; }
     
     // Account Categories
-    public int DefaultAccounts { get; set; }
+    public int DefaultAccounts { get; set; } // Renaming to DefaulterAccounts might break existing bindings, I'll keep DefaultAccounts but add the new ones
+    public int DefaulterAccounts { get; set; }
     public int MatureAccounts { get; set; }
     public int AboutToFreezeAccounts { get; set; }
     public int AdvancedAccounts { get; set; }
     public int NewlyOpenedAccounts { get; set; }
+    public int EligibleForLoanAccounts { get; set; }
+    public int EligibleForPrematureClosureAccounts { get; set; }
+    public int VipAccounts { get; set; }
+    public int AtRiskAccounts { get; set; }
+    public decimal PendingCommissionForecast { get; set; }
     
     // First Half Summary
     public int FirstHalfPendingCount { get; set; }

@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using Unit = ReactiveUI.Primitives.RxVoid;
+using System.Reactive;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;

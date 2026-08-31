@@ -6,6 +6,7 @@
     
     <Application.Resources>
         <converters:BoolToThemeIconConverter x:Key="BoolToThemeIconConverter"/>
+        <converters:BoolNotConverter x:Key="BoolNotConverter"/>
         <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
         <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
         <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>

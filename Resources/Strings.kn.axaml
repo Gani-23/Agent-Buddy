@@ -67,6 +67,7 @@
         <x:String x:Key="L_List_DeleteAll">ಎಲ್ಲ ಅಳಿಸಿ</x:String>
         <x:String x:Key="L_List_StartWalk">ಪ್ರಕ್ರಿಯೆ ಪ್ರಾರಂಭಿಸಿ</x:String>
         <x:String x:Key="L_List_RetryFailed">ವಿಫಲವಾದವು ಮಾತ್ರ ಮರುಪ್ರಯತ್ನಿಸಿ</x:String>
+        <x:String x:Key="L_List_ValidateAccounts">Check Accounts</x:String>
         <x:String x:Key="L_List_AddList">ಪಟ್ಟಿ ಸೇರಿಸಿ</x:String>
         <x:String x:Key="L_List_Processing">ಪ್ರಕ್ರಿಯೆ ನಡೆಯುತ್ತಿದೆ...</x:String>
         <x:String x:Key="L_List_ReferenceNumbers">ರೆಫರೆನ್ಸ್ ಸಂಖ್ಯೆಗಳು</x:String>
@@ -81,6 +82,12 @@
         <x:String x:Key="L_List_LegendCatchUp">ಕ್ಯಾಚ್-ಅಪ್: ಹಳೆಯ ಬಾಕಿ ತೆರವು</x:String>
         <x:String x:Key="L_List_LegendPartialCatchUp">ಭಾಗಶಃ: ಇನ್ನೂ ಪ್ರಸ್ತುತ ತಿಂಗಳಿಗೆ ಬಂದಿಲ್ಲ</x:String>
         <x:String x:Key="L_List_LegendMissingDue">ಬಾಕಿ ದಿನಾಂಕ ಲಭ್ಯವಿಲ್ಲ</x:String>
+        <x:String x:Key="L_List_ValidationTitle">Account Check</x:String>
+        <x:String x:Key="L_List_ValidationHint">Checks every staged account against the current database and processing rules.</x:String>
+        <x:String x:Key="L_List_ValidationChecked">Checked:</x:String>
+        <x:String x:Key="L_List_ValidationReady">Ready:</x:String>
+        <x:String x:Key="L_List_ValidationReview">Review:</x:String>
+        <x:String x:Key="L_List_ValidationBlocked">Blocked:</x:String>
 
         <x:String x:Key="L_Report_Kicker">ಕಾರ್ಯಾಚರಣೆ</x:String>
         <x:String x:Key="L_Report_Title">ವರದಿಗಳು</x:String>

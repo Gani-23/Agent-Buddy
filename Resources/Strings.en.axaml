@@ -68,6 +68,7 @@
         <x:String x:Key="L_List_StartWalk">Start And Take A Walk</x:String>
         <x:String x:Key="L_List_RetryFailed">Retry Failed Only</x:String>
         <x:String x:Key="L_List_AddList">Add List</x:String>
+        <x:String x:Key="L_List_ValidateAccounts">Check Accounts</x:String>
         <x:String x:Key="L_List_Processing">Processing...</x:String>
         <x:String x:Key="L_List_ReferenceNumbers">Reference Numbers</x:String>
         <x:String x:Key="L_List_Mode">Mode</x:String>
@@ -81,6 +82,12 @@
         <x:String x:Key="L_List_LegendCatchUp">Catch-up: clears old dues</x:String>
         <x:String x:Key="L_List_LegendPartialCatchUp">Partial: still not current month</x:String>
         <x:String x:Key="L_List_LegendMissingDue">Due date unavailable</x:String>
+        <x:String x:Key="L_List_ValidationTitle">Account Check</x:String>
+        <x:String x:Key="L_List_ValidationHint">Checks every staged account against the current database and processing rules.</x:String>
+        <x:String x:Key="L_List_ValidationChecked">Checked:</x:String>
+        <x:String x:Key="L_List_ValidationReady">Ready:</x:String>
+        <x:String x:Key="L_List_ValidationReview">Review:</x:String>
+        <x:String x:Key="L_List_ValidationBlocked">Blocked:</x:String>
 
         <x:String x:Key="L_Report_Kicker">Operations</x:String>
         <x:String x:Key="L_Report_Title">Reports</x:String>

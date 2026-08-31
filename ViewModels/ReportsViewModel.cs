@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Unit = ReactiveUI.Primitives.RxVoid;
+using System.Reactive;
 using System.Threading.Tasks;
 using AgentBuddy.Models;
 using AgentBuddy.Services;

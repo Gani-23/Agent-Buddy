@@ -67,6 +67,7 @@
         <x:String x:Key="L_List_DeleteAll">అన్నీ తొలగించు</x:String>
         <x:String x:Key="L_List_StartWalk">ప్రాసెస్ ప్రారంభించు</x:String>
         <x:String x:Key="L_List_RetryFailed">ఫెయిల్ అయినవే మళ్లీ</x:String>
+        <x:String x:Key="L_List_ValidateAccounts">Check Accounts</x:String>
         <x:String x:Key="L_List_AddList">జాబితా జోడించు</x:String>
         <x:String x:Key="L_List_Processing">ప్రాసెస్ జరుగుతోంది...</x:String>
         <x:String x:Key="L_List_ReferenceNumbers">రెఫరెన్స్ నంబర్లు</x:String>
@@ -81,6 +82,12 @@
         <x:String x:Key="L_List_LegendCatchUp">క్యాచ్-అప్: పాత బకాయిలు క్లియర్</x:String>
         <x:String x:Key="L_List_LegendPartialCatchUp">పాక్షికం: ఇంకా ఈ నెలకు చేరలేదు</x:String>
         <x:String x:Key="L_List_LegendMissingDue">డ్యూ తేదీ అందుబాటులో లేదు</x:String>
+        <x:String x:Key="L_List_ValidationTitle">Account Check</x:String>
+        <x:String x:Key="L_List_ValidationHint">Checks every staged account against the current database and processing rules.</x:String>
+        <x:String x:Key="L_List_ValidationChecked">Checked:</x:String>
+        <x:String x:Key="L_List_ValidationReady">Ready:</x:String>
+        <x:String x:Key="L_List_ValidationReview">Review:</x:String>
+        <x:String x:Key="L_List_ValidationBlocked">Blocked:</x:String>
 
         <x:String x:Key="L_Report_Kicker">ఆపరేషన్స్</x:String>
         <x:String x:Key="L_Report_Title">రిపోర్ట్స్</x:String>

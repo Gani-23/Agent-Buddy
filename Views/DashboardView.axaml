@@ -253,148 +253,110 @@
                     </Grid>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
-                    <Border Grid.Column="0" Classes="MetricCard FeaturedMetric">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{DynamicResource L_Dash_TotalAccounts}" Classes="Kicker" VerticalAlignment="Center"/>
-                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource InfoTintBrush}">
-                                    <TextBlock Text="#"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource AccentBlueBrush}"/>
-                                </Border>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalAccounts}" Classes="MetricValue"/>
-                            <TextBlock Grid.Row="2" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}">
-                                    <Run Text="{DynamicResource L_Dash_UpdatedPrefix}"/>
-                                    <Run Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM HH:mm}'}"/>
-                                </TextBlock>
-                        </Grid>
-                    </Border>
 
-                    <Border Grid.Column="1" Classes="MetricCard FeaturedMetric">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{DynamicResource L_Dash_ActiveAmount}" Classes="Kicker" VerticalAlignment="Center"/>
-                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource SuccessTintBrush}">
-                                    <TextBlock Text="Rs"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource SuccessBrush}"/>
-                                </Border>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Classes="MetricValue" Foreground="{StaticResource AccentBlueBrush}">
-                                    <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
-                                </TextBlock>
-                            <TextBlock Grid.Row="2" Text="{DynamicResource L_Dash_ActiveValueHint}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        </Grid>
-                    </Border>
 
-                    <Border Grid.Column="2" Classes="MetricCard FeaturedMetric">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{DynamicResource L_Dash_Due30Days}" Classes="Kicker" VerticalAlignment="Center"/>
-                                <Border Grid.Column="1" Classes="MetricIcon" Background="{DynamicResource WarningTintBrush}">
-                                    <TextBlock Text="!"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource WarningBrush}"/>
-                                </Border>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding AccountsDueSoon.Count}" Classes="MetricValue" Foreground="{StaticResource WarningBrush}"/>
-                            <WrapPanel Grid.Row="2">
-                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
-                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
-                                    <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
-                                </WrapPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-
-                <Border Classes="DefaultSummaryCard">
-                    <Grid ColumnDefinitions="1.35*,1*,Auto" ColumnSpacing="16">
-                        <StackPanel Grid.Column="0" Spacing="10">
-                            <StackPanel Spacing="2">
-                                <TextBlock Text="Default Summary" Classes="Kicker"/>
-                                <TextBlock Text="{Binding DefaultSummaryTitle}"
-                                           FontSize="22"
-                                           FontWeight="Bold"
-                                           LineHeight="28"
-                                           TextWrapping="Wrap"/>
-                                <TextBlock Text="{Binding DefaultSummaryHint}"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                           TextWrapping="Wrap"/>
+                <Border Classes="DefaultSummaryCard Hoverable" Padding="32">
+                    <StackPanel Spacing="32">
+                        <!-- HEADER SECTION -->
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Top">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="PORTFOLIO OVERVIEW" Classes="Kicker" LetterSpacing="2" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBlock Text="Complete Active RD Portfolio" FontSize="28" FontWeight="Black" LetterSpacing="-0.5"/>
                             </StackPanel>
 
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                                <ComboBox Grid.Column="0"
-                                          ItemsSource="{Binding DefaultSummaryOptions}"
-                                          SelectedItem="{Binding SelectedDefaultSummaryOption}"
-                                          VerticalAlignment="Center"/>
-                                <ComboBox Grid.Column="1"
-                                          ItemsSource="{Binding DefaultSummarySortOptions}"
-                                          SelectedItem="{Binding SelectedDefaultSummarySortOption}"
-                                          VerticalAlignment="Center"/>
-                            </Grid>
-                        </StackPanel>
-
-                        <Grid Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="10" VerticalAlignment="Stretch">
-                            <Border Grid.Column="0" Classes="SummaryMiniStat">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Text="Accounts" Classes="Kicker"/>
-                                    <TextBlock Text="{Binding DefaultSummaryCount}"
-                                               FontSize="30"
-                                               FontWeight="Bold"
-                                               LineHeight="36"/>
-                                    <TextBlock Text="{Binding DefaultSummarySortLabel, StringFormat='Sorted: {0}'}"
-                                               FontSize="11"
-                                               TextWrapping="Wrap"
-                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="1" Classes="SummaryMiniStat">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Text="Amount" Classes="Kicker"/>
-                                    <TextBlock FontSize="25"
-                                               FontWeight="Bold"
-                                               LineHeight="32"
-                                               Foreground="{StaticResource AccentBlueBrush}">
-                                        <Run Text="Rs. "/>
-                                        <Run Text="{Binding DefaultSummaryAmount, StringFormat=N0}"/>
-                                    </TextBlock>
-                                    <TextBlock Text="Printable account set"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Border>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Button Classes="Secondary" Padding="16,8" Click="SearchDefaultSummary_Click" Content="Search Accounts"/>
+                                <Button Classes="Primary" Padding="20,8" Click="OpenDefaultSummary_Click" Content="View All Accounts"/>
+                            </StackPanel>
                         </Grid>
 
-                        <StackPanel Grid.Column="2"
-                                    Spacing="8"
-                                    Width="126"
-                                    VerticalAlignment="Center">
-                            <Button Classes="Primary"
-                                    Padding="14,8"
-                                    HorizontalAlignment="Stretch"
-                                    Click="OpenDefaultSummary_Click"
-                                    Content="{DynamicResource L_Common_ViewAccounts}"/>
-                            <Button Classes="Secondary"
-                                    Padding="14,8"
-                                    HorizontalAlignment="Stretch"
-                                    Click="SearchDefaultSummary_Click"
-                                    Content="{DynamicResource L_Common_Search}"/>
-                            <Button Classes="Secondary"
-                                    Padding="14,8"
-                                    HorizontalAlignment="Stretch"
-                                    Click="PrintDefaultSummary_Click"
-                                    Content="{DynamicResource L_Common_Print}"/>
+                        <!-- METRICS SECTION -->
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="32">
+                            <!-- Metric 1 -->
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Total Active Accounts" Classes="Kicker"/>
+                                <TextBlock Text="{Binding TotalAccounts}" FontSize="36" FontWeight="Black" LetterSpacing="-1"/>
+                            </StackPanel>
+                            
+                            <!-- Metric 2 -->
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Total Portfolio Size" Classes="Kicker"/>
+                                <TextBlock FontSize="36" FontWeight="Black" Foreground="{StaticResource AccentBlueBrush}" LetterSpacing="-1">
+                                    <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+                            
+                            <!-- Metric 3 -->
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Total Due Collection" Classes="Kicker"/>
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" LetterSpacing="-0.5">
+                                    <Run Text="{Binding PendingThisMonthCount}" /> Accounts
+                                </TextBlock>
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                    <Run Text="Rs. "/><Run Text="{Binding PendingThisMonthAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Metric 4 -->
+                            <StackPanel Grid.Column="3" Spacing="4">
+                                <TextBlock Text="Deposited This Month" Classes="Kicker"/>
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" LetterSpacing="-0.5">
+                                    <Run Text="Rs. "/><Run Text="{Binding FirstHalfDepositedWindowAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Subtle Divider -->
+                        <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="0,8" Opacity="0.3"/>
+
+                        <!-- AUTOMATIONS SECTION -->
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="AUTOMATED ACTIONS" Classes="Kicker" LetterSpacing="2" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Text="1-Click WhatsApp dispatch for bulk collection reminders." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="13"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                    <TextBlock Text="OWNER NUMBER:" Classes="Kicker" VerticalAlignment="Center"/>
+                                    <TextBox Width="180" Text="{Binding AgentPhoneNumber}" PlaceholderText="e.g. 919876543210"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <WrapPanel Margin="0,4,0,0">
+                                <!-- 15th Deadline Auto -->
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="20,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Remind 15th Deadline" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding FirstHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.8"/>
+                                    </StackPanel>
+                                </Button>
+                                
+                                <!-- Month End Auto -->
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="20,12" Tag="pending-second-half" Click="SmartAutomation_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Remind Month-End" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding SecondHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.8"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Rebate Upsell Auto -->
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="20,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Pitch 6-Month Rebates" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                        <TextBlock Text="{Binding RebateUpsellCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Opacity="0.8"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Critical Discontinuation Auto -->
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="20,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Warn Discontinuations" FontWeight="Bold" Foreground="{StaticResource DangerBrush}"/>
+                                        <TextBlock Text="{Binding CriticalDiscontinuationCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" Opacity="0.8"/>
+                                    </StackPanel>
+                                </Button>
+                            </WrapPanel>
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
                 </Border>
 
                 <Border Classes="Card" Padding="16" IsVisible="{Binding HasUpdateStatus}">
@@ -487,9 +449,150 @@
 
                 <Border Classes="SectionCard" Padding="16">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="{DynamicResource L_Dash_ActionCenter}" Classes="SubHeader"/>
+                        <TextBlock Text="Agent Insights (Opportunities &amp; Risks)" Classes="SubHeader"/>
 
                         <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <!-- Row 0: Rebate Upsell Prospects -->
+                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Rebate Upsell Prospects" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding RebateUpsellCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Prime for 6-month advance pitch" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="rebate-upsell" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 0: Critical Discontinuation -->
+                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Last Chance (5-6 Mo Overdue)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding CriticalDiscontinuationCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="About to be permanently discontinued" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="critical-discontinuation" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 0: Defaulters -->
+                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Defaulter Accounts (4+ Mo)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding DefaulterAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Requires Revival Fee" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="defaulters" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: VIP Customers -->
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="VIP Accounts (High Value)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding VipAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding VipAccountsAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="vip-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Row 1: At-Risk Customers -->
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="At Risk (1-3 Mo Overdue)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AtRiskAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Monthly penalties applying" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="at-risk-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 0: Defaulters -->
+                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Defaulter Accounts" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding DefaulterAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Requires Revival Fee" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="defaulters" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: Commission Forecast -->
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Pending Commission Forecast" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding PendingCommissionForecast, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Estimated 4% of Pending Month" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: Eligible for Loan -->
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Eligible for 50% Loan" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding EligibleForLoanCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="12+ Installments Paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="loan-eligible" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: Premature Closure -->
+                            <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Premature Closure Prospects" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding EligibleForPrematureClosureCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="36+ Installments Paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="premature-closure" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="SectionCard" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{DynamicResource L_Dash_ActionCenter}" Classes="SubHeader"/>
+
+                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
 
                             <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintSuccess">
                                 <StackPanel Spacing="6">
@@ -599,6 +702,23 @@
                             </Border>
 
                             <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_Due30Days}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AccountsDueSoon.Count}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Requires immediate action" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Shift Matured to Row 3 -->
+                            <Border Grid.Row="3" Grid.Column="0" Classes="StatTile TintDanger">
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="{DynamicResource L_Dash_MaturedAccounts}" FontWeight="SemiBold"/>
                                     <TextBlock FontSize="22" FontWeight="Bold">
