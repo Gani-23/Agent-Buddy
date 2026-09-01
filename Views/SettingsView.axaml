@@ -124,7 +124,8 @@
                 <StackPanel Spacing="16">
                     <TextBlock Text="{DynamicResource L_Set_DatabaseConfig}" Classes="SubHeader"/>
 
-                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <!-- Actual DB Path -->
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource L_Set_DatabasePath}" 
                                    VerticalAlignment="Top"
@@ -135,11 +136,34 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
+                        <!-- Base Directory Override -->
                         <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Base Directory" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        
+                        <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6" ColumnSpacing="12">
+                            <TextBox Grid.Row="0" Grid.Column="0"
+                                     Text="{Binding DatabaseLocation, Mode=TwoWay}" 
+                                     PlaceholderText="e.g. /Users/gani/Documents/DOPAgent"/>
+                            <Button Grid.Row="0" Grid.Column="1" 
+                                    Classes="Secondary" 
+                                    Content="Save Path" 
+                                    Command="{Binding SaveDatabaseLocationCommand}"/>
+                            
+                            <!-- Status Label -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding DatabaseLocationStatus}"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                       FontSize="12"
+                                       IsVisible="{Binding DatabaseLocationStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </Grid>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource L_Set_AgentId}" 
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                        <TextBlock Grid.Row="2" Grid.Column="1" 
                                    Text="{Binding AgentId}" 
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>

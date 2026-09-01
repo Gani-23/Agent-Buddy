@@ -115,6 +115,7 @@ public class SettingsViewModel : ViewModelBase
         SaveCredentialsCommand = ReactiveCommand.CreateFromTask(SaveCredentialsAsync);
         SaveMobileSyncSettingsCommand = ReactiveCommand.CreateFromTask(SaveMobileSyncSettingsAsync);
         SaveLanguageCommand = ReactiveCommand.CreateFromTask(SaveLanguageAsync);
+        SaveDatabaseLocationCommand = ReactiveCommand.CreateFromTask(SaveDatabaseLocationAsync);
         UpdateMissingAslaasAllCommand = ReactiveCommand.CreateFromTask(UpdateMissingAslaasAllAsync);
         ForceUpdateAllAslaasCommand = ReactiveCommand.CreateFromTask(ForceUpdateAllAslaasAsync);
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
@@ -168,6 +169,20 @@ public class SettingsViewModel : ViewModelBase
     {
         get => _basePath;
         set => this.RaiseAndSetIfChanged(ref _basePath, value);
+    }
+
+    private string? _databaseLocation;
+    public string? DatabaseLocation
+    {
+        get => _databaseLocation;
+        set => this.RaiseAndSetIfChanged(ref _databaseLocation, value);
+    }
+
+    private string? _databaseLocationStatus;
+    public string? DatabaseLocationStatus
+    {
+        get => _databaseLocationStatus;
+        set => this.RaiseAndSetIfChanged(ref _databaseLocationStatus, value);
     }
 
     public string? AgentId
@@ -479,6 +494,7 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SaveBrowserSettingsCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveRdCertificateRenewalCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveRetentionSettingsCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveDatabaseLocationCommand { get; }
     public ReactiveCommand<Unit, Unit> ActivateLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ValidateStoredLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearLicenseCommand { get; }
@@ -488,6 +504,13 @@ public class SettingsViewModel : ViewModelBase
 
     private async void LoadSettings()
     {
+        var config = GlobalConfig.Load();
+        DatabaseLocation = config.BaseDirectoryOverride;
+        if (string.IsNullOrWhiteSpace(DatabaseLocation))
+        {
+            DatabaseLocation = Path.Combine(AppPaths.DocumentsDirectory, "DOPAgent");
+        }
+        
         DatabasePath = _databaseService.GetDatabasePath();
         ScriptsPath = _pythonService.GetScriptsPath();
         DocumentsPath = _pythonService.GetDocumentsPath();
@@ -1565,5 +1588,30 @@ public class SettingsViewModel : ViewModelBase
             .FirstOrDefault(line => !string.IsNullOrWhiteSpace(line));
 
         return string.IsNullOrWhiteSpace(firstLine) ? "Unknown error." : firstLine;
+    }
+
+    private async Task SaveDatabaseLocationAsync()
+    {
+        try
+        {
+            var config = GlobalConfig.Load();
+            var dir = DatabaseLocation?.Trim() ?? string.Empty;
+            
+            if (string.IsNullOrWhiteSpace(dir) || dir == Path.Combine(AppPaths.DocumentsDirectory, "DOPAgent"))
+            {
+                config.BaseDirectoryOverride = string.Empty;
+            }
+            else
+            {
+                config.BaseDirectoryOverride = dir;
+            }
+            
+            config.Save();
+            DatabaseLocationStatus = "Database location saved. Please restart the app to apply changes.";
+        }
+        catch (Exception ex)
+        {
+            DatabaseLocationStatus = $"Failed to save location: {ex.Message}";
+        }
     }
 }

@@ -14,6 +14,11 @@ public static class AppPaths
 
     private static string ResolveBaseDirectory()
     {
+        var config = GlobalConfig.Load();
+        if (!string.IsNullOrWhiteSpace(config.BaseDirectoryOverride))
+        {
+            return EnsureDirectory(config.BaseDirectoryOverride);
+        }
         return EnsureDirectory(Path.Combine(DocumentsDirectory, "DOPAgent"));
     }
 
