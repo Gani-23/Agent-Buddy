@@ -1,0 +1,32 @@
+name: "Intent Guard Agent Audit"
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  intent-guard-audit:
+    name: Audit Agent Intent & PR Safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Runs Intent Guard PR Auditor from GitHub Marketplace
+      - name: Run Intent Guard Auditor
+        uses: Gani-23/Intent-core@v1.0.2
+        with:
+          github_token: ${{ secrets.GH_TOKEN || github.token }}
+          report_dir: ".intent-guard/reports"
+          upload_artifact: "true"
+          artifact_name: "agent-buddy-intent-audit-reports"
