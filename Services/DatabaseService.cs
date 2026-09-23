@@ -1159,4 +1159,243 @@ public class DatabaseService
         }
         return builder.ToString();
     }
+
+    /// <summary>
+    /// Save a batch of RD accounts into rd_accounts and account_detail within a transaction
+    /// </summary>
+    public async Task<(int newCount, int updatedCount)> SaveAccountsBatchAsync(IReadOnlyCollection<RDAccount> accounts)
+    {
+        EnsureAnalyticsSchema();
+        if (accounts == null || accounts.Count == 0)
+        {
+            return (0, 0);
+        }
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+        using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        var existingMap = new Dictionary<string, (int id, bool isActive)>(StringComparer.OrdinalIgnoreCase);
+        using (var selectCmd = connection.CreateCommand())
+        {
+            selectCmd.Transaction = transaction;
+            selectCmd.CommandText = "SELECT account_no, id, is_active FROM rd_accounts";
+            using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var acct = reader.GetString(0);
+                var id = reader.GetInt32(1);
+                var isActive = reader.GetInt32(2) == 1;
+                existingMap[acct] = (id, isActive);
+            }
+        }
+
+        var newCount = 0;
+        var updatedCount = 0;
+
+        foreach (var account in accounts)
+        {
+            var acctNo = (account.AccountNo ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(acctNo)) continue;
+
+            var amount = account.GetAmount();
+            var monthPaidNum = account.GetMonthPaidNumber();
+            var nextDueIso = account.NextDueDateIso ?? string.Empty;
+            var totalDeposit = account.TotalDeposit > 0 ? account.TotalDeposit : amount * monthPaidNum;
+            var status = string.IsNullOrWhiteSpace(account.Status) ? "activate" : account.Status;
+            var aslaas = account.AslaasNo ?? string.Empty;
+
+            if (existingMap.TryGetValue(acctNo, out _))
+            {
+                updatedCount++;
+                using var updateCmd = connection.CreateCommand();
+                updateCmd.Transaction = transaction;
+                updateCmd.CommandText = @"
+                    UPDATE rd_accounts
+                    SET account_name = @accountName,
+                        aslaas_no = @aslaasNo,
+                        denomination = @denomination,
+                        month_paid_upto = @monthPaidUpto,
+                        next_installment_date = @nextInstallmentDate,
+                        amount = @amount,
+                        month_paid_upto_num = @monthPaidUptoNum,
+                        next_due_date_iso = @nextDueDateIso,
+                        total_deposit = @totalDeposit,
+                        status = @status,
+                        is_active = 1,
+                        last_updated = CURRENT_TIMESTAMP
+                    WHERE account_no = @accountNo";
+                updateCmd.Parameters.AddWithValue("@accountNo", acctNo);
+                updateCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
+                updateCmd.Parameters.AddWithValue("@aslaasNo", aslaas);
+                updateCmd.Parameters.AddWithValue("@denomination", account.Denomination ?? string.Empty);
+                updateCmd.Parameters.AddWithValue("@monthPaidUpto", account.MonthPaidUpto ?? string.Empty);
+                updateCmd.Parameters.AddWithValue("@nextInstallmentDate", account.NextInstallmentDate ?? string.Empty);
+                updateCmd.Parameters.AddWithValue("@amount", amount);
+                updateCmd.Parameters.AddWithValue("@monthPaidUptoNum", monthPaidNum);
+                updateCmd.Parameters.AddWithValue("@nextDueDateIso", nextDueIso);
+                updateCmd.Parameters.AddWithValue("@totalDeposit", totalDeposit);
+                updateCmd.Parameters.AddWithValue("@status", status);
+                await updateCmd.ExecuteNonQueryAsync();
+            }
+            else
+            {
+                newCount++;
+                using var insertCmd = connection.CreateCommand();
+                insertCmd.Transaction = transaction;
+                insertCmd.CommandText = @"
+                    INSERT INTO rd_accounts (
+                        account_no, account_name, aslaas_no, denomination, month_paid_upto,
+                        next_installment_date, amount, month_paid_upto_num, next_due_date_iso,
+                        total_deposit, status, is_active, first_seen, last_updated
+                    ) VALUES (
+                        @accountNo, @accountName, @aslaasNo, @denomination, @monthPaidUpto,
+                        @nextInstallmentDate, @amount, @monthPaidUptoNum, @nextDueDateIso,
+                        @totalDeposit, @status, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                    )";
+                insertCmd.Parameters.AddWithValue("@accountNo", acctNo);
+                insertCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
+                insertCmd.Parameters.AddWithValue("@aslaasNo", aslaas);
+                insertCmd.Parameters.AddWithValue("@denomination", account.Denomination ?? string.Empty);
+                insertCmd.Parameters.AddWithValue("@monthPaidUpto", account.MonthPaidUpto ?? string.Empty);
+                insertCmd.Parameters.AddWithValue("@nextInstallmentDate", account.NextInstallmentDate ?? string.Empty);
+                insertCmd.Parameters.AddWithValue("@amount", amount);
+                insertCmd.Parameters.AddWithValue("@monthPaidUptoNum", monthPaidNum);
+                insertCmd.Parameters.AddWithValue("@nextDueDateIso", nextDueIso);
+                insertCmd.Parameters.AddWithValue("@totalDeposit", totalDeposit);
+                insertCmd.Parameters.AddWithValue("@status", status);
+                await insertCmd.ExecuteNonQueryAsync();
+            }
+
+            // Sync account_detail
+            using var detailCmd = connection.CreateCommand();
+            detailCmd.Transaction = transaction;
+            detailCmd.CommandText = @"
+                INSERT INTO account_detail (
+                    account_number, account_holder_name, amount, month_paid_upto,
+                    next_due_date, total_deposit, status, first_seen, last_updated
+                ) VALUES (
+                    @accountNo, @accountName, @amount, @monthPaidUptoNum,
+                    @nextDueDateIso, @totalDeposit, @status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                ) ON CONFLICT(account_number) DO UPDATE SET
+                    account_holder_name = excluded.account_holder_name,
+                    amount = excluded.amount,
+                    month_paid_upto = excluded.month_paid_upto,
+                    next_due_date = excluded.next_due_date,
+                    total_deposit = excluded.total_deposit,
+                    status = excluded.status,
+                    last_updated = CURRENT_TIMESTAMP";
+            detailCmd.Parameters.AddWithValue("@accountNo", acctNo);
+            detailCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
+            detailCmd.Parameters.AddWithValue("@amount", amount);
+            detailCmd.Parameters.AddWithValue("@monthPaidUptoNum", monthPaidNum);
+            detailCmd.Parameters.AddWithValue("@nextDueDateIso", nextDueIso);
+            detailCmd.Parameters.AddWithValue("@totalDeposit", totalDeposit);
+            detailCmd.Parameters.AddWithValue("@status", status);
+            await detailCmd.ExecuteNonQueryAsync();
+        }
+
+        await transaction.CommitAsync();
+        NotifyDatabaseChanged();
+        return (newCount, updatedCount);
+    }
+
+    /// <summary>
+    /// Archives missing accounts into closed_accounts and deactivates them in rd_accounts
+    /// </summary>
+    public async Task ArchiveMissingAccountsAsync(IReadOnlyCollection<RDAccount> missingAccounts, string reason = "missing_from_popup")
+    {
+        EnsureAnalyticsSchema();
+        if (missingAccounts == null || missingAccounts.Count == 0)
+        {
+            return;
+        }
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+        using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        foreach (var account in missingAccounts)
+        {
+            var acctNo = (account.AccountNo ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(acctNo)) continue;
+
+            using var insertCmd = connection.CreateCommand();
+            insertCmd.Transaction = transaction;
+            insertCmd.CommandText = @"
+                INSERT INTO closed_accounts (
+                    account_no, account_name, aslaas_no, denomination, month_paid_upto,
+                    next_installment_date, amount, month_paid_upto_num, next_due_date_iso,
+                    total_deposit, status, first_seen, last_updated, closed_on, closed_reason, source_update_time
+                ) VALUES (
+                    @accountNo, @accountName, @aslaasNo, @denomination, @monthPaidUpto,
+                    @nextInstallmentDate, @amount, @monthPaidUptoNum, @nextDueDateIso,
+                    @totalDeposit, 'closed', @firstSeen, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @closedReason, CURRENT_TIMESTAMP
+                ) ON CONFLICT(account_no) DO UPDATE SET
+                    status = 'closed',
+                    closed_reason = excluded.closed_reason,
+                    last_updated = CURRENT_TIMESTAMP";
+            insertCmd.Parameters.AddWithValue("@accountNo", acctNo);
+            insertCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@aslaasNo", account.AslaasNo ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@denomination", account.Denomination ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@monthPaidUpto", account.MonthPaidUpto ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@nextInstallmentDate", account.NextInstallmentDate ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@amount", account.GetAmount());
+            insertCmd.Parameters.AddWithValue("@monthPaidUptoNum", account.GetMonthPaidNumber());
+            insertCmd.Parameters.AddWithValue("@nextDueDateIso", account.NextDueDateIso ?? string.Empty);
+            insertCmd.Parameters.AddWithValue("@totalDeposit", account.TotalDeposit);
+            insertCmd.Parameters.AddWithValue("@firstSeen", account.FirstSeen == default ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : account.FirstSeen.ToString("yyyy-MM-dd HH:mm:ss"));
+            insertCmd.Parameters.AddWithValue("@closedReason", reason);
+            await insertCmd.ExecuteNonQueryAsync();
+
+            using var deactCmd = connection.CreateCommand();
+            deactCmd.Transaction = transaction;
+            deactCmd.CommandText = @"
+                UPDATE rd_accounts
+                SET is_active = 0, status = 'deactivate', last_updated = CURRENT_TIMESTAMP
+                WHERE account_no = @accountNo";
+            deactCmd.Parameters.AddWithValue("@accountNo", acctNo);
+            await deactCmd.ExecuteNonQueryAsync();
+
+            using var detailDeactCmd = connection.CreateCommand();
+            detailDeactCmd.Transaction = transaction;
+            detailDeactCmd.CommandText = @"
+                UPDATE account_detail
+                SET status = 'deactivate', last_updated = CURRENT_TIMESTAMP
+                WHERE account_number = @accountNo";
+            detailDeactCmd.Parameters.AddWithValue("@accountNo", acctNo);
+            await detailDeactCmd.ExecuteNonQueryAsync();
+        }
+
+        await transaction.CommitAsync();
+        NotifyDatabaseChanged();
+    }
+
+    /// <summary>
+    /// Records an update log in update_history
+    /// </summary>
+    public async Task RecordUpdateHistoryAsync(int totalAccounts, int newAccounts, int updatedAccounts, int removedAccounts, int activeAmount, string status = "success")
+    {
+        EnsureAnalyticsSchema();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            INSERT INTO update_history (
+                update_time, total_accounts, new_accounts, updated_accounts,
+                removed_accounts, active_amount, status
+            ) VALUES (
+                CURRENT_TIMESTAMP, @totalAccounts, @newAccounts, @updatedAccounts,
+                @removedAccounts, @activeAmount, @status
+            )";
+        cmd.Parameters.AddWithValue("@totalAccounts", totalAccounts);
+        cmd.Parameters.AddWithValue("@newAccounts", newAccounts);
+        cmd.Parameters.AddWithValue("@updatedAccounts", updatedAccounts);
+        cmd.Parameters.AddWithValue("@removedAccounts", removedAccounts);
+        cmd.Parameters.AddWithValue("@activeAmount", activeAmount);
+        cmd.Parameters.AddWithValue("@status", status);
+        await cmd.ExecuteNonQueryAsync();
+    }
 }

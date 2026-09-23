@@ -36,6 +36,7 @@ public class DashboardViewModel : ViewModelBase
     private readonly PythonService _pythonService;
     private readonly MobileSyncService _mobileSyncService;
     private readonly NotificationService? _notificationService;
+    private readonly IPortalAutomationService _portalAutomationService;
 
     private bool _isDarkTheme;
     private bool _isLoading;
@@ -113,13 +114,15 @@ public class DashboardViewModel : ViewModelBase
         MetricsCalculator metricsCalculator,
         PythonService pythonService,
         MobileSyncService mobileSyncService,
-        NotificationService? notificationService = null)
+        NotificationService? notificationService = null,
+        IPortalAutomationService? portalAutomationService = null)
     {
         _databaseService = databaseService;
         _metricsCalculator = metricsCalculator;
         _pythonService = pythonService;
         _mobileSyncService = mobileSyncService;
         _notificationService = notificationService;
+        _portalAutomationService = portalAutomationService ?? new DesktopPythonPortalAutomationService(pythonService);
         
         var settings = Services.AppSettings.Load();
         _agentPhoneNumber = settings.AgentPhoneNumber;
@@ -1554,10 +1557,37 @@ public class DashboardViewModel : ViewModelBase
         }
 
         IsUpdating = true;
-        UpdateStatus = "Checking Python installation...";
+        UpdateStatus = "Connecting to portal...";
 
         try
         {
+            // If running on mobile / non-desktop platform without python, run on-device portal automation
+            if (_portalAutomationService.CanRunOnDevice &&
+                !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
+                !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var (mobileSuccess, fetchedCount, mobileMessage) = await _portalAutomationService.FetchAccountsAsync(
+                    progress => UpdateStatus = progress);
+
+                if (mobileSuccess)
+                {
+                    UpdateStatus = $"Update successful! Fetched {fetchedCount} accounts. Refreshing dashboard...";
+                    await Task.Delay(1000);
+                    _databaseService.NotifyDatabaseChanged();
+                    UpdateStatus = "Database refreshed!";
+                    _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
+                    await Task.Delay(2000);
+                }
+                else
+                {
+                    UpdateStatus = $"Update failed: {mobileMessage}";
+                    _notificationService?.Error("Update Failed", mobileMessage);
+                    await Task.Delay(5000);
+                }
+                return;
+            }
+
             // Check if Python is installed
             var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();
             if (!isInstalled)
