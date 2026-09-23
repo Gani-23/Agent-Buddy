@@ -390,200 +390,178 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:ListPanelViewModel">
                             <Border Classes="Card Hoverable" 
-                                    Width="340" 
-                                    Height="490"
-                                    Padding="14"
-                                    Margin="0,0,16,16">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto"
+                                    Width="370" 
+                                    Height="540"
+                                    Padding="14,12"
+                                    Margin="0,0,14,14">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto"
                                       RowSpacing="6">
 
-                                    <!-- List Header -->
-                                    <StackPanel Grid.Row="0" Spacing="6">
-                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="4">
-                                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                <TextBlock Text="{Binding Name}" 
-                                                           FontWeight="Bold"
-                                                           FontSize="15"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                                <Button Grid.Column="1"
-                                                        Classes="Secondary"
-                                                        Padding="8,4"
-                                                        FontSize="12"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right"
-                                                        IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
-                                                        Click="DeleteList_Click"
-                                                        Content="Delete"/>
-                                            </Grid>
-                                            
-                                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                <TextBlock VerticalAlignment="Center"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
-                                                    <Run Text="{Binding TotalAmount, StringFormat='Rs. {0:N0}'}"/>
-                                                    <Run Text="{Binding AmountLimitText}" 
-                                                         Foreground="{DynamicResource AppTextSecondaryBrush}" 
-                                                         FontWeight="Normal"/>
-                                                </TextBlock>
-                                                <Border Grid.Column="1"
-                                                        Padding="6,2"
-                                                        Background="{DynamicResource AppHoverBrush}"
-                                                        CornerRadius="4"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Count, StringFormat='{}{0} accounts'}"
-                                                               FontSize="11"
-                                                               FontWeight="Medium"
-                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                                </Border>
-                                            </Grid>
-                                        </Grid>
+                                    <!-- Row 0: List Header (Title + Mode + Status + Delete) -->
+                                    <Grid Grid.Row="0"
+                                          ColumnDefinitions="Auto,Auto,Auto,*,Auto"
+                                          ColumnSpacing="6"
+                                          VerticalAlignment="Center">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Name}" 
+                                                   FontWeight="Bold"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                            <TextBlock Text="{DynamicResource L_List_Mode}"
-                                                        FontSize="11"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                                        VerticalAlignment="Center"/>
-                                            <ComboBox Grid.Column="1"
-                                                      Width="170"
-                                                      Height="30"
-                                                      Classes="ModeSelector"
-                                                      ItemsSource="{Binding PaymentModes}"
-                                                      SelectedItem="{Binding SelectedPaymentMode}"/>
-                                        </Grid>
+                                        <ComboBox Grid.Column="1"
+                                                  Width="84"
+                                                  Height="26"
+                                                  Classes="ModeSelector"
+                                                  VerticalAlignment="Center"
+                                                  ItemsSource="{Binding PaymentModes}"
+                                                  SelectedItem="{Binding SelectedPaymentMode}"/>
 
-                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
-                                            <Border Padding="8,4"
-                                                    CornerRadius="4"
-                                                    Tag="{Binding StatusTag}">
-                                                <Border.Styles>
-                                                    <Style Selector="Border">
-                                                        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
-                                                    </Style>
-                                                    <Style Selector="Border[Tag=Pending]">
-                                                        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
-                                                    </Style>
-                                                    <Style Selector="Border[Tag=Processing]">
-                                                        <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
-                                                    </Style>
-                                                    <Style Selector="Border[Tag=Success]">
-                                                        <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
-                                                    </Style>
-                                                    <Style Selector="Border[Tag=Failed]">
-                                                        <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
-                                                    </Style>
-                                                </Border.Styles>
-                                                <TextBlock Text="{Binding StatusText}"
-                                                           FontSize="11"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            </Border>
+                                        <Border Grid.Column="2"
+                                                Padding="6,2"
+                                                CornerRadius="5"
+                                                VerticalAlignment="Center"
+                                                Tag="{Binding StatusTag}">
+                                            <Border.Styles>
+                                                <Style Selector="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=Pending]">
+                                                    <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=Processing]">
+                                                    <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=Success]">
+                                                    <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
+                                                </Style>
+                                                <Style Selector="Border[Tag=Failed]">
+                                                    <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
+                                                </Style>
+                                            </Border.Styles>
+                                            <TextBlock Text="{Binding StatusText}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                        </Border>
 
-                                            <Border Classes="ListSpinner Spinner"
-                                                    IsVisible="{Binding IsProcessingState}">
-                                                <Border Width="4"
-                                                        Height="4"
-                                                        CornerRadius="2"
-                                                        Background="{StaticResource AccentBlueBrush}"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Top"
-                                                        Margin="0,1,0,0"/>
-                                            </Border>
-                                        </StackPanel>
+                                        <Button Grid.Column="4"
+                                                Classes="Secondary"
+                                                Padding="7,2"
+                                                FontSize="11"
+                                                MinHeight="24"
+                                                VerticalAlignment="Center"
+                                                IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
+                                                Click="DeleteList_Click"
+                                                Content="Delete"/>
+                                    </Grid>
 
+                                    <!-- Row 1: Amount Limit & Account Count -->
+                                    <Grid Grid.Row="1"
+                                          ColumnDefinitions="*,Auto"
+                                          ColumnSpacing="8"
+                                          VerticalAlignment="Center">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   FontSize="11.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}">
+                                            <Run Text="{Binding TotalAmount, StringFormat='Rs. {0:N0}'}"/>
+                                            <Run Text="{Binding AmountLimitText}" 
+                                                 Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                                                 FontWeight="Normal"/>
+                                        </TextBlock>
+                                        <Border Grid.Column="1"
+                                                Padding="6,2"
+                                                Background="{DynamicResource AppHoverBrush}"
+                                                CornerRadius="4"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Count, StringFormat='{}{0} accounts'}"
+                                                       FontSize="10.5"
+                                                       FontWeight="Medium"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Row 2: Alerts & Diagnostics (if any) -->
+                                    <StackPanel Grid.Row="2" Spacing="4">
                                         <TextBlock Text="{Binding FailureReason}"
                                                    IsVisible="{Binding HasFailureReason}"
                                                    FontSize="10"
                                                    TextWrapping="Wrap"
-                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                   Foreground="{StaticResource ErrorBrush}"/>
 
                                         <Border Background="{DynamicResource ListDuplicateTintBrush}"
                                                 BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
                                                 BorderThickness="1"
-                                                CornerRadius="6"
-                                                Padding="8,5"
+                                                CornerRadius="5"
+                                                Padding="6,3"
                                                 IsVisible="{Binding IsDuplicateFocus}">
                                             <TextBlock Text="Duplicate found here"
-                                                       FontSize="11"
+                                                       FontSize="10.5"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                         </Border>
                                     </StackPanel>
 
-                                    <Separator Grid.Row="1"/>
-
-                                    <!-- Inline Add -->
-                                    <Border Grid.Row="2"
+                                    <!-- Row 3: Inline Add Input Well -->
+                                    <Border Grid.Row="3"
                                             Background="{DynamicResource AppHoverBrush}"
-                                            CornerRadius="6"
-                                            Padding="6">
-                                        <Grid ColumnDefinitions="*,80" ColumnSpacing="6">
+                                            BorderBrush="{DynamicResource AppBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="7"
+                                            Padding="4">
+                                        <Grid ColumnDefinitions="*,64" ColumnSpacing="5">
                                             <TextBox Text="{Binding PendingAccountNo, UpdateSourceTrigger=PropertyChanged}"
                                                      PlaceholderText="{DynamicResource L_List_WatermarkAccountNo}"
                                                      Tag="AccountInput"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      MaxLength="12"
-                                                     Padding="8,5"
-                                                     MinHeight="32"
-                                                     FontSize="12"
+                                                     Padding="8,4"
+                                                     MinHeight="28"
+                                                     FontSize="11.5"
                                                      FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                             <TextBox Grid.Column="1"
                                                      Text="{Binding PendingInstallmentText, UpdateSourceTrigger=PropertyChanged}"
-                                                     PlaceholderText="{DynamicResource L_List_WatermarkInst}"
+                                                     PlaceholderText="Inst (1)"
                                                      Tag="{Binding InstallmentInputTag}"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      HorizontalContentAlignment="Center"
-                                                     Padding="8,5"
-                                                     MinHeight="32"
-                                                     FontSize="12"
+                                                     Padding="4,4"
+                                                     MinHeight="28"
+                                                     FontSize="11.5"
                                                      FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                         </Grid>
                                     </Border>
 
-                                    <StackPanel Grid.Row="3" Spacing="2">
-                                        <TextBlock Text="{DynamicResource L_List_EnterHint}"
-                                                   FontSize="10"
-                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding InstallmentSuggestionHint}"
-                                                   FontSize="10"
-                                                   IsVisible="{Binding HasInstallmentSuggestionHint}"
-                                                   Foreground="{DynamicResource WarningBrush}"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Row="4"
-                                               Text="{Binding EntryMessage}"
-                                               FontSize="11"
-                                               TextWrapping="Wrap"
-                                               IsVisible="{Binding HasEntryMessage}"
-                                               Foreground="{Binding EntryMessageForeground}"/>
-
-                                    <Grid Grid.Row="5" ColumnDefinitions="*,64,32" ColumnSpacing="8">
-                                        <TextBlock Text="{DynamicResource L_List_ColumnAccountNo}"
-                                                   FontSize="11"
+                                    <!-- Row 4: Account Table Column Headers -->
+                                    <Grid Grid.Row="4"
+                                          ColumnDefinitions="4,*,64,28"
+                                          ColumnSpacing="8"
+                                          Margin="0,2,0,0">
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{DynamicResource L_List_ColumnAccountNo}"
+                                                   FontSize="10.5"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        <TextBlock Grid.Column="1"
+                                        <TextBlock Grid.Column="2"
                                                    Text="{DynamicResource L_List_ColumnInst}"
-                                                   FontSize="11"
+                                                   FontSize="10.5"
                                                    HorizontalAlignment="Center"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                     </Grid>
 
-                                    <!-- Account List -->
-                                    <ScrollViewer Grid.Row="6"
-                                                  MinHeight="100">
+                                    <!-- Row 5: Account Items ScrollViewer (Expands to fill vertical room) -->
+                                    <ScrollViewer Grid.Row="5"
+                                                  VerticalAlignment="Stretch">
                                         <ItemsControl ItemsSource="{Binding Items}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="models:ListItem">
-                                                    <Border Padding="8,6" 
+                                                    <Border Padding="8,5" 
                                                             Margin="0,2"
-                                                            CornerRadius="4">
+                                                            CornerRadius="5">
                                                         <Border.Styles>
                                                             <Style Selector="Border">
                                                                 <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
@@ -631,20 +609,21 @@
                                                             <Binding Converter="{StaticResource ListItemToTagConverter}"/>
                                                         </Border.Tag>
 
-                                                        <Grid ColumnDefinitions="4,*,64,32" ColumnSpacing="8"
+                                                        <Grid ColumnDefinitions="4,*,64,28" ColumnSpacing="8"
                                                               VerticalAlignment="Center">
                                                             <Border Width="4"
                                                                     CornerRadius="2"
                                                                     Background="{DynamicResource ListDuplicateBorderBrush}"
                                                                     IsVisible="{Binding IsDuplicateFocus}"/>
-                                                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding AccountNo}" 
                                                                            FontFamily="{StaticResource AppMonoFontFamily}"
-                                                                           FontSize="12"
+                                                                           FontSize="11.5"
+                                                                           FontWeight="SemiBold"
                                                                            TextTrimming="CharacterEllipsis"
                                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                                                 <TextBlock Text="{Binding EstimatedOpeningDateDisplay, StringFormat='Opened: {0}'}"
-                                                                           FontSize="10"
+                                                                           FontSize="9.5"
                                                                            TextTrimming="CharacterEllipsis"
                                                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                                 <ToolTip.Tip>
@@ -656,7 +635,7 @@
                                                                             MaxWidth="320">
                                                                         <StackPanel Spacing="4">
                                                                             <TextBlock Text="{Binding AccountNo, StringFormat='Account: {0}'}"
-                                                                                       FontWeight="SemiBold"/>
+                                                                                        FontWeight="SemiBold"/>
                                                                             <TextBlock Text="{Binding AccountNameDisplay, StringFormat='Name: {0}'}"/>
                                                                             <TextBlock Text="{Binding DenominationDisplay, StringFormat='Amount: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextInstallmentDateDisplay, StringFormat='Next Due: {0}'}"/>
@@ -666,7 +645,7 @@
                                                                             <TextBlock Text="{Binding TotalAmount, StringFormat='List Amount: Rs. {0:N0}'}"/>
                                                                             <TextBlock Text="{Binding PaymentCategoryLabel, StringFormat='Payment Type: {0}'}"/>
                                                                             <TextBlock Text="{Binding PaymentSummary, StringFormat='Payment Flow: {0}'}"
-                                                                                       TextWrapping="Wrap"/>
+                                                                                        TextWrapping="Wrap"/>
                                                                             <TextBlock Text="{Binding Status, StringFormat='Status: {0}'}"/>
                                                                         </StackPanel>
                                                                     </Border>
@@ -674,20 +653,21 @@
                                                             </StackPanel>
                                                             <TextBlock Grid.Column="2"
                                                                        Text="{Binding Installment}"
-                                                                       FontSize="12"
+                                                                       FontSize="11.5"
+                                                                       FontWeight="SemiBold"
                                                                        HorizontalAlignment="Center"
                                                                        VerticalAlignment="Center"
                                                                        Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                                             <Button Grid.Column="3"
                                                                     Classes="Icon"
                                                                     Tag="RowDelete"
-                                                                    Width="28"
-                                                                    Height="28"
+                                                                    Width="24"
+                                                                    Height="24"
                                                                     Padding="0"
                                                                     HorizontalAlignment="Center"
                                                                     VerticalAlignment="Center"
                                                                     Click="RemoveAccount_Click">
-                                                                <Viewbox Width="14" Height="14" Stretch="Uniform">
+                                                                <Viewbox Width="12" Height="12" Stretch="Uniform">
                                                                     <Canvas Width="16" Height="16">
                                                                         <Path Fill="{DynamicResource AppTextPrimaryBrush}"
                                                                               Data="M6 1H10C10.55 1 11 1.45 11 2V3H14V5H13V13.5C13 14.33 12.33 15 11.5 15H4.5C3.67 15 3 14.33 3 13.5V5H2V3H5V2C5 1.45 5.45 1 6 1ZM7 3H9V2.5H7V3ZM5 5V13H11V5H5ZM6.5 6.5H8V11.5H6.5V6.5ZM8.5 6.5H10V11.5H8.5V6.5Z"/>
@@ -701,15 +681,34 @@
                                         </ItemsControl>
                                     </ScrollViewer>
 
-                                    <!-- Clear Button -->
-                                    <Button Grid.Row="7"
-                                            Classes="Danger" 
-                                            Command="{Binding ClearCommand}"
-                                            HorizontalAlignment="Stretch"
-                                            Content="{DynamicResource L_List_ClearList}"
-                                            MinHeight="34"
-                                            Margin="0,6,0,0"
-                                            Padding="8"/>
+                                    <!-- Row 6: Card Footer (Clear Button + Suggestions) -->
+                                    <Grid Grid.Row="6"
+                                          ColumnDefinitions="*,Auto"
+                                          Margin="0,4,0,0"
+                                          VerticalAlignment="Center">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding InstallmentSuggestionHint}"
+                                                       FontSize="10"
+                                                       IsVisible="{Binding HasInstallmentSuggestionHint}"
+                                                       Foreground="{DynamicResource WarningBrush}"/>
+                                            <TextBlock Text="{Binding EntryMessage}"
+                                                       FontSize="10.5"
+                                                       TextWrapping="Wrap"
+                                                       IsVisible="{Binding HasEntryMessage}"
+                                                       Foreground="{Binding EntryMessageForeground}"/>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1"
+                                                Classes="Secondary" 
+                                                Foreground="{StaticResource ErrorBrush}"
+                                                Command="{Binding ClearCommand}"
+                                                Content="{DynamicResource L_List_ClearList}"
+                                                MinHeight="26"
+                                                Padding="8,3"
+                                                FontSize="11"
+                                                FontWeight="SemiBold"
+                                                VerticalAlignment="Center"/>
+                                    </Grid>
 
                                 </Grid>
                             </Border>
