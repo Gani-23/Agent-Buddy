@@ -31,7 +31,27 @@
         <Color x:Key="AccentYellow">#D4A017</Color>
         <Color x:Key="AccentPink">#C44582</Color>
 
-        <!-- Legacy keys kept for compatibility -->
+        <!-- Neumorphic Palette (Default Light Soft UI) -->
+        <Color x:Key="NeuLightBackground">#E6ECF5</Color>
+        <Color x:Key="NeuLightCard">#E6ECF5</Color>
+        <Color x:Key="NeuLightSidebar">#DFE6F0</Color>
+        <Color x:Key="NeuLightTextPrimary">#2D3748</Color>
+        <Color x:Key="NeuLightTextSecondary">#627289</Color>
+        <Color x:Key="NeuLightBorder">#D5DFED</Color>
+        <Color x:Key="NeuLightHover">#DDE5F0</Color>
+        <Color x:Key="NeuLightPressed">#D3DCE8</Color>
+
+        <!-- Neumorphic Palette (Dark Soft UI) -->
+        <Color x:Key="NeuDarkBackground">#1E222B</Color>
+        <Color x:Key="NeuDarkCard">#1E222B</Color>
+        <Color x:Key="NeuDarkSidebar">#181B22</Color>
+        <Color x:Key="NeuDarkTextPrimary">#E2E8F0</Color>
+        <Color x:Key="NeuDarkTextSecondary">#8A99AD</Color>
+        <Color x:Key="NeuDarkBorder">#2A303C</Color>
+        <Color x:Key="NeuDarkHover">#252A35</Color>
+        <Color x:Key="NeuDarkPressed">#191C24</Color>
+
+        <!-- Legacy / Fallback keys -->
         <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackground}"/>
         <SolidColorBrush x:Key="LightCardBackgroundBrush" Color="{StaticResource LightCardBackground}"/>
         <SolidColorBrush x:Key="LightSidebarBackgroundBrush" Color="{StaticResource LightSidebarBackground}"/>
@@ -50,36 +70,52 @@
         <SolidColorBrush x:Key="DarkHoverBrush" Color="{StaticResource DarkHover}"/>
         <SolidColorBrush x:Key="DarkPressedBrush" Color="{StaticResource DarkPressed}"/>
 
-        <!-- App tokens defaulting to Light; updated at runtime when theme toggles -->
-        <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource LightBackground}"/>
-        <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="{StaticResource LightCardBackground}"/>
-        <SolidColorBrush x:Key="AppSidebarBackgroundBrush" Color="{StaticResource LightSidebarBackground}"/>
-        <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{StaticResource LightTextPrimary}"/>
-        <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{StaticResource LightTextSecondary}"/>
-        <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource LightBorder}"/>
-        <SolidColorBrush x:Key="AppHoverBrush" Color="{StaticResource LightHover}"/>
-        <SolidColorBrush x:Key="AppPressedBrush" Color="{StaticResource LightPressed}"/>
+        <!-- App tokens (Defaulting to Neumorphic Light Soft UI) -->
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource NeuLightBackground}"/>
+        <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="{StaticResource NeuLightCard}"/>
+        <SolidColorBrush x:Key="AppSidebarBackgroundBrush" Color="{StaticResource NeuLightSidebar}"/>
+        <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{StaticResource NeuLightTextPrimary}"/>
+        <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{StaticResource NeuLightTextSecondary}"/>
+        <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource NeuLightBorder}"/>
+        <SolidColorBrush x:Key="AppHoverBrush" Color="{StaticResource NeuLightHover}"/>
+        <SolidColorBrush x:Key="AppPressedBrush" Color="{StaticResource NeuLightPressed}"/>
 
-        <SolidColorBrush x:Key="SuccessTintBrush" Color="#E7F4EC"/>
-        <SolidColorBrush x:Key="WarningTintBrush" Color="#FFF4DC"/>
-        <SolidColorBrush x:Key="DangerTintBrush" Color="#FDECEC"/>
-        <SolidColorBrush x:Key="InfoTintBrush" Color="#EAF2FF"/>
-        <SolidColorBrush x:Key="TintTextBrush" Color="#2F3437"/>
-        <SolidColorBrush x:Key="ListAdvanceTintBrush" Color="#DCEBFF"/>
+        <!-- Neumorphic Shadows (BoxShadow tokens) -->
+        <BoxShadows x:Key="NeuCardShadow">-6 -6 14 0 #FFFFFFFF, 6 6 14 0 #30456224</BoxShadows>
+        <BoxShadows x:Key="NeuCardHoverShadow">-8 -8 18 0 #FFFFFFFF, 8 8 18 0 #30456230</BoxShadows>
+        <BoxShadows x:Key="NeuCardSmallShadow">-4 -4 10 0 #FFFFFFFF, 4 4 10 0 #30456220</BoxShadows>
+        <BoxShadows x:Key="NeuInsetShadow">inset 3 3 6 0 #30456228, inset -3 -3 6 0 #FFFFFFFF</BoxShadows>
+        <BoxShadows x:Key="NeuButtonShadow">-4 -4 10 0 #FFFFFFFF, 4 4 10 0 #30456224</BoxShadows>
+        <BoxShadows x:Key="NeuButtonPressedShadow">inset 3 3 6 0 #30456230, inset -3 -3 6 0 #FFFFFFFF</BoxShadows>
+        <BoxShadows x:Key="NeuPillShadow">-3 -3 7 0 #FFFFFFFF, 3 3 7 0 #30456220</BoxShadows>
+
+        <!-- Dynamic BoxShadow resources updated at runtime -->
+        <BoxShadows x:Key="AppCardShadow">-6 -6 14 0 #FFFFFFFF, 6 6 14 0 #30456224</BoxShadows>
+        <BoxShadows x:Key="AppCardHoverShadow">-8 -8 18 0 #FFFFFFFF, 8 8 18 0 #30456230</BoxShadows>
+        <BoxShadows x:Key="AppInsetShadow">inset 3 3 6 0 #30456228, inset -3 -3 6 0 #FFFFFFFF</BoxShadows>
+        <BoxShadows x:Key="AppButtonShadow">-4 -4 10 0 #FFFFFFFF, 4 4 10 0 #30456224</BoxShadows>
+        <BoxShadows x:Key="AppButtonPressedShadow">inset 3 3 6 0 #30456230, inset -3 -3 6 0 #FFFFFFFF</BoxShadows>
+
+        <SolidColorBrush x:Key="SuccessTintBrush" Color="#D9F0E2"/>
+        <SolidColorBrush x:Key="WarningTintBrush" Color="#FCECC7"/>
+        <SolidColorBrush x:Key="DangerTintBrush" Color="#FCDCDC"/>
+        <SolidColorBrush x:Key="InfoTintBrush" Color="#DBE7FA"/>
+        <SolidColorBrush x:Key="TintTextBrush" Color="#2D3748"/>
+        <SolidColorBrush x:Key="ListAdvanceTintBrush" Color="#D2E3FC"/>
         <SolidColorBrush x:Key="ListAdvanceBorderBrush" Color="#145BD6"/>
-        <SolidColorBrush x:Key="ListCatchUpTintBrush" Color="#FFF1CF"/>
+        <SolidColorBrush x:Key="ListCatchUpTintBrush" Color="#FAE8BC"/>
         <SolidColorBrush x:Key="ListCatchUpBorderBrush" Color="#C98B00"/>
-        <SolidColorBrush x:Key="ListMixedTintBrush" Color="#D8F4EE"/>
+        <SolidColorBrush x:Key="ListMixedTintBrush" Color="#C9EFE6"/>
         <SolidColorBrush x:Key="ListMixedBorderBrush" Color="#0B8A6A"/>
-        <SolidColorBrush x:Key="ListLongOverdueTintBrush" Color="#FADFC7"/>
+        <SolidColorBrush x:Key="ListLongOverdueTintBrush" Color="#F6D6BA"/>
         <SolidColorBrush x:Key="ListLongOverdueBorderBrush" Color="#C56000"/>
-        <SolidColorBrush x:Key="ListPartialCatchUpTintBrush" Color="#FFE3E0"/>
+        <SolidColorBrush x:Key="ListPartialCatchUpTintBrush" Color="#FCD6D2"/>
         <SolidColorBrush x:Key="ListPartialCatchUpBorderBrush" Color="#E16A5A"/>
-        <SolidColorBrush x:Key="ListLongOverduePartialTintBrush" Color="#F6C7C1"/>
+        <SolidColorBrush x:Key="ListLongOverduePartialTintBrush" Color="#F7BDB5"/>
         <SolidColorBrush x:Key="ListLongOverduePartialBorderBrush" Color="#A63232"/>
-        <SolidColorBrush x:Key="ListMissingDueTintBrush" Color="#F1F0EE"/>
-        <SolidColorBrush x:Key="ListMissingDueBorderBrush" Color="#A0A0A0"/>
-        <SolidColorBrush x:Key="ListDuplicateTintBrush" Color="#FCEAF3"/>
+        <SolidColorBrush x:Key="ListMissingDueTintBrush" Color="#E2E7EE"/>
+        <SolidColorBrush x:Key="ListMissingDueBorderBrush" Color="#9CA3AF"/>
+        <SolidColorBrush x:Key="ListDuplicateTintBrush" Color="#F9D7E8"/>
         <SolidColorBrush x:Key="ListDuplicateBorderBrush" Color="#C44582"/>
         <SolidColorBrush x:Key="SuggestionBorderBrush" Color="#C44582"/>
 

@@ -90,8 +90,12 @@
                     <Button Grid.Column="3"
                             Classes="Secondary"
                             Command="{Binding RefreshCommand}"
-                            Padding="14,8"
-                            Content="{DynamicResource L_Common_Refresh}"/>
+                            Padding="14,8">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{StaticResource Icon_Refresh}" Width="14" Height="14"/>
+                            <TextBlock Text="{DynamicResource L_Common_Refresh}"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
@@ -161,16 +165,28 @@
                                                         VerticalAlignment="Center">
                                                 <Button Classes="Secondary"
                                                         Padding="8,5"
-                                                        Click="Copy_Click"
-                                                        Content="{DynamicResource L_Balance_Copy}"/>
+                                                        Click="Copy_Click">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <PathIcon Data="{StaticResource Icon_Copy}" Width="12" Height="12"/>
+                                                        <TextBlock Text="{DynamicResource L_Balance_Copy}"/>
+                                                    </StackPanel>
+                                                </Button>
                                                 <Button Classes="Primary"
                                                         Padding="8,5"
-                                                        Click="Add_Click"
-                                                        Content="{DynamicResource L_Balance_Add}"/>
+                                                        Click="Add_Click">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <PathIcon Data="{StaticResource Icon_Plus}" Width="12" Height="12"/>
+                                                        <TextBlock Text="{DynamicResource L_Balance_Add}"/>
+                                                    </StackPanel>
+                                                </Button>
                                                 <Button Classes="Secondary"
                                                         Padding="8,5"
-                                                        Click="View_Click"
-                                                        Content="{DynamicResource L_Balance_View}"/>
+                                                        Click="View_Click">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <PathIcon Data="{StaticResource Icon_Folder}" Width="12" Height="12"/>
+                                                        <TextBlock Text="{DynamicResource L_Balance_View}"/>
+                                                    </StackPanel>
+                                                </Button>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -186,7 +202,12 @@
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"
                            VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Classes="Secondary" Padding="16,8" Click="Close_Click" Content="{DynamicResource L_Common_Close}"/>
+                <Button Grid.Column="1" Classes="Secondary" Padding="16,8" Click="Close_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource Icon_Close}" Width="14" Height="14"/>
+                        <TextBlock Text="{DynamicResource L_Common_Close}"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Grid>
     </Border>

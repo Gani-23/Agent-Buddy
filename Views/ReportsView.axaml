@@ -29,16 +29,17 @@
             <WrapPanel>
                 <Button Classes="Primary"
                         Command="{Binding RefreshCommand}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Common_Refresh}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="White"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Refresh}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
-                <Border Margin="0,0,12,0"
-                        Padding="10,6"
-                        CornerRadius="8"
+                <Border Margin="0,0,12,10"
+                        Padding="12,6"
+                        CornerRadius="10"
                         Background="{DynamicResource AppCardBackgroundBrush}"
                         BorderBrush="{DynamicResource AppBorderBrush}"
                         BorderThickness="1">
@@ -53,9 +54,9 @@
                     </StackPanel>
                 </Border>
 
-                <Border Margin="0,0,12,0"
-                        Padding="10,6"
-                        CornerRadius="8"
+                <Border Margin="0,0,12,10"
+                        Padding="12,6"
+                        CornerRadius="10"
                         Background="{DynamicResource AppCardBackgroundBrush}"
                         BorderBrush="{DynamicResource AppBorderBrush}"
                         BorderThickness="1">
@@ -74,54 +75,60 @@
                 <Button Classes="Secondary"
                         Command="{Binding SetDefaultPrinterCommand}"
                         IsEnabled="{Binding HasPrinterOptions}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Report_SetDefaultPrinter}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Print}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_SetDefaultPrinter}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
                 <Button Classes="Secondary"
                         Command="{Binding RefreshPrintersCommand}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Common_Refresh}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Refresh}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
                 <Button Classes="Success"
                         Command="{Binding PrintAllCommand}"
                         IsEnabled="{Binding HasPrintableReports}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Report_PrintAllToday}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Print}" Width="14" Height="14" Foreground="White"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_PrintAllToday}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
                 <Button Classes="Secondary"
                         Command="{Binding GeneratePayslipsCommand}"
                         IsEnabled="{Binding HasReports}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Report_GeneratePayslip}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_GeneratePayslip}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
                 <Button Classes="Secondary"
                         Command="{Binding GenerateMissingReportsCommand}"
                         IsEnabled="{Binding HasMissingReports}"
-                        Padding="16,10"
-                        Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{DynamicResource L_Report_GenerateMissingPdfs}"/>
-                    </StackPanel>
+                        Padding="14,9"
+                        Margin="0,0,12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_GenerateMissingPdfs}" VerticalAlignment="Center"/>
+                    </Grid>
                 </Button>
 
                 <TextBlock Text="{DynamicResource L_Report_Max3A4}"
                            VerticalAlignment="Center"
+                           Margin="0,0,0,10"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </WrapPanel>
 

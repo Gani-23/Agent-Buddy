@@ -17,7 +17,7 @@
         CanResize="True"
         Background="{DynamicResource AppCardBackgroundBrush}">
 
-    <Border Padding="24" Classes="FadeIn">
+    <Border Padding="24" Classes="FadeIn DialogSurface">
         <Grid RowDefinitions="Auto,Auto,*,Auto">
             
             <!-- Header -->
@@ -44,13 +44,13 @@
                         <TextBox Grid.Column="0"
                                  Text="{Binding SearchQuery}"
                                  PlaceholderText="{DynamicResource L_Search_Watermark}"
-                                 Classes="Notion"
                                  FontSize="14"/>
                         <Button Grid.Column="1"
                                 Classes="Primary"
                                 Command="{Binding SearchCommand}"
                                 Padding="20,8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Search}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Search_ButtonSearch}"/>
                             </StackPanel>
                         </Button>
@@ -77,7 +77,10 @@
                         <Button Classes="Secondary"
                                 Command="{Binding ClearFiltersCommand}"
                                 Padding="12,8">
-                            <TextBlock Text="{DynamicResource L_Search_ClearFilters}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource Icon_Trash}" Width="14" Height="14"/>
+                                <TextBlock Text="{DynamicResource L_Search_ClearFilters}"/>
+                            </StackPanel>
                         </Button>
                     </WrapPanel>
 
@@ -210,6 +213,7 @@
                             Margin="0,0,12,0"
                             IsEnabled="{Binding HasSelection}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Plus}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Search_AddSelected}"/>
                         </StackPanel>
                     </Button>
@@ -217,7 +221,10 @@
                     <Button Classes="Secondary"
                             Click="Cancel_Click"
                             Padding="16,10">
-                        <TextBlock Text="{DynamicResource L_Common_Cancel}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
+                            <TextBlock Text="{DynamicResource L_Common_Cancel}"/>
+                        </StackPanel>
                     </Button>
                 </WrapPanel>
 

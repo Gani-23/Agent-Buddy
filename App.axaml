@@ -5,11 +5,17 @@
              RequestedThemeVariant="Light">
     
     <Application.Resources>
-        <converters:BoolToThemeIconConverter x:Key="BoolToThemeIconConverter"/>
-        <converters:BoolNotConverter x:Key="BoolNotConverter"/>
-        <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
-        <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
-        <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Icons.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <converters:BoolToThemeIconConverter x:Key="BoolToThemeIconConverter"/>
+            <converters:BoolNotConverter x:Key="BoolNotConverter"/>
+            <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
+            <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
+            <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+        </ResourceDictionary>
     </Application.Resources>
     
     <Application.Styles>

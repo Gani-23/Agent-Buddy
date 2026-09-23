@@ -36,6 +36,52 @@
                 </Grid>
             </Border>
 
+            <!-- Appearance & Theme -->
+            <Border Classes="SectionCard" Padding="24">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Appearance &amp; Theme" Classes="SubHeader"/>
+                            <TextBlock Text="Choose between Soft Neumorphic surfaces or the classic Notion styling."
+                                       Classes="SectionLead"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="150,*"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Theme Style"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Grid.Row="0"
+                                  Grid.Column="1"
+                                  MinWidth="300"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding ThemeModeOptions}"
+                                  SelectedItem="{Binding SelectedThemeModeOption}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Spacing="2" Margin="0,4">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="{Binding SelectedThemeModeOption.Description}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Language -->
             <Border Classes="SectionCard" Padding="24">
                 <StackPanel Spacing="16">
@@ -76,6 +122,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Set_SaveLanguage}"/>
                         </StackPanel>
                     </Button>
@@ -113,6 +160,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Bolt}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Set_CheckPython}"/>
                         </StackPanel>
                     </Button>
@@ -148,8 +196,13 @@
                                      PlaceholderText="e.g. /Users/gani/Documents/DOPAgent"/>
                             <Button Grid.Row="0" Grid.Column="1" 
                                     Classes="Secondary" 
-                                    Content="Save Path" 
-                                    Command="{Binding SaveDatabaseLocationCommand}"/>
+                                    Command="{Binding SaveDatabaseLocationCommand}"
+                                    Padding="14,8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <PathIcon Data="{StaticResource Icon_Save}" Width="14" Height="14"/>
+                                    <TextBlock Text="Save Path"/>
+                                </StackPanel>
+                            </Button>
                             
                             <!-- Status Label -->
                             <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
@@ -212,6 +265,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Set_SaveCredentials}"/>
                         </StackPanel>
                     </Button>
@@ -222,7 +276,10 @@
                                 IsEnabled="{Binding !IsChangingPassword}"
                                 HorizontalAlignment="Left"
                                 Padding="16,10">
-                            <TextBlock Text="Change Portal Password"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Key}" Width="16" Height="16"/>
+                                <TextBlock Text="Change Portal Password"/>
+                            </StackPanel>
                         </Button>
                         <TextBlock Text="{Binding PasswordChangeStatus}"
                                    TextWrapping="Wrap"
@@ -267,6 +324,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Set_SaveMobileSync}"/>
                         </StackPanel>
                     </Button>
@@ -309,7 +367,10 @@
                             IsEnabled="{Binding !IsSavingRdCertificateRenewal}"
                             HorizontalAlignment="Left"
                             Padding="16,10">
-                        <TextBlock Text="Save Renewal Date"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
+                            <TextBlock Text="Save Renewal Date"/>
+                        </StackPanel>
                     </Button>
 
                     <Separator/>
@@ -362,7 +423,10 @@
                             IsEnabled="{Binding !IsSavingRetentionSettings}"
                             HorizontalAlignment="Left"
                             Padding="16,10">
-                        <TextBlock Text="Save Retention Settings"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
+                            <TextBlock Text="Save Retention Settings"/>
+                        </StackPanel>
                     </Button>
 
                     <Separator/>
@@ -424,7 +488,10 @@
                                 IsEnabled="{Binding !IsProcessingLicense}"
                                 HorizontalAlignment="Left"
                                 Padding="16,10">
-                            <TextBlock Text="Activate License"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sparkle}" Width="16" Height="16"/>
+                                <TextBlock Text="Activate License"/>
+                            </StackPanel>
                         </Button>
 
                         <Button Classes="Secondary"
@@ -433,7 +500,10 @@
                                 HorizontalAlignment="Left"
                                 Padding="16,10"
                                 Margin="12,0,0,0">
-                            <TextBlock Text="Validate Saved License"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Shield}" Width="16" Height="16"/>
+                                <TextBlock Text="Validate Saved License"/>
+                            </StackPanel>
                         </Button>
 
                         <Button Classes="Danger"
@@ -442,7 +512,10 @@
                                 HorizontalAlignment="Left"
                                 Padding="16,10"
                                 Margin="12,0,0,0">
-                            <TextBlock Text="Clear License"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Trash}" Width="16" Height="16"/>
+                                <TextBlock Text="Clear License"/>
+                            </StackPanel>
                         </Button>
                     </WrapPanel>
 
@@ -488,7 +561,10 @@
                             IsEnabled="{Binding !IsCheckingUpdates}"
                             HorizontalAlignment="Left"
                             Padding="16,10">
-                        <TextBlock Text="Check for Updates"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Refresh}" Width="16" Height="16"/>
+                            <TextBlock Text="Check for Updates"/>
+                        </StackPanel>
                     </Button>
 
                     <Separator/>
@@ -527,6 +603,7 @@
                                 HorizontalAlignment="Left"
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_RefreshPrinters}"/>
                             </StackPanel>
                         </Button>
@@ -538,6 +615,7 @@
                                 Padding="16,10"
                                 Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_SaveDefaultPrinter}"/>
                             </StackPanel>
                         </Button>
@@ -579,6 +657,7 @@
                             HorizontalAlignment="Left"
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
                             <TextBlock Text="{DynamicResource L_Set_SaveBrowser}"/>
                         </StackPanel>
                     </Button>
@@ -597,6 +676,7 @@
                                 HorizontalAlignment="Left"
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_UpdateMissingAslaasAll}"/>
                             </StackPanel>
                         </Button>
@@ -608,6 +688,7 @@
                                 Padding="16,10"
                                 Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_ForceUpdateAslaasAll}"/>
                             </StackPanel>
                         </Button>
@@ -620,12 +701,14 @@
                     <WrapPanel>
                         <Button Classes="Secondary" Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Database}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_BackupDb}"/>
                             </StackPanel>
                         </Button>
 
                         <Button Classes="Secondary" Padding="16,10" Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Download}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_ExportExcel}"/>
                             </StackPanel>
                         </Button>
@@ -649,8 +732,12 @@
                         <Button Grid.Row="0" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseSourceDb_Click"
-                                Padding="12,8"
-                                Content="{DynamicResource L_Set_Browse}"/>
+                                Padding="12,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource Icon_Folder}" Width="14" Height="14"/>
+                                <TextBlock Text="{DynamicResource L_Set_Browse}"/>
+                            </StackPanel>
+                        </Button>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource L_Set_TargetDb}"
@@ -662,8 +749,12 @@
                         <Button Grid.Row="1" Grid.Column="2"
                                 Classes="Secondary"
                                 Click="BrowseTargetDb_Click"
-                                Padding="12,8"
-                                Content="{DynamicResource L_Set_Browse}"/>
+                                Padding="12,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource Icon_Folder}" Width="14" Height="14"/>
+                                <TextBlock Text="{DynamicResource L_Set_Browse}"/>
+                            </StackPanel>
+                        </Button>
                     </Grid>
 
                     <WrapPanel VerticalAlignment="Center">
@@ -678,6 +769,7 @@
                                 Padding="16,10"
                                 Margin="0,0,12,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_SyncLegacy}"/>
                             </StackPanel>
                         </Button>
@@ -687,6 +779,7 @@
                                 IsEnabled="{Binding !IsSyncing}"
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_ForceFullSync}"/>
                             </StackPanel>
                         </Button>
