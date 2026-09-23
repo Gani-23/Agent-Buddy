@@ -32,12 +32,12 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
 
     /// <summary>
     /// Executes the on-device portal automation workflow:
-    /// 1. Initialize WebView & load portal
-    /// 2. Autofill Agent ID & Password
-    /// 3. Detect & OCR CAPTCHA (or prompt user)
-    /// 4. Submit login form (Action.VALIDATE_RM_PLUS_CREDENTIALS_CATCHA_DISABLED)
-    /// 5. Navigate to Accounts -> Agent Enquire & Update Screen
-    /// 6. Trigger #printpreview and loop Action.NEXT_ACCOUNTS to extract all records
+    /// 1. Initialize WebView and load portal
+    /// 2. Autofill Agent ID and Password
+    /// 3. Detect and OCR CAPTCHA (or prompt user)
+    /// 4. Submit login form
+    /// 5. Navigate to Accounts - Agent Enquire and Update Screen
+    /// 6. Trigger print preview and loop next accounts to extract all records
     /// 7. Ingest into local SQLite database
     /// </summary>
     public async Task<(bool success, int fetchedCount, string message)> FetchAccountsAsync(
@@ -52,9 +52,9 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
             try
             {
                 statusCallback?.Invoke("Initializing Android browser engine...");
-                var credentials = await _databaseService.GetSavedCredentialsAsync();
-                var agentId = credentials?.AgentId ?? "DOPMI5158650200005";
-                var password = credentials?.Password ?? "";
+                var (savedAgentId, savedPassword) = await _databaseService.GetSavedCredentialsAsync();
+                var agentId = !string.IsNullOrWhiteSpace(savedAgentId) ? savedAgentId : "DOPMI5158650200005";
+                var password = savedPassword ?? "";
 
                 if (string.IsNullOrWhiteSpace(password))
                 {

@@ -659,6 +659,57 @@ public class DatabaseService
     }
 
     /// <summary>
+    /// Retrieve saved agent ID and plaintext password (decoded from credentials table).
+    /// </summary>
+    public async Task<(string? agentId, string? password)> GetSavedCredentialsAsync()
+    {
+        EnsureAnalyticsSchema();
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            if (!await TableExistsAsync(connection, "credentials"))
+            {
+                return (null, null);
+            }
+
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT agent_id, COALESCE(encrypted_password, '')
+                FROM credentials
+                WHERE id = 1";
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var agentId = GetStringOrEmpty(reader, 0);
+                var encryptedPassword = GetStringOrEmpty(reader, 1);
+                string? password = null;
+                if (!string.IsNullOrWhiteSpace(encryptedPassword))
+                {
+                    try
+                    {
+                        var bytes = Convert.FromBase64String(encryptedPassword);
+                        password = Encoding.UTF8.GetString(bytes);
+                    }
+                    catch
+                    {
+                        password = null;
+                    }
+                }
+                return (string.IsNullOrWhiteSpace(agentId) ? null : agentId, password);
+            }
+        }
+        catch
+        {
+            // Ignore and return default
+        }
+
+        return (null, null);
+    }
+
+    /// <summary>
     /// Save or update portal credentials (compatible with Python script format).
     /// </summary>
     public async Task SaveCredentialsAsync(string agentId, string password)
