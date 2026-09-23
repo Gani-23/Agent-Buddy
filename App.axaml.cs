@@ -10,11 +10,22 @@ public partial class App : Application
 {
     public override void Initialize()
     {
+        try
+        {
+            SQLitePCL.Batteries_V2.Init();
+        }
+        catch { }
+
         AvaloniaXamlLoader.Load(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
+        try
+        {
+            SQLitePCL.Batteries_V2.Init();
+        }
+        catch { }
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow

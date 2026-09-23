@@ -43,7 +43,11 @@ public class PythonService
         _databaseService = databaseService ?? new DatabaseService();
         _documentsPath = AppPaths.DocumentsDirectory;
         _scriptsPath = AppPaths.BaseDirectory;
-        Directory.CreateDirectory(_scriptsPath);
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_scriptsPath)) Directory.CreateDirectory(_scriptsPath);
+        }
+        catch { }
         
         // Check for virtual environment
         _venvPath = Path.Combine(_scriptsPath, ".venv");

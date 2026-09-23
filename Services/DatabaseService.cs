@@ -28,11 +28,33 @@ public class DatabaseService
 
     public DatabaseService()
     {
-        var dopAgentFolder = AppPaths.BaseDirectory;
-        Directory.CreateDirectory(dopAgentFolder);
-        _dbPath = Path.Combine(dopAgentFolder, "dop_agent.db");
-        _connectionString = $"Data Source={_dbPath}";
-        EnsureAnalyticsSchema();
+        try
+        {
+            var dopAgentFolder = AppPaths.BaseDirectory;
+            if (!string.IsNullOrWhiteSpace(dopAgentFolder) && !Directory.Exists(dopAgentFolder))
+            {
+                Directory.CreateDirectory(dopAgentFolder);
+            }
+            _dbPath = Path.Combine(dopAgentFolder, "dop_agent.db");
+            _connectionString = $"Data Source={_dbPath}";
+            EnsureAnalyticsSchema();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"DatabaseService init warning: {ex.Message}");
+            try
+            {
+                var fallbackFolder = Path.Combine(Path.GetTempPath(), "DOPAgent");
+                if (!Directory.Exists(fallbackFolder))
+                {
+                    Directory.CreateDirectory(fallbackFolder);
+                }
+                _dbPath = Path.Combine(fallbackFolder, "dop_agent.db");
+                _connectionString = $"Data Source={_dbPath}";
+                EnsureAnalyticsSchema();
+            }
+            catch { }
+        }
     }
 
     /// <summary>

@@ -10,8 +10,15 @@ public class GlobalConfig
 
     private static string GetConfigPath()
     {
-        var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return Path.Combine(profile, ".agentbuddy_config.json");
+        try
+        {
+            var dir = AppPaths.DocumentsDirectory;
+            return Path.Combine(dir, ".agentbuddy_config.json");
+        }
+        catch
+        {
+            return Path.Combine(Path.GetTempPath(), ".agentbuddy_config.json");
+        }
     }
 
     public static GlobalConfig Load()

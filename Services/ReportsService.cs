@@ -36,9 +36,14 @@ public class ReportsService
         _pdfDirectoryPath = Path.Combine(reportsRoot, "pdf");
         _scriptsPath = dopAgentRoot;
         _connectionString = $"Data Source={dbPath}";
-        Directory.CreateDirectory(_scriptsPath);
-        Directory.CreateDirectory(Path.GetDirectoryName(_referencesFilePath)!);
-        Directory.CreateDirectory(_pdfDirectoryPath);
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_scriptsPath)) Directory.CreateDirectory(_scriptsPath);
+            var refDir = Path.GetDirectoryName(_referencesFilePath);
+            if (!string.IsNullOrWhiteSpace(refDir)) Directory.CreateDirectory(refDir);
+            if (!string.IsNullOrWhiteSpace(_pdfDirectoryPath)) Directory.CreateDirectory(_pdfDirectoryPath);
+        }
+        catch { }
 
         var venvPath = Path.Combine(_scriptsPath, ".venv");
         var hasVenv = Directory.Exists(venvPath);
