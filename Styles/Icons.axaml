@@ -47,4 +47,5 @@
     <StreamGeometry x:Key="Icon_FileText">M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z</StreamGeometry>
     <StreamGeometry x:Key="Icon_Shield">M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z</StreamGeometry>
     <StreamGeometry x:Key="Icon_Sparkle">M12 2l2.4 7.2L21.6 12l-7.2 2.4L12 21.6l-2.4-7.2L2.4 12l7.2-2.4z</StreamGeometry>
+    <StreamGeometry x:Key="Icon_Logo">M12 2L3 6v6c0 5.25 3.82 10.18 9 11.4 5.18-1.22 9-6.15 9-11.4V6l-9-4zm-1 6h4l-3 5h3l-5 7v-5h-2l3-7z</StreamGeometry>
 </ResourceDictionary>

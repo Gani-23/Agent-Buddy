@@ -51,54 +51,46 @@
           RowSpacing="16"
           Margin="0,0,0,8">
 
-        <Grid ColumnDefinitions="*,320"
+        <Grid ColumnDefinitions="*,340"
               ColumnSpacing="16">
-            <StackPanel Spacing="8">
-                <StackPanel Spacing="4">
+            <StackPanel Spacing="10" VerticalAlignment="Center">
+                <StackPanel Spacing="2">
                     <TextBlock Text="{DynamicResource L_List_Kicker}" Classes="Kicker"/>
                     <TextBlock Text="{DynamicResource L_List_Title}"
                                Classes="SectionHeader"
+                               Margin="0"
                                MaxWidth="760"/>
                 </StackPanel>
 
                 <WrapPanel>
-                    <Border Classes="Card"
-                            Padding="10,6"
-                            Margin="0,0,10,0">
+                    <Border Classes="StatusChip" Margin="0,0,8,4">
                         <TextBlock Text="{Binding Lists.Count, StringFormat='Lists: {0}'}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
                     </Border>
 
-                    <Border Classes="Card"
-                            Padding="10,6"
-                            Margin="0,0,10,0">
+                    <Border Classes="StatusChip" Margin="0,0,8,4">
                         <TextBlock Text="{Binding ReferenceNumbers.Count, StringFormat='References: {0}'}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
                     </Border>
 
-                    <Border Classes="Card"
-                            Padding="10,6"
-                            Margin="0,0,10,0">
+                    <Border Classes="StatusChip" Margin="0,0,8,4">
                         <TextBlock Text="{Binding AutoSaveStatusText}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
                     </Border>
 
-                    <Border Classes="Card"
-                            Padding="10,6"
-                            Margin="0,0,10,0">
+                    <Border Classes="StatusChip" Margin="0,0,8,4">
                         <TextBlock Text="{Binding SavedLotStatusText}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
                     </Border>
 
-                    <Border Classes="Card"
-                            Padding="10,6"
+                    <Border Classes="StatusChip"
                             Background="{DynamicResource ListDuplicateTintBrush}"
                             BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
-                            BorderThickness="1"
+                            Margin="0,0,8,4"
                             IsVisible="{Binding HasFailedLists}">
                         <TextBlock Text="Failed lists need attention"
                                    FontSize="12"
@@ -112,54 +104,70 @@
                     Padding="14"
                     HorizontalAlignment="Stretch">
                 <StackPanel Spacing="10">
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="3">
                         <TextBlock Text="{Binding DatabaseStatusTitle}"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{Binding DatabaseStatusMessage}"
+                                   FontSize="12"
                                    TextWrapping="Wrap"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Text="Override is active. Review accounts carefully."
                                    IsVisible="{Binding ShowOverrideWarning}"
-                                   FontSize="12"
+                                   FontSize="11"
                                    Foreground="{DynamicResource WarningBrush}"/>
                     </StackPanel>
 
-                    <WrapPanel VerticalAlignment="Center">
-                        <Button Classes="Primary"
-                                Command="{Binding UpdateDatabaseCommand}"
-                                Content="Update Database"
-                                IsEnabled="{Binding !IsUpdatingDatabase}"
-                                MinHeight="40"
-                                Margin="0,0,10,0"/>
-                        <Button Classes="Secondary"
-                                Command="{Binding RefreshDatabaseStatusCommand}"
-                                IsEnabled="{Binding !IsUpdatingDatabase}"
-                                Content="Recheck"
-                                MinHeight="40"
-                                Margin="0,0,10,0"/>
-                        <Button Classes="Danger"
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Grid.Column="0"
+                                    Classes="Primary"
+                                    Command="{Binding UpdateDatabaseCommand}"
+                                    IsEnabled="{Binding !IsUpdatingDatabase}"
+                                    MinHeight="36"
+                                    Padding="10,6">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Database}" Width="13" Height="13" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="Update DB" VerticalAlignment="Center" FontSize="12"/>
+                                </Grid>
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Classes="Secondary"
+                                    Command="{Binding RefreshDatabaseStatusCommand}"
+                                    IsEnabled="{Binding !IsUpdatingDatabase}"
+                                    MinHeight="36"
+                                    Padding="10,6">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Refresh}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Recheck" VerticalAlignment="Center" FontSize="12"/>
+                                </Grid>
+                            </Button>
+                        </Grid>
+                        <Button Grid.Row="1"
+                                Classes="Danger"
                                 Command="{Binding OverrideDatabaseGuardCommand}"
                                 IsEnabled="{Binding !IsUpdatingDatabase}"
                                 Content="Proceed Anyway"
+                                MinHeight="34"
+                                FontSize="12"
                                 IsVisible="{Binding ShowOverrideButton}"/>
-                    </WrapPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
         </Grid>
 
         <Border Grid.Row="1"
                 Classes="Card"
-                Padding="14">
-            <StackPanel Spacing="12">
+                Padding="12">
+            <StackPanel Spacing="10">
                 <WrapPanel>
                     <Button Classes="Primary" 
                             Command="{Binding AddNewListCommand}"
                             IsEnabled="{Binding CanEditLists}"
-                            MinHeight="42"
-                            MinWidth="118"
-                            Margin="0,0,10,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center"/>
                         </Grid>
@@ -167,11 +175,11 @@
 
                     <Button Classes="Success" 
                             Command="{Binding ProcessAllListsCommand}"
-                            MinHeight="42"
-                            MinWidth="138"
-                            Margin="0,0,10,10"
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8"
                             IsEnabled="{Binding CanProcessLists}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="14" Height="14" Foreground="White"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center"/>
                         </Grid>
@@ -180,10 +188,10 @@
                     <Button Classes="Secondary"
                             Command="{Binding RetryFailedListsCommand}"
                             IsEnabled="{Binding CanRetryFailedLists}"
-                            MinHeight="42"
-                            MinWidth="138"
-                            Margin="0,0,22,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center"/>
                         </Grid>
@@ -192,10 +200,10 @@
                     <Button Classes="Secondary"
                             Command="{Binding ValidateAllAccountsCommand}"
                             IsEnabled="{Binding CanValidateLists}"
-                            MinHeight="42"
-                            MinWidth="150"
-                            Margin="0,0,10,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center"/>
                         </Grid>
@@ -203,10 +211,10 @@
 
                     <Button Classes="Secondary" 
                             Command="{Binding SaveLotCommand}"
-                            MinHeight="42"
-                            MinWidth="118"
-                            Margin="0,0,10,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center"/>
                         </Grid>
@@ -214,10 +222,10 @@
 
                     <Button Classes="Secondary" 
                             Command="{Binding ReloadLotCommand}"
-                            MinHeight="42"
-                            MinWidth="126"
-                            Margin="0,0,10,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center"/>
                         </Grid>
@@ -225,10 +233,10 @@
 
                     <Button Classes="Danger" 
                             Command="{Binding DeleteAllListsCommand}"
-                            MinHeight="42"
-                            MinWidth="108"
-                            Margin="0,0,0,10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            MinHeight="38"
+                            Padding="14,8"
+                            Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="14" Height="14" Foreground="White"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center"/>
                         </Grid>
@@ -351,14 +359,15 @@
                         <DataTemplate x:DataType="vm:ListPanelViewModel">
                             <Border Classes="Card Hoverable" 
                                     Width="340" 
-                                    Height="548"
+                                    Height="490"
+                                    Padding="14"
                                     Margin="0,0,16,16">
                                 <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto"
-                                      RowSpacing="8">
+                                      RowSpacing="6">
 
                                     <!-- List Header -->
-                                    <StackPanel Grid.Row="0" Spacing="8">
-                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="6">
+                                    <StackPanel Grid.Row="0" Spacing="6">
+                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="4">
                                             <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                                 <TextBlock Text="{Binding Name}" 
                                                            FontWeight="Bold"
@@ -402,10 +411,10 @@
 
                                         <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                                             <TextBlock Text="{DynamicResource L_List_Mode}"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                                       VerticalAlignment="Center"/>
+                                                        FontSize="11"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                        VerticalAlignment="Center"/>
                                             <ComboBox Grid.Column="1"
                                                       Width="170"
                                                       Height="30"
@@ -478,13 +487,16 @@
                                     <Border Grid.Row="2"
                                             Background="{DynamicResource AppHoverBrush}"
                                             CornerRadius="6"
-                                            Padding="8">
-                                        <Grid ColumnDefinitions="*,90" ColumnSpacing="8">
+                                            Padding="6">
+                                        <Grid ColumnDefinitions="*,80" ColumnSpacing="6">
                                             <TextBox Text="{Binding PendingAccountNo, UpdateSourceTrigger=PropertyChanged}"
                                                      PlaceholderText="{DynamicResource L_List_WatermarkAccountNo}"
                                                      Tag="AccountInput"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      MaxLength="12"
+                                                     Padding="8,5"
+                                                     MinHeight="32"
+                                                     FontSize="12"
                                                      FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                             <TextBox Grid.Column="1"
@@ -493,6 +505,9 @@
                                                      Tag="{Binding InstallmentInputTag}"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      HorizontalContentAlignment="Center"
+                                                     Padding="8,5"
+                                                     MinHeight="32"
+                                                     FontSize="12"
                                                      FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                         </Grid>
@@ -530,7 +545,7 @@
 
                                     <!-- Account List -->
                                     <ScrollViewer Grid.Row="6"
-                                                  MinHeight="120">
+                                                  MinHeight="100">
                                         <ItemsControl ItemsSource="{Binding Items}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="models:ListItem">
@@ -660,8 +675,9 @@
                                             Command="{Binding ClearCommand}"
                                             HorizontalAlignment="Stretch"
                                             Content="{DynamicResource L_List_ClearList}"
-                                            Margin="0,6,0,-4"
-                                            Padding="10"/>
+                                            MinHeight="34"
+                                            Margin="0,6,0,0"
+                                            Padding="8"/>
 
                                 </Grid>
                             </Border>
@@ -675,7 +691,8 @@
 
         <Border Grid.Row="3"
                 Classes="Card"
-                Padding="12">
+                Padding="12"
+                Margin="0,0,130,0">
             <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*"
                   ColumnSpacing="8">
                 <Border Width="14" Height="14"

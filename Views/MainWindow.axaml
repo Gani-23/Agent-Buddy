@@ -31,16 +31,18 @@
 
             <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="16">
                 <!-- App Brand Card -->
-                <Border Grid.Row="0" Classes="Card" Padding="14">
+                <Border Grid.Row="0" Classes="Card" Padding="12">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
-                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="10" 
+                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="12" 
                                 Background="{StaticResource AccentBlueBrush}" 
+                                BorderBrush="#40FFFFFF"
+                                BorderThickness="1"
                                 VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource Icon_Sparkle}" Width="18" Height="18" Foreground="White"/>
+                            <PathIcon Data="{StaticResource Icon_Logo}" Width="20" Height="20" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{DynamicResource L_Main_AppName}"
-                                       FontSize="20"
+                                       FontSize="19"
                                        FontWeight="Black"
                                        LetterSpacing="-0.5"
                                        TextWrapping="Wrap"
