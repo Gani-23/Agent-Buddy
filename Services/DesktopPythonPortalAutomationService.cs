@@ -17,9 +17,10 @@ public sealed class DesktopPythonPortalAutomationService : IPortalAutomationServ
         _pythonService = pythonService;
     }
 
-    public bool CanRunOnDevice => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-                                  RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
-                                  RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+    public bool CanRunOnDevice => !OperatingSystem.IsAndroid() && !OperatingSystem.IsIOS() &&
+                                  (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                                   RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                                   RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
 
     public async Task<(bool success, int fetchedCount, string message)> FetchAccountsAsync(
         Action<string>? statusCallback = null,

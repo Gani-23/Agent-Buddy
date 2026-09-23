@@ -1586,28 +1586,33 @@ public class DashboardViewModel : ViewModelBase
 
         try
         {
-            // If running on mobile / non-desktop platform without python, run on-device portal automation
-            if (_portalAutomationService.CanRunOnDevice && (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()))
-            {
-                var (mobileSuccess, fetchedCount, mobileMessage) = await _portalAutomationService.FetchAccountsAsync(
-                    progress => UpdateStatus = progress);
+            var automationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? _portalAutomationService;
 
-                if (mobileSuccess)
+            // If running on mobile / non-desktop platform without python, run on-device portal automation
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || automationService.CanRunOnDevice)
+            {
+                if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
                 {
-                    UpdateStatus = $"Update successful! Fetched {fetchedCount} accounts. Refreshing dashboard...";
-                    await Task.Delay(1000);
-                    _databaseService.NotifyDatabaseChanged();
-                    UpdateStatus = "Database refreshed!";
-                    _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
-                    await Task.Delay(2000);
+                    var (mobileSuccess, fetchedCount, mobileMessage) = await automationService.FetchAccountsAsync(
+                        progress => UpdateStatus = progress);
+
+                    if (mobileSuccess)
+                    {
+                        UpdateStatus = $"Update successful! Fetched {fetchedCount} accounts. Refreshing dashboard...";
+                        await Task.Delay(1000);
+                        _databaseService.NotifyDatabaseChanged();
+                        UpdateStatus = "Database refreshed!";
+                        _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
+                        await Task.Delay(2000);
+                    }
+                    else
+                    {
+                        UpdateStatus = $"Update failed: {mobileMessage}";
+                        _notificationService?.Error("Update Failed", mobileMessage);
+                        await Task.Delay(5000);
+                    }
+                    return;
                 }
-                else
-                {
-                    UpdateStatus = $"Update failed: {mobileMessage}";
-                    _notificationService?.Error("Update Failed", mobileMessage);
-                    await Task.Delay(5000);
-                }
-                return;
             }
 
             // Check if Python is installed

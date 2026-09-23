@@ -1388,23 +1388,28 @@ public class ListManagementViewModel : ViewModelBase
 
         try
         {
-            if (_portalAutomationService.CanRunOnDevice && (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()))
-            {
-                var (mobileSuccess, fetchedCount, mobileMessage) = await _portalAutomationService.FetchAccountsAsync(
-                    progress => ProcessStatus = progress);
+            var automationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? _portalAutomationService;
 
-                if (mobileSuccess)
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || automationService.CanRunOnDevice)
+            {
+                if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
                 {
-                    ProcessStatus = $"Database updated! Refreshed {fetchedCount} accounts.";
-                    _databaseService.NotifyDatabaseChanged();
-                    _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
+                    var (mobileSuccess, fetchedCount, mobileMessage) = await automationService.FetchAccountsAsync(
+                        progress => ProcessStatus = progress);
+
+                    if (mobileSuccess)
+                    {
+                        ProcessStatus = $"Database updated! Refreshed {fetchedCount} accounts.";
+                        _databaseService.NotifyDatabaseChanged();
+                        _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
+                    }
+                    else
+                    {
+                        ProcessStatus = $"Update failed: {mobileMessage}";
+                        _notificationService?.Error("Update Failed", mobileMessage);
+                    }
+                    return;
                 }
-                else
-                {
-                    ProcessStatus = $"Update failed: {mobileMessage}";
-                    _notificationService?.Error("Update Failed", mobileMessage);
-                }
-                return;
             }
 
             var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();

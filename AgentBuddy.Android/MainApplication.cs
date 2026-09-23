@@ -5,6 +5,9 @@ using Avalonia;
 using Avalonia.Android;
 using ReactiveUI.Avalonia;
 
+using AgentBuddy.Android.Services;
+using AgentBuddy.Services;
+
 namespace AgentBuddy.Android;
 
 [Application]
@@ -17,6 +20,7 @@ public class MainApplication : AvaloniaAndroidApplication<App>
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
+        PortalAutomationProvider.Factory = db => new AndroidPortalAutomationService(MainActivity.Instance ?? Context, db);
         return base.CustomizeAppBuilder(builder)
             .WithInterFont()
             .UseReactiveUI(_ => { });

@@ -7,6 +7,7 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
+using Android.Util;
 using Android.Views;
 using Android.Webkit;
 using Android.Widget;
@@ -20,6 +21,7 @@ namespace AgentBuddy.Android.Services;
 public sealed class AndroidPortalAutomationService : IPortalAutomationService
 {
     private const string PortalUrl = "https://dopagent.indiapost.gov.in";
+    private const string Tag = "AgentBuddyPortal";
     private readonly Context _context;
     private readonly DatabaseService _databaseService;
     private readonly OnDeviceDataIngestionService _ingestionService;
@@ -37,7 +39,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
     /// Executes the on-device portal automation workflow:
     /// 1. Initialize WebView dialog and load portal
     /// 2. Autofill Agent ID and Password
-    /// 3. Wait for CAPTCHA & form submission
+    /// 3. Wait for CAPTCHA and form submission
     /// 4. Navigate to Accounts -> Agent Enquire and Update Screen
     /// 5. Trigger print preview and extract all account pages
     /// 6. Ingest into local SQLite database
@@ -46,6 +48,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
         Action<string>? statusCallback = null,
         CancellationToken cancellationToken = default)
     {
+        Log.Info(Tag, "FetchAccountsAsync initiated on Android device.");
         var tcs = new TaskCompletionSource<(bool, int, string)>();
 
         var mainHandler = new Handler(Looper.MainLooper!);
@@ -59,35 +62,48 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 var agentId = !string.IsNullOrWhiteSpace(savedAgentId) ? savedAgentId : "DOPMI5158650200005";
                 var password = savedPassword ?? "";
 
-                statusCallback?.Invoke("Initializing DOP Portal engine...");
+                Log.Info(Tag, $"Loaded credentials for Agent ID: {agentId}");
+                statusCallback?.Invoke("Opening DOP Agent Portal browser...");
 
-                // Create container layout for the in-app portal browser
-                var layout = new LinearLayout(_context)
+                var actContext = MainActivity.Instance ?? _context;
+
+                // Container layout
+                var layout = new LinearLayout(actContext)
                 {
                     Orientation = Orientation.Vertical
                 };
-                layout.SetPadding(16, 16, 16, 16);
+                layout.SetPadding(24, 24, 24, 24);
 
-                // Header status
-                var titleText = new TextView(_context)
+                // Top Header Bar
+                var headerBar = new LinearLayout(actContext)
                 {
-                    Text = "India Post DOP Agent Portal Automation",
-                    TextSize = 16,
+                    Orientation = Orientation.Horizontal
+                };
+                var titleText = new TextView(actContext)
+                {
+                    Text = "DOP Portal Sync",
+                    TextSize = 18,
                     Typeface = Typeface.DefaultBold
                 };
-                titleText.SetPadding(8, 8, 8, 8);
-                layout.AddView(titleText);
+                titleText.SetTextColor(Color.Black);
+                titleText.LayoutParameters = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WrapContent, 1f);
+                headerBar.AddView(titleText);
 
-                var statusText = new TextView(_context)
+                var closeBtn = new Button(actContext) { Text = "✕ Close" };
+                headerBar.AddView(closeBtn);
+                layout.AddView(headerBar);
+
+                var statusText = new TextView(actContext)
                 {
                     Text = "Connecting to dopagent.indiapost.gov.in...",
                     TextSize = 12
                 };
-                statusText.SetPadding(8, 0, 8, 8);
+                statusText.SetTextColor(Color.DarkGray);
+                statusText.SetPadding(0, 8, 0, 12);
                 layout.AddView(statusText);
 
-                // WebView setup
-                var webView = new WebView(_context);
+                // In-App WebView
+                var webView = new WebView(actContext);
                 webView.Settings.JavaScriptEnabled = true;
                 webView.Settings.DomStorageEnabled = true;
                 webView.Settings.LoadsImagesAutomatically = true;
@@ -95,22 +111,21 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 webView.Settings.SetSupportMultipleWindows(true);
                 webView.Settings.UserAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36";
 
-                var lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 1200);
-                webView.LayoutParameters = lp;
+                var webLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 0, 1f);
+                webView.LayoutParameters = webLp;
                 layout.AddView(webView);
 
-                // Action buttons (Cancel / Finish)
-                var buttonLayout = new LinearLayout(_context)
+                // Bottom Action Button
+                var finishButton = new Button(actContext)
                 {
-                    Orientation = Orientation.Horizontal
+                    Text = "Save & Complete Sync",
+                    TextSize = 14,
+                    Typeface = Typeface.DefaultBold
                 };
-                var cancelButton = new Button(_context) { Text = "Cancel" };
-                var finishButton = new Button(_context) { Text = "Done Syncing" };
-                buttonLayout.AddView(cancelButton);
-                buttonLayout.AddView(finishButton);
-                layout.AddView(buttonLayout);
+                finishButton.SetPadding(16, 16, 16, 16);
+                layout.AddView(finishButton);
 
-                dialog = new Dialog(_context);
+                dialog = new Dialog(actContext, global::Android.Resource.Style.ThemeDeviceDefaultLightNoActionBarFullscreen);
                 dialog.SetContentView(layout);
                 dialog.SetCancelable(true);
 
@@ -127,13 +142,15 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                         try
                         {
                             dialog?.Dismiss();
-                            statusCallback?.Invoke($"Ingesting {records.Count} records into local database...");
+                            Log.Info(Tag, $"Extraction complete with {records.Count} records. Ingesting into SQLite...");
+                            statusCallback?.Invoke($"Ingesting {records.Count} records into local SQLite database...");
                             var (newCount, updatedCount, removedCount) = await _ingestionService.IngestPortalAccountsAsync(records);
                             var summary = $"Sync Complete! Fetched: {records.Count}, New: {newCount}, Updated: {updatedCount}, Matured/Closed: {removedCount}.";
                             tcs.TrySetResult((true, records.Count, summary));
                         }
                         catch (Exception ex)
                         {
+                            Log.Error(Tag, $"Ingestion exception: {ex.Message}");
                             tcs.TrySetResult((false, 0, $"Ingestion error: {ex.Message}"));
                         }
                     });
@@ -146,11 +163,12 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                     mainHandler.Post(() =>
                     {
                         dialog?.Dismiss();
+                        Log.Error(Tag, $"Automation failed: {error}");
                         tcs.TrySetResult((false, 0, error));
                     });
                 }
 
-                cancelButton.Click += (s, e) =>
+                closeBtn.Click += (s, e) =>
                 {
                     dialog?.Dismiss();
                     if (!isDone)
@@ -168,7 +186,6 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                     }
                     else
                     {
-                        // Trigger final extraction attempt
                         webView.EvaluateJavascript(GetTableExtractionScript(), new JavaValueCallback(jsonResult =>
                         {
                             var list = ParseRecordsFromJson(jsonResult);
@@ -178,7 +195,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                             }
                             else
                             {
-                                FailExtraction("No account records extracted yet.");
+                                FailExtraction("No account records extracted yet. Make sure you are logged in and on the accounts screen.");
                             }
                         }));
                     }
@@ -193,6 +210,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                         {
                             statusText.Text = msg;
                             statusCallback?.Invoke(msg);
+                            Log.Info(Tag, $"Status: {msg}");
                         });
                     },
                     records =>
@@ -205,11 +223,13 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                     }
                 ));
 
+                Log.Info(Tag, $"Loading URL: {PortalUrl}");
                 dialog.Show();
                 webView.LoadUrl(PortalUrl);
             }
             catch (Exception ex)
             {
+                Log.Error(Tag, $"Exception in FetchAccountsAsync: {ex.Message}");
                 dialog?.Dismiss();
                 tcs.TrySetResult((false, 0, $"Android Portal Error: {ex.Message}"));
             }
@@ -258,7 +278,10 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Log.Error(Tag, $"JSON Parse error: {ex.Message}");
+        }
         return list;
     }
 
@@ -291,6 +314,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
             if (view == null || string.IsNullOrWhiteSpace(url)) return;
 
             var lowerUrl = url.ToLowerInvariant();
+            Log.Info(Tag, $"OnPageFinished URL: {url}");
 
             // Step 1: Login Page
             if (lowerUrl.Contains("dopagent.indiapost.gov.in") &&
@@ -298,7 +322,7 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 !lowerUrl.Contains("agent") &&
                 !lowerUrl.Contains("account"))
             {
-                _statusCallback?.Invoke("Autofilling credentials... please solve CAPTCHA & tap Login if needed.");
+                _statusCallback?.Invoke("Autofilling credentials... solve CAPTCHA and tap Sign In / Login.");
 
                 var loginJs = $@"
                     (function() {{
@@ -323,17 +347,15 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
             // Step 2: Main Menu -> Navigate to Agent Enquire & Update Screen
             if (lowerUrl.Contains("bankuser") || lowerUrl.Contains("agent") || lowerUrl.Contains("account"))
             {
-                _statusCallback?.Invoke("Checking account list page...");
+                _statusCallback?.Invoke("Navigating to Accounts -> Agent Enquire & Update Screen...");
 
                 var navigateOrExtractJs = @"
                     (function() {
-                        // Check if we are on the accounts enquire screen
                         var printBtn = document.querySelector('#printpreview, img[src*=""btn-printscreen.gif""], input[name=""Action.FETCH_INPUT_ACCOUNT""]');
                         if (printBtn) {
                             return 'on_account_screen';
                         }
 
-                        // Try navigating to Accounts -> Agent Enquire & Update Screen
                         var links = document.querySelectorAll('a');
                         for (var i = 0; i < links.length; i++) {
                             var text = links[i].innerText || '';
@@ -356,6 +378,8 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 view.EvaluateJavascript(navigateOrExtractJs, new JavaValueCallback(stepResult =>
                 {
                     var cleanStep = (stepResult ?? string.Empty).Trim('"');
+                    Log.Info(Tag, $"Navigation Step result: {cleanStep}");
+
                     if (cleanStep == "on_account_screen" || cleanStep == "unknown_state")
                     {
                         // Step 3: Trigger extract table rows
@@ -364,6 +388,8 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                         view.EvaluateJavascript(GetTableExtractionScript(), new JavaValueCallback(jsonResult =>
                         {
                             var list = ParseRecordsFromJson(jsonResult);
+                            Log.Info(Tag, $"Parsed {list.Count} accounts from current page.");
+
                             if (list.Count > 0)
                             {
                                 foreach (var item in list)
@@ -376,7 +402,6 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
 
                                 _statusCallback?.Invoke($"Extracted {_accumulatedRecords.Count} accounts so far...");
 
-                                // Check if next page button exists
                                 var checkNextJs = @"
                                     (function() {
                                         var nextBtn = document.querySelector('input[name=""Action.NEXT_ACCOUNTS""], input[name=""Action.AgentRDActSummaryAllListing.GOTO_NEXT__""], input[value="">""]');
@@ -389,7 +414,9 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
 
                                 view.EvaluateJavascript(checkNextJs, new JavaValueCallback(nextRes =>
                                 {
-                                    if ((nextRes ?? "").Trim('"') == "done" && _accumulatedRecords.Count > 0)
+                                    var cleanNext = (nextRes ?? "").Trim('"');
+                                    Log.Info(Tag, $"Pagination Step: {cleanNext}");
+                                    if (cleanNext == "done" && _accumulatedRecords.Count > 0)
                                     {
                                         _onSuccess(_accumulatedRecords);
                                     }
