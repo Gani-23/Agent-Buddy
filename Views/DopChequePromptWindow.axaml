@@ -138,13 +138,21 @@
                                 HorizontalAlignment="Right"
                                 Spacing="10">
                         <Button Classes="Secondary"
-                                Content="{DynamicResource L_Common_Cancel}"
                                 Click="Cancel_Click"
-                                Padding="16,8"/>
+                                Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
+                                <TextBlock Text="{DynamicResource L_Common_Cancel}"/>
+                            </StackPanel>
+                        </Button>
                         <Button Classes="Primary"
-                                Content="{DynamicResource L_Common_SaveContinue}"
                                 Click="Save_Click"
-                                Padding="16,8"/>
+                                Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Check}" Width="16" Height="16"/>
+                                <TextBlock Text="{DynamicResource L_Common_SaveContinue}"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

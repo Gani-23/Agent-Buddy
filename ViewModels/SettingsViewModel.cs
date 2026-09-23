@@ -135,6 +135,40 @@ public class SettingsViewModel : ViewModelBase
         LatestVersion = CurrentVersion;
     }
 
+    public event Action<ThemeMode>? ThemeModeChanged;
+
+    public class ThemeModeOption
+    {
+        public ThemeMode Mode { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string IconKey { get; set; } = string.Empty;
+    }
+
+    public ObservableCollection<ThemeModeOption> ThemeModeOptions { get; } = new()
+    {
+        new ThemeModeOption { Mode = ThemeMode.NeumorphicLight, Title = "Neumorphic Light (Soft UI)", Description = "Extruded dual-shadow surfaces and clean soft light palette", IconKey = "Icon_Theme_Sun" },
+        new ThemeModeOption { Mode = ThemeMode.NeumorphicDark, Title = "Neumorphic Dark (Soft UI)", Description = "Deep dark mode with inset highlights and soft contrast", IconKey = "Icon_Theme_Moon" },
+        new ThemeModeOption { Mode = ThemeMode.ClassicNotion, Title = "Classic Notion (3rd Theme)", Description = "Minimalist Notion-inspired workspace palette", IconKey = "Icon_Theme_Palette" }
+    };
+
+    private ThemeModeOption? _selectedThemeModeOption;
+    public ThemeModeOption? SelectedThemeModeOption
+    {
+        get => _selectedThemeModeOption;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedThemeModeOption, value);
+            if (value != null)
+            {
+                var settings = AppSettings.Load();
+                settings.ThemeMode = (int)value.Mode;
+                settings.Save();
+                ThemeModeChanged?.Invoke(value.Mode);
+            }
+        }
+    }
+
     public bool IsDarkTheme
     {
         get => _isDarkTheme;
@@ -505,6 +539,11 @@ public class SettingsViewModel : ViewModelBase
     private async void LoadSettings()
     {
         var config = GlobalConfig.Load();
+        var appSettings = AppSettings.Load();
+        var currentMode = (ThemeMode)Math.Clamp(appSettings.ThemeMode, 0, 2);
+        _selectedThemeModeOption = ThemeModeOptions.FirstOrDefault(o => o.Mode == currentMode) ?? ThemeModeOptions[0];
+        this.RaisePropertyChanged(nameof(SelectedThemeModeOption));
+
         DatabaseLocation = config.BaseDirectoryOverride;
         if (string.IsNullOrWhiteSpace(DatabaseLocation))
         {

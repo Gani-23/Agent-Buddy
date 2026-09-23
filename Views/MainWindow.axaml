@@ -22,42 +22,55 @@
 
     <Grid ColumnDefinitions="240,*" Background="{DynamicResource AppBackgroundBrush}">
 
-        <!-- SIDEBAR (text only) -->
+        <!-- SIDEBAR -->
         <Border Grid.Column="0"
                 Background="{DynamicResource AppSidebarBackgroundBrush}"
                 BorderBrush="{DynamicResource AppBorderBrush}"
                 BorderThickness="0,0,1,0"
-                Padding="14">
+                Padding="16">
 
-            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
-                <Border Grid.Row="0" Classes="Card" Padding="12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{DynamicResource L_Main_AppName}"
-                                   FontSize="26"
-                                   FontWeight="Bold"
-                                   TextWrapping="Wrap"
-                                   LineHeight="34"
-                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="{DynamicResource L_Main_Subtitle}"
-                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                   FontSize="12"
-                                   TextWrapping="Wrap"
-                                   LineHeight="18"/>
-                    </StackPanel>
+            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="16">
+                <!-- App Brand Card -->
+                <Border Grid.Row="0" Classes="Card" Padding="14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="10" 
+                                Background="{StaticResource AccentBlueBrush}" 
+                                VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource Icon_Sparkle}" Width="18" Height="18" Foreground="White"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource L_Main_AppName}"
+                                       FontSize="20"
+                                       FontWeight="Black"
+                                       LetterSpacing="-0.5"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="{DynamicResource L_Main_Subtitle}"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                       FontSize="11"
+                                       FontWeight="Medium"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
                 <TextBlock Grid.Row="1"
                            Text="{DynamicResource L_Main_Navigation}"
                            Classes="Kicker"
+                           LetterSpacing="1.5"
                            Margin="8,4,8,0"/>
 
-                <StackPanel Grid.Row="2" Spacing="4">
+                <!-- Navigation List -->
+                <StackPanel Grid.Row="2" Spacing="8">
                     <Button x:Name="DashboardNavButton"
                             Classes="NavItem"
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Dashboard">
-                        <TextBlock Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap" LineHeight="20"/>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Dashboard}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Grid>
                     </Button>
 
                     <Button x:Name="ListsNavButton"
@@ -65,7 +78,10 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Lists">
-                        <TextBlock Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap" LineHeight="20"/>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Lists}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Grid>
                     </Button>
 
                     <Button x:Name="ReportsNavButton"
@@ -73,7 +89,10 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Reports">
-                        <TextBlock Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap" LineHeight="20"/>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Grid>
                     </Button>
 
                     <Button x:Name="SupportNavButton"
@@ -81,42 +100,52 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Support">
-                        <TextBlock Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap" LineHeight="20"/>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Support}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Grid>
                     </Button>
 
                     <Button x:Name="SettingsNavButton"
                             Classes="NavItem"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Settings">
-                        <TextBlock Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap" LineHeight="20"/>
+                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Grid>
                     </Button>
                 </StackPanel>
 
+                <!-- Footer / Theme & License -->
                 <StackPanel Grid.Row="3" Spacing="10">
-                    <Border Classes="Card"
-                            Padding="10">
+                    <Border Classes="Card" Padding="10">
                         <Border Classes="LicenseBadge" Padding="10"
                                 Background="{DynamicResource InfoTintBrush}"
                                 BorderBrush="{DynamicResource AppBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="10">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                <Border Width="10" Height="10" CornerRadius="5"
-                                        Background="{StaticResource AccentBlueBrush}"/>
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Shield}" Width="14" Height="14" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding LicenseStatusText}"
                                            FontWeight="SemiBold"
                                            FontSize="12"
+                                           VerticalAlignment="Center"
                                            TextWrapping="Wrap"/>
                             </Grid>
                         </Border>
                     </Border>
 
-                    <Border Classes="Card"
-                            Padding="8">
-                        <Button Classes="NavItem"
-                                Command="{Binding ToggleThemeCommand}">
-                            <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" TextWrapping="Wrap" LineHeight="20"/>
+                    <Border Classes="Card" Padding="6">
+                        <Button Classes="NavItem" Command="{Binding ToggleThemeCommand}">
+                            <Grid ColumnDefinitions="24,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Theme_Palette}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" FontSize="13" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding ThemeModeLabel}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Grid>
                         </Button>
                     </Border>
                 </StackPanel>
@@ -150,18 +179,18 @@
 
         <Button Grid.Column="1"
                 Classes="Primary"
-                Width="118"
                 Height="42"
+                Padding="16,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Margin="0,0,36,34"
                 IsEnabled="{Binding IsLicenseActive}"
                 Click="OpenBalanceBuddy_Click"
                 ToolTip.Tip="Open overdue balance accounts">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="BB"/>
-                <TextBlock Text="Balance"/>
-            </StackPanel>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="16" Height="16" Foreground="White"/>
+                <TextBlock Grid.Column="1" Text="Balance" FontWeight="Bold" VerticalAlignment="Center"/>
+            </Grid>
         </Button>
 
     </Grid>

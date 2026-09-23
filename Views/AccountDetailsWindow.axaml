@@ -38,7 +38,7 @@
                         Classes="Icon"
                         Click="Close_Click"
                         ToolTip.Tip="{DynamicResource L_Common_Close}">
-                    <TextBlock Text="×" FontSize="16" FontWeight="Bold"/>
+                    <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
                 </Button>
             </Grid>
 
@@ -136,17 +136,21 @@
             <!-- Action Buttons -->
             <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,20,0,0">
                 <Button Classes="Primary" 
-                        Width="120"
-                        Click="AddToList_Click">
+                        Click="AddToList_Click"
+                        Padding="16,10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource Icon_Plus}" Width="16" Height="16"/>
                         <TextBlock Text="{DynamicResource L_AccountDetails_AddToList}"/>
                     </StackPanel>
                 </Button>
                 
                 <Button Classes="Secondary" 
-                        Width="100"
-                        Click="Close_Click">
-                    <TextBlock Text="{DynamicResource L_Common_Close}"/>
+                        Click="Close_Click"
+                        Padding="16,10">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
+                        <TextBlock Text="{DynamicResource L_Common_Close}"/>
+                    </StackPanel>
                 </Button>
             </StackPanel>
 

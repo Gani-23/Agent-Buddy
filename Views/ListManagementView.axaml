@@ -158,60 +158,81 @@
                             IsEnabled="{Binding CanEditLists}"
                             MinHeight="42"
                             MinWidth="118"
-                            Padding="16,10"
-                            Margin="0,0,10,10"
-                            Content="{DynamicResource L_List_AddList}"/>
+                            Margin="0,0,10,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Success" 
                             Command="{Binding ProcessAllListsCommand}"
-                            Padding="18,10"
                             MinHeight="42"
                             MinWidth="138"
                             Margin="0,0,10,10"
-                            IsEnabled="{Binding CanProcessLists}"
-                            Content="{DynamicResource L_List_StartWalk}"/>
+                            IsEnabled="{Binding CanProcessLists}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="14" Height="14" Foreground="White"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Secondary"
                             Command="{Binding RetryFailedListsCommand}"
                             IsEnabled="{Binding CanRetryFailedLists}"
                             MinHeight="42"
                             MinWidth="138"
-                            Padding="16,10"
-                            Margin="0,0,22,10"
-                            Content="{DynamicResource L_List_RetryFailed}"/>
+                            Margin="0,0,22,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Secondary"
                             Command="{Binding ValidateAllAccountsCommand}"
                             IsEnabled="{Binding CanValidateLists}"
                             MinHeight="42"
                             MinWidth="150"
-                            Padding="16,10"
-                            Margin="0,0,10,10"
-                            Content="{DynamicResource L_List_ValidateAccounts}"/>
+                            Margin="0,0,10,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Secondary" 
                             Command="{Binding SaveLotCommand}"
                             MinHeight="42"
                             MinWidth="118"
-                            Padding="14,10"
-                            Margin="0,0,10,10"
-                            Content="{DynamicResource L_List_SaveLot}"/>
+                            Margin="0,0,10,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Secondary" 
                             Command="{Binding ReloadLotCommand}"
                             MinHeight="42"
                             MinWidth="126"
-                            Padding="14,10"
-                            Margin="0,0,10,10"
-                            Content="{DynamicResource L_List_ReloadList}"/>
+                            Margin="0,0,10,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
 
                     <Button Classes="Danger" 
                             Command="{Binding DeleteAllListsCommand}"
                             MinHeight="42"
                             MinWidth="108"
-                            Padding="14,10"
-                            Margin="0,0,0,10"
-                            Content="{DynamicResource L_List_DeleteAll}"/>
+                            Margin="0,0,0,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="14" Height="14" Foreground="White"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
                 </WrapPanel>
 
                 <Border Background="{DynamicResource WarningTintBrush}"

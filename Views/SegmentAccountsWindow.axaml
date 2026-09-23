@@ -202,6 +202,7 @@
                                                         CommandParameter="{Binding}"
                                                         HorizontalAlignment="Right">
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource SuccessBrush}"/>
                                                         <TextBlock Text="Send WhatsApp Reminder" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
                                                     </StackPanel>
                                                 </Button>
@@ -218,10 +219,16 @@
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                 <Button Classes="Secondary" Padding="16,8" Command="{Binding SendBulkWhatsAppCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="16" Height="16" Foreground="{StaticResource SuccessBrush}"/>
                         <TextBlock Text="Bulk WhatsApp List" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
-                <Button Classes="Secondary" Padding="16,8" Click="Close_Click" Content="{DynamicResource L_Common_Close}"/>
+                <Button Classes="Secondary" Padding="16,8" Click="Close_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource Icon_Close}" Width="14" Height="14"/>
+                        <TextBlock Text="{DynamicResource L_Common_Close}"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Grid>
     </Border>

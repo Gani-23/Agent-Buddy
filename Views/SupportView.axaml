@@ -49,12 +49,10 @@
                                         Background="{DynamicResource InfoTintBrush}"
                                         BorderBrush="{StaticResource AccentBlueBrush}"
                                         BorderThickness="1">
-                                    <TextBlock Text="@"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontSize="20"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource AccentBlueBrush}"/>
+                                    <PathIcon Data="{StaticResource Icon_Mail}"
+                                              Width="20"
+                                              Height="20"
+                                              Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" Spacing="3">
                                     <TextBlock Text="{DynamicResource L_Support_Contact}" Classes="SubHeader"/>
@@ -66,10 +64,7 @@
 
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                                 <Border Grid.Row="0" Grid.Column="0"
-                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
-                                        BorderBrush="{DynamicResource AppBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10"
+                                        Classes="DefaultSummaryCard"
                                         Padding="14">
                                     <StackPanel Spacing="5">
                                         <TextBlock Text="{DynamicResource L_Common_Name}" Classes="Kicker"/>
@@ -78,10 +73,7 @@
                                 </Border>
 
                                 <Border Grid.Row="0" Grid.Column="1"
-                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
-                                        BorderBrush="{DynamicResource AppBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10"
+                                        Classes="DefaultSummaryCard"
                                         Padding="14">
                                     <StackPanel Spacing="5">
                                         <TextBlock Text="{DynamicResource L_Common_Email}" Classes="Kicker"/>
@@ -90,10 +82,7 @@
                                 </Border>
 
                                 <Border Grid.Row="1" Grid.ColumnSpan="2"
-                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
-                                        BorderBrush="{DynamicResource AppBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10"
+                                        Classes="DefaultSummaryCard"
                                         Padding="14">
                                     <StackPanel Spacing="5">
                                         <TextBlock Text="{DynamicResource L_Common_Address}" Classes="Kicker"/>
@@ -108,7 +97,7 @@
                                         Padding="18,11"
                                         Margin="0,0,10,10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="@"/>
+                                        <PathIcon Data="{StaticResource Icon_Mail}" Width="16" Height="16"/>
                                         <TextBlock Text="{DynamicResource L_Support_SendEmail}"/>
                                     </StackPanel>
                                 </Button>
@@ -118,13 +107,7 @@
                                         Padding="18,11"
                                         Margin="0,0,10,10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Width="18"
-                                                Height="18"
-                                                CornerRadius="9"
-                                                ClipToBounds="True">
-                                            <Image Source="avares://AgentBuddy/Assets/WhatsAppLogo.png"
-                                                   Stretch="Uniform"/>
-                                        </Border>
+                                        <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="16" Height="16"/>
                                         <TextBlock Text="{DynamicResource L_Support_OpenWhatsapp}"/>
                                     </StackPanel>
                                 </Button>

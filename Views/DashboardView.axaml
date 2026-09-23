@@ -105,25 +105,39 @@
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Top"
                                    IsVisible="{Binding !IsLoading}">
-                            <Button Classes="Secondary" Command="{Binding RefreshCommand}" Padding="12,7" Margin="0,0,8,0" Content="{DynamicResource L_Common_Refresh}"/>
+                            <Button Classes="Secondary" Command="{Binding RefreshCommand}" Margin="0,0,8,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Refresh}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                             <Button Classes="Secondary"
                                     Command="{Binding SyncToMobileCommand}"
-                                    Padding="12,7"
                                     Margin="0,0,8,0"
-                                    IsEnabled="{Binding !IsBusy}"
-                                    Content="{DynamicResource L_Dash_SyncToMobile}"/>
+                                    IsEnabled="{Binding !IsBusy}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Dash_SyncToMobile}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                             <Button Classes="Primary"
                                     Command="{Binding UpdateDatabaseCommand}"
-                                    Padding="12,7"
                                     Margin="0"
-                                    IsEnabled="{Binding !IsBusy}"
-                                    Content="{DynamicResource L_Dash_UpdateDatabase}"/>
+                                    IsEnabled="{Binding !IsBusy}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Dash_UpdateDatabase}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                             <Button Classes="Primary"
                                     Command="{Binding OpenUpdateLinkCommand}"
-                                    Padding="12,7"
                                     Margin="8,0,0,0"
-                                    IsVisible="{Binding IsUpdateAvailable}"
-                                    Content="{Binding UpdateButtonText}"/>
+                                    IsVisible="{Binding IsUpdateAvailable}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sparkle}" Width="14" Height="14" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding UpdateButtonText}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                         </WrapPanel>
                     </Grid>
 
@@ -146,10 +160,13 @@
 
                             <Button Grid.Column="2"
                                     Classes="Secondary"
-                                    Padding="14,8"
                                     VerticalAlignment="Center"
-                                    Click="SearchAllAccounts_Click"
-                                    Content="{DynamicResource L_Common_Search}"/>
+                                    Click="SearchAllAccounts_Click">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Search}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Search}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                         </Grid>
                     </Border>
                 </Grid>
@@ -324,35 +341,39 @@
 
                             <WrapPanel Margin="0,4,0,0">
                                 <!-- 15th Deadline Auto -->
-                                <Button Classes="Primary" Margin="0,0,12,12" Padding="20,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Remind 15th Deadline" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding FirstHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.8"/>
-                                    </StackPanel>
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Calendar}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Remind 15th Deadline" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding FirstHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
                                 
                                 <!-- Month End Auto -->
-                                <Button Classes="Primary" Margin="0,0,12,12" Padding="20,12" Tag="pending-second-half" Click="SmartAutomation_Click">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Remind Month-End" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding SecondHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.8"/>
-                                    </StackPanel>
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-second-half" Click="SmartAutomation_Click">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Remind Month-End" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding SecondHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
 
                                 <!-- Rebate Upsell Auto -->
-                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="20,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Pitch 6-Month Rebates" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
-                                        <TextBlock Text="{Binding RebateUpsellCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Opacity="0.8"/>
-                                    </StackPanel>
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sparkle}" Width="16" Height="16" Foreground="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Pitch 6-Month Rebates" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding RebateUpsellCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
 
                                 <!-- Critical Discontinuation Auto -->
-                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="20,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Warn Discontinuations" FontWeight="Bold" Foreground="{StaticResource DangerBrush}"/>
-                                        <TextBlock Text="{Binding CriticalDiscontinuationCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" Opacity="0.8"/>
-                                    </StackPanel>
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Alert}" Width="16" Height="16" Foreground="{StaticResource AccentRedBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Warn Discontinuations" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding CriticalDiscontinuationCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
                             </WrapPanel>
                         </StackPanel>

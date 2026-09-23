@@ -51,15 +51,23 @@
                                 HorizontalAlignment="Right"
                                 Spacing="10">
                         <Button Classes="Secondary"
-                                Content="{Binding NoText}"
                                 Click="No_Click"
                                 IsCancel="True"
-                                Padding="16,8"/>
+                                Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
+                                <TextBlock Text="{Binding NoText}"/>
+                            </StackPanel>
+                        </Button>
                         <Button Classes="Primary"
-                                Content="{Binding YesText}"
                                 Click="Yes_Click"
                                 IsDefault="True"
-                                Padding="16,8"/>
+                                Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Check}" Width="16" Height="16"/>
+                                <TextBlock Text="{Binding YesText}"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Grid>

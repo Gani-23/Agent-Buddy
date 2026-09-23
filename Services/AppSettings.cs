@@ -7,6 +7,7 @@ namespace AgentBuddy.Services;
 public class AppSettings
 {
     public string AgentPhoneNumber { get; set; } = string.Empty;
+    public int ThemeMode { get; set; } = 0;
 
     public static AppSettings Load()
     {
