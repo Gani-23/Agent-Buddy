@@ -1,0 +1,354 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AgentBuddy.ViewModels"
+             xmlns:m="using:AgentBuddy.Models"
+             xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="412" d:DesignHeight="915"
+             x:Class="AgentBuddy.Views.MobileDashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="14" Margin="14,14,14,24">
+            
+            <!-- 1. HERO SYNC & AGENCY BANNER -->
+            <Border Classes="Card"
+                    Padding="14,12"
+                    CornerRadius="14"
+                    Background="{DynamicResource AppCardBackgroundBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1"
+                    BoxShadow="{DynamicResource AppCardShadow}">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{StaticResource SuccessBrush}"/>
+                                <TextBlock Text="DOP Agent Portal"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding LastUpdated, StringFormat='Synced: {0:dd MMM, hh:mm tt}', FallbackValue='Not synced yet'}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <!-- 1-Tap Sync Portal Button -->
+                        <Button Grid.Column="1"
+                                Classes="Primary"
+                                Padding="12,8"
+                                CornerRadius="10"
+                                Command="{Binding UpdateDatabaseCommand}"
+                                IsEnabled="{Binding !IsBusy}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="14" Height="14" Foreground="White"/>
+                                <TextBlock Text="Sync Portal" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Real-time sync status banner -->
+                    <Border Grid.Row="1"
+                            Background="{DynamicResource InfoTintBrush}"
+                            BorderBrush="{StaticResource AccentBlueBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="10,6"
+                            IsVisible="{Binding HasUpdateStatus}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <ProgressBar Width="16" Height="16" IsIndeterminate="True" IsVisible="{Binding IsBusy}"/>
+                            <TextBlock Text="{Binding UpdateStatus}"
+                                       FontSize="11"
+                                       FontWeight="Medium"
+                                       Foreground="{DynamicResource TintTextBrush}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- 2. TOTAL PORTFOLIO OVERVIEW CARD -->
+            <Border Classes="Card"
+                    Padding="16"
+                    CornerRadius="16"
+                    Background="{DynamicResource AppCardBackgroundBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1"
+                    BoxShadow="{DynamicResource AppCardShadow}">
+                <Grid ColumnDefinitions="*,*">
+                    <!-- Total Accounts -->
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="ACTIVE ACCOUNTS"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   LetterSpacing="0.5"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding TotalAccounts, StringFormat='{}{0:N0}'}"
+                                   FontSize="24"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="Active RD Accounts"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+
+                    <!-- Total Monthly Deposit -->
+                    <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right">
+                        <TextBlock Text="MONTHLY VOLUME"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   LetterSpacing="0.5"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding TotalAmount, StringFormat='₹ {0:N0}'}"
+                                   FontSize="24"
+                                   FontWeight="Black"
+                                   Foreground="{StaticResource AccentBlueBrush}"/>
+                        <TextBlock Text="Monthly Denomination"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 3. COLLECTION CYCLES (2x2 COMPACT MOBILE GRID) -->
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <!-- 1st Half Pending -->
+                <Border Grid.Row="0" Grid.Column="0"
+                        Classes="Card"
+                        Padding="12"
+                        CornerRadius="12"
+                        Background="{DynamicResource WarningTintBrush}"
+                        BorderBrush="{StaticResource WarningBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="1st Half Pending (1-15)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfPendingAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 1st Half Deposited -->
+                <Border Grid.Row="0" Grid.Column="1"
+                        Classes="Card"
+                        Padding="12"
+                        CornerRadius="12"
+                        Background="{DynamicResource SuccessTintBrush}"
+                        BorderBrush="{StaticResource SuccessBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="1st Half Deposited" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfDepositedAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2nd Half Pending -->
+                <Border Grid.Row="1" Grid.Column="0"
+                        Classes="Card"
+                        Padding="12"
+                        CornerRadius="12"
+                        Background="{DynamicResource WarningTintBrush}"
+                        BorderBrush="{StaticResource WarningBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="2nd Half Pending (16+)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfPendingAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2nd Half Deposited -->
+                <Border Grid.Row="1" Grid.Column="1"
+                        Classes="Card"
+                        Padding="12"
+                        CornerRadius="12"
+                        Background="{DynamicResource SuccessTintBrush}"
+                        BorderBrush="{StaticResource SuccessBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="2nd Half Deposited" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfDepositedAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 4. HORIZONTAL SCROLLABLE SEGMENT FILTER PILLS (22 SEGMENTS) -->
+            <Border Padding="0,2">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding DefaultSummaryOptions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="m:DashboardSummaryOption">
+                                <Button Padding="12,8"
+                                        CornerRadius="20"
+                                        Background="{DynamicResource AppCardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).SelectSummaryOptionCommand, FallbackValue={x:Null}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <!-- 5. MOBILE SEARCH & SEGMENT HEADER -->
+            <Border Classes="Card"
+                    Padding="12"
+                    CornerRadius="12"
+                    Background="{DynamicResource AppCardBackgroundBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <TextBox Grid.Row="0"
+                             Text="{Binding GlobalAccountSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="Search accounts by number or name..."
+                             FontSize="13"
+                             CornerRadius="10"
+                             Padding="10,8"/>
+
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Text="{Binding DefaultSummaryTitle}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding DefaultSummaryCount, StringFormat='{}{0} Accounts'}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                CornerRadius="8"
+                                Padding="8,4"
+                                Background="{DynamicResource InfoTintBrush}">
+                            <TextBlock Text="{Binding DefaultSummaryAmount, StringFormat='₹ {0:N0}'}"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource AccentBlueBrush}"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 6. MOBILE ACCOUNT CARDS FEED (TOUCH OPTIMIZED) -->
+            <ItemsControl ItemsSource="{Binding AccountsDueSoon}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:RDAccount">
+                        <Border Margin="0,0,0,10"
+                                Padding="14,12"
+                                CornerRadius="14"
+                                Background="{DynamicResource AppCardBackgroundBrush}"
+                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                BorderThickness="1"
+                                BoxShadow="{DynamicResource AppCardShadow}">
+                            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                                <!-- Row 1: Name & Account Number -->
+                                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding AccountName}"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    
+                                    <Border Grid.Column="1"
+                                            CornerRadius="6"
+                                            Padding="6,2"
+                                            Background="{DynamicResource AppHoverBrush}">
+                                        <TextBlock Text="{Binding AccountNo}"
+                                                   FontSize="11"
+                                                   FontFamily="Consolas,Menlo,Monospace"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Row 2: Amount, Installment Count & Due Date -->
+                                <Grid Grid.Row="1" ColumnDefinitions="*,*,*" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="0" Spacing="1">
+                                        <TextBlock Text="Monthly" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding Denomination}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="1">
+                                        <TextBlock Text="Paid Upto" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding MonthPaidUpto}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Spacing="1" HorizontalAlignment="Right">
+                                        <TextBlock Text="Next Due" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding NextInstallmentDate}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Row 3: Action Button (WhatsApp Reminder) -->
+                                <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,4,0,0">
+                                    <Button Grid.Column="0"
+                                            Classes="Secondary"
+                                            Padding="10,8"
+                                            CornerRadius="8"
+                                            Background="#1525D366"
+                                            BorderBrush="#4025D366"
+                                            Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).SendWhatsAppReminderCommand, FallbackValue={x:Null}}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Share}" Width="13" Height="13" Foreground="#25D366"/>
+                                            <TextBlock Text="Send WhatsApp Reminder" FontSize="11" FontWeight="Bold" Foreground="#25D366"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Grid.Column="1"
+                                            Classes="NavItem"
+                                            Padding="8,8"
+                                            CornerRadius="8"
+                                            Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).ViewAccountDetailsCommand, FallbackValue={x:Null}}"
+                                            CommandParameter="{Binding}">
+                                        <PathIcon Data="{StaticResource Icon_Settings}" Width="14" Height="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 7. MOBILE CHART INSIGHTS -->
+            <Border Classes="Card"
+                    Padding="14"
+                    CornerRadius="14"
+                    Background="{DynamicResource AppCardBackgroundBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1"
+                    BoxShadow="{DynamicResource AppCardShadow}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Collection Breakdown"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    
+                    <Border Height="200">
+                        <lvc:PieChart Series="{Binding CategorySeries}"
+                                      LegendPosition="Bottom"
+                                      LegendTextPaint="{Binding ChartLegendTextPaint}"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

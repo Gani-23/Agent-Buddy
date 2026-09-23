@@ -59,11 +59,11 @@
         </Border>
 
         <!-- MAIN VIEW CONTENT -->
-        <Border Grid.Row="1" Padding="12,10">
+        <Border Grid.Row="1" Padding="0">
             <ContentControl Content="{Binding CurrentView}">
                 <ContentControl.DataTemplates>
                     <DataTemplate DataType="vm:DashboardViewModel">
-                        <views:DashboardView/>
+                        <views:MobileDashboardView/>
                     </DataTemplate>
                     <DataTemplate DataType="vm:ListManagementViewModel">
                         <views:ListManagementView/>
@@ -75,7 +75,7 @@
                         <views:SupportView/>
                     </DataTemplate>
                     <DataTemplate DataType="vm:SettingsViewModel">
-                        <views:SettingsView/>
+                        <views:MobileSettingsView/>
                     </DataTemplate>
                 </ContentControl.DataTemplates>
             </ContentControl>

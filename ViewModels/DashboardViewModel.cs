@@ -37,6 +37,7 @@ public class DashboardViewModel : ViewModelBase
     private readonly MobileSyncService _mobileSyncService;
     private readonly NotificationService? _notificationService;
     private readonly IPortalAutomationService _portalAutomationService;
+    private readonly ReportsService _reportsService = new();
 
     private bool _isDarkTheme;
     private bool _isLoading;
@@ -178,6 +179,8 @@ public class DashboardViewModel : ViewModelBase
         SyncToMobileCommand = ReactiveCommand.CreateFromTask(SyncToMobileAsync);
         ViewAccountDetailsCommand = ReactiveCommand.Create<RDAccount>(ViewAccountDetails);
         OpenUpdateLinkCommand = ReactiveCommand.Create(OpenUpdateLink);
+        SelectSummaryOptionCommand = ReactiveCommand.Create<DashboardSummaryOption>(SelectSummaryOption);
+        SendWhatsAppReminderCommand = ReactiveCommand.Create<RDAccount>(SendWhatsAppReminder);
 
         // Load data on initialization
         HalfMonthTitleSuffix = BuildHalfMonthTitleSuffix(DateTime.Today);
@@ -681,6 +684,28 @@ public class DashboardViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> UpdateNewAccountAslaasCommand { get; }
     public ReactiveCommand<Unit, Unit> SyncToMobileCommand { get; }
     public ReactiveCommand<RDAccount, Unit> ViewAccountDetailsCommand { get; }
+    public ReactiveCommand<DashboardSummaryOption, Unit> SelectSummaryOptionCommand { get; }
+    public ReactiveCommand<RDAccount, Unit> SendWhatsAppReminderCommand { get; }
+
+    private void SelectSummaryOption(DashboardSummaryOption? option)
+    {
+        if (option != null)
+        {
+            SelectedDefaultSummaryOption = option;
+        }
+    }
+
+    private void SendWhatsAppReminder(RDAccount? account)
+    {
+        if (account == null) return;
+        try
+        {
+            var msg = $"Dear {account.AccountName},\nThis is a friendly reminder for your DOP Postal RD Account #{account.AccountNo}.\nMonthly Amount: {account.Denomination}\nNext Due Date: {account.NextInstallmentDate}\nPaid Upto: {account.MonthPaidUpto}\nThank you!";
+            var url = $"https://api.whatsapp.com/send?text={Uri.EscapeDataString(msg)}";
+            _ = _reportsService?.OpenLinkAsync(url);
+        }
+        catch { }
+    }
 
     public async Task RefreshRdCertificateRenewalAsync()
     {
@@ -1764,15 +1789,5 @@ public class DashboardViewModel : ViewModelBase
         {
             _notificationService?.Error("Open Failed", ex.Message);
         }
-    }
-
-    public sealed record DashboardSummaryOption(string SegmentKey, string Title, string Hint)
-    {
-        public override string ToString() => Title;
-    }
-
-    public sealed record DashboardSortOption(string Key, string Title)
-    {
-        public override string ToString() => Title;
     }
 }

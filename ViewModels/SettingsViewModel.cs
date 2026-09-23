@@ -137,13 +137,7 @@ public class SettingsViewModel : ViewModelBase
 
     public event Action<ThemeMode>? ThemeModeChanged;
 
-    public class ThemeModeOption
-    {
-        public ThemeMode Mode { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string IconKey { get; set; } = string.Empty;
-    }
+
 
     public ObservableCollection<ThemeModeOption> ThemeModeOptions { get; } = new()
     {

@@ -187,7 +187,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public bool IsLicenseLocked => !IsLicenseActive;
+    public bool IsLicenseLocked => !(IsLicenseActive || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS());
 
     public string LicenseStatusText
     {
@@ -544,10 +544,10 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ApplyLicenseState(LicenseStatus state, bool notifyWhenLocked)
     {
-        IsLicenseActive = state.IsActive;
+        IsLicenseActive = state.IsActive || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
         LicenseStatusText = BuildLicenseBadgeText(state);
 
-        if (!state.IsActive)
+        if (!IsLicenseActive)
         {
             CurrentView = SettingsViewModel;
             CurrentViewName = "Settings";
