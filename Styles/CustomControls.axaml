@@ -478,8 +478,8 @@
         <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="7,2"/>
         <Setter Property="BoxShadow" Value="{DynamicResource AppInputShadow}"/>
     </Style>
 

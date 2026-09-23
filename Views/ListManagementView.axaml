@@ -48,85 +48,81 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
-          RowSpacing="12"
-          Margin="0,0,0,8">
+          RowSpacing="8"
+          Margin="0,0,0,6">
 
         <!-- Top Header: Title Only -->
         <TextBlock Grid.Row="0"
                    Text="{DynamicResource L_List_Title}"
                    Classes="SectionHeader"
-                   FontSize="26"
+                   FontSize="20"
                    FontWeight="Bold"
-                   Margin="0,2,0,0"
+                   Margin="0"
                    VerticalAlignment="Center"/>
 
         <!-- Row 1: Action Toolbar (Left) & Database Guard Card (Right) Side-by-Side -->
         <Grid Grid.Row="1"
-              ColumnDefinitions="*,340"
-              ColumnSpacing="14">
+              ColumnDefinitions="*,380"
+              ColumnSpacing="10">
 
             <!-- Action Toolbar Card -->
             <Border Grid.Column="0"
                     Classes="Card"
-                    Padding="16,14">
+                    Padding="12,8">
                 <Grid RowDefinitions="Auto,Auto,Auto"
-                      RowSpacing="14"
+                      RowSpacing="7"
                       VerticalAlignment="Center">
 
                     <!-- Line 1 Inside Card: Status Chips & Summary Info -->
-                    <Grid Grid.Row="0"
-                          ColumnDefinitions="*,Auto"
-                          VerticalAlignment="Center">
-                        <WrapPanel Grid.Column="0"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Left">
-                            <Border Classes="StatusChip" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <TextBlock Text="Lists:" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding Lists.Count}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
+                    <WrapPanel Grid.Row="0"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left">
+                        <Border Classes="StatusChip" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="Lists:" FontSize="10.5" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Lists.Count}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                            <Border Classes="StatusChip" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <TextBlock Text="References:" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding ReferenceNumbers.Count}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
+                        <Border Classes="StatusChip" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="References:" FontSize="10.5" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ReferenceNumbers.Count}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                            <Border Classes="StatusChip" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <Ellipse Width="6" Height="6" Fill="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding AutoSaveStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
+                        <Border Classes="StatusChip" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <Ellipse Width="5" Height="5" Fill="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding AutoSaveStatusText}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                            <Border Classes="StatusChip" Margin="0,0,8,0">
-                                <TextBlock Text="{Binding SavedLotStatusText}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                           VerticalAlignment="Center"/>
-                            </Border>
+                        <Border Classes="StatusChip" Margin="0,0,6,0">
+                            <TextBlock Text="{Binding SavedLotStatusText}"
+                                       FontSize="10.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Border>
 
-                            <Border Classes="StatusChip"
-                                    Background="{DynamicResource ListDuplicateTintBrush}"
-                                    BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
-                                    Margin="0,0,8,0"
-                                    IsVisible="{Binding HasFailedLists}">
-                                <TextBlock Text="Failed lists need attention"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource ErrorBrush}"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                        </WrapPanel>
-                    </Grid>
+                        <Border Classes="StatusChip"
+                                Background="{DynamicResource ListDuplicateTintBrush}"
+                                BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
+                                Margin="0,0,6,0"
+                                IsVisible="{Binding HasFailedLists}">
+                            <TextBlock Text="Failed lists need attention"
+                                       FontSize="10.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource ErrorBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                    </WrapPanel>
 
                     <!-- Line 2 Inside Card: Action Buttons (Workflow on Left, Delete on Right) -->
                     <Grid Grid.Row="1"
                           ColumnDefinitions="*,Auto"
-                          ColumnSpacing="10"
+                          ColumnSpacing="8"
                           VerticalAlignment="Center">
                         <WrapPanel Grid.Column="0"
                                    VerticalAlignment="Center"
@@ -134,70 +130,70 @@
                             <Button Classes="Primary" 
                                     Command="{Binding AddNewListCommand}"
                                     IsEnabled="{Binding CanEditLists}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="13" Height="13" Foreground="White"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="12" Height="12" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
                             <Button Classes="Success" 
                                     Command="{Binding ProcessAllListsCommand}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0"
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0"
                                     IsEnabled="{Binding CanProcessLists}">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="13" Height="13" Foreground="White"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="12" Height="12" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
                             <Button Classes="Secondary" 
                                     Command="{Binding RetryFailedListsCommand}"
                                     IsEnabled="{Binding CanRetryFailedLists}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
                             <Button Classes="Secondary" 
                                     Command="{Binding ValidateAllAccountsCommand}"
                                     IsEnabled="{Binding CanValidateLists}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
                             <Button Classes="Secondary" 
                                     Command="{Binding SaveLotCommand}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
                             <Button Classes="Secondary" 
                                     Command="{Binding ReloadLotCommand}"
-                                    MinHeight="36"
-                                    Padding="13,7"
-                                    Margin="0,0,8,0">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
                         </WrapPanel>
@@ -206,12 +202,12 @@
                         <Button Grid.Column="1"
                                 Classes="Danger" 
                                 Command="{Binding DeleteAllListsCommand}"
-                                MinHeight="36"
-                                Padding="13,7"
+                                MinHeight="30"
+                                Padding="10,4"
                                 VerticalAlignment="Center">
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="13" Height="13" Foreground="White"/>
-                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="12" Height="12" Foreground="White"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                             </Grid>
                         </Button>
                     </Grid>
@@ -221,12 +217,12 @@
                             Background="{DynamicResource WarningTintBrush}"
                             BorderBrush="{StaticResource WarningBrush}"
                             BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="12,8"
+                            CornerRadius="6"
+                            Padding="8,5"
                             IsVisible="{Binding ShowRetryFailedWarning}">
                         <TextBlock Text="Some lists failed. Use Retry Failed Only to avoid report conflicts."
                                    FontWeight="SemiBold"
-                                   FontSize="12"
+                                   FontSize="11"
                                    TextWrapping="Wrap"
                                    Foreground="{StaticResource WarningBrush}"/>
                     </Border>
@@ -236,63 +232,60 @@
             <!-- Database Guard Card -->
             <Border Grid.Column="1"
                     Classes="Card"
-                    Padding="16,14"
+                    Padding="12,8"
                     HorizontalAlignment="Stretch">
                 <Grid RowDefinitions="Auto,Auto"
-                      RowSpacing="10"
+                      RowSpacing="7"
                       VerticalAlignment="Center">
-                    <StackPanel Grid.Row="0" Spacing="3">
+                    <StackPanel Grid.Row="0" Spacing="2">
                         <TextBlock Text="{Binding DatabaseStatusTitle}"
                                    FontWeight="Bold"
-                                   FontSize="13"
+                                   FontSize="12"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{Binding DatabaseStatusMessage}"
-                                   FontSize="11"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                   LineHeight="15"/>
-                        <TextBlock Text="Override is active. Review accounts carefully."
+                                   FontSize="10.5"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="Override active. Review accounts carefully."
                                    IsVisible="{Binding ShowOverrideWarning}"
-                                   FontSize="11"
+                                   FontSize="10"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource WarningBrush}"/>
                     </StackPanel>
 
-                    <Grid Grid.Row="1" RowDefinitions="Auto,Auto" RowSpacing="6">
-                        <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="8">
-                            <Button Grid.Column="0"
-                                    Classes="Primary"
-                                    Command="{Binding UpdateDatabaseCommand}"
-                                    IsEnabled="{Binding !IsUpdatingDatabase}"
-                                    MinHeight="34"
-                                    Padding="10,6">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Database}" Width="13" Height="13" Foreground="White"/>
-                                    <TextBlock Grid.Column="1" Text="Update DB" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
-                                </Grid>
-                            </Button>
-                            <Button Grid.Column="1"
-                                    Classes="Secondary"
-                                    Command="{Binding RefreshDatabaseStatusCommand}"
-                                    IsEnabled="{Binding !IsUpdatingDatabase}"
-                                    MinHeight="34"
-                                    Padding="10,6">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Refresh}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Recheck" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
-                                </Grid>
-                            </Button>
-                        </Grid>
-                        <Button Grid.Row="1"
-                                Classes="Danger"
+                    <!-- 3 Buttons on the same single line -->
+                    <UniformGrid Grid.Row="1" Rows="1" ColumnSpacing="6">
+                        <Button Classes="Primary"
+                                Command="{Binding UpdateDatabaseCommand}"
+                                IsEnabled="{Binding !IsUpdatingDatabase}"
+                                MinHeight="28"
+                                Padding="6,3">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Database}" Width="11" Height="11" Foreground="White"/>
+                                <TextBlock Grid.Column="1" Text="Update DB" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding RefreshDatabaseStatusCommand}"
+                                IsEnabled="{Binding !IsUpdatingDatabase}"
+                                MinHeight="28"
+                                Padding="6,3">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Refresh}" Width="11" Height="11" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="Recheck" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Danger"
                                 Command="{Binding OverrideDatabaseGuardCommand}"
                                 IsEnabled="{Binding !IsUpdatingDatabase}"
-                                Content="Proceed Anyway"
-                                MinHeight="30"
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                IsVisible="{Binding ShowOverrideButton}"/>
-                    </Grid>
+                                MinHeight="28"
+                                Padding="6,3"
+                                IsVisible="{Binding ShowOverrideButton}">
+                            <TextBlock Text="Proceed" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
+                        </Button>
+                    </UniformGrid>
                 </Grid>
             </Border>
         </Grid>
