@@ -45,7 +45,7 @@
                         <TextBlock Grid.Row="0"
                                    Grid.Column="1"
                                    Text="{Binding AccountNo}"
-                                   FontFamily="Consolas"
+                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="1"
@@ -68,7 +68,7 @@
                                  x:Name="AslaasTextBox"
                                  Text="{Binding AslaasNo}"
                                  PlaceholderText="{DynamicResource L_Prompt_AslaasWatermark}"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource AppMonoFontFamily}"
                                  MaxLength="30"/>
                     </Grid>
 

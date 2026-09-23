@@ -13,20 +13,21 @@
         </Border>
     </Design.PreviewWith>
 
-    <!-- Typography baseline (Notion-like) -->
+    <!-- Typography baseline -->
     <Style Selector="Window">
         <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}"/>
-        <Setter Property="FontFamily" Value="Inter, Segoe UI Variable, Segoe UI, Arial"/>
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
         <Setter Property="FontSize" Value="14"/>
     </Style>
 
     <Style Selector="UserControl">
-        <Setter Property="FontFamily" Value="Inter, Segoe UI Variable, Segoe UI, Arial"/>
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
         <Setter Property="FontSize" Value="14"/>
     </Style>
 
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
     </Style>
 
     <!-- Ensure labels inside buttons inherit the button's foreground color -->

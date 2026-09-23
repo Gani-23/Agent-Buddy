@@ -147,7 +147,7 @@
                                             <CheckBox IsChecked="{Binding IsSelectedForPayslip}"
                                                       VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ReferenceNumber}"
-                                                       FontFamily="Consolas"
+                                                       FontFamily="{StaticResource AppMonoFontFamily}"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                             <TextBlock Text="{Binding ListDisplay}"

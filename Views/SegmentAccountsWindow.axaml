@@ -114,7 +114,7 @@
                                                     DoubleTapped="OpenProfile_DoubleTapped">
                                                 <Grid ColumnDefinitions="140,*,120,120,150"
                                                       ColumnSpacing="10">
-                                                    <TextBlock Text="{Binding AccountNo}" FontFamily="Consolas" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding AccountNo}" FontFamily="{StaticResource AppMonoFontFamily}" FontWeight="Medium"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
                                                     <TextBlock Grid.Column="2" Text="{Binding Denomination}" TextAlignment="Right" FontWeight="SemiBold"/>
                                                     <TextBlock Grid.Column="3" Text="{Binding MonthPaidUpto}" TextAlignment="Center"/>
@@ -149,7 +149,7 @@
                                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding AccountNo}"
-                                                           FontFamily="Consolas"/>
+                                                           FontFamily="{StaticResource AppMonoFontFamily}"/>
 
                                                 <TextBlock Grid.Column="2"
                                                            Text="Name"

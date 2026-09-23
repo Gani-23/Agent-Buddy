@@ -53,7 +53,7 @@
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1"
                            Text="{Binding AccountNo}"
-                           FontFamily="Consolas"
+                           FontFamily="{StaticResource AppMonoFontFamily}"
                            FontWeight="SemiBold"
                            FontSize="15"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
@@ -118,7 +118,7 @@
                            Text="{DynamicResource L_AccountDetails_ShortCode}" 
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Grid.Row="7" Grid.Column="1"
-                           FontFamily="Consolas"
+                           FontFamily="{StaticResource AppMonoFontFamily}"
                            Foreground="{DynamicResource AppTextPrimaryBrush}">
                     <Run Text="{Binding ShortCode}"/>
                 </TextBlock>

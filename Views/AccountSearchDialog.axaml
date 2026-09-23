@@ -122,7 +122,7 @@
                                         <!-- Account Number -->
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding Account.AccountNo}"
-                                                   FontFamily="Consolas"
+                                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                                    FontWeight="Medium"
                                                    Foreground="{DynamicResource AppTextPrimaryBrush}"
                                                    VerticalAlignment="Center"

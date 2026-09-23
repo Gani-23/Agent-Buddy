@@ -2,6 +2,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Styles.Resources>
+        <!-- Font Families (Cross-platform MacOS/Windows/Linux) -->
+        <FontFamily x:Key="AppFontFamily">-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Inter, Arial, sans-serif</FontFamily>
+        <FontFamily x:Key="AppMonoFontFamily">"SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace</FontFamily>
+
         <!-- Notion-inspired neutrals -->
         <Color x:Key="LightBackground">#F7F6F3</Color>
         <Color x:Key="LightCardBackground">#FFFFFF</Color>

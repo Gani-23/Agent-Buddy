@@ -54,7 +54,7 @@
                         <TextBlock Grid.Row="1"
                                    Grid.Column="1"
                                    Text="{Binding AccountNo}"
-                                   FontFamily="Consolas"
+                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <TextBlock Grid.Row="2"
@@ -102,7 +102,7 @@
                                  IsVisible="{Binding ShowChequeNoField}"
                                  PlaceholderText="{Binding ChequeNoWatermark}"
                                  TabIndex="1"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource AppMonoFontFamily}"
                                  MaxLength="30"/>
 
                         <TextBlock Grid.Row="6"
@@ -115,7 +115,7 @@
                                  Text="{Binding PaymentAccountNo}"
                                  PlaceholderText="{Binding PaymentAccountWatermark}"
                                  TabIndex="2"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource AppMonoFontFamily}"
                                  MaxLength="30"/>
 
                         <TextBlock Grid.Row="7"

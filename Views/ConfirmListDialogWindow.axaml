@@ -88,23 +88,23 @@
                                         <DataTemplate>
                                             <Grid ColumnDefinitions="120,*,120,140" ColumnSpacing="10" Margin="0,2">
                                                 <TextBlock Text="{Binding ListLabel}"
-                                                           FontFamily="Consolas"
+                                                           FontFamily="{StaticResource AppMonoFontFamily}"
                                                            FontSize="12"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding ReferenceNumber}"
-                                                           FontFamily="Consolas"
+                                                           FontFamily="{StaticResource AppMonoFontFamily}"
                                                            FontSize="12"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                                 <TextBlock Grid.Column="2"
                                                            Text="{Binding AccountCount}"
-                                                           FontFamily="Consolas"
+                                                           FontFamily="{StaticResource AppMonoFontFamily}"
                                                            FontSize="12"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"
                                                            TextAlignment="Right"/>
                                                 <TextBlock Grid.Column="3"
                                                            Text="{Binding TimestampLabel}"
-                                                           FontFamily="Consolas"
+                                                           FontFamily="{StaticResource AppMonoFontFamily}"
                                                            FontSize="12"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                             </Grid>

@@ -291,7 +291,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}"
-                                                   FontFamily="Consolas"
+                                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                                    FontSize="11"
                                                    TextWrapping="Wrap"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -313,15 +313,23 @@
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     
                     <ItemsControl ItemsSource="{Binding ReferenceNumbers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="12,8"
-                                        Margin="0,4"
+                                <Border Padding="12,6"
+                                        Margin="0,0,8,8"
                                         Background="{DynamicResource SuccessTintBrush}"
+                                        BorderBrush="{StaticResource AccentGreenBrush}"
+                                        BorderThickness="1"
                                         CornerRadius="6">
                                     <TextBlock Text="{Binding}"
-                                               FontFamily="Consolas"
-                                               FontWeight="Medium"
+                                               FontFamily="{StaticResource AppMonoFontFamily}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
                                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                 </Border>
                             </DataTemplate>
@@ -350,31 +358,46 @@
 
                                     <!-- List Header -->
                                     <StackPanel Grid.Row="0" Spacing="8">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                            <TextBlock Text="{Binding Name}" 
-                                                       FontWeight="SemiBold"
-                                                       FontSize="16"
-                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                            <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
-                                                <TextBlock Text="{Binding Count, StringFormat='Items: {0}'}"
-                                                           FontSize="11"
-                                                           HorizontalAlignment="Right"
-                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                                <TextBlock FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"
-                                                           HorizontalAlignment="Right">
+                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="6">
+                                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <TextBlock Text="{Binding Name}" 
+                                                           FontWeight="Bold"
+                                                           FontSize="15"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                <Button Grid.Column="1"
+                                                        Classes="Secondary"
+                                                        Padding="8,4"
+                                                        FontSize="12"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Right"
+                                                        IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
+                                                        Click="DeleteList_Click"
+                                                        Content="Delete"/>
+                                            </Grid>
+                                            
+                                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <TextBlock VerticalAlignment="Center"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource AppTextPrimaryBrush}">
                                                     <Run Text="{Binding TotalAmount, StringFormat='Rs. {0:N0}'}"/>
-                                                    <Run Text="{Binding AmountLimitText}"/>
+                                                    <Run Text="{Binding AmountLimitText}" 
+                                                         Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                                                         FontWeight="Normal"/>
                                                 </TextBlock>
-                                            </StackPanel>
-                                            <Button Grid.Column="2"
-                                                    Classes="Secondary"
-                                                    Padding="10,6"
-                                                    VerticalAlignment="Top"
-                                                    HorizontalAlignment="Right"
-                                                    IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
-                                                    Click="DeleteList_Click"
-                                                    Content="Delete"/>
+                                                <Border Grid.Column="1"
+                                                        Padding="6,2"
+                                                        Background="{DynamicResource AppHoverBrush}"
+                                                        CornerRadius="4"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Count, StringFormat='{}{0} accounts'}"
+                                                               FontSize="11"
+                                                               FontWeight="Medium"
+                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                </Border>
+                                            </Grid>
                                         </Grid>
 
                                         <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
@@ -462,7 +485,7 @@
                                                      Tag="AccountInput"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      MaxLength="12"
-                                                     FontFamily="Consolas"
+                                                     FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                             <TextBox Grid.Column="1"
                                                      Text="{Binding PendingInstallmentText, UpdateSourceTrigger=PropertyChanged}"
@@ -470,7 +493,7 @@
                                                      Tag="{Binding InstallmentInputTag}"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                      HorizontalContentAlignment="Center"
-                                                     FontFamily="Consolas"
+                                                     FontFamily="{StaticResource AppMonoFontFamily}"
                                                      KeyDown="PendingField_KeyDown"/>
                                         </Grid>
                                     </Border>
@@ -569,7 +592,7 @@
                                                                     IsVisible="{Binding IsDuplicateFocus}"/>
                                                             <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding AccountNo}" 
-                                                                           FontFamily="Consolas"
+                                                                           FontFamily="{StaticResource AppMonoFontFamily}"
                                                                            FontSize="12"
                                                                            TextTrimming="CharacterEllipsis"
                                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
@@ -859,7 +882,7 @@
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                         <TextBlock Text="{Binding AccountNo}"
-                                                                   FontFamily="Consolas"
+                                                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                                                    FontSize="13"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
