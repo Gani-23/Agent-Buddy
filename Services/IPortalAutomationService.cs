@@ -21,3 +21,11 @@ public interface IPortalAutomationService
         Action<string>? statusCallback = null,
         CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Static provider to allow platform heads (e.g. AgentBuddy.Android) to supply platform-specific automation services.
+/// </summary>
+public static class PortalAutomationProvider
+{
+    public static Func<DatabaseService, IPortalAutomationService>? Factory { get; set; }
+}

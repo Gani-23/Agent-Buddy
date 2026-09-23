@@ -839,18 +839,22 @@ public class ListManagementViewModel : ViewModelBase
     private bool _hasStaleDatabaseOverride;
     private int _duplicateHighlightVersion;
 
+    private readonly IPortalAutomationService _portalAutomationService;
+
     public ListManagementViewModel(
         DatabaseService databaseService,
         ValidationService validationService,
         PythonService pythonService,
         ReportsService reportsService,
-        NotificationService? notificationService = null)
+        NotificationService? notificationService = null,
+        IPortalAutomationService? portalAutomationService = null)
     {
         _databaseService = databaseService;
         _validationService = validationService;
         _pythonService = pythonService;
         _reportsService = reportsService;
         _notificationService = notificationService;
+        _portalAutomationService = portalAutomationService ?? new DesktopPythonPortalAutomationService(pythonService);
 
         var stateDirectory = Path.Combine(AppPaths.BaseDirectory, "State");
         Directory.CreateDirectory(stateDirectory);
@@ -1384,6 +1388,25 @@ public class ListManagementViewModel : ViewModelBase
 
         try
         {
+            if (_portalAutomationService.CanRunOnDevice && (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()))
+            {
+                var (mobileSuccess, fetchedCount, mobileMessage) = await _portalAutomationService.FetchAccountsAsync(
+                    progress => ProcessStatus = progress);
+
+                if (mobileSuccess)
+                {
+                    ProcessStatus = $"Database updated! Refreshed {fetchedCount} accounts.";
+                    _databaseService.NotifyDatabaseChanged();
+                    _notificationService?.Success("Database Updated", $"Refreshed {fetchedCount} accounts successfully.");
+                }
+                else
+                {
+                    ProcessStatus = $"Update failed: {mobileMessage}";
+                    _notificationService?.Error("Update Failed", mobileMessage);
+                }
+                return;
+            }
+
             var (isInstalled, version) = await _pythonService.CheckPythonInstalledAsync();
             if (!isInstalled)
             {

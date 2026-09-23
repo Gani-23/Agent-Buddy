@@ -1587,10 +1587,7 @@ public class DashboardViewModel : ViewModelBase
         try
         {
             // If running on mobile / non-desktop platform without python, run on-device portal automation
-            if (_portalAutomationService.CanRunOnDevice &&
-                !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
-                !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (_portalAutomationService.CanRunOnDevice && (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()))
             {
                 var (mobileSuccess, fetchedCount, mobileMessage) = await _portalAutomationService.FetchAccountsAsync(
                     progress => UpdateStatus = progress);

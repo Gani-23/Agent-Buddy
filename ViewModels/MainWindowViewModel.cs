@@ -45,6 +45,7 @@ public class MainWindowViewModel : ViewModelBase
     private readonly MobileSyncService _mobileSyncService;
     private readonly LocalizationService _localizationService;
     private readonly UpdateService _updateService;
+    private readonly IPortalAutomationService _portalAutomationService;
     private readonly CancellationTokenSource _updateCts = new();
     private string _latestVersion = string.Empty;
     private bool _isUpdateAvailable;
@@ -83,10 +84,11 @@ public class MainWindowViewModel : ViewModelBase
         _mobileSyncService = new MobileSyncService();
         _localizationService = new LocalizationService();
         _updateService = new UpdateService(_databaseService);
+        _portalAutomationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? new DesktopPythonPortalAutomationService(_pythonService);
 
         // Initialize view models
-        DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService);
-        ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService);
+        DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService);
+        ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService, _portalAutomationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
         SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService);
