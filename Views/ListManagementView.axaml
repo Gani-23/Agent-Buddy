@@ -48,57 +48,168 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
-          RowSpacing="16"
+          RowSpacing="14"
           Margin="0,0,0,8">
 
-        <Grid ColumnDefinitions="*,340"
-              ColumnSpacing="16">
-            <StackPanel Spacing="10" VerticalAlignment="Center">
-                <StackPanel Spacing="2">
-                    <TextBlock Text="{DynamicResource L_List_Kicker}" Classes="Kicker"/>
-                    <TextBlock Text="{DynamicResource L_List_Title}"
-                               Classes="SectionHeader"
-                               Margin="0"
-                               MaxWidth="760"/>
+        <!-- Top Header: Title & Status Chips Inline -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="16"
+              VerticalAlignment="Center">
+            <TextBlock Text="{DynamicResource L_List_Title}"
+                       Classes="SectionHeader"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Margin="0"
+                       VerticalAlignment="Center"/>
+
+            <WrapPanel Grid.Column="1"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left">
+                <Border Classes="StatusChip" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding Lists.Count, StringFormat='Lists: {0}'}"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <Border Classes="StatusChip" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding ReferenceNumbers.Count, StringFormat='References: {0}'}"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <Border Classes="StatusChip" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding AutoSaveStatusText}"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <Border Classes="StatusChip" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding SavedLotStatusText}"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <Border Classes="StatusChip"
+                        Background="{DynamicResource ListDuplicateTintBrush}"
+                        BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
+                        Margin="0,0,8,0"
+                        IsVisible="{Binding HasFailedLists}">
+                    <TextBlock Text="Failed lists need attention"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+            </WrapPanel>
+        </Grid>
+
+        <!-- Row 1: Action Toolbar (Left) & Database Guard Card (Right) Side-by-Side -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,340"
+              ColumnSpacing="14">
+
+            <!-- Action Toolbar Card -->
+            <Border Grid.Column="0"
+                    Classes="Card"
+                    Padding="12">
+                <StackPanel Spacing="10">
+                    <WrapPanel>
+                        <Button Classes="Primary" 
+                                Command="{Binding AddNewListCommand}"
+                                IsEnabled="{Binding CanEditLists}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Success" 
+                                Command="{Binding ProcessAllListsCommand}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8"
+                                IsEnabled="{Binding CanProcessLists}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="14" Height="14" Foreground="White"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Secondary" 
+                                Command="{Binding RetryFailedListsCommand}"
+                                IsEnabled="{Binding CanRetryFailedLists}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Secondary" 
+                                Command="{Binding ValidateAllAccountsCommand}"
+                                IsEnabled="{Binding CanValidateLists}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Secondary" 
+                                Command="{Binding SaveLotCommand}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Secondary" 
+                                Command="{Binding ReloadLotCommand}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,8,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Danger" 
+                                Command="{Binding DeleteAllListsCommand}"
+                                MinHeight="38"
+                                Padding="14,8"
+                                Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="14" Height="14" Foreground="White"/>
+                                <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+                    </WrapPanel>
+
+                    <Border Background="{DynamicResource WarningTintBrush}"
+                            BorderBrush="{StaticResource WarningBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12,10"
+                            IsVisible="{Binding ShowRetryFailedWarning}">
+                        <TextBlock Text="Some lists failed. Use Retry Failed Only to avoid report conflicts."
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource WarningBrush}"/>
+                    </Border>
                 </StackPanel>
+            </Border>
 
-                <WrapPanel>
-                    <Border Classes="StatusChip" Margin="0,0,8,4">
-                        <TextBlock Text="{Binding Lists.Count, StringFormat='Lists: {0}'}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-
-                    <Border Classes="StatusChip" Margin="0,0,8,4">
-                        <TextBlock Text="{Binding ReferenceNumbers.Count, StringFormat='References: {0}'}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-
-                    <Border Classes="StatusChip" Margin="0,0,8,4">
-                        <TextBlock Text="{Binding AutoSaveStatusText}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-
-                    <Border Classes="StatusChip" Margin="0,0,8,4">
-                        <TextBlock Text="{Binding SavedLotStatusText}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-
-                    <Border Classes="StatusChip"
-                            Background="{DynamicResource ListDuplicateTintBrush}"
-                            BorderBrush="{DynamicResource ListDuplicateBorderBrush}"
-                            Margin="0,0,8,4"
-                            IsVisible="{Binding HasFailedLists}">
-                        <TextBlock Text="Failed lists need attention"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-                </WrapPanel>
-            </StackPanel>
-
+            <!-- Database Guard Card -->
             <Border Grid.Column="1"
                     Classes="Card"
                     Padding="14"
@@ -155,108 +266,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-
-        <Border Grid.Row="1"
-                Classes="Card"
-                Padding="12">
-            <StackPanel Spacing="10">
-                <WrapPanel>
-                    <Button Classes="Primary" 
-                            Command="{Binding AddNewListCommand}"
-                            IsEnabled="{Binding CanEditLists}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_AddList}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Success" 
-                            Command="{Binding ProcessAllListsCommand}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8"
-                            IsEnabled="{Binding CanProcessLists}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="14" Height="14" Foreground="White"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_StartWalk}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Secondary"
-                            Command="{Binding RetryFailedListsCommand}"
-                            IsEnabled="{Binding CanRetryFailedLists}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_RetryFailed}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Secondary"
-                            Command="{Binding ValidateAllAccountsCommand}"
-                            IsEnabled="{Binding CanValidateLists}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Check}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ValidateAccounts}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Secondary" 
-                            Command="{Binding SaveLotCommand}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Copy}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_SaveLot}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Secondary" 
-                            Command="{Binding ReloadLotCommand}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,8,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Danger" 
-                            Command="{Binding DeleteAllListsCommand}"
-                            MinHeight="38"
-                            Padding="14,8"
-                            Margin="0,0,0,8">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Trash}" Width="14" Height="14" Foreground="White"/>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource L_List_DeleteAll}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-                </WrapPanel>
-
-                <Border Background="{DynamicResource WarningTintBrush}"
-                        BorderBrush="{StaticResource WarningBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="12,10"
-                        IsVisible="{Binding ShowRetryFailedWarning}">
-                    <TextBlock Text="Some lists failed. Use Retry Failed Only to avoid report conflicts."
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap"
-                               Foreground="{StaticResource WarningBrush}"/>
-                </Border>
-
-            </StackPanel>
-        </Border>
 
         <ScrollViewer Grid.Row="2"
                       HorizontalScrollBarVisibility="Disabled"
