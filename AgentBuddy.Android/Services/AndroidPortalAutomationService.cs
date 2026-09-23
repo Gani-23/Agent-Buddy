@@ -109,6 +109,10 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
                 webView.Settings.LoadsImagesAutomatically = true;
                 webView.Settings.JavaScriptCanOpenWindowsAutomatically = true;
                 webView.Settings.SetSupportMultipleWindows(true);
+                webView.Settings.UseWideViewPort = true;
+                webView.Settings.LoadWithOverviewMode = true;
+                webView.Settings.BuiltInZoomControls = true;
+                webView.Settings.DisplayZoomControls = false;
                 webView.Settings.UserAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36";
 
                 var webLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 0, 1f);
@@ -313,119 +317,119 @@ public sealed class AndroidPortalAutomationService : IPortalAutomationService
             base.OnPageFinished(view, url);
             if (view == null || string.IsNullOrWhiteSpace(url)) return;
 
-            var lowerUrl = url.ToLowerInvariant();
             Log.Info(Tag, $"OnPageFinished URL: {url}");
 
-            // Step 1: Login Page
-            if (lowerUrl.Contains("dopagent.indiapost.gov.in") &&
-                !lowerUrl.Contains("bankuser") &&
-                !lowerUrl.Contains("agent") &&
-                !lowerUrl.Contains("account"))
-            {
-                _statusCallback?.Invoke("Autofilling credentials... solve CAPTCHA and tap Sign In / Login.");
-
-                var loginJs = $@"
-                    (function() {{
-                        var u = document.querySelector('input[name=""AuthenticationFG.USER_PRINCIPAL""]');
-                        var p = document.querySelector('input[name=""AuthenticationFG.ACCESS_CODE""]');
-                        if (u && !u.value) {{
-                            u.value = '{_agentId}';
-                            u.dispatchEvent(new Event('input', {{bubbles:true}}));
-                            u.dispatchEvent(new Event('change', {{bubbles:true}}));
-                        }}
-                        if (p && !p.value && '{_password}'.length > 0) {{
-                            p.value = '{_password}';
-                            p.dispatchEvent(new Event('input', {{bubbles:true}}));
-                            p.dispatchEvent(new Event('change', {{bubbles:true}}));
-                        }}
-                    }})();";
-
-                view.EvaluateJavascript(loginJs, null);
-                return;
-            }
-
-            // Step 2: Main Menu -> Navigate to Agent Enquire & Update Screen
-            if (lowerUrl.Contains("bankuser") || lowerUrl.Contains("agent") || lowerUrl.Contains("account"))
-            {
-                _statusCallback?.Invoke("Navigating to Accounts -> Agent Enquire & Update Screen...");
-
-                var navigateOrExtractJs = @"
-                    (function() {
-                        var printBtn = document.querySelector('#printpreview, img[src*=""btn-printscreen.gif""], input[name=""Action.FETCH_INPUT_ACCOUNT""]');
-                        if (printBtn) {
-                            return 'on_account_screen';
-                        }
-
-                        var links = document.querySelectorAll('a');
-                        for (var i = 0; i < links.length; i++) {
-                            var text = links[i].innerText || '';
-                            if (text.indexOf('Agent Enquire & Update Screen') !== -1 ||
-                                text.indexOf('Agent Enquire') !== -1) {
-                                links[i].click();
-                                return 'navigating_enquire';
-                            }
-                        }
-                        for (var j = 0; j < links.length; j++) {
-                            var t = links[j].innerText || '';
-                            if (t.trim() === 'Accounts') {
-                                links[j].click();
-                                return 'clicked_accounts_menu';
-                            }
-                        }
-                        return 'unknown_state';
-                    })();";
-
-                view.EvaluateJavascript(navigateOrExtractJs, new JavaValueCallback(stepResult =>
-                {
-                    var cleanStep = (stepResult ?? string.Empty).Trim('"');
-                    Log.Info(Tag, $"Navigation Step result: {cleanStep}");
-
-                    if (cleanStep == "on_account_screen" || cleanStep == "unknown_state")
-                    {
-                        // Step 3: Trigger extract table rows
-                        _statusCallback?.Invoke("Extracting account data rows...");
-
-                        view.EvaluateJavascript(GetTableExtractionScript(), new JavaValueCallback(jsonResult =>
-                        {
-                            var list = ParseRecordsFromJson(jsonResult);
-                            Log.Info(Tag, $"Parsed {list.Count} accounts from current page.");
-
-                            if (list.Count > 0)
-                            {
-                                foreach (var item in list)
-                                {
-                                    if (!_accumulatedRecords.Exists(r => r.AccountNo == item.AccountNo))
-                                    {
-                                        _accumulatedRecords.Add(item);
-                                    }
-                                }
-
-                                _statusCallback?.Invoke($"Extracted {_accumulatedRecords.Count} accounts so far...");
-
-                                var checkNextJs = @"
-                                    (function() {
-                                        var nextBtn = document.querySelector('input[name=""Action.NEXT_ACCOUNTS""], input[name=""Action.AgentRDActSummaryAllListing.GOTO_NEXT__""], input[value="">""]');
-                                        if (nextBtn && !nextBtn.disabled) {
-                                            nextBtn.click();
-                                            return 'clicked_next';
-                                        }
-                                        return 'done';
-                                    })();";
-
-                                view.EvaluateJavascript(checkNextJs, new JavaValueCallback(nextRes =>
-                                {
-                                    var cleanNext = (nextRes ?? "").Trim('"');
-                                    Log.Info(Tag, $"Pagination Step: {cleanNext}");
-                                    if (cleanNext == "done" && _accumulatedRecords.Count > 0)
-                                    {
-                                        _onSuccess(_accumulatedRecords);
-                                    }
-                                }));
-                            }
-                        }));
+            // DOM detection script
+            var inspectDomJs = @"
+                (function() {
+                    var userField = document.querySelector('input[name=""AuthenticationFG.USER_PRINCIPAL""], input[name*=""USER_PRINCIPAL""]');
+                    if (userField) {
+                        return 'login_page';
                     }
-                }));
-            }
+                    var printBtn = document.querySelector('#printpreview, img[src*=""btn-printscreen.gif""], input[name=""Action.FETCH_INPUT_ACCOUNT""]');
+                    if (printBtn) {
+                        return 'account_screen';
+                    }
+                    var table = document.querySelector('table#SummaryList, table[id*=""SummaryList""]');
+                    if (table) {
+                        return 'account_table';
+                    }
+                    var links = document.querySelectorAll('a');
+                    for (var i = 0; i < links.length; i++) {
+                        var text = links[i].innerText || '';
+                        if (text.indexOf('Agent Enquire & Update Screen') !== -1 ||
+                            text.indexOf('Agent Enquire') !== -1) {
+                            links[i].click();
+                            return 'navigating_enquire';
+                        }
+                    }
+                    for (var j = 0; j < links.length; j++) {
+                        var t = links[j].innerText || '';
+                        if (t.trim() === 'Accounts') {
+                            links[j].click();
+                            return 'clicked_accounts_menu';
+                        }
+                    }
+                    return 'unknown_page';
+                })();";
+
+            view.EvaluateJavascript(inspectDomJs, new JavaValueCallback(pageState =>
+            {
+                var state = (pageState ?? "").Trim('"');
+                Log.Info(Tag, $"Detected DOM Page State: {state}");
+
+                if (state == "login_page")
+                {
+                    _statusCallback?.Invoke("Autofilling credentials... solve CAPTCHA and tap Log in.");
+
+                    var autofillJs = $@"
+                        (function() {{
+                            var u = document.querySelector('input[name=""AuthenticationFG.USER_PRINCIPAL""], input[name*=""USER_PRINCIPAL""]');
+                            var p = document.querySelector('input[name=""AuthenticationFG.ACCESS_CODE""], input[name*=""ACCESS_CODE""]');
+                            var captcha = document.querySelector('input[name*=""CAPTCHA""], input[name*=""verification""], input[name=""AuthenticationFG.VERIFICATION_CODE""]');
+                            if (u && !u.value) {{
+                                u.value = '{_agentId}';
+                                u.dispatchEvent(new Event('input', {{bubbles:true}}));
+                                u.dispatchEvent(new Event('change', {{bubbles:true}}));
+                            }}
+                            if (p && !p.value && '{_password}'.length > 0) {{
+                                p.value = '{_password}';
+                                p.dispatchEvent(new Event('input', {{bubbles:true}}));
+                                p.dispatchEvent(new Event('change', {{bubbles:true}}));
+                            }}
+                            if (captcha) {{
+                                captcha.focus();
+                            }}
+                        }})();";
+
+                    view.EvaluateJavascript(autofillJs, null);
+                    return;
+                }
+
+                if (state == "account_screen" || state == "account_table" || state == "unknown_page")
+                {
+                    _statusCallback?.Invoke("Extracting account data rows...");
+
+                    view.EvaluateJavascript(GetTableExtractionScript(), new JavaValueCallback(jsonResult =>
+                    {
+                        var list = ParseRecordsFromJson(jsonResult);
+                        Log.Info(Tag, $"Parsed {list.Count} accounts from current page.");
+
+                        if (list.Count > 0)
+                        {
+                            foreach (var item in list)
+                            {
+                                if (!_accumulatedRecords.Exists(r => r.AccountNo == item.AccountNo))
+                                {
+                                    _accumulatedRecords.Add(item);
+                                }
+                            }
+
+                            _statusCallback?.Invoke($"Extracted {_accumulatedRecords.Count} accounts so far...");
+
+                            var checkNextJs = @"
+                                (function() {
+                                    var nextBtn = document.querySelector('input[name=""Action.NEXT_ACCOUNTS""], input[name=""Action.AgentRDActSummaryAllListing.GOTO_NEXT__""], input[value="">""]');
+                                    if (nextBtn && !nextBtn.disabled) {
+                                        nextBtn.click();
+                                        return 'clicked_next';
+                                    }
+                                    return 'done';
+                                })();";
+
+                            view.EvaluateJavascript(checkNextJs, new JavaValueCallback(nextRes =>
+                            {
+                                var cleanNext = (nextRes ?? "").Trim('"');
+                                Log.Info(Tag, $"Pagination Step: {cleanNext}");
+                                if (cleanNext == "done" && _accumulatedRecords.Count > 0)
+                                {
+                                    _onSuccess(_accumulatedRecords);
+                                }
+                            }));
+                        }
+                    }));
+                }
+            }));
         }
     }
 
