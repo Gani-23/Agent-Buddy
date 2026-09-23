@@ -1,0 +1,146 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AgentBuddy.ViewModels"
+             xmlns:views="using:AgentBuddy.Views"
+             mc:Ignorable="d" d:DesignWidth="430" d:DesignHeight="932"
+             x:Class="AgentBuddy.Views.MainView"
+             x:DataType="vm:MainWindowViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- TOP APP BAR -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource AppCardBackgroundBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,12"
+                BoxShadow="0 2 8 0 #00000008">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                <!-- App Logo & Title -->
+                <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" CornerRadius="10" 
+                            Background="{StaticResource AccentBlueBrush}" 
+                            BorderBrush="#40FFFFFF"
+                            BorderThickness="1"
+                            VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Logo}" Width="18" Height="18" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource L_Main_AppName}"
+                                   FontSize="16"
+                                   FontWeight="Black"
+                                   LetterSpacing="-0.5"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="Mobile Dashboard"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Action Controls (Theme Switcher & Status) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="NavItem"
+                            Padding="8"
+                            Width="36"
+                            Height="36"
+                            Command="{Binding ToggleThemeCommand}"
+                            ToolTip.Tip="Toggle Light/Dark Theme">
+                        <PathIcon Data="{StaticResource Icon_Theme_Palette}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- MAIN VIEW CONTENT -->
+        <Border Grid.Row="1" Padding="12,10">
+            <ContentControl Content="{Binding CurrentView}">
+                <ContentControl.DataTemplates>
+                    <DataTemplate DataType="vm:DashboardViewModel">
+                        <views:DashboardView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:ListManagementViewModel">
+                        <views:ListManagementView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:ReportsViewModel">
+                        <views:ReportsView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:SupportViewModel">
+                        <views:SupportView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:SettingsViewModel">
+                        <views:SettingsView/>
+                    </DataTemplate>
+                </ContentControl.DataTemplates>
+            </ContentControl>
+        </Border>
+
+        <!-- BOTTOM MOBILE NAVIGATION BAR -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource AppCardBackgroundBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="8,8"
+                BoxShadow="0 -2 10 0 #00000008">
+            <Grid ColumnDefinitions="*,*,*,*">
+                <!-- Dashboard Tab -->
+                <Button Grid.Column="0"
+                        Classes="NavItem"
+                        Height="52"
+                        Padding="4"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Dashboard">
+                    <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Dashboard}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Dashboard}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Create Lists Tab -->
+                <Button Grid.Column="1"
+                        Classes="NavItem"
+                        Height="52"
+                        Padding="4"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Lists">
+                    <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Lists}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{DynamicResource L_Nav_CreateLists}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Reports Tab -->
+                <Button Grid.Column="2"
+                        Classes="NavItem"
+                        Height="52"
+                        Padding="4"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Reports">
+                    <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Reports}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Reports}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Settings Tab -->
+                <Button Grid.Column="3"
+                        Classes="NavItem"
+                        Height="52"
+                        Padding="4"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Settings">
+                    <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Settings}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{DynamicResource L_Nav_Settings}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
