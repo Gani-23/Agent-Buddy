@@ -77,17 +77,15 @@ def generate_wxs(root_dir: str, out_path: str):
     def emit_directory(node, rel_dir, indent):
         nonlocal dir_counter, comp_counter
         files = files_by_dir.get(rel_dir, [])
-        if rel_dir == "":
-            current_indent = indent
-            for name in files:
-                comp_id = f"cmp_{comp_counter}"
-                file_id = f"fil_{comp_counter}"
-                comp_counter += 1
-                rel_path = name.replace(os.sep, "/")
-                src = f'$(var.SourceDir)/{rel_path}'
-                lines.append(f'{current_indent}<Component Id="{comp_id}" Guid="*">')
-                lines.append(f'{current_indent}  <File Id="{file_id}" Source="{escape(src)}" />')
-                lines.append(f'{current_indent}</Component>')
+        for name in files:
+            comp_id = f"cmp_{comp_counter}"
+            file_id = f"fil_{comp_counter}"
+            comp_counter += 1
+            rel_path = f"{rel_dir}/{name}".replace(os.sep, "/") if rel_dir else name.replace(os.sep, "/")
+            src = f'$(var.SourceDir)/{rel_path}'
+            lines.append(f'{indent}<Component Id="{comp_id}" Guid="*">')
+            lines.append(f'{indent}  <File Id="{file_id}" Source="{escape(src)}" />')
+            lines.append(f'{indent}</Component>')
         for subdir, child in sorted(node.items()):
             dir_id = f"dir_{dir_counter}"
             dir_counter += 1
