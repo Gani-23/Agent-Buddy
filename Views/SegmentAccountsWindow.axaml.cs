@@ -67,4 +67,33 @@ public partial class SegmentAccountsWindow : Window
         var dialog = new AccountDetailsWindow(account, _isDarkTheme);
         await dialog.ShowDialog(this);
     }
+
+    private async void DeleteAccount_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SegmentAccountsWindowViewModel viewModel ||
+            sender is not Button button ||
+            button.DataContext is not RDAccount account)
+        {
+            return;
+        }
+
+        var request = new ConfirmDialogRequest(
+            "Delete closed account",
+            $"Remove {account.AccountNo} from closed accounts?",
+            "Delete",
+            "Cancel");
+
+        var dialog = new ConfirmDialogWindow(request)
+        {
+            RequestedThemeVariant = _isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light
+        };
+
+        var confirmed = await dialog.ShowDialog<bool>(this);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await viewModel.DeleteAccountAsync(account);
+    }
 }

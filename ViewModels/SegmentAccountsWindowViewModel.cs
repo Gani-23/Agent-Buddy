@@ -139,6 +139,7 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
     public string Title => DashboardContext.DefaultSummaryTitle;
     public string SegmentKey => DashboardContext.SelectedDefaultSummaryKey;
     public bool IsNewAccountsSegment => string.Equals(SegmentKey, "new-accounts", System.StringComparison.OrdinalIgnoreCase);
+    public bool CanDeleteAccounts => string.Equals(SegmentKey, "closed-accounts", System.StringComparison.OrdinalIgnoreCase);
     public string SegmentHint => IsNewAccountsSegment
         ? "Latest additions are shown first."
         : string.Empty;
@@ -180,5 +181,27 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
         TotalAmount = FilteredAccounts.Sum(a => a.GetAmount());
         this.RaisePropertyChanged(nameof(Count));
         this.RaisePropertyChanged(nameof(TotalAmount));
+    }
+
+    public async System.Threading.Tasks.Task<bool> DeleteAccountAsync(RDAccount account)
+    {
+        if (!CanDeleteAccounts || account == null)
+        {
+            return false;
+        }
+
+        var deleted = await DashboardContext.DeleteClosedAccountAsync(account);
+        if (!deleted)
+        {
+            return false;
+        }
+
+        Accounts.Remove(account);
+        FilteredAccounts.Remove(account);
+        Count = FilteredAccounts.Count;
+        TotalAmount = FilteredAccounts.Sum(a => a.GetAmount());
+        this.RaisePropertyChanged(nameof(Count));
+        this.RaisePropertyChanged(nameof(TotalAmount));
+        return true;
     }
 }

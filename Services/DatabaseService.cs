@@ -247,6 +247,33 @@ public class DatabaseService
         return null;
     }
 
+    public async Task<bool> DeleteClosedAccountAsync(string accountNo)
+    {
+        var normalizedAccountNo = (accountNo ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedAccountNo))
+        {
+            return false;
+        }
+
+        EnsureAnalyticsSchema();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            DELETE FROM closed_accounts
+            WHERE account_no = @accountNo";
+        command.Parameters.AddWithValue("@accountNo", normalizedAccountNo);
+
+        var deletedRows = await command.ExecuteNonQueryAsync();
+        if (deletedRows > 0)
+        {
+            NotifyDatabaseChanged();
+        }
+
+        return deletedRows > 0;
+    }
+
     /// <summary>
     /// Search accounts by query (account number or name)
     /// </summary>

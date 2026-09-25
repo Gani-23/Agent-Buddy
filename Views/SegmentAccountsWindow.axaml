@@ -8,6 +8,7 @@
         d:DesignWidth="980"
         d:DesignHeight="680"
         x:Class="AgentBuddy.Views.SegmentAccountsWindow"
+        x:Name="Root"
         x:DataType="vm:SegmentAccountsWindowViewModel"
         Title="{DynamicResource L_Segment_Title}"
         Width="980"
@@ -88,13 +89,18 @@
             </Border>
 
             <Border Grid.Row="2" Classes="Card" Padding="10,8">
-                <Grid ColumnDefinitions="140,*,120,120,150,60" ColumnSpacing="10">
+                <Grid ColumnDefinitions="140,*,110,110,130,60,78" ColumnSpacing="10">
                     <TextBlock Text="{DynamicResource L_Segment_ColumnAccountNo}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="1" Text="{DynamicResource L_Segment_ColumnAccountName}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="2" Text="{DynamicResource L_Segment_ColumnAmount}" FontWeight="SemiBold" TextAlignment="Right"/>
                     <TextBlock Grid.Column="3" Text="{DynamicResource L_Segment_ColumnPaidUpto}" FontWeight="SemiBold" TextAlignment="Center"/>
                     <TextBlock Grid.Column="4" Text="{DynamicResource L_Segment_ColumnNextDue}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="5" Text="View" FontWeight="SemiBold" TextAlignment="Center"/>
+                    <TextBlock Grid.Column="6"
+                               Text="{DynamicResource L_Report_Delete}"
+                               FontWeight="SemiBold"
+                               TextAlignment="Center"
+                               IsVisible="{Binding CanDeleteAccounts}"/>
                 </Grid>
             </Border>
 
@@ -106,13 +112,13 @@
                                 <Border BorderThickness="0,0,0,1"
                                         BorderBrush="{DynamicResource AppBorderBrush}">
                                     <StackPanel>
-                                        <Grid ColumnDefinitions="140,*,120,120,150,60"
+                                        <Grid ColumnDefinitions="140,*,110,110,130,60,78"
                                               ColumnSpacing="10">
                                             <Border Grid.ColumnSpan="5"
                                                     Padding="10,8"
                                                     Background="Transparent"
                                                     DoubleTapped="OpenProfile_DoubleTapped">
-                                                <Grid ColumnDefinitions="140,*,120,120,150"
+                                                <Grid ColumnDefinitions="140,*,110,110,130"
                                                       ColumnSpacing="10">
                                                     <TextBlock Text="{Binding AccountNo}" FontFamily="{StaticResource AppMonoFontFamily}" FontWeight="Medium"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding AccountName}" TextTrimming="CharacterEllipsis"/>
@@ -134,6 +140,16 @@
                                                           Fill="{DynamicResource AppTextSecondaryBrush}"
                                                           Data="M1.5 12C2.9 7.8 7.1 5 12 5s9.1 2.8 10.5 7c-1.4 4.2-5.6 7-10.5 7S2.9 16.2 1.5 12zm10.5 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
                                                 </ToggleButton>
+                                            </Border>
+                                            <Border Grid.Column="6"
+                                                    Padding="8,8"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    IsVisible="{ReflectionBinding DataContext.CanDeleteAccounts, ElementName=Root}">
+                                                <Button Classes="Danger"
+                                                        Padding="10,5"
+                                                        Content="{DynamicResource L_Report_Delete}"
+                                                        Click="DeleteAccount_Click"/>
                                             </Border>
                                         </Grid>
                                         <Border Background="{DynamicResource AppHoverBrush}"

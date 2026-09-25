@@ -13,3 +13,4 @@ installer/staging/
 *.user
 *.suo
 *.log
+.env*

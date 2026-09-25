@@ -712,6 +712,37 @@ public class DashboardViewModel : ViewModelBase
         await LoadRdCertificateRenewalAsync();
     }
 
+    public async Task RefreshDashboardAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    public async Task<bool> DeleteClosedAccountAsync(RDAccount account)
+    {
+        if (account == null || string.IsNullOrWhiteSpace(account.AccountNo))
+        {
+            return false;
+        }
+
+        try
+        {
+            var deleted = await _databaseService.DeleteClosedAccountAsync(account.AccountNo);
+            if (deleted)
+            {
+                _notificationService?.Success("Closed Account Deleted", $"{account.AccountNo} removed from closed accounts.");
+                return true;
+            }
+
+            _notificationService?.Warning("Closed Account Not Found", $"{account.AccountNo} was not found in closed accounts.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _notificationService?.Error("Delete Failed", ex.Message);
+            return false;
+        }
+    }
+
     private void OnDatabaseChanged(object? sender, EventArgs e)
     {
         _ = LoadDataAsync();
