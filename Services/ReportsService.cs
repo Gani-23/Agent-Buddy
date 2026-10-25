@@ -979,12 +979,20 @@ public class ReportsService
     }
 
     public async Task<(bool Success, string Message, string OutputPdfPath)> GeneratePayslipsAsync(
-        IReadOnlyList<DailyListReport> selectedReports)
+        IReadOnlyList<DailyListReport> selectedReports,
+        string? layout = null,
+        bool? showDefaults = null,
+        bool? showRebates = null)
     {
         if (selectedReports == null || selectedReports.Count == 0)
         {
             return (false, "Select at least one report to generate payslip.", string.Empty);
         }
+
+        var settings = AppSettings.Load();
+        var effectiveLayout = !string.IsNullOrWhiteSpace(layout) ? layout : settings.PayslipLayout;
+        var effectiveShowDefaults = showDefaults ?? settings.ShowPayslipDefaultFee;
+        var effectiveShowRebates = showRebates ?? settings.ShowPayslipRebate;
 
         var references = selectedReports
             .Select(report => report.ReferenceNumber)
@@ -1028,6 +1036,15 @@ public class ReportsService
             process.StartInfo.ArgumentList.Add(scriptPath);
             process.StartInfo.ArgumentList.Add("--refs-json");
             process.StartInfo.ArgumentList.Add(refsJson);
+
+            if (!string.IsNullOrWhiteSpace(effectiveLayout))
+            {
+                process.StartInfo.ArgumentList.Add("--layout");
+                process.StartInfo.ArgumentList.Add(effectiveLayout);
+            }
+
+            process.StartInfo.ArgumentList.Add(effectiveShowDefaults ? "--show-defaults" : "--no-show-defaults");
+            process.StartInfo.ArgumentList.Add(effectiveShowRebates ? "--show-rebates" : "--no-show-rebates");
 
             process.OutputDataReceived += (_, args) =>
             {

@@ -196,6 +196,18 @@
                                     <TextBlock Grid.Column="1" Text="{DynamicResource L_List_ReloadList}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
+
+                            <Button Classes="Secondary" 
+                                    Command="{Binding OpenTemplatesCommand}"
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0"
+                                    ToolTip.Tip="Save, view, and load recurring lot presets">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Lot Templates" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
+                                </Grid>
+                            </Button>
                         </WrapPanel>
 
                         <!-- Danger Action: Delete All (Right-aligned) -->
@@ -407,21 +419,33 @@
                                                            TextTrimming="CharacterEllipsis"
                                                            VerticalAlignment="Center"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                                <Button Grid.Column="1"
-                                                        Classes="Icon"
-                                                        Width="28"
-                                                        Height="28"
-                                                        Padding="0"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right"
-                                                        ToolTip.Tip="Delete List"
-                                                        IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
-                                                        Click="DeleteList_Click">
-                                                    <PathIcon Data="{StaticResource Icon_Trash}"
-                                                              Width="13"
-                                                              Height="13"
-                                                              Foreground="{StaticResource ErrorBrush}"/>
-                                                </Button>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                    <Button Classes="Icon"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Save as Recurring Lot Template"
+                                                            Click="SaveListTemplate_Click">
+                                                        <PathIcon Data="{StaticResource Icon_Save}"
+                                                                  Width="12"
+                                                                  Height="12"
+                                                                  Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                    </Button>
+                                                    <Button Classes="Icon"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Padding="0"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Delete List"
+                                                            IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
+                                                            Click="DeleteList_Click">
+                                                        <PathIcon Data="{StaticResource Icon_Trash}"
+                                                                  Width="13"
+                                                                  Height="13"
+                                                                  Foreground="{StaticResource ErrorBrush}"/>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
                                             
                                             <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -649,10 +673,18 @@
                                                                            FontSize="12"
                                                                            TextTrimming="CharacterEllipsis"
                                                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                                                <TextBlock Text="{Binding EstimatedOpeningDateDisplay, StringFormat='Opened: {0}'}"
-                                                                           FontSize="10"
-                                                                           TextTrimming="CharacterEllipsis"
-                                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                                    <TextBlock Grid.Column="0"
+                                                                               Text="{Binding NextInstallmentDateDisplay, StringFormat='Due: {0}'}"
+                                                                               FontSize="10"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding InstallmentsPaidDisplay}"
+                                                                               FontSize="10"
+                                                                               FontWeight="Medium"
+                                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                                </Grid>
                                                                 <ToolTip.Tip>
                                                                     <Border Background="{DynamicResource AppCardBackgroundBrush}"
                                                                             BorderBrush="{DynamicResource AppBorderBrush}"
@@ -666,6 +698,7 @@
                                                                             <TextBlock Text="{Binding AccountNameDisplay, StringFormat='Name: {0}'}"/>
                                                                             <TextBlock Text="{Binding DenominationDisplay, StringFormat='Amount: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextInstallmentDateDisplay, StringFormat='Next Due: {0}'}"/>
+                                                                            <TextBlock Text="{Binding InstallmentsPaidDisplay, StringFormat='Installments Paid So Far: {0}'}"/>
                                                                             <TextBlock Text="{Binding DueMonthDisplay, StringFormat='Due Month: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextDueAfterPaymentDisplay, StringFormat='Next Due After Payment: {0}'}"/>
                                                                             <TextBlock Text="{Binding Installment, StringFormat='Installments: {0}'}"/>

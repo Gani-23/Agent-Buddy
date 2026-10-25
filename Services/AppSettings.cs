@@ -8,6 +8,9 @@ public class AppSettings
 {
     public string AgentPhoneNumber { get; set; } = string.Empty;
     public int ThemeMode { get; set; } = 0;
+    public string PayslipLayout { get; set; } = "portrait_3_counterfoil";
+    public bool ShowPayslipDefaultFee { get; set; } = true;
+    public bool ShowPayslipRebate { get; set; } = true;
 
     public static AppSettings Load()
     {

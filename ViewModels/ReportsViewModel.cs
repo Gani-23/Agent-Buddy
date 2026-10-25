@@ -22,12 +22,22 @@ public class ReportsViewModel : ViewModelBase
     private string _selectedPrinter = string.Empty;
     private bool _isSettingDefaultPrinter;
     private bool _isGeneratingMissingReports;
+    private PayslipLayoutOption _selectedPayslipLayout;
+    private bool _showPayslipDefaultFee;
+    private bool _showPayslipRebate;
+    private bool _isPayslipOptionsOpen;
 
     public ReportsViewModel(ReportsService reportsService, PythonService pythonService, NotificationService? notificationService = null)
     {
         _reportsService = reportsService;
         _pythonService = pythonService;
         _notificationService = notificationService;
+
+        var settings = AppSettings.Load();
+        _selectedPayslipLayout = PayslipLayoutOptions.FirstOrDefault(o => o.Key == settings.PayslipLayout)
+                                 ?? PayslipLayoutOptions[0];
+        _showPayslipDefaultFee = settings.ShowPayslipDefaultFee;
+        _showPayslipRebate = settings.ShowPayslipRebate;
 
         TodayReports = new ObservableCollection<DailyListReport>();
 
@@ -39,6 +49,10 @@ public class ReportsViewModel : ViewModelBase
         GenerateMissingReportsCommand = ReactiveCommand.CreateFromTask(GenerateMissingReportsAsync);
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
         SetDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SetDefaultPrinterAsync);
+        TogglePayslipOptionsCommand = ReactiveCommand.Create(() =>
+        {
+            IsPayslipOptionsOpen = !IsPayslipOptionsOpen;
+        });
 
         _ = LoadPrintersAsync();
         _ = LoadTodayReportsAsync();
@@ -98,6 +112,63 @@ public class ReportsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> GenerateMissingReportsCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
     public ReactiveCommand<Unit, Unit> SetDefaultPrinterCommand { get; }
+    public ReactiveCommand<Unit, Unit> TogglePayslipOptionsCommand { get; }
+
+    public IReadOnlyList<PayslipLayoutOption> PayslipLayoutOptions { get; } = new List<PayslipLayoutOption>
+    {
+        new() { Key = "portrait_3_counterfoil", Title = "Portrait 3/page (Counterfoil)", Subtitle = "3 slips per page with note counterfoil" },
+        new() { Key = "landscape_2_counterfoil", Title = "Landscape 2/page (Counterfoil)", Subtitle = "2 wide slips per page with note counterfoil" },
+        new() { Key = "portrait_3_plain", Title = "Portrait 3/page (Plain)", Subtitle = "3 slips per page without counterfoil" },
+    };
+
+    public PayslipLayoutOption SelectedPayslipLayout
+    {
+        get => _selectedPayslipLayout;
+        set
+        {
+            if (value != null && !EqualityComparer<PayslipLayoutOption>.Default.Equals(_selectedPayslipLayout, value))
+            {
+                this.RaiseAndSetIfChanged(ref _selectedPayslipLayout, value);
+                var s = AppSettings.Load();
+                s.PayslipLayout = value.Key;
+                s.Save();
+            }
+        }
+    }
+
+    public bool ShowPayslipDefaultFee
+    {
+        get => _showPayslipDefaultFee;
+        set
+        {
+            if (this.RaiseAndSetIfChanged(ref _showPayslipDefaultFee, value))
+            {
+                var s = AppSettings.Load();
+                s.ShowPayslipDefaultFee = value;
+                s.Save();
+            }
+        }
+    }
+
+    public bool ShowPayslipRebate
+    {
+        get => _showPayslipRebate;
+        set
+        {
+            if (this.RaiseAndSetIfChanged(ref _showPayslipRebate, value))
+            {
+                var s = AppSettings.Load();
+                s.ShowPayslipRebate = value;
+                s.Save();
+            }
+        }
+    }
+
+    public bool IsPayslipOptionsOpen
+    {
+        get => _isPayslipOptionsOpen;
+        set => this.RaiseAndSetIfChanged(ref _isPayslipOptionsOpen, value);
+    }
 
     public async Task LoadTodayReportsAsync()
     {
@@ -233,7 +304,11 @@ public class ReportsViewModel : ViewModelBase
             return;
         }
 
-        var (success, message, outputPdfPath) = await _reportsService.GeneratePayslipsAsync(selectedReports);
+        var (success, message, outputPdfPath) = await _reportsService.GeneratePayslipsAsync(
+            selectedReports,
+            layout: SelectedPayslipLayout?.Key,
+            showDefaults: ShowPayslipDefaultFee,
+            showRebates: ShowPayslipRebate);
         if (!success)
         {
             StatusMessage = message;
@@ -241,7 +316,7 @@ public class ReportsViewModel : ViewModelBase
             return;
         }
 
-        StatusMessage = $"{message} ({selectedReports.Count} selected, max 3 per page)";
+        StatusMessage = $"{message} ({selectedReports.Count} selected, {SelectedPayslipLayout?.Title ?? "standard"})";
         _notificationService?.Success("Payslip Ready", $"{selectedReports.Count} report(s) converted to payslip.");
         if (!string.IsNullOrWhiteSpace(outputPdfPath))
         {
@@ -402,4 +477,11 @@ public class ReportsViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(TotalAccounts));
         this.RaisePropertyChanged(nameof(SummaryText));
     }
+}
+
+public sealed class PayslipLayoutOption
+{
+    public string Key { get; init; } = string.Empty;
+    public string Title { get; init; } = string.Empty;
+    public string Subtitle { get; init; } = string.Empty;
 }

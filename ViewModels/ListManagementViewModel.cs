@@ -810,6 +810,7 @@ public class ListManagementViewModel : ViewModelBase
     private readonly string _lotSnapshotPath;
     private readonly string _lotCheckpointDirectory;
     private readonly string _autoSaveSnapshotPath;
+    private readonly string _savedLotTemplatesPath;
     private readonly string _referencesFilePath;
     private readonly Dictionary<string, PersistedListRunState> _persistedStates = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _pendingAslaasUpdates = new(StringComparer.OrdinalIgnoreCase);
@@ -862,6 +863,7 @@ public class ListManagementViewModel : ViewModelBase
         _lotSnapshotPath = Path.Combine(stateDirectory, "list_lot_snapshot.json");
         _lotCheckpointDirectory = Path.Combine(stateDirectory, "lot_checkpoints");
         _autoSaveSnapshotPath = Path.Combine(stateDirectory, "list_autosave.json");
+        _savedLotTemplatesPath = Path.Combine(stateDirectory, "saved_lot_templates.json");
         _referencesFilePath = Path.Combine(AppPaths.BaseDirectory, "Reports", "references", "payment_references.txt");
         _autoSaveTimer = new DispatcherTimer
         {
@@ -880,6 +882,8 @@ public class ListManagementViewModel : ViewModelBase
         AddNewListCommand = ReactiveCommand.Create(AddNewList);
         SaveLotCommand = ReactiveCommand.CreateFromTask(SaveLotAsync);
         ReloadLotCommand = ReactiveCommand.CreateFromTask(ReloadLotAsync);
+        OpenTemplatesCommand = ReactiveCommand.CreateFromTask(OpenTemplatesManagerAsync);
+        SaveListAsTemplateCommand = ReactiveCommand.CreateFromTask<ListPanelViewModel?>(list => SaveListAsTemplateAsync(list));
         DeleteAllListsCommand = ReactiveCommand.Create(DeleteAllLists);
         ProcessAllListsCommand = ReactiveCommand.CreateFromTask(ProcessAllListsAsync);
         RetryFailedListsCommand = ReactiveCommand.CreateFromTask(RetryFailedListsAsync);
@@ -897,6 +901,7 @@ public class ListManagementViewModel : ViewModelBase
         _databaseService.DatabaseChanged += OnDatabaseChanged;
         _autoSaveTimer.Start();
         _ = RestoreAutoSaveAsync();
+        _ = LoadSavedLotTemplatesAsync();
         _ = RefreshDatabaseStatusAsync();
         _ = CleanupSavedLotSnapshotsAsync();
     }
@@ -1035,10 +1040,16 @@ public class ListManagementViewModel : ViewModelBase
     public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
     public Interaction<ConfirmListDialogRequest, bool> ConfirmListPrompt { get; } = new();
     public Interaction<DuplicateFocusRequest, Unit> DuplicateFocusPrompt { get; } = new();
+    public Interaction<SavedLotTemplatesViewModel, Unit> ManageTemplatesPrompt { get; } = new();
+
+    public ObservableCollection<SavedLotTemplate> SavedLotTemplates { get; } = new();
+    public bool HasSavedLotTemplates => SavedLotTemplates.Count > 0;
 
     public ReactiveCommand<Unit, Unit> AddNewListCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveLotCommand { get; }
     public ReactiveCommand<Unit, Unit> ReloadLotCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenTemplatesCommand { get; }
+    public ReactiveCommand<ListPanelViewModel?, Unit> SaveListAsTemplateCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> ProcessAllListsCommand { get; }
     public ReactiveCommand<Unit, Unit> RetryFailedListsCommand { get; }
@@ -1300,6 +1311,197 @@ public class ListManagementViewModel : ViewModelBase
         {
             ProcessStatus = $"Reload lot failed: {ex.Message}";
             _notificationService?.Error("Reload Lot Failed", ex.Message);
+        }
+    }
+
+    public async Task LoadSavedLotTemplatesAsync()
+    {
+        try
+        {
+            if (!File.Exists(_savedLotTemplatesPath))
+            {
+                return;
+            }
+
+            var json = await File.ReadAllTextAsync(_savedLotTemplatesPath);
+            var templates = JsonSerializer.Deserialize<List<SavedLotTemplate>>(json);
+            if (templates != null)
+            {
+                SavedLotTemplates.Clear();
+                foreach (var t in templates)
+                {
+                    SavedLotTemplates.Add(t);
+                }
+                this.RaisePropertyChanged(nameof(HasSavedLotTemplates));
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to load lot templates: {ex.Message}");
+        }
+    }
+
+    public async Task SaveSavedLotTemplatesAsync()
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(SavedLotTemplates.ToList(), new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            await File.WriteAllTextAsync(_savedLotTemplatesPath, json);
+            this.RaisePropertyChanged(nameof(HasSavedLotTemplates));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to save lot templates: {ex.Message}");
+        }
+    }
+
+    public async Task<SavedLotTemplate?> SaveListAsTemplateAsync(ListPanelViewModel? list, string? customName = null)
+    {
+        var targetList = list ?? Lists.FirstOrDefault(l => l.Items.Count > 0);
+        if (targetList == null || targetList.Items.Count == 0)
+        {
+            ProcessStatus = "No accounts in the selected list to save as a template.";
+            _notificationService?.Warning("Empty List", "Add accounts before saving as a template.");
+            return null;
+        }
+
+        var templateName = !string.IsNullOrWhiteSpace(customName)
+            ? customName.Trim()
+            : $"{targetList.Name} ({targetList.Count} accounts)";
+
+        var template = new SavedLotTemplate
+        {
+            Name = templateName,
+            PaymentMode = targetList.SelectedPaymentMode,
+            CreatedAtUtc = DateTime.UtcNow,
+            Items = targetList.Items
+                .Where(i => !string.IsNullOrWhiteSpace(i.AccountNo))
+                .Select(i => new SavedLotItemTemplate
+                {
+                    AccountNo = i.AccountNo.Trim(),
+                    Installment = Math.Max(1, i.Installment),
+                    Nickname = i.AccountNameDisplay
+                }).ToList()
+        };
+
+        SavedLotTemplates.Insert(0, template);
+        await SaveSavedLotTemplatesAsync();
+        ProcessStatus = $"Saved recurring template '{template.Name}' with {template.AccountCount} account(s).";
+        _notificationService?.Success("Template Saved", $"Saved '{template.Name}' ({template.AccountCount} accounts).");
+        return template;
+    }
+
+    public async Task<int> LoadTemplateIntoListAsync(ListPanelViewModel list, SavedLotTemplate template, bool clearFirst = false)
+    {
+        if (list == null || template == null)
+        {
+            return 0;
+        }
+
+        if (clearFirst)
+        {
+            list.Clear();
+        }
+
+        list.SelectedPaymentMode = template.PaymentMode;
+        var loadedCount = 0;
+
+        foreach (var item in template.Items)
+        {
+            if (string.IsNullOrWhiteSpace(item.AccountNo) || list.IsFull)
+            {
+                continue;
+            }
+
+            var wasAdded = await AddSingleAccountToListAsync(
+                list,
+                item.AccountNo.Trim(),
+                Math.Max(1, item.Installment),
+                skipAdvanceConfirmation: true,
+                skipDatabaseGuard: true);
+
+            if (wasAdded)
+            {
+                loadedCount++;
+            }
+        }
+
+        ScheduleAutoSave();
+        ProcessStatus = $"Loaded template '{template.Name}': {loadedCount} account(s) loaded into {list.Name}.";
+        _notificationService?.Success("Template Loaded", $"Loaded {loadedCount} accounts into {list.Name}.");
+        return loadedCount;
+    }
+
+    public async Task<ListPanelViewModel?> CreateNewListFromTemplateAsync(SavedLotTemplate template)
+    {
+        if (template == null)
+        {
+            return null;
+        }
+
+        AddNewList();
+        var newList = Lists.LastOrDefault();
+        if (newList != null)
+        {
+            await LoadTemplateIntoListAsync(newList, template, clearFirst: false);
+        }
+        return newList;
+    }
+
+    public async Task DeleteTemplateAsync(SavedLotTemplate template)
+    {
+        if (template == null)
+        {
+            return;
+        }
+
+        if (SavedLotTemplates.Remove(template))
+        {
+            await SaveSavedLotTemplatesAsync();
+            ProcessStatus = $"Deleted template '{template.Name}'.";
+            _notificationService?.Info("Template Deleted", $"Removed template '{template.Name}'.");
+        }
+    }
+
+    public async Task OpenTemplatesManagerAsync()
+    {
+        try
+        {
+            var activeList = Lists.FirstOrDefault(l => l.Items.Count > 0) ?? Lists.FirstOrDefault();
+            var vm = new SavedLotTemplatesViewModel(SavedLotTemplates, Lists, activeList);
+
+            vm.SaveTemplateRequested += async (_, args) =>
+            {
+                var created = await SaveListAsTemplateAsync(args.SourceList, args.TemplateName);
+                if (created != null)
+                {
+                    vm.AddTemplate(created);
+                }
+            };
+
+            vm.LoadIntoListRequested += async (_, args) =>
+            {
+                await LoadTemplateIntoListAsync(args.TargetList, args.Template);
+            };
+
+            vm.LoadIntoNewListRequested += async (_, template) =>
+            {
+                await CreateNewListFromTemplateAsync(template);
+            };
+
+            vm.TemplateDeleted += async (_, template) =>
+            {
+                await DeleteTemplateAsync(template);
+            };
+
+            await ManageTemplatesPrompt.Handle(vm).ToTask();
+        }
+        catch (Exception ex)
+        {
+            ProcessStatus = $"Templates error: {ex.Message}";
         }
     }
 
@@ -3461,52 +3663,77 @@ public class ListManagementViewModel : ViewModelBase
                 .Where(item => item.AccountDetails != null && !string.IsNullOrWhiteSpace(item.AccountNo))
                 .ToList();
 
-            foreach (var item in dopChequeItems)
+            var applySingleChequeToLot = false;
+
+            for (var itemIndex = 0; itemIndex < dopChequeItems.Count; itemIndex++)
             {
-                var response = await DopChequePrompt.Handle(new DopChequePromptRequest
-                {
-                    ListNumber = list.ListNumber,
-                    ListName = list.Name,
-                    AccountNo = item.AccountNo,
-                    AccountName = item.AccountNameDisplay,
-                    Installment = item.EffectiveInstallment,
-                    PaymentModeToken = paymentModeToken,
-                    RequireChequeNo = true,
-                    SuggestedBankName = lastBankName,
-                    SuggestedChequeNo = lastChequeNo,
-                    SuggestedPaymentAccountNo = lastPaymentAccountNo
-                }).ToTask();
+                var item = dopChequeItems[itemIndex];
 
-                if (response == null)
-                {
-                    return null;
-                }
+                string bankName;
+                string chequeNo;
+                string paymentAccountNo;
+                var accountNo = item.AccountNo.Trim();
 
-                var chequeNo = (response.ChequeNo ?? string.Empty).Trim();
-                var paymentAccountNo = (response.PaymentAccountNo ?? string.Empty).Trim();
-                var bankName = (response.BankName ?? string.Empty).Trim();
-                var accountNo = (response.AccountNo ?? string.Empty).Trim();
-                if (string.IsNullOrWhiteSpace(accountNo) ||
-                    string.IsNullOrWhiteSpace(chequeNo) ||
-                    string.IsNullOrWhiteSpace(paymentAccountNo))
+                if (applySingleChequeToLot && !string.IsNullOrWhiteSpace(lastChequeNo) && !string.IsNullOrWhiteSpace(lastPaymentAccountNo))
                 {
-                    return null;
+                    bankName = lastBankName;
+                    chequeNo = lastChequeNo;
+                    paymentAccountNo = lastPaymentAccountNo;
                 }
+                else
+                {
+                    var response = await DopChequePrompt.Handle(new DopChequePromptRequest
+                    {
+                        ListNumber = list.ListNumber,
+                        ListName = list.Name,
+                        AccountNo = item.AccountNo,
+                        AccountName = item.AccountNameDisplay,
+                        Installment = item.EffectiveInstallment,
+                        PaymentModeToken = paymentModeToken,
+                        RequireChequeNo = true,
+                        SuggestedBankName = lastBankName,
+                        SuggestedChequeNo = lastChequeNo,
+                        SuggestedPaymentAccountNo = lastPaymentAccountNo,
+                        TotalAccountsInLot = dopChequeItems.Count,
+                        AccountIndexInLot = itemIndex + 1
+                    }).ToTask();
 
-                if (isNonDopChequeMode && string.IsNullOrWhiteSpace(bankName))
-                {
-                    return null;
-                }
+                    if (response == null)
+                    {
+                        return null;
+                    }
 
-                if (!string.IsNullOrWhiteSpace(bankName))
-                {
-                    lastBankName = bankName;
+                    chequeNo = (response.ChequeNo ?? string.Empty).Trim();
+                    paymentAccountNo = (response.PaymentAccountNo ?? string.Empty).Trim();
+                    bankName = (response.BankName ?? string.Empty).Trim();
+                    accountNo = (response.AccountNo ?? string.Empty).Trim();
+                    if (string.IsNullOrWhiteSpace(accountNo) ||
+                        string.IsNullOrWhiteSpace(chequeNo) ||
+                        string.IsNullOrWhiteSpace(paymentAccountNo))
+                    {
+                        return null;
+                    }
+
+                    if (isNonDopChequeMode && string.IsNullOrWhiteSpace(bankName))
+                    {
+                        return null;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(bankName))
+                    {
+                        lastBankName = bankName;
+                    }
+                    if (!string.IsNullOrWhiteSpace(chequeNo))
+                    {
+                        lastChequeNo = chequeNo;
+                    }
+                    lastPaymentAccountNo = paymentAccountNo;
+
+                    if (response.ApplyToEntireLot)
+                    {
+                        applySingleChequeToLot = true;
+                    }
                 }
-                if (!string.IsNullOrWhiteSpace(chequeNo))
-                {
-                    lastChequeNo = chequeNo;
-                }
-                lastPaymentAccountNo = paymentAccountNo;
 
                 result.Add(new DopChequeInputItem
                 {

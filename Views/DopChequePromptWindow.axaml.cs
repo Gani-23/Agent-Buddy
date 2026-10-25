@@ -78,7 +78,8 @@ public partial class DopChequePromptWindow : Window
             AccountNo = vm.AccountNo,
             BankName = bankName,
             ChequeNo = chequeNo,
-            PaymentAccountNo = paymentAccountNo
+            PaymentAccountNo = paymentAccountNo,
+            ApplyToEntireLot = vm.ApplyToEntireLot
         });
     }
 

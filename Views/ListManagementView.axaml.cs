@@ -19,6 +19,7 @@ public partial class ListManagementView : UserControl
     private IDisposable? _confirmPromptHandler;
     private IDisposable? _confirmListPromptHandler;
     private IDisposable? _duplicateFocusPromptHandler;
+    private IDisposable? _manageTemplatesPromptHandler;
 
     public ListManagementView()
     {
@@ -53,6 +54,18 @@ public partial class ListManagementView : UserControl
         }
 
         await rootVm.DeleteListAsync(listVm);
+    }
+
+    private async void SaveListTemplate_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button ||
+            button.DataContext is not ListPanelViewModel listVm ||
+            DataContext is not ListManagementViewModel rootVm)
+        {
+            return;
+        }
+
+        await rootVm.SaveListAsTemplateAsync(listVm);
     }
 
     private async void PendingField_KeyDown(object? sender, KeyEventArgs e)
@@ -180,6 +193,20 @@ public partial class ListManagementView : UserControl
 
             interaction.SetOutput(Unit.Default);
         });
+
+        _manageTemplatesPromptHandler = vm.ManageTemplatesPrompt.RegisterHandler(async interaction =>
+        {
+            var owner = TopLevel.GetTopLevel(this) as Window;
+            if (owner == null)
+            {
+                interaction.SetOutput(Unit.Default);
+                return;
+            }
+
+            var dialog = new SavedLotTemplatesWindow(interaction.Input);
+            await dialog.ShowDialog(owner);
+            interaction.SetOutput(Unit.Default);
+        });
     }
 
     private void DisposePromptHandler()
@@ -194,5 +221,7 @@ public partial class ListManagementView : UserControl
         _confirmListPromptHandler = null;
         _duplicateFocusPromptHandler?.Dispose();
         _duplicateFocusPromptHandler = null;
+        _manageTemplatesPromptHandler?.Dispose();
+        _manageTemplatesPromptHandler = null;
     }
 }

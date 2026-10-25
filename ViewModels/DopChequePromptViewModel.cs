@@ -15,6 +15,8 @@ public sealed class DopChequePromptRequest
     public string SuggestedBankName { get; set; } = string.Empty;
     public string SuggestedChequeNo { get; set; } = string.Empty;
     public string SuggestedPaymentAccountNo { get; set; } = string.Empty;
+    public int TotalAccountsInLot { get; set; } = 1;
+    public int AccountIndexInLot { get; set; } = 1;
 }
 
 public sealed class DopChequePromptResult
@@ -23,6 +25,7 @@ public sealed class DopChequePromptResult
     public string BankName { get; set; } = string.Empty;
     public string ChequeNo { get; set; } = string.Empty;
     public string PaymentAccountNo { get; set; } = string.Empty;
+    public bool ApplyToEntireLot { get; set; } = false;
 }
 
 public sealed class DopChequePromptViewModel : ViewModelBase
@@ -31,6 +34,7 @@ public sealed class DopChequePromptViewModel : ViewModelBase
     private string _chequeNo;
     private string _paymentAccountNo;
     private string _validationMessage = string.Empty;
+    private bool _applyToEntireLot;
 
     public DopChequePromptViewModel(DopChequePromptRequest request)
     {
@@ -46,6 +50,9 @@ public sealed class DopChequePromptViewModel : ViewModelBase
         _bankName = request.SuggestedBankName ?? string.Empty;
         _chequeNo = request.SuggestedChequeNo ?? string.Empty;
         _paymentAccountNo = request.SuggestedPaymentAccountNo ?? string.Empty;
+        TotalAccountsInLot = request.TotalAccountsInLot > 0 ? request.TotalAccountsInLot : 1;
+        AccountIndexInLot = request.AccountIndexInLot > 0 ? request.AccountIndexInLot : 1;
+        _applyToEntireLot = false;
     }
 
     public int ListNumber { get; }
@@ -61,6 +68,27 @@ public sealed class DopChequePromptViewModel : ViewModelBase
     public string PaymentModeToken { get; }
 
     public bool RequireChequeNo { get; }
+
+    public int TotalAccountsInLot { get; }
+
+    public int AccountIndexInLot { get; }
+
+    public bool HasMultipleAccountsInLot => TotalAccountsInLot > 1;
+
+    public string ProgressDisplay => HasMultipleAccountsInLot
+        ? $"Account {AccountIndexInLot} of {TotalAccountsInLot}"
+        : string.Empty;
+
+    public bool ApplyToEntireLot
+    {
+        get => _applyToEntireLot;
+        set => this.RaiseAndSetIfChanged(ref _applyToEntireLot, value);
+    }
+
+    public string ApplyToEntireLotLabel =>
+        TotalAccountsInLot - AccountIndexInLot > 0
+            ? $"Single cheque covers this lot (apply to remaining {TotalAccountsInLot - AccountIndexInLot} accounts)"
+            : "Single cheque covers entire lot";
 
     public bool ShowChequeNoField => RequireChequeNo;
     public bool ShowBankNameField => IsNonDopChequeMode;

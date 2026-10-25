@@ -28,6 +28,11 @@
                             <Border Classes="DialogDot"/>
                             <TextBlock Text="Action Required"
                                        Classes="Kicker"/>
+                            <TextBlock Text="{Binding ProgressDisplay}"
+                                       Classes="Kicker"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                       IsVisible="{Binding HasMultipleAccountsInLot}"/>
                         </StackPanel>
 
                         <TextBlock Text="{Binding Heading}"
@@ -130,6 +135,27 @@
                     <TextBlock Text="{Binding Hint}"
                                FontSize="11"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                    <!-- Single Cheque for Entire Lot Toggle -->
+                    <Border Background="{DynamicResource AppHoverBrush}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="10,8"
+                            IsVisible="{Binding HasMultipleAccountsInLot}">
+                        <CheckBox IsChecked="{Binding ApplyToEntireLot}"
+                                  VerticalAlignment="Center">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{Binding ApplyToEntireLotLabel}"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                <TextBlock Text="Applies the same cheque number and bank details to all remaining accounts in this lot."
+                                           FontSize="10.5"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            </StackPanel>
+                        </CheckBox>
+                    </Border>
 
                     <Border Classes="DialogDivider"
                             Margin="0,2"/>

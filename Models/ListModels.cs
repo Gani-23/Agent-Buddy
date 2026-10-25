@@ -46,6 +46,9 @@ public class ListItem : ReactiveObject
     public string NextDueAfterPaymentDisplay => PaymentAnalysis.NextDueMonthAfterPaymentDisplay;
     public string EstimatedOpeningDateDisplay =>
         AccountDetails?.EstimatedOpeningDateDisplay ?? "-";
+    public int MonthPaidNumber => AccountDetails?.GetMonthPaidNumber() ?? 0;
+    public string InstallmentsPaidDisplay =>
+        AccountDetails != null ? $"Paid: {AccountDetails.GetMonthPaidNumber()}" : "-";
     
     /// <summary>
     /// Gets the formatted string for Python script: AccountNo_Installment
