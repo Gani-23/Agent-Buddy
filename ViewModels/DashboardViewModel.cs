@@ -282,8 +282,9 @@ public class DashboardViewModel : ViewModelBase
         get => _isDarkTheme;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _isDarkTheme, value))
+            if (_isDarkTheme != value)
             {
+                this.RaiseAndSetIfChanged(ref _isDarkTheme, value);
                 ApplyChartTheme();
             }
         }
@@ -300,8 +301,9 @@ public class DashboardViewModel : ViewModelBase
         get => _isUpdating;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _isUpdating, value))
+            if (_isUpdating != value)
             {
+                this.RaiseAndSetIfChanged(ref _isUpdating, value);
                 this.RaisePropertyChanged(nameof(IsBusy));
             }
         }
@@ -312,8 +314,9 @@ public class DashboardViewModel : ViewModelBase
         get => _isUpdatingAslaas;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _isUpdatingAslaas, value))
+            if (_isUpdatingAslaas != value)
             {
+                this.RaiseAndSetIfChanged(ref _isUpdatingAslaas, value);
                 this.RaisePropertyChanged(nameof(IsBusy));
             }
         }
@@ -324,8 +327,9 @@ public class DashboardViewModel : ViewModelBase
         get => _isSyncingToMobile;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _isSyncingToMobile, value))
+            if (_isSyncingToMobile != value)
             {
+                this.RaiseAndSetIfChanged(ref _isSyncingToMobile, value);
                 this.RaisePropertyChanged(nameof(IsBusy));
             }
         }

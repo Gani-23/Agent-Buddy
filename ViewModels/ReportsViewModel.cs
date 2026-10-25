@@ -141,8 +141,9 @@ public class ReportsViewModel : ViewModelBase
         get => _showPayslipDefaultFee;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _showPayslipDefaultFee, value))
+            if (_showPayslipDefaultFee != value)
             {
+                this.RaiseAndSetIfChanged(ref _showPayslipDefaultFee, value);
                 var s = AppSettings.Load();
                 s.ShowPayslipDefaultFee = value;
                 s.Save();
@@ -155,8 +156,9 @@ public class ReportsViewModel : ViewModelBase
         get => _showPayslipRebate;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _showPayslipRebate, value))
+            if (_showPayslipRebate != value)
             {
+                this.RaiseAndSetIfChanged(ref _showPayslipRebate, value);
                 var s = AppSettings.Load();
                 s.ShowPayslipRebate = value;
                 s.Save();

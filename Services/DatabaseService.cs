@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using AgentBuddy.Models;
+using Avalonia.Threading;
 using Microsoft.Data.Sqlite;
 
 namespace AgentBuddy.Services;
@@ -72,7 +73,14 @@ public class DatabaseService
 
     public void NotifyDatabaseChanged()
     {
-        DatabaseChanged?.Invoke(this, EventArgs.Empty);
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            DatabaseChanged?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(() => DatabaseChanged?.Invoke(this, EventArgs.Empty));
+        }
     }
 
     /// <summary>

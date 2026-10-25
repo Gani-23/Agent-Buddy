@@ -974,8 +974,9 @@ public class ListManagementViewModel : ViewModelBase
         get => _isValidationPanelOpen;
         private set
         {
-            if (this.RaiseAndSetIfChanged(ref _isValidationPanelOpen, value))
+            if (_isValidationPanelOpen != value)
             {
+                this.RaiseAndSetIfChanged(ref _isValidationPanelOpen, value);
                 this.RaisePropertyChanged(nameof(ShowValidationLauncher));
             }
         }
