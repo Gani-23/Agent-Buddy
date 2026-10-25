@@ -28,7 +28,7 @@
                         VerticalAlignment="Center">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
-                        <TextBlock Grid.Column="1" Text="+ New Fixed Deposit" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="New Fixed Deposit" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
             </Grid>
@@ -183,13 +183,13 @@
 
                 <!-- Interactive Scheme & Maturity Calculator Card -->
                 <Border Grid.Row="0" Classes="Card" Padding="16">
-                    <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="14">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="15" Height="15" Foreground="{DynamicResource AccentBrush}"/>
                             <TextBlock Grid.Column="1" Text="Official India Post Time Deposit &amp; MIS Interest Calculator" FontWeight="Bold" FontSize="13"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="200,160,100,160,*" ColumnSpacing="12" VerticalAlignment="Center">
+                        <Grid Grid.Row="1" ColumnDefinitions="160,130,85,190,*" ColumnSpacing="12" VerticalAlignment="Center">
                             <!-- Scheme -->
                             <StackPanel Grid.Column="0" Spacing="3">
                                 <TextBlock Text="Scheme" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -316,6 +316,7 @@
                                          Background="Transparent"
                                          BorderThickness="0"
                                          MaxHeight="450"
+                                         IsVisible="{Binding HasFilteredAccounts}"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="models:FixedDepositAccount">
@@ -412,23 +413,23 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
-                            </Grid>
-                        </Border>
 
-                        <!-- Empty State -->
-                        <Border Grid.Row="1"
-                                Padding="30"
-                                IsVisible="{Binding !HasFilteredAccounts}"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                            <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                <PathIcon Data="{StaticResource Icon_Database}" Width="28" Height="28" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="No Fixed Deposits recorded." FontWeight="SemiBold" FontSize="13" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Use '+ New Fixed Deposit' above to add clients' Time Deposits, MIS, or SCSS accounts."
-                                           FontSize="11"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
+                                <!-- Empty State inside Table -->
+                                <Border Grid.Row="1"
+                                        Padding="40,32"
+                                        IsVisible="{Binding !HasFilteredAccounts}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource Icon_Database}" Width="28" Height="28" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="No Fixed Deposits recorded." FontWeight="SemiBold" FontSize="13" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Use 'New Fixed Deposit' above to add clients' Time Deposits, MIS, or SCSS accounts."
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Border>
