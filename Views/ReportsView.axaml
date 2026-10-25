@@ -8,15 +8,15 @@
              x:Class="AgentBuddy.Views.ReportsView"
              x:DataType="vm:ReportsViewModel">
 
-    <ScrollViewer>
-        <StackPanel Spacing="20" Margin="0,0,0,24">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="16" Margin="0,0,0,24">
             <StackPanel Spacing="2">
                 <TextBlock Text="{DynamicResource L_Report_Kicker}" Classes="Kicker"/>
                 <TextBlock Text="{DynamicResource L_Report_Title}" Classes="SectionHeader"/>
             </StackPanel>
 
-            <Border Classes="SectionCard" Padding="20">
-                <StackPanel Spacing="10">
+            <Border Classes="SectionCard" Padding="16">
+                <StackPanel Spacing="8">
                     <TextBlock Text="{DynamicResource L_Report_DailySummary}" Classes="SubHeader"/>
                     <TextBlock Text="{Binding SummaryText}"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -26,69 +26,14 @@
                 </StackPanel>
             </Border>
 
+            <!-- Report Actions Toolbar -->
             <WrapPanel>
                 <Button Classes="Primary"
                         Command="{Binding RefreshCommand}"
                         Padding="14,9"
-                        Margin="0,0,12,10">
+                        Margin="0,0,10,8">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="White"/>
-                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Refresh}" VerticalAlignment="Center"/>
-                    </Grid>
-                </Button>
-
-                <Border Margin="0,0,12,10"
-                        Padding="12,6"
-                        CornerRadius="10"
-                        Background="{DynamicResource AppCardBackgroundBrush}"
-                        BorderBrush="{DynamicResource AppBorderBrush}"
-                        BorderThickness="1">
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="{DynamicResource L_Report_PrintCopies}"
-                                   VerticalAlignment="Center"
-                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <ComboBox Width="84"
-                                  HorizontalAlignment="Left"
-                                  ItemsSource="{Binding CopyOptions}"
-                                  SelectedItem="{Binding PrintCopies}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Margin="0,0,12,10"
-                        Padding="12,6"
-                        CornerRadius="10"
-                        Background="{DynamicResource AppCardBackgroundBrush}"
-                        BorderBrush="{DynamicResource AppBorderBrush}"
-                        BorderThickness="1">
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="{DynamicResource L_Report_DefaultPrinter}"
-                                   VerticalAlignment="Center"
-                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <ComboBox Width="220"
-                                  HorizontalAlignment="Left"
-                                  ItemsSource="{Binding PrinterOptions}"
-                                  SelectedItem="{Binding SelectedPrinter}"
-                                  IsEnabled="{Binding HasPrinterOptions}"/>
-                    </StackPanel>
-                </Border>
-
-                <Button Classes="Secondary"
-                        Command="{Binding SetDefaultPrinterCommand}"
-                        IsEnabled="{Binding HasPrinterOptions}"
-                        Padding="14,9"
-                        Margin="0,0,12,10">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Print}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_SetDefaultPrinter}" VerticalAlignment="Center"/>
-                    </Grid>
-                </Button>
-
-                <Button Classes="Secondary"
-                        Command="{Binding RefreshPrintersCommand}"
-                        Padding="14,9"
-                        Margin="0,0,12,10">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sync}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="{DynamicResource L_Common_Refresh}" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
@@ -97,7 +42,7 @@
                         Command="{Binding PrintAllCommand}"
                         IsEnabled="{Binding HasPrintableReports}"
                         Padding="14,9"
-                        Margin="0,0,12,10">
+                        Margin="0,0,10,8">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Print}" Width="14" Height="14" Foreground="White"/>
                         <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_PrintAllToday}" VerticalAlignment="Center"/>
@@ -108,7 +53,7 @@
                         Command="{Binding GeneratePayslipsCommand}"
                         IsEnabled="{Binding HasReports}"
                         Padding="14,9"
-                        Margin="0,0,12,10">
+                        Margin="0,0,6,8">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_GeneratePayslip}" VerticalAlignment="Center"/>
@@ -118,9 +63,9 @@
                 <Button Classes="Secondary"
                         Command="{Binding TogglePayslipOptionsCommand}"
                         Padding="10,9"
-                        Margin="0,0,12,10"
+                        Margin="0,0,10,8"
                         ToolTip.Tip="Configure payslip format, counterfoils, and charge visibility">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="Options ▾" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                     </Grid>
@@ -130,60 +75,98 @@
                         Command="{Binding GenerateMissingReportsCommand}"
                         IsEnabled="{Binding HasMissingReports}"
                         Padding="14,9"
-                        Margin="0,0,12,10">
+                        Margin="0,0,10,8">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="{DynamicResource L_Report_GenerateMissingPdfs}" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
-
-                <TextBlock Text="{DynamicResource L_Report_Max3A4}"
-                           VerticalAlignment="Center"
-                           Margin="0,0,0,10"
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </WrapPanel>
+
+            <!-- Printer Configuration Toolbar -->
+            <Border Classes="Card"
+                    Padding="12,8"
+                    Margin="0,0,0,2">
+                <WrapPanel VerticalAlignment="Center">
+                    <!-- Default Printer Selection -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,16,4">
+                        <PathIcon Data="{StaticResource Icon_Print}" Width="13" Height="13" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource L_Report_DefaultPrinter}"
+                                   VerticalAlignment="Center"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Width="200"
+                                  Height="32"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding PrinterOptions}"
+                                  SelectedItem="{Binding SelectedPrinter}"
+                                  IsEnabled="{Binding HasPrinterOptions}"/>
+                        <Button Classes="Secondary"
+                                Command="{Binding SetDefaultPrinterCommand}"
+                                IsEnabled="{Binding HasPrinterOptions}"
+                                Height="32"
+                                Padding="10,0"
+                                ToolTip.Tip="Save as Default Printer">
+                            <TextBlock Text="{DynamicResource L_Report_SetDefaultPrinter}" FontSize="11" VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Classes="Icon"
+                                Command="{Binding RefreshPrintersCommand}"
+                                Width="32"
+                                Height="32"
+                                ToolTip.Tip="Refresh Available Printers">
+                            <PathIcon Data="{StaticResource Icon_Sync}" Width="13" Height="13" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Print Copies -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,0,4">
+                        <TextBlock Text="{DynamicResource L_Report_PrintCopies}"
+                                   VerticalAlignment="Center"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox Width="72"
+                                  Height="32"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding CopyOptions}"
+                                  SelectedItem="{Binding PrintCopies}"/>
+                    </StackPanel>
+                </WrapPanel>
+            </Border>
 
             <!-- Configurable Payslip Print Options Panel -->
             <Border Classes="Card"
                     Padding="14,10"
-                    Margin="0,0,0,12"
+                    Margin="0,0,0,4"
                     IsVisible="{Binding IsPayslipOptionsOpen}">
-                <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="16" VerticalAlignment="Center">
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <WrapPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6" VerticalAlignment="Center">
                         <PathIcon Data="{StaticResource Icon_FileText}" Width="13" Height="13" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="Payslip Layout:" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                        <ComboBox Width="230"
+                                  Height="32"
+                                  ItemsSource="{Binding PayslipLayoutOptions}"
+                                  SelectedItem="{Binding SelectedPayslipLayout}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PayslipLayoutOption">
+                                    <TextBlock Text="{Binding Title}" FontSize="12"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="{Binding SelectedPayslipLayout.Subtitle}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <ComboBox Grid.Column="1"
-                              Width="240"
-                              Height="32"
-                              ItemsSource="{Binding PayslipLayoutOptions}"
-                              SelectedItem="{Binding SelectedPayslipLayout}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="vm:PayslipLayoutOption">
-                                <TextBlock Text="{Binding Title}" FontSize="12"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-
-                    <TextBlock Grid.Column="2"
-                               Text="{Binding SelectedPayslipLayout.Subtitle}"
-                               FontSize="11.5"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"
-                               VerticalAlignment="Center"/>
-
-                    <CheckBox Grid.Column="3"
-                              IsChecked="{Binding ShowPayslipDefaultFee}"
-                              VerticalAlignment="Center">
-                        <TextBlock Text="Show Default Charges" FontSize="11.5"/>
-                    </CheckBox>
-
-                    <CheckBox Grid.Column="4"
-                              IsChecked="{Binding ShowPayslipRebate}"
-                              VerticalAlignment="Center">
-                        <TextBlock Text="Show Rebates" FontSize="11.5"/>
-                    </CheckBox>
-                </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,0,0,6" VerticalAlignment="Center">
+                        <CheckBox IsChecked="{Binding ShowPayslipDefaultFee}" VerticalAlignment="Center">
+                            <TextBlock Text="Show Default Charges" FontSize="11.5"/>
+                        </CheckBox>
+                        <CheckBox IsChecked="{Binding ShowPayslipRebate}" VerticalAlignment="Center">
+                            <TextBlock Text="Show Rebates" FontSize="11.5"/>
+                        </CheckBox>
+                    </StackPanel>
+                </WrapPanel>
             </Border>
 
             <Border Classes="SectionCard" Padding="16" IsVisible="{Binding HasReports}">
