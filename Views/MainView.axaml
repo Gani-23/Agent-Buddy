@@ -68,6 +68,9 @@
                     <DataTemplate DataType="vm:ListManagementViewModel">
                         <views:ListManagementView/>
                     </DataTemplate>
+                    <DataTemplate DataType="vm:FixedDepositViewModel">
+                        <views:FixedDepositView/>
+                    </DataTemplate>
                     <DataTemplate DataType="vm:ReportsViewModel">
                         <views:ReportsView/>
                     </DataTemplate>

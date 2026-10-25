@@ -54,6 +54,7 @@ public class MainWindowViewModel : ViewModelBase
     // View Models
     public DashboardViewModel DashboardViewModel { get; }
     public ListManagementViewModel ListManagementViewModel { get; }
+    public FixedDepositViewModel FixedDepositViewModel { get; }
     public ReportsViewModel ReportsViewModel { get; }
     public SupportViewModel SupportViewModel { get; }
     public SettingsViewModel SettingsViewModel { get; }
@@ -89,6 +90,7 @@ public class MainWindowViewModel : ViewModelBase
         // Initialize view models
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService);
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService, _portalAutomationService);
+        FixedDepositViewModel = new FixedDepositViewModel(_databaseService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
         SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService);
@@ -107,6 +109,7 @@ public class MainWindowViewModel : ViewModelBase
         // Propagate initial theme state.
         DashboardViewModel.IsDarkTheme = IsDarkTheme;
         ListManagementViewModel.IsDarkTheme = IsDarkTheme;
+        FixedDepositViewModel.IsDarkTheme = IsDarkTheme;
         ReportsViewModel.IsDarkTheme = IsDarkTheme;
         SupportViewModel.IsDarkTheme = IsDarkTheme;
         SettingsViewModel.IsDarkTheme = IsDarkTheme;
@@ -251,11 +254,16 @@ public class MainWindowViewModel : ViewModelBase
         {
             _ = DashboardViewModel.RefreshRdCertificateRenewalAsync();
         }
+        else if (viewName == "FixedDeposits")
+        {
+            _ = FixedDepositViewModel.LoadAccountsAsync();
+        }
 
         CurrentView = viewName switch
         {
             "Dashboard" => DashboardViewModel,
             "Lists" => ListManagementViewModel,
+            "FixedDeposits" => FixedDepositViewModel,
             "Reports" => ReportsViewModel,
             "Support" => SupportViewModel,
             "Settings" => SettingsViewModel,
@@ -295,6 +303,7 @@ public class MainWindowViewModel : ViewModelBase
         // Apply theme change to all child view models
         DashboardViewModel.IsDarkTheme = IsDarkTheme;
         ListManagementViewModel.IsDarkTheme = IsDarkTheme;
+        FixedDepositViewModel.IsDarkTheme = IsDarkTheme;
         ReportsViewModel.IsDarkTheme = IsDarkTheme;
         SupportViewModel.IsDarkTheme = IsDarkTheme;
         SettingsViewModel.IsDarkTheme = IsDarkTheme;
@@ -314,6 +323,7 @@ public class MainWindowViewModel : ViewModelBase
 
         DashboardViewModel.IsDarkTheme = IsDarkTheme;
         ListManagementViewModel.IsDarkTheme = IsDarkTheme;
+        FixedDepositViewModel.IsDarkTheme = IsDarkTheme;
         ReportsViewModel.IsDarkTheme = IsDarkTheme;
         SupportViewModel.IsDarkTheme = IsDarkTheme;
         SettingsViewModel.IsDarkTheme = IsDarkTheme;

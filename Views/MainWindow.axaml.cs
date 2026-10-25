@@ -296,6 +296,7 @@ public partial class MainWindow : Window
         {
             (Button: DashboardNavButton, ViewName: "Dashboard"),
             (Button: ListsNavButton, ViewName: "Lists"),
+            (Button: FixedDepositsNavButton, ViewName: "FixedDeposits"),
             (Button: ReportsNavButton, ViewName: "Reports"),
             (Button: SupportNavButton, ViewName: "Support"),
             (Button: SettingsNavButton, ViewName: "Settings")

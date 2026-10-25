@@ -1,0 +1,438 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:AgentBuddy.Models"
+             xmlns:vm="using:AgentBuddy.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="750"
+             x:Class="AgentBuddy.Views.FixedDepositView"
+             x:DataType="vm:FixedDepositViewModel">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="16" Margin="0,0,0,24">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Post Office Savings Bank (POSB)" Classes="Kicker"/>
+                    <TextBlock Text="Fixed Deposits (TD / MIS / SCSS)" Classes="SectionHeader"/>
+                    <TextBlock Text="Track Time Deposits, monitor maturity dates, calculate compounded interest, and manage client renewals."
+                               FontSize="12"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Classes="Primary"
+                        Command="{Binding AddAccountCommand}"
+                        Padding="16,9"
+                        VerticalAlignment="Center">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
+                        <TextBlock Grid.Column="1" Text="+ New Fixed Deposit" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+            </Grid>
+
+            <!-- Metrics Cards Row -->
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                <!-- Total Active Deposits -->
+                <Border Grid.Column="0" Classes="Card" Padding="14">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="ACTIVE DEPOSITS" Classes="Kicker" FontSize="10"/>
+                        <TextBlock Text="{Binding FormattedTotalDeposit}"
+                                   FontSize="20"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding ActiveAccountCount, StringFormat='{}{0} active account(s)'}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Total Maturity Value -->
+                <Border Grid.Column="1" Classes="Card" Padding="14">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MATURITY VALUE" Classes="Kicker" FontSize="10"/>
+                        <TextBlock Text="{Binding FormattedTotalMaturity}"
+                                   FontSize="20"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="Expected total return"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Maturing Soon -->
+                <Border Grid.Column="2" Classes="Card" Padding="14" Background="{DynamicResource WarningTintBrush}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MATURING SOON" Classes="Kicker" FontSize="10" Foreground="{DynamicResource WarningBrush}"/>
+                        <TextBlock Text="{Binding MaturingSoonCount}"
+                                   FontSize="20"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource WarningBrush}"/>
+                        <TextBlock Text="Next 30 days (due for renewal)"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource WarningBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Matured / Completed -->
+                <Border Grid.Column="3" Classes="Card" Padding="14" Background="{DynamicResource SuccessTintBrush}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MATURED" Classes="Kicker" FontSize="10" Foreground="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="{Binding MaturedCount}"
+                                   FontSize="20"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="Ready for claim or reinvestment"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource SuccessBrush}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Add New Fixed Deposit Form (Expandable Panel) -->
+            <Border Classes="Card"
+                    Padding="16"
+                    BorderBrush="{DynamicResource AccentBrush}"
+                    BorderThickness="1"
+                    IsVisible="{Binding IsEntryPanelOpen}">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <TextBlock Text="Add New Fixed Deposit Account" FontWeight="Bold" FontSize="14"/>
+                        <Button Grid.Column="1" Classes="Icon" Command="{Binding CloseEntryPanelCommand}">
+                            <PathIcon Data="{StaticResource Icon_Close}" Width="13" Height="13"/>
+                        </Button>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                        <!-- Account No -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Account Number *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryAccountNo}" PlaceholderText="10-digit A/C No" Height="32"/>
+                        </StackPanel>
+
+                        <!-- Customer Name -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Customer Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" Height="32"/>
+                        </StackPanel>
+
+                        <!-- Customer Phone -->
+                        <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4">
+                            <TextBlock Text="Phone (for WhatsApp Alerts)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryCustomerPhone}" PlaceholderText="10-digit Mobile" Height="32"/>
+                        </StackPanel>
+
+                        <!-- Scheme Type -->
+                        <StackPanel Grid.Row="0" Grid.Column="3" Spacing="4">
+                            <TextBlock Text="Scheme Type *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding EntrySchemeType}" Height="32" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+
+                        <!-- Deposit Amount -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Deposit Amount (Rs.) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryDepositAmount}" PlaceholderText="e.g. 100000" Height="32"/>
+                        </StackPanel>
+
+                        <!-- Interest Rate -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Interest Rate (%) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryInterestRate}" PlaceholderText="e.g. 7.5" Height="32"/>
+                        </StackPanel>
+
+                        <!-- Deposit Date -->
+                        <StackPanel Grid.Row="1" Grid.Column="2" Spacing="4">
+                            <TextBlock Text="Deposit Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <DatePicker SelectedDate="{Binding EntryDepositDate}" Height="32" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+
+                        <!-- Notes -->
+                        <StackPanel Grid.Row="1" Grid.Column="3" Spacing="4">
+                            <TextBlock Text="Notes / Agent Ref" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding EntryValidationMessage}"
+                                   Foreground="#C62828"
+                                   FontSize="11.5"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding HasEntryValidationMessage}"/>
+
+                        <Button Grid.Column="1" Classes="Secondary" Command="{Binding CloseEntryPanelCommand}" Padding="14,8">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+
+                        <Button Grid.Column="2" Classes="Primary" Command="{Binding SaveEntryCommand}" Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Check}" Width="12" Height="12" Foreground="White"/>
+                                <TextBlock Text="Save to Ledger" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Main Layout: Interactive Calculator Card (Top) & Register Table (Bottom) -->
+            <Grid RowDefinitions="Auto,*" RowSpacing="16">
+
+                <!-- Interactive Scheme & Maturity Calculator Card -->
+                <Border Grid.Row="0" Classes="Card" Padding="16">
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="Official India Post Time Deposit &amp; MIS Interest Calculator" FontWeight="Bold" FontSize="13"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="200,160,100,160,*" ColumnSpacing="12" VerticalAlignment="Center">
+                            <!-- Scheme -->
+                            <StackPanel Grid.Column="0" Spacing="3">
+                                <TextBlock Text="Scheme" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding CalcSchemeType}" Height="32" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+
+                            <!-- Amount -->
+                            <StackPanel Grid.Column="1" Spacing="3">
+                                <TextBlock Text="Principal Amount (Rs.)" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBox Text="{Binding CalcDepositAmountText}" Height="32"/>
+                            </StackPanel>
+
+                            <!-- Rate -->
+                            <StackPanel Grid.Column="2" Spacing="3">
+                                <TextBlock Text="Rate (%)" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBox Text="{Binding CalcInterestRateText}" Height="32"/>
+                            </StackPanel>
+
+                            <!-- Start Date -->
+                            <StackPanel Grid.Column="3" Spacing="3">
+                                <TextBlock Text="Opening Date" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <DatePicker SelectedDate="{Binding CalcStartDate}" Height="32" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+
+                            <!-- Result Pill Box -->
+                            <Border Grid.Column="4"
+                                    Background="{DynamicResource AppHoverBrush}"
+                                    BorderBrush="{DynamicResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="12,8">
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="MATURITY AMOUNT" FontSize="9" FontWeight="Bold" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding CalcMaturityAmountDisplay}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource AccentBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="TOTAL INTEREST" FontSize="9" FontWeight="Bold" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding CalcTotalInterestDisplay}" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource SuccessBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="MATURITY DATE" FontSize="9" FontWeight="Bold" Classes="Kicker"/>
+                                        <TextBlock Text="{Binding CalcMaturityDateDisplay}" FontWeight="SemiBold" FontSize="12"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Fixed Deposit Accounts Ledger Table Card -->
+                <Border Grid.Row="1" Classes="SectionCard" Padding="16">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                        <!-- Table Filters Bar -->
+                        <Grid Grid.Row="0" ColumnDefinitions="240,160,140,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                            <!-- Search -->
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding SearchText}"
+                                     PlaceholderText="Search by A/C, Name, Phone..."
+                                     Height="32">
+                                <TextBox.InnerLeftContent>
+                                    <PathIcon Data="{StaticResource Icon_Search}" Width="12" Height="12" Margin="8,0,0,0" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
+
+                            <!-- Scheme Filter -->
+                            <ComboBox Grid.Column="1"
+                                      Height="32"
+                                      ItemsSource="{Binding SchemeFilterOptions}"
+                                      SelectedItem="{Binding SelectedSchemeFilter}"
+                                      HorizontalAlignment="Stretch"/>
+
+                            <!-- Status Filter -->
+                            <ComboBox Grid.Column="2"
+                                      Height="32"
+                                      ItemsSource="{Binding StatusFilterOptions}"
+                                      SelectedItem="{Binding SelectedStatusFilter}"
+                                      HorizontalAlignment="Stretch"/>
+
+                            <!-- Spacer -->
+                            <TextBlock Grid.Column="3"/>
+
+                            <!-- Refresh -->
+                            <Button Grid.Column="4"
+                                    Classes="Secondary"
+                                    Command="{Binding RefreshCommand}"
+                                    Height="32"
+                                    Padding="10,0">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Sync}" Width="12" Height="12"/>
+                                    <TextBlock Text="Refresh" FontSize="11.5"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <!-- Accounts DataGrid / ItemsControl -->
+                        <Border Grid.Row="1"
+                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                ClipToBounds="True">
+                            <Grid RowDefinitions="Auto,*">
+                                <!-- Table Header -->
+                                <Border Grid.Row="0"
+                                        Background="{DynamicResource AppHoverBrush}"
+                                        Padding="12,10"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="140,180,120,110,120,130,110,Auto" ColumnSpacing="8">
+                                        <TextBlock Grid.Column="0" Text="Account No" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="1" Text="Customer Name" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="2" Text="Scheme" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="3" Text="Principal" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="4" Text="Deposit Date" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="5" Text="Maturity Date" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="6" Text="Maturity Value" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="7" Text="Actions" FontWeight="Bold" FontSize="11" Width="80"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Table Rows -->
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding FilteredAccounts}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         MaxHeight="450"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:FixedDepositAccount">
+                                            <Border Padding="4,6"
+                                                    BorderBrush="{DynamicResource AppBorderBrush}"
+                                                    BorderThickness="0,0,0,1">
+                                                <Grid ColumnDefinitions="140,180,120,110,120,130,110,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                                    <!-- Account No -->
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="{Binding AccountNo}"
+                                                               FontFamily="{StaticResource AppMonoFontFamily}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <!-- Customer Name & Phone -->
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CustomerName}"
+                                                                   FontWeight="SemiBold"
+                                                                   FontSize="12"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding CustomerPhone}"
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Scheme Badge -->
+                                                    <Border Grid.Column="2"
+                                                            Background="{DynamicResource AppHoverBrush}"
+                                                            Padding="6,2"
+                                                            CornerRadius="4"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding SchemeType}" FontSize="10.5" FontWeight="SemiBold"/>
+                                                    </Border>
+
+                                                    <!-- Deposit Amount -->
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="{Binding FormattedDepositAmount}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <!-- Deposit Date -->
+                                                    <TextBlock Grid.Column="4"
+                                                               Text="{Binding FormattedDepositDate}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <!-- Maturity Date & Badge -->
+                                                    <StackPanel Grid.Column="5" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding FormattedMaturityDate}" FontSize="11" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding StatusBadge}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Classes="Kicker"/>
+                                                    </StackPanel>
+
+                                                    <!-- Maturity Value -->
+                                                    <TextBlock Grid.Column="6"
+                                                               Text="{Binding FormattedMaturityAmount}"
+                                                               FontWeight="Bold"
+                                                               FontSize="12"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <!-- Actions (WhatsApp & Delete) -->
+                                                    <StackPanel Grid.Column="7"
+                                                                Orientation="Horizontal"
+                                                                Spacing="6"
+                                                                Width="80"
+                                                                VerticalAlignment="Center">
+                                                        <Button Classes="Icon"
+                                                                Width="28"
+                                                                Height="28"
+                                                                Command="{ReflectionBinding DataContext.CopyReminderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                ToolTip.Tip="Copy WhatsApp Maturity Reminder">
+                                                            <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="#25D366"/>
+                                                        </Button>
+
+                                                        <Button Classes="Icon"
+                                                                Width="28"
+                                                                Height="28"
+                                                                Command="{ReflectionBinding DataContext.DeleteAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                ToolTip.Tip="Delete from Ledger">
+                                                            <PathIcon Data="{StaticResource Icon_Trash}" Width="12" Height="12" Foreground="{DynamicResource ErrorBrush}"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+
+                        <!-- Empty State -->
+                        <Border Grid.Row="1"
+                                Padding="30"
+                                IsVisible="{Binding !HasFilteredAccounts}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                            <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Database}" Width="28" Height="28" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="No Fixed Deposits recorded." FontWeight="SemiBold" FontSize="13" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Use '+ New Fixed Deposit' above to add clients' Time Deposits, MIS, or SCSS accounts."
+                                           FontSize="11"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -8,6 +8,7 @@
         <x:String x:Key="L_Main_Navigation">నావిగేషన్</x:String>
         <x:String x:Key="L_Nav_Dashboard">డ్యాష్‌బోర్డ్</x:String>
         <x:String x:Key="L_Nav_CreateLists">జాబితాలు సృష్టించు</x:String>
+        <x:String x:Key="L_Nav_FixedDeposits">ఫిక్స్‌డ్ డిపాజిట్లు (TD)</x:String>
         <x:String x:Key="L_Nav_Reports">రిపోర్ట్స్</x:String>
         <x:String x:Key="L_Nav_Support">సహాయం</x:String>
         <x:String x:Key="L_Nav_Settings">సెట్టింగ్స్</x:String>

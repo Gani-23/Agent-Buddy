@@ -19,8 +19,8 @@ public class DatabaseService
     private const string DefaultMobileSyncApiUrl = "https://rd-base.vercel.app";
     private const string MobileSyncApiUrlKey = "mobile_sync_api_url";
     private const string MobileSyncApiKeyKey = "mobile_sync_api_key";
-    private readonly string _dbPath;
-    private readonly string _connectionString;
+    private readonly string _dbPath = string.Empty;
+    private readonly string _connectionString = string.Empty;
     private readonly object _schemaLock = new();
     private bool _schemaEnsured;
 
@@ -1158,6 +1158,29 @@ public class DatabaseService
                 createDopChequeInputs.ExecuteNonQuery();
             }
 
+            using (var createFixedDeposits = connection.CreateCommand())
+            {
+                createFixedDeposits.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS fixed_deposit_accounts (
+                        id TEXT PRIMARY KEY,
+                        account_no TEXT NOT NULL,
+                        customer_name TEXT NOT NULL,
+                        customer_phone TEXT,
+                        scheme_type TEXT NOT NULL,
+                        deposit_amount REAL NOT NULL,
+                        interest_rate REAL NOT NULL,
+                        deposit_date TEXT NOT NULL,
+                        maturity_date TEXT NOT NULL,
+                        maturity_amount REAL NOT NULL,
+                        annual_interest REAL DEFAULT 0,
+                        status TEXT DEFAULT 'Active',
+                        notes TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )";
+                createFixedDeposits.ExecuteNonQuery();
+            }
+
             EnsureColumn(connection, "credentials", "encrypted_password", "TEXT");
             EnsureColumn(connection, "rd_accounts", "amount", "INTEGER DEFAULT 0");
             EnsureColumn(connection, "rd_accounts", "month_paid_upto_num", "INTEGER DEFAULT 0");
@@ -1497,5 +1520,130 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("@activeAmount", activeAmount);
         cmd.Parameters.AddWithValue("@status", status);
         await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task<List<FixedDepositAccount>> GetAllFixedDepositsAsync()
+    {
+        var list = new List<FixedDepositAccount>();
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = @"
+                SELECT id, account_no, customer_name, customer_phone, scheme_type,
+                       deposit_amount, interest_rate, deposit_date, maturity_date,
+                       maturity_amount, annual_interest, status, notes, created_at, updated_at
+                FROM fixed_deposit_accounts
+                ORDER BY maturity_date ASC";
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                list.Add(new FixedDepositAccount
+                {
+                    Id = reader.GetString(0),
+                    AccountNo = reader.GetString(1),
+                    CustomerName = reader.GetString(2),
+                    CustomerPhone = reader.IsDBNull(3) ? null : reader.GetString(3),
+                    SchemeType = reader.GetString(4),
+                    DepositAmount = (decimal)reader.GetDouble(5),
+                    InterestRate = (decimal)reader.GetDouble(6),
+                    DepositDate = DateTime.TryParse(reader.GetString(7), out var depDate) ? depDate : DateTime.Today,
+                    MaturityDate = DateTime.TryParse(reader.GetString(8), out var matDate) ? matDate : DateTime.Today,
+                    MaturityAmount = (decimal)reader.GetDouble(9),
+                    AnnualInterest = reader.IsDBNull(10) ? 0 : (decimal)reader.GetDouble(10),
+                    Status = reader.IsDBNull(11) ? "Active" : reader.GetString(11),
+                    Notes = reader.IsDBNull(12) ? null : reader.GetString(12)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to load fixed deposits: {ex.Message}");
+        }
+        return list;
+    }
+
+    public async Task<bool> SaveFixedDepositAsync(FixedDepositAccount account)
+    {
+        if (account == null) return false;
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO fixed_deposit_accounts (
+                    id, account_no, customer_name, customer_phone, scheme_type,
+                    deposit_amount, interest_rate, deposit_date, maturity_date,
+                    maturity_amount, annual_interest, status, notes, updated_at
+                ) VALUES (
+                    @id, @accountNo, @customerName, @customerPhone, @schemeType,
+                    @depositAmount, @interestRate, @depositDate, @maturityDate,
+                    @maturityAmount, @annualInterest, @status, @notes, CURRENT_TIMESTAMP
+                )
+                ON CONFLICT(id) DO UPDATE SET
+                    account_no = excluded.account_no,
+                    customer_name = excluded.customer_name,
+                    customer_phone = excluded.customer_phone,
+                    scheme_type = excluded.scheme_type,
+                    deposit_amount = excluded.deposit_amount,
+                    interest_rate = excluded.interest_rate,
+                    deposit_date = excluded.deposit_date,
+                    maturity_date = excluded.maturity_date,
+                    maturity_amount = excluded.maturity_amount,
+                    annual_interest = excluded.annual_interest,
+                    status = excluded.status,
+                    notes = excluded.notes,
+                    updated_at = CURRENT_TIMESTAMP";
+
+            cmd.Parameters.AddWithValue("@id", string.IsNullOrWhiteSpace(account.Id) ? Guid.NewGuid().ToString("N") : account.Id);
+            cmd.Parameters.AddWithValue("@accountNo", account.AccountNo ?? string.Empty);
+            cmd.Parameters.AddWithValue("@customerName", account.CustomerName ?? string.Empty);
+            cmd.Parameters.AddWithValue("@customerPhone", (object?)account.CustomerPhone ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@schemeType", account.SchemeType ?? "5-Year TD");
+            cmd.Parameters.AddWithValue("@depositAmount", (double)account.DepositAmount);
+            cmd.Parameters.AddWithValue("@interestRate", (double)account.InterestRate);
+            cmd.Parameters.AddWithValue("@depositDate", account.DepositDate.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@maturityDate", account.MaturityDate.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@maturityAmount", (double)account.MaturityAmount);
+            cmd.Parameters.AddWithValue("@annualInterest", (double)account.AnnualInterest);
+            cmd.Parameters.AddWithValue("@status", account.Status ?? "Active");
+            cmd.Parameters.AddWithValue("@notes", (object?)account.Notes ?? DBNull.Value);
+
+            await cmd.ExecuteNonQueryAsync();
+            NotifyDatabaseChanged();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to save fixed deposit: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteFixedDepositAsync(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return false;
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "DELETE FROM fixed_deposit_accounts WHERE id = @id";
+            cmd.Parameters.AddWithValue("@id", id);
+            await cmd.ExecuteNonQueryAsync();
+            NotifyDatabaseChanged();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to delete fixed deposit: {ex.Message}");
+            return false;
+        }
     }
 }

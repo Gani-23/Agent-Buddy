@@ -8,6 +8,7 @@
         <x:String x:Key="L_Main_Navigation">NAVIGATION</x:String>
         <x:String x:Key="L_Nav_Dashboard">Dashboard</x:String>
         <x:String x:Key="L_Nav_CreateLists">Create Lists</x:String>
+        <x:String x:Key="L_Nav_FixedDeposits">Fixed Deposits (TD)</x:String>
         <x:String x:Key="L_Nav_Reports">Reports</x:String>
         <x:String x:Key="L_Nav_Support">Support</x:String>
         <x:String x:Key="L_Nav_Settings">Settings</x:String>
