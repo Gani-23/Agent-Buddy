@@ -64,13 +64,18 @@
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
                         <ComboBox Grid.Column="1"
-                                  Width="130"
+                                  Width="150"
                                   Height="32"
                                   ItemsSource="{Binding OpenLists}"
                                   SelectedItem="{Binding SelectedOpenList}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:ListPanelViewModel">
-                                    <TextBlock Text="{Binding Name}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Count, StringFormat='({0} a/c)'}"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                   FontSize="11"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -86,6 +91,8 @@
                                 Classes="Primary"
                                 Height="32"
                                 Padding="12,0"
+                                IsEnabled="{Binding CanSaveCurrentList}"
+                                ToolTip.Tip="{Binding SaveButtonTooltip}"
                                 Click="SaveList_Click">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource Icon_Save}" Width="12" Height="12" Foreground="White"/>
@@ -165,13 +172,26 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
 
-                            <TextBlock Grid.Row="1"
-                                       Text="No saved lot templates found."
-                                       IsVisible="{Binding !HasTemplates}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <!-- Left Empty State -->
+                            <StackPanel Grid.Row="1"
+                                        Spacing="8"
+                                        IsVisible="{Binding !HasTemplates}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Lists}" Width="24" Height="24" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="No saved lot templates"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Save any RD list above as a reusable template."
+                                           FontSize="10.5"
+                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           MaxWidth="200"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
@@ -182,107 +202,153 @@
                             BorderThickness="1"
                             CornerRadius="8"
                             Padding="14">
-                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12" IsVisible="{Binding HasSelectedTemplate}">
+                        <Grid>
+                            <!-- Selected Template Details (Visible when template is selected) -->
+                            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12" IsVisible="{Binding HasSelectedTemplate}">
 
-                            <!-- Template Info Header -->
-                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                <StackPanel Spacing="3">
-                                    <TextBlock Text="{Binding SelectedTemplate.Name}"
-                                               FontSize="15"
+                                <!-- Template Info Header -->
+                                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="{Binding SelectedTemplate.Name}"
+                                                   FontSize="15"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                        <TextBlock Text="{Binding SelectedTemplate.DisplaySummary}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="1"
+                                            Classes="Danger"
+                                            Height="28"
+                                            Padding="10,0"
+                                            Click="DeleteTemplate_Click"
+                                            ToolTip.Tip="Delete this template">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Trash}" Width="11" Height="11" Foreground="White"/>
+                                            <TextBlock Text="Delete" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Account List Preview -->
+                                <Border Grid.Row="1"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        ClipToBounds="True">
+                                    <ListBox ItemsSource="{Binding SelectedTemplate.Items}"
+                                             Background="Transparent"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="models:SavedLotItemTemplate">
+                                                <Grid ColumnDefinitions="30,140,*,60"
+                                                      ColumnSpacing="8"
+                                                      Margin="4,2">
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="•"
+                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding AccountNo}"
+                                                               FontFamily="{StaticResource AppMonoFontFamily}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding Nickname}"
+                                                               FontSize="11"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="{Binding Installment, StringFormat='{}{0} inst'}"
+                                                               FontSize="11"
+                                                               FontWeight="Medium"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+
+                                <!-- Action Buttons -->
+                                <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding StatusMessage}"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"/>
+
+                                    <Button Grid.Column="1"
+                                            Classes="Secondary"
+                                            Padding="14,8"
+                                            Click="LoadIntoSelectedList_Click"
+                                            IsEnabled="{Binding HasOpenLists}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Copy}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                            <TextBlock Text="Load into Selected List" FontSize="11.5" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Grid.Column="2"
+                                            Classes="Primary"
+                                            Padding="14,8"
+                                            Click="LoadIntoNewList_Click">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Check}" Width="12" Height="12" Foreground="White"/>
+                                            <TextBlock Text="Load into New List" FontSize="11.5" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Placeholder State (Visible when no template is selected) -->
+                            <Border IsVisible="{Binding !HasSelectedTemplate}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Padding="24">
+                                <StackPanel Spacing="10" HorizontalAlignment="Center" MaxWidth="340">
+                                    <Border Width="52" Height="52"
+                                            CornerRadius="26"
+                                            Background="{DynamicResource AppHoverBrush}"
+                                            HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource Icon_FileText}" Width="22" Height="22" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <TextBlock Text="No Template Selected"
                                                FontWeight="Bold"
-                                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Text="{Binding SelectedTemplate.DisplaySummary}"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                               FontSize="14"
+                                               Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                               HorizontalAlignment="Center"/>
+
+                                    <TextBlock Text="Select a saved template from the list on the left to inspect its accounts and load it into your RD lists, or save a list above."
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"/>
+
+                                    <Border Background="{DynamicResource AppHoverBrush}"
+                                            BorderBrush="{DynamicResource AppBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="12,10"
+                                            Margin="0,8,0,0">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="💡 What are Lot Templates?" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AccentBrush}"/>
+                                            <TextBlock Text="Templates let you group recurring monthly depositor accounts (e.g. 'Colony Batch' or 'Office Staff') so you can reload them every month with 1-click instead of entering account numbers one-by-one."
+                                                       FontSize="10.5"
+                                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
-
-                                <Button Grid.Column="1"
-                                        Classes="Danger"
-                                        Height="28"
-                                        Padding="10,0"
-                                        Click="DeleteTemplate_Click"
-                                        ToolTip.Tip="Delete this template">
-                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Trash}" Width="11" Height="11" Foreground="White"/>
-                                        <TextBlock Text="Delete" FontSize="11"/>
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
-
-                            <!-- Account List Preview -->
-                            <Border Grid.Row="1"
-                                    BorderBrush="{DynamicResource AppBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="6"
-                                    ClipToBounds="True">
-                                <ListBox ItemsSource="{Binding SelectedTemplate.Items}"
-                                         Background="Transparent"
-                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate x:DataType="models:SavedLotItemTemplate">
-                                            <Grid ColumnDefinitions="30,140,*,60"
-                                                  ColumnSpacing="8"
-                                                  Margin="4,2">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="•"
-                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                                           VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="1"
-                                                           Text="{Binding AccountNo}"
-                                                           FontFamily="{StaticResource AppMonoFontFamily}"
-                                                           FontWeight="SemiBold"
-                                                           FontSize="12"
-                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"
-                                                           VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2"
-                                                           Text="{Binding Nickname}"
-                                                           FontSize="11"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                                           VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3"
-                                                           Text="{Binding Installment, StringFormat='{}{0} inst'}"
-                                                           FontSize="11"
-                                                           FontWeight="Medium"
-                                                           HorizontalAlignment="Right"
-                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                                           VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
                             </Border>
-
-                            <!-- Action Buttons -->
-                            <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
-                                <TextBlock Grid.Column="0"
-                                           Text="{Binding StatusMessage}"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center"/>
-
-                                <Button Grid.Column="1"
-                                        Classes="Secondary"
-                                        Padding="14,8"
-                                        Click="LoadIntoSelectedList_Click"
-                                        IsEnabled="{Binding HasOpenLists}">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Copy}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                        <TextBlock Text="Load into Selected List" FontSize="11.5" FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <Button Grid.Column="2"
-                                        Classes="Primary"
-                                        Padding="14,8"
-                                        Click="LoadIntoNewList_Click">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Check}" Width="12" Height="12" Foreground="White"/>
-                                        <TextBlock Text="Load into New List" FontSize="11.5" FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
                         </Grid>
                     </Border>
                 </Grid>

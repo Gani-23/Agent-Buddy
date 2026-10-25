@@ -29,13 +29,13 @@ public sealed class SavedLotTemplatesViewModel : ViewModelBase
         _selectedOpenList = activeList ?? OpenLists.FirstOrDefault();
         _selectedTemplate = FilteredTemplates.FirstOrDefault();
 
-        if (_selectedOpenList != null)
+        if (_selectedOpenList != null && _selectedOpenList.Count > 0)
         {
             _newTemplateName = $"{_selectedOpenList.Name} ({_selectedOpenList.Count} accounts)";
         }
         else
         {
-            _newTemplateName = $"Lot Template {DateTime.Now:dd-MMM}";
+            _newTemplateName = string.Empty;
         }
 
         CloseCommand = ReactiveCommand.Create(() => CloseRequested?.Invoke(this, EventArgs.Empty));
@@ -69,15 +69,27 @@ public sealed class SavedLotTemplatesViewModel : ViewModelBase
     public string SelectedTemplateItemCountText =>
         SelectedTemplate != null ? $"{SelectedTemplate.AccountCount} Accounts" : string.Empty;
 
+    public bool CanSaveCurrentList => SelectedOpenList != null && SelectedOpenList.Count > 0;
+
+    public string SaveButtonTooltip => CanSaveCurrentList
+        ? "Save this list's accounts as a template"
+        : "Select an open list that contains accounts to save as a template";
+
     public ListPanelViewModel? SelectedOpenList
     {
         get => _selectedOpenList;
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedOpenList, value);
-            if (value != null && string.IsNullOrWhiteSpace(NewTemplateName))
+            this.RaisePropertyChanged(nameof(CanSaveCurrentList));
+            this.RaisePropertyChanged(nameof(SaveButtonTooltip));
+            if (value != null && value.Count > 0 && string.IsNullOrWhiteSpace(NewTemplateName))
             {
                 NewTemplateName = $"{value.Name} ({value.Count} accounts)";
+            }
+            else if (value != null && value.Count == 0 && (NewTemplateName?.Contains("(0 accounts)") == true || string.IsNullOrWhiteSpace(NewTemplateName)))
+            {
+                NewTemplateName = string.Empty;
             }
         }
     }
