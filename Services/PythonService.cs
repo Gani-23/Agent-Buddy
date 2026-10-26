@@ -18,7 +18,7 @@ namespace AgentBuddy.Services;
 public class PythonService
 {
     private static readonly Regex ReferenceRegex = new(
-        @"Reference:\s*([A-Z0-9]+)\b",
+        @"(?:Reference:\s*|e-Banking\s*reference\s*number\s*is\s*)([A-Z0-9]+)\b",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex AslaasSubmittedRegex = new(
         @"ASLAAS update submitted:\s*(?<account>[A-Z0-9]+)\s*->\s*(?<aslaas>[A-Z0-9]+)",

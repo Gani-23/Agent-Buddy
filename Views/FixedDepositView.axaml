@@ -110,49 +110,49 @@
                         <!-- Account No -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
                             <TextBlock Text="Account Number *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryAccountNo}" PlaceholderText="10-digit A/C No" Height="32"/>
+                            <TextBox Text="{Binding EntryAccountNo}" PlaceholderText="10-digit A/C No" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
 
                         <!-- Customer Name -->
                         <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                             <TextBlock Text="Customer Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" Height="32"/>
+                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
 
                         <!-- Customer Phone -->
                         <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4">
                             <TextBlock Text="Phone (for WhatsApp Alerts)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryCustomerPhone}" PlaceholderText="10-digit Mobile" Height="32"/>
+                            <TextBox Text="{Binding EntryCustomerPhone}" PlaceholderText="10-digit Mobile" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
 
                         <!-- Scheme Type -->
                         <StackPanel Grid.Row="0" Grid.Column="3" Spacing="4">
                             <TextBlock Text="Scheme Type *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding EntrySchemeType}" Height="32" HorizontalAlignment="Stretch"/>
+                            <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding EntrySchemeType}" Height="42" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Deposit Amount -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
                             <TextBlock Text="Deposit Amount (Rs.) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryDepositAmount}" PlaceholderText="e.g. 100000" Height="32"/>
+                            <TextBox Text="{Binding EntryDepositAmount}" PlaceholderText="e.g. 100000" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
 
                         <!-- Interest Rate -->
                         <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
                             <TextBlock Text="Interest Rate (%) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryInterestRate}" PlaceholderText="e.g. 7.5" Height="32"/>
+                            <TextBox Text="{Binding EntryInterestRate}" PlaceholderText="e.g. 7.5" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
 
                         <!-- Deposit Date -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Spacing="4">
                             <TextBlock Text="Deposit Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <DatePicker SelectedDate="{Binding EntryDepositDate}" Height="32" HorizontalAlignment="Stretch"/>
+                            <DatePicker SelectedDate="{Binding EntryDepositDate}" Height="42" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Notes -->
                         <StackPanel Grid.Row="1" Grid.Column="3" Spacing="4">
                             <TextBlock Text="Notes / Agent Ref" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" Height="32"/>
+                            <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
                         </StackPanel>
                     </Grid>
 
@@ -194,25 +194,25 @@
                             <!-- Scheme -->
                             <StackPanel Grid.Column="0" Spacing="4">
                                 <TextBlock Text="Scheme" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding CalcSchemeType}" Height="32" HorizontalAlignment="Stretch"/>
+                                <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding CalcSchemeType}" Height="42" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
                             </StackPanel>
 
                             <!-- Amount -->
                             <StackPanel Grid.Column="1" Spacing="4">
                                 <TextBlock Text="Principal Amount (Rs.)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                <TextBox Text="{Binding CalcDepositAmountText}" Height="32"/>
+                                <TextBox Text="{Binding CalcDepositAmountText}" Height="42" VerticalContentAlignment="Center" FontSize="14"/>
                             </StackPanel>
 
                             <!-- Rate -->
                             <StackPanel Grid.Column="2" Spacing="4">
                                 <TextBlock Text="Rate (%)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                <TextBox Text="{Binding CalcInterestRateText}" Height="32"/>
+                                <TextBox Text="{Binding CalcInterestRateText}" Height="42" VerticalContentAlignment="Center" FontSize="14"/>
                             </StackPanel>
 
                             <!-- Start Date -->
                             <StackPanel Grid.Column="3" Spacing="4">
                                 <TextBlock Text="Opening Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                <DatePicker SelectedDate="{Binding CalcStartDate}" Height="32" HorizontalAlignment="Stretch"/>
+                                <DatePicker SelectedDate="{Binding CalcStartDate}" Height="42" HorizontalAlignment="Stretch"/>
                             </StackPanel>
                         </Grid>
 
@@ -250,7 +250,9 @@
                             <TextBox Grid.Column="0"
                                      Text="{Binding SearchText}"
                                      PlaceholderText="Search by A/C, Name, Phone..."
-                                     Height="32">
+                                     Height="42"
+                                     VerticalContentAlignment="Center"
+                                     FontSize="13.5">
                                 <TextBox.InnerLeftContent>
                                     <PathIcon Data="{StaticResource Icon_Search}" Width="12" Height="12" Margin="8,0,0,0" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                 </TextBox.InnerLeftContent>
@@ -258,14 +260,16 @@
 
                             <!-- Scheme Filter -->
                             <ComboBox Grid.Column="1"
-                                      Height="32"
+                                      Height="42"
+                                      VerticalContentAlignment="Center"
                                       ItemsSource="{Binding SchemeFilterOptions}"
                                       SelectedItem="{Binding SelectedSchemeFilter}"
                                       HorizontalAlignment="Stretch"/>
 
                             <!-- Status Filter -->
                             <ComboBox Grid.Column="2"
-                                      Height="32"
+                                      Height="42"
+                                      VerticalContentAlignment="Center"
                                       ItemsSource="{Binding StatusFilterOptions}"
                                       SelectedItem="{Binding SelectedStatusFilter}"
                                       HorizontalAlignment="Stretch"/>
@@ -277,8 +281,8 @@
                             <Button Grid.Column="4"
                                     Classes="Secondary"
                                     Command="{Binding RefreshCommand}"
-                                    Height="32"
-                                    Padding="10,0">
+                                    Height="42"
+                                    Padding="12,0">
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Sync}" Width="12" Height="12"/>
                                     <TextBlock Text="Refresh" FontSize="11.5"/>

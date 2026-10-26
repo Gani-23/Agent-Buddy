@@ -99,7 +99,20 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="14,0"/>
+    </Style>
+
+    <Style Selector="DatePicker">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="DatePicker /template/ Button#PART_FlyoutButton">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
     <Style Selector="TextBox /template/ Border#PART_BorderElement">
@@ -123,8 +136,9 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="38"/>
-        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="12,0"/>
     </Style>
 
     <Style Selector="ComboBox.ModeSelector">
@@ -159,7 +173,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="38"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
     <Style Selector="ToolTip">

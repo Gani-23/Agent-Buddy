@@ -10,9 +10,9 @@
         x:Class="AgentBuddy.Views.OverdueBalanceWindow"
         x:DataType="vm:OverdueBalanceWindowViewModel"
         Title="{DynamicResource L_Balance_WindowTitle}"
-        Width="940"
-        Height="640"
-        MinWidth="820"
+        Width="960"
+        Height="650"
+        MinWidth="840"
         MinHeight="560"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
@@ -20,9 +20,12 @@
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Background="{DynamicResource AppHoverBrush}">
+        Background="{DynamicResource AppCardBackgroundBrush}">
 
-    <Border Padding="18" Classes="FadeIn DialogSurface">
+    <Border Padding="18"
+            Classes="FadeIn"
+            BorderBrush="{DynamicResource AppBorderBrush}"
+            BorderThickness="1.5">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
             <Grid Grid.Row="0">
                 <StackPanel Spacing="2">
@@ -106,14 +109,14 @@
                             BorderBrush="{DynamicResource AppBorderBrush}"
                             BorderThickness="0,0,0,1"
                             Padding="12,10">
-                        <Grid ColumnDefinitions="135,*,105,95,120,175"
+                        <Grid ColumnDefinitions="130,*,100,85,115,110"
                               ColumnSpacing="10">
                             <TextBlock Grid.Column="0" Text="{DynamicResource L_Balance_ColumnAccount}" Classes="Kicker"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Balance_ColumnName}" Classes="Kicker"/>
                             <TextBlock Grid.Column="2" Text="{DynamicResource L_Balance_ColumnBalance}" Classes="Kicker"/>
                             <TextBlock Grid.Column="3" Text="{DynamicResource L_Balance_ColumnPaidUpto}" Classes="Kicker"/>
                             <TextBlock Grid.Column="4" Text="{DynamicResource L_Balance_ColumnNextDue}" Classes="Kicker"/>
-                            <TextBlock Grid.Column="5" Text="{DynamicResource L_Balance_ColumnActions}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="5" Text="{DynamicResource L_Balance_ColumnActions}" Classes="Kicker" HorizontalAlignment="Center"/>
                         </Grid>
                     </Border>
 
@@ -126,7 +129,7 @@
                                     <Border BorderBrush="{DynamicResource AppBorderBrush}"
                                             BorderThickness="0,0,0,1"
                                             Padding="12,9">
-                                        <Grid ColumnDefinitions="135,*,105,95,120,175"
+                                        <Grid ColumnDefinitions="130,*,100,85,115,110"
                                               ColumnSpacing="10"
                                               VerticalAlignment="Center">
                                             <TextBlock Grid.Column="0"
@@ -161,31 +164,31 @@
                                             <StackPanel Grid.Column="5"
                                                         Orientation="Horizontal"
                                                         Spacing="6"
-                                                        HorizontalAlignment="Right"
+                                                        HorizontalAlignment="Center"
                                                         VerticalAlignment="Center">
                                                 <Button Classes="Secondary"
-                                                        Padding="8,5"
+                                                        Padding="6"
+                                                        Width="28"
+                                                        Height="28"
+                                                        ToolTip.Tip="{DynamicResource L_Balance_Copy}"
                                                         Click="Copy_Click">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <PathIcon Data="{StaticResource Icon_Copy}" Width="12" Height="12"/>
-                                                        <TextBlock Text="{DynamicResource L_Balance_Copy}"/>
-                                                    </StackPanel>
+                                                    <PathIcon Data="{StaticResource Icon_Copy}" Width="12" Height="12"/>
                                                 </Button>
                                                 <Button Classes="Primary"
-                                                        Padding="8,5"
+                                                        Padding="6"
+                                                        Width="28"
+                                                        Height="28"
+                                                        ToolTip.Tip="{DynamicResource L_Balance_Add}"
                                                         Click="Add_Click">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <PathIcon Data="{StaticResource Icon_Plus}" Width="12" Height="12"/>
-                                                        <TextBlock Text="{DynamicResource L_Balance_Add}"/>
-                                                    </StackPanel>
+                                                    <PathIcon Data="{StaticResource Icon_Plus}" Width="12" Height="12"/>
                                                 </Button>
                                                 <Button Classes="Secondary"
-                                                        Padding="8,5"
+                                                        Padding="6"
+                                                        Width="28"
+                                                        Height="28"
+                                                        ToolTip.Tip="{DynamicResource L_Balance_View}"
                                                         Click="View_Click">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <PathIcon Data="{StaticResource Icon_Folder}" Width="12" Height="12"/>
-                                                        <TextBlock Text="{DynamicResource L_Balance_View}"/>
-                                                    </StackPanel>
+                                                    <PathIcon Data="{StaticResource Icon_Folder}" Width="12" Height="12"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
