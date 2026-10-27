@@ -1615,12 +1615,46 @@ public class SettingsViewModel : ViewModelBase
             return "Unknown error.";
         }
 
-        var firstLine = output
+        var lines = output
             .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(line => line.Trim())
-            .FirstOrDefault(line => !string.IsNullOrWhiteSpace(line));
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToList();
 
-        return string.IsNullOrWhiteSpace(firstLine) ? "Unknown error." : firstLine;
+        if (lines.Count == 0)
+        {
+            return "Unknown error.";
+        }
+
+        // If output contains a Python traceback, extract the actual exception line
+        if (output.Contains("Traceback (most recent call last):", StringComparison.OrdinalIgnoreCase))
+        {
+            var exceptionLine = lines.LastOrDefault(l =>
+                !l.StartsWith("File ", StringComparison.OrdinalIgnoreCase) &&
+                !l.StartsWith("Traceback", StringComparison.OrdinalIgnoreCase) &&
+                !l.StartsWith("^", StringComparison.Ordinal) &&
+                !l.StartsWith("During handling", StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(exceptionLine))
+            {
+                return exceptionLine;
+            }
+        }
+
+        // Look for explicit error prefixes
+        var errorLine = lines.FirstOrDefault(l =>
+            l.StartsWith("❌", StringComparison.Ordinal) ||
+            l.StartsWith("Error:", StringComparison.OrdinalIgnoreCase) ||
+            l.StartsWith("Error ", StringComparison.OrdinalIgnoreCase) ||
+            l.StartsWith("Exception:", StringComparison.OrdinalIgnoreCase) ||
+            l.StartsWith("Failed:", StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(errorLine))
+        {
+            return errorLine.TrimStart('❌', ' ').Trim();
+        }
+
+        return lines.FirstOrDefault() ?? "Unknown error.";
     }
 
     private async Task SaveDatabaseLocationAsync()

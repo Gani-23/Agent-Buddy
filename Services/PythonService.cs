@@ -48,6 +48,8 @@ public class PythonService
             if (!string.IsNullOrWhiteSpace(_scriptsPath)) Directory.CreateDirectory(_scriptsPath);
         }
         catch { }
+
+        EnsureScriptsDeployed();
         
         // Check for virtual environment
         _venvPath = Path.Combine(_scriptsPath, ".venv");
@@ -71,7 +73,37 @@ public class PythonService
         }
         else
         {
-            _pythonCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "python" : "python3";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _pythonCommand = "python";
+            }
+            else
+            {
+                var candidatePaths = new[]
+                {
+                    "/Library/Frameworks/Python.framework/Versions/Current/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
+                    "/usr/local/bin/python3",
+                    "/opt/homebrew/bin/python3",
+                    "/usr/bin/python3"
+                };
+
+                string? found = null;
+                foreach (var candidate in candidatePaths)
+                {
+                    if (File.Exists(candidate))
+                    {
+                        found = candidate;
+                        break;
+                    }
+                }
+
+                _pythonCommand = found ?? "python3";
+            }
         }
     }
 
@@ -934,11 +966,47 @@ public class PythonService
 
     public string GetDocumentsPath() => _documentsPath;
 
+    public void EnsureScriptsDeployed()
+    {
+        try
+        {
+            var appDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidateSourceDirs = new[]
+            {
+                Path.Combine(appDir, "DOPAgent-Scripts"),
+                Path.Combine(appDir, "DOPAgent"),
+                appDir
+            };
+
+            foreach (var sourceDir in candidateSourceDirs)
+            {
+                if (!Directory.Exists(sourceDir)) continue;
+
+                var pyFiles = Directory.GetFiles(sourceDir, "*.py");
+                if (pyFiles.Length == 0) continue;
+
+                foreach (var file in Directory.GetFiles(sourceDir))
+                {
+                    var fileName = Path.GetFileName(file);
+                    if (string.Equals(fileName, ".DS_Store", StringComparison.OrdinalIgnoreCase)) continue;
+                    var destFile = Path.Combine(_scriptsPath, fileName);
+                    if (!File.Exists(destFile) || File.GetLastWriteTimeUtc(file) > File.GetLastWriteTimeUtc(destFile))
+                    {
+                        try { File.Copy(file, destFile, true); } catch { }
+                    }
+                }
+                break;
+            }
+        }
+        catch { }
+    }
+
     /// <summary>
     /// Check if scripts exist
     /// </summary>
     public (bool fetchExists, bool scheduleExists) CheckScriptsExist()
     {
+        EnsureScriptsDeployed();
         var fetchPath = Path.Combine(_scriptsPath, "Fetch_RDAccounts.py");
         var schedulePath = Path.Combine(_scriptsPath, "ScheduleArguments.py");
         
@@ -954,6 +1022,18 @@ public class PythonService
     {
         startInfo.Environment["PYTHONUTF8"] = "1";
         startInfo.Environment["PYTHONIOENCODING"] = "utf-8";
+
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var existingPath = startInfo.Environment.TryGetValue("PATH", out var currentPath)
+                ? currentPath
+                : Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+
+            var extraPaths = "/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin";
+            startInfo.Environment["PATH"] = string.IsNullOrWhiteSpace(existingPath)
+                ? extraPaths
+                : $"{extraPaths}:{existingPath}";
+        }
     }
 
     private async Task<string> GetPreferredBrowserArgAsync()

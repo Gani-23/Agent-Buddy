@@ -118,7 +118,7 @@ public class DatabaseService
                    next_installment_date, first_seen, last_updated, is_active,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, '')
+                   COALESCE(status, ''), COALESCE(short_code, '')
             FROM rd_accounts
             WHERE is_active = 1
             ORDER BY account_no";
@@ -149,7 +149,7 @@ public class DatabaseService
                    next_installment_date, first_seen, last_updated, is_active,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, '')
+                   COALESCE(status, ''), COALESCE(short_code, '')
             FROM rd_accounts
             ORDER BY account_no";
 
@@ -179,7 +179,7 @@ public class DatabaseService
                    next_installment_date, COALESCE(first_seen, ''), COALESCE(last_updated, ''), 0,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, 'closed')
+                   COALESCE(status, 'closed'), COALESCE(short_code, '')
             FROM closed_accounts
             ORDER BY
                 CASE WHEN trim(COALESCE(first_seen, '')) = '' THEN 1 ELSE 0 END,
@@ -211,7 +211,7 @@ public class DatabaseService
                    next_installment_date, first_seen, last_updated, is_active,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, '')
+                   COALESCE(status, ''), COALESCE(short_code, '')
             FROM rd_accounts
             WHERE account_no = @accountNo";
         command.Parameters.AddWithValue("@accountNo", accountNo);
@@ -240,7 +240,7 @@ public class DatabaseService
                    next_installment_date, COALESCE(first_seen, ''), COALESCE(last_updated, ''), 0,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, 'closed')
+                   COALESCE(status, 'closed'), COALESCE(short_code, '')
             FROM closed_accounts
             WHERE account_no = @accountNo
             LIMIT 1";
@@ -299,13 +299,14 @@ public class DatabaseService
                    next_installment_date, first_seen, last_updated, is_active,
                    COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
                    COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
-                   COALESCE(status, '')
+                   COALESCE(status, ''), COALESCE(short_code, '')
             FROM rd_accounts
             WHERE is_active = 1
-              AND (account_no LIKE @query OR account_name LIKE @query)
+              AND (account_no LIKE @query OR account_name LIKE @query OR short_code = @exactQuery)
             ORDER BY account_no
             LIMIT 100";
         command.Parameters.AddWithValue("@query", $"%{query}%");
+        command.Parameters.AddWithValue("@exactQuery", query?.Trim()?.TrimStart('#')?.Trim() ?? string.Empty);
 
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -314,6 +315,66 @@ public class DatabaseService
         }
 
         return accounts;
+    }
+
+    /// <summary>
+    /// Get account by short code (checks active rd_accounts first, then closed_accounts)
+    /// </summary>
+    public async Task<RDAccount?> GetAccountByShortCodeAsync(string shortCode)
+    {
+        var normalized = (shortCode ?? string.Empty).Trim().TrimStart('#').Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        EnsureAnalyticsSchema();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        // 1. Try active rd_accounts first
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = @"
+                SELECT id, account_no, account_name, COALESCE(aslaas_no, ''), denomination, month_paid_upto,
+                       next_installment_date, first_seen, last_updated, is_active,
+                       COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
+                       COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
+                       COALESCE(status, ''), COALESCE(short_code, '')
+                FROM rd_accounts
+                WHERE short_code = @shortCode
+                LIMIT 1";
+            command.Parameters.AddWithValue("@shortCode", normalized);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return MapAccount(reader);
+            }
+        }
+
+        // 2. Check closed_accounts
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = @"
+                SELECT id, account_no, account_name, COALESCE(aslaas_no, ''), denomination, month_paid_upto,
+                       next_installment_date, COALESCE(first_seen, ''), COALESCE(last_updated, ''), 0,
+                       COALESCE(amount, 0), COALESCE(month_paid_upto_num, 0),
+                       COALESCE(next_due_date_iso, ''), COALESCE(total_deposit, 0),
+                       COALESCE(status, 'closed'), COALESCE(short_code, '')
+                FROM closed_accounts
+                WHERE short_code = @shortCode
+                LIMIT 1";
+            command.Parameters.AddWithValue("@shortCode", normalized);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return MapAccount(reader);
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -992,7 +1053,8 @@ public class DatabaseService
             MonthPaidUptoNumber = reader.IsDBNull(11) ? 0 : Convert.ToInt32(reader.GetValue(11)),
             NextDueDateIso = GetStringOrEmpty(reader, 12),
             TotalDeposit = reader.IsDBNull(13) ? 0 : Convert.ToDecimal(reader.GetValue(13)),
-            Status = GetStringOrEmpty(reader, 14)
+            Status = GetStringOrEmpty(reader, 14),
+            ShortCode = reader.FieldCount > 15 ? GetStringOrEmpty(reader, 15) : string.Empty
         };
     }
 
@@ -1211,6 +1273,41 @@ public class DatabaseService
             EnsureColumn(connection, "closed_accounts", "source_update_time", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
             EnsureColumn(connection, "dop_cheque_inputs", "payment_mode", "TEXT DEFAULT 'dop_cheque'");
             EnsureColumn(connection, "dop_cheque_inputs", "bank_name", "TEXT DEFAULT ''");
+            EnsureColumn(connection, "rd_accounts", "short_code", "TEXT");
+            EnsureColumn(connection, "account_detail", "short_code", "TEXT");
+            EnsureColumn(connection, "closed_accounts", "short_code", "TEXT");
+
+            using (var idxCmd = connection.CreateCommand())
+            {
+                idxCmd.CommandText = @"
+                    CREATE INDEX IF NOT EXISTS idx_rd_accounts_short_code ON rd_accounts(short_code);
+                    CREATE INDEX IF NOT EXISTS idx_account_detail_short_code ON account_detail(short_code);
+                    CREATE INDEX IF NOT EXISTS idx_closed_accounts_short_code ON closed_accounts(short_code);";
+                idxCmd.ExecuteNonQuery();
+            }
+
+            using (var backfillCmd = connection.CreateCommand())
+            {
+                backfillCmd.CommandText = "SELECT COUNT(*) FROM rd_accounts WHERE short_code IS NULL OR trim(short_code) = '';";
+                var missingCount = Convert.ToInt64(backfillCmd.ExecuteScalar() ?? 0);
+                if (missingCount > 0)
+                {
+                    backfillCmd.CommandText = @"
+                        WITH numbered AS (
+                            SELECT account_no, CAST(ROW_NUMBER() OVER (ORDER BY account_no ASC) AS TEXT) AS code
+                            FROM rd_accounts
+                        )
+                        UPDATE rd_accounts
+                        SET short_code = (SELECT code FROM numbered WHERE numbered.account_no = rd_accounts.account_no)
+                        WHERE short_code IS NULL OR trim(short_code) = '';
+
+                        UPDATE account_detail
+                        SET short_code = (SELECT short_code FROM rd_accounts WHERE rd_accounts.account_no = account_detail.account_number)
+                        WHERE short_code IS NULL OR trim(short_code) = '';";
+                    backfillCmd.ExecuteNonQuery();
+                }
+            }
+
             PurgeArchivedClosedAccountsForNewMonth(connection);
 
             _schemaEnsured = true;
@@ -1324,6 +1421,23 @@ public class DatabaseService
         var newCount = 0;
         var updatedCount = 0;
 
+        long maxShortCode = 0;
+        using (var maxCmd = connection.CreateCommand())
+        {
+            maxCmd.Transaction = transaction;
+            maxCmd.CommandText = @"
+                SELECT COALESCE(MAX(m), 0) FROM (
+                    SELECT MAX(CAST(short_code AS INTEGER)) AS m FROM rd_accounts WHERE short_code IS NOT NULL AND short_code GLOB '[0-9]*'
+                    UNION ALL
+                    SELECT MAX(CAST(short_code AS INTEGER)) AS m FROM closed_accounts WHERE short_code IS NOT NULL AND short_code GLOB '[0-9]*'
+                )";
+            var val = await maxCmd.ExecuteScalarAsync();
+            if (val != null && val != DBNull.Value)
+            {
+                _ = long.TryParse(val.ToString(), out maxShortCode);
+            }
+        }
+
         foreach (var account in accounts)
         {
             var acctNo = (account.AccountNo ?? string.Empty).Trim();
@@ -1335,10 +1449,12 @@ public class DatabaseService
             var totalDeposit = account.TotalDeposit > 0 ? account.TotalDeposit : amount * monthPaidNum;
             var status = string.IsNullOrWhiteSpace(account.Status) ? "activate" : account.Status;
             var aslaas = account.AslaasNo ?? string.Empty;
+            string assignedShortCode;
 
             if (existingMap.TryGetValue(acctNo, out _))
             {
                 updatedCount++;
+                assignedShortCode = account.ShortCode ?? string.Empty;
                 using var updateCmd = connection.CreateCommand();
                 updateCmd.Transaction = transaction;
                 updateCmd.CommandText = @"
@@ -1372,17 +1488,19 @@ public class DatabaseService
             else
             {
                 newCount++;
+                maxShortCode++;
+                assignedShortCode = string.IsNullOrWhiteSpace(account.ShortCode) ? maxShortCode.ToString() : account.ShortCode;
                 using var insertCmd = connection.CreateCommand();
                 insertCmd.Transaction = transaction;
                 insertCmd.CommandText = @"
                     INSERT INTO rd_accounts (
                         account_no, account_name, aslaas_no, denomination, month_paid_upto,
                         next_installment_date, amount, month_paid_upto_num, next_due_date_iso,
-                        total_deposit, status, is_active, first_seen, last_updated
+                        total_deposit, status, is_active, first_seen, last_updated, short_code
                     ) VALUES (
                         @accountNo, @accountName, @aslaasNo, @denomination, @monthPaidUpto,
                         @nextInstallmentDate, @amount, @monthPaidUptoNum, @nextDueDateIso,
-                        @totalDeposit, @status, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                        @totalDeposit, @status, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @shortCode
                     )";
                 insertCmd.Parameters.AddWithValue("@accountNo", acctNo);
                 insertCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
@@ -1395,6 +1513,7 @@ public class DatabaseService
                 insertCmd.Parameters.AddWithValue("@nextDueDateIso", nextDueIso);
                 insertCmd.Parameters.AddWithValue("@totalDeposit", totalDeposit);
                 insertCmd.Parameters.AddWithValue("@status", status);
+                insertCmd.Parameters.AddWithValue("@shortCode", assignedShortCode);
                 await insertCmd.ExecuteNonQueryAsync();
             }
 
@@ -1404,10 +1523,10 @@ public class DatabaseService
             detailCmd.CommandText = @"
                 INSERT INTO account_detail (
                     account_number, account_holder_name, amount, month_paid_upto,
-                    next_due_date, total_deposit, status, first_seen, last_updated
+                    next_due_date, total_deposit, status, first_seen, last_updated, short_code
                 ) VALUES (
                     @accountNo, @accountName, @amount, @monthPaidUptoNum,
-                    @nextDueDateIso, @totalDeposit, @status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                    @nextDueDateIso, @totalDeposit, @status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @shortCode
                 ) ON CONFLICT(account_number) DO UPDATE SET
                     account_holder_name = excluded.account_holder_name,
                     amount = excluded.amount,
@@ -1415,7 +1534,8 @@ public class DatabaseService
                     next_due_date = excluded.next_due_date,
                     total_deposit = excluded.total_deposit,
                     status = excluded.status,
-                    last_updated = CURRENT_TIMESTAMP";
+                    last_updated = CURRENT_TIMESTAMP,
+                    short_code = COALESCE(excluded.short_code, account_detail.short_code)";
             detailCmd.Parameters.AddWithValue("@accountNo", acctNo);
             detailCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
             detailCmd.Parameters.AddWithValue("@amount", amount);
@@ -1423,6 +1543,7 @@ public class DatabaseService
             detailCmd.Parameters.AddWithValue("@nextDueDateIso", nextDueIso);
             detailCmd.Parameters.AddWithValue("@totalDeposit", totalDeposit);
             detailCmd.Parameters.AddWithValue("@status", status);
+            detailCmd.Parameters.AddWithValue("@shortCode", assignedShortCode);
             await detailCmd.ExecuteNonQueryAsync();
         }
 
@@ -1457,15 +1578,16 @@ public class DatabaseService
                 INSERT INTO closed_accounts (
                     account_no, account_name, aslaas_no, denomination, month_paid_upto,
                     next_installment_date, amount, month_paid_upto_num, next_due_date_iso,
-                    total_deposit, status, first_seen, last_updated, closed_on, closed_reason, source_update_time
+                    total_deposit, status, first_seen, last_updated, closed_on, closed_reason, source_update_time, short_code
                 ) VALUES (
                     @accountNo, @accountName, @aslaasNo, @denomination, @monthPaidUpto,
                     @nextInstallmentDate, @amount, @monthPaidUptoNum, @nextDueDateIso,
-                    @totalDeposit, 'closed', @firstSeen, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @closedReason, CURRENT_TIMESTAMP
+                    @totalDeposit, 'closed', @firstSeen, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @closedReason, CURRENT_TIMESTAMP, @shortCode
                 ) ON CONFLICT(account_no) DO UPDATE SET
                     status = 'closed',
                     closed_reason = excluded.closed_reason,
-                    last_updated = CURRENT_TIMESTAMP";
+                    last_updated = CURRENT_TIMESTAMP,
+                    short_code = COALESCE(excluded.short_code, closed_accounts.short_code)";
             insertCmd.Parameters.AddWithValue("@accountNo", acctNo);
             insertCmd.Parameters.AddWithValue("@accountName", account.AccountName ?? string.Empty);
             insertCmd.Parameters.AddWithValue("@aslaasNo", account.AslaasNo ?? string.Empty);
@@ -1478,6 +1600,7 @@ public class DatabaseService
             insertCmd.Parameters.AddWithValue("@totalDeposit", account.TotalDeposit);
             insertCmd.Parameters.AddWithValue("@firstSeen", account.FirstSeen == default ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : account.FirstSeen.ToString("yyyy-MM-dd HH:mm:ss"));
             insertCmd.Parameters.AddWithValue("@closedReason", reason);
+            insertCmd.Parameters.AddWithValue("@shortCode", account.ShortCode ?? string.Empty);
             await insertCmd.ExecuteNonQueryAsync();
 
             using var deactCmd = connection.CreateCommand();

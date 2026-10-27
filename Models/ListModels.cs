@@ -29,6 +29,8 @@ public class ListItem : ReactiveObject
     }
     public int EffectiveInstallment => Installment > 0 ? Installment : 1;
     public decimal TotalAmount => (AccountDetails?.GetAmount() ?? 0) * EffectiveInstallment;
+    public bool HasShortCode => AccountDetails?.HasShortCode ?? false;
+    public string ShortCodeDisplay => AccountDetails?.ShortCodeDisplay ?? string.Empty;
     public string AccountNameDisplay =>
         string.IsNullOrWhiteSpace(AccountDetails?.AccountName) ? "-" : AccountDetails.AccountName;
     public string DenominationDisplay =>

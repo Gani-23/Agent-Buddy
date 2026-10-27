@@ -127,6 +127,17 @@
                         <WrapPanel Grid.Column="0"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Left">
+                            <!-- Global Entry Mode Selector (Left of Add List) -->
+                            <ComboBox Width="150"
+                                      Height="30"
+                                      MinHeight="30"
+                                      Classes="ModeSelector"
+                                      ItemsSource="{Binding AvailableEntryModes}"
+                                      SelectedItem="{Binding SelectedEntryMode}"
+                                      Margin="0,0,6,0"
+                                      VerticalAlignment="Center"
+                                      ToolTip.Tip="Global Entry Mode for All Lists (⚡ Short Code or Manual No)"/>
+
                             <Button Classes="Primary" 
                                     Command="{Binding AddNewListCommand}"
                                     IsEnabled="{Binding CanEditLists}"
@@ -550,12 +561,13 @@
                                             Background="{DynamicResource AppHoverBrush}"
                                             CornerRadius="6"
                                             Padding="6">
+                                        <!-- Field Inputs -->
                                         <Grid ColumnDefinitions="*,80" ColumnSpacing="6">
                                             <TextBox Text="{Binding PendingAccountNo, UpdateSourceTrigger=PropertyChanged}"
-                                                     PlaceholderText="{DynamicResource L_List_WatermarkAccountNo}"
+                                                     PlaceholderText="{Binding AccountInputWatermark}"
                                                      Tag="AccountInput"
                                                      IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
-                                                     MaxLength="12"
+                                                     MaxLength="{Binding AccountInputMaxLength}"
                                                      Padding="8,5"
                                                      MinHeight="32"
                                                      FontSize="12"
@@ -576,6 +588,20 @@
                                     </Border>
 
                                     <StackPanel Grid.Row="3" Spacing="2">
+                                        <!-- Customer / Short code preview -->
+                                        <Border IsVisible="{Binding HasShortCodePreview}"
+                                                Padding="6,3"
+                                                CornerRadius="4"
+                                                Background="{DynamicResource AppCardBackgroundBrush}"
+                                                BorderBrush="{DynamicResource AppBorderBrush}"
+                                                BorderThickness="1">
+                                            <TextBlock Text="{Binding ShortCodePreviewText}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{Binding ShortCodePreviewForeground}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </Border>
+
                                         <TextBlock Text="{DynamicResource L_List_EnterHint}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -668,11 +694,26 @@
                                                                     Background="{DynamicResource ListDuplicateBorderBrush}"
                                                                     IsVisible="{Binding IsDuplicateFocus}"/>
                                                             <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding AccountNo}" 
-                                                                           FontFamily="{StaticResource AppMonoFontFamily}"
-                                                                           FontSize="12"
-                                                                           TextTrimming="CharacterEllipsis"
-                                                                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                                    <Border IsVisible="{Binding HasShortCode}"
+                                                                            Background="{DynamicResource InfoTintBrush}"
+                                                                            CornerRadius="3"
+                                                                            Padding="4,0"
+                                                                            Height="16"
+                                                                            VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding ShortCodeDisplay}"
+                                                                                   FontSize="10"
+                                                                                   FontWeight="Bold"
+                                                                                   Foreground="{StaticResource AccentBlueBrush}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                    <TextBlock Text="{Binding AccountNo}" 
+                                                                               FontFamily="{StaticResource AppMonoFontFamily}"
+                                                                               FontSize="12"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                                               VerticalAlignment="Center"/>
+                                                                </StackPanel>
                                                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
                                                                     <TextBlock Grid.Column="0"
                                                                                Text="{Binding NextInstallmentDateDisplay, StringFormat='Due: {0}'}"
@@ -693,6 +734,10 @@
                                                                             Padding="10"
                                                                             MaxWidth="320">
                                                                         <StackPanel Spacing="4">
+                                                                            <TextBlock Text="{Binding ShortCodeDisplay, StringFormat='Short Code: {0}'}"
+                                                                                       IsVisible="{Binding HasShortCode}"
+                                                                                       FontWeight="Bold"
+                                                                                       Foreground="{StaticResource AccentBlueBrush}"/>
                                                                             <TextBlock Text="{Binding AccountNo, StringFormat='Account: {0}'}"
                                                                                         FontWeight="SemiBold"/>
                                                                             <TextBlock Text="{Binding AccountNameDisplay, StringFormat='Name: {0}'}"/>

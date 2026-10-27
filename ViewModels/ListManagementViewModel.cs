@@ -10,12 +10,19 @@ using System.Reactive.Threading.Tasks;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using Avalonia.Threading;
 using AgentBuddy.Models;
 using AgentBuddy.Services;
 using ReactiveUI;
 
 namespace AgentBuddy.ViewModels;
+
+public enum AccountEntryMode
+{
+    ShortCode,
+    Manual
+}
 
 public enum ListRunState
 {
@@ -71,6 +78,7 @@ public class ListPanelViewModel : ReactiveObject
     private string _entryMessage = string.Empty;
     private EntryMessageTone _entryMessageTone = EntryMessageTone.Neutral;
     private ListRunState _runState = ListRunState.Pending;
+    private string _customStatusText = string.Empty;
     private string _referenceNumber = string.Empty;
     private string _failureReason = string.Empty;
     private bool _isInstallmentSuggestionActive;
@@ -82,6 +90,9 @@ public class ListPanelViewModel : ReactiveObject
     private string _selectedPaymentMode = "Cash";
     private string _lastProcessedPaymentMode = "Cash";
     private bool _isDuplicateFocus;
+    private AccountEntryMode _entryMode = AccountEntryMode.ShortCode;
+    private string _shortCodePreviewText = string.Empty;
+    private bool _isShortCodePreviewError;
     public event Action? StateChanged;
     public event Action? ContentChanged;
 
@@ -109,6 +120,8 @@ public class ListPanelViewModel : ReactiveObject
         AddPendingAccountCommand = ReactiveCommand.CreateFromTask(async () => { await SubmitPendingAsync(); });
         RemoveAccountCommand = ReactiveCommand.Create<ListItem?>(RemoveAccount);
         ClearCommand = ReactiveCommand.Create(Clear);
+        SwitchToShortCodeModeCommand = ReactiveCommand.Create(() => { EntryMode = AccountEntryMode.ShortCode; });
+        SwitchToManualModeCommand = ReactiveCommand.Create(() => { EntryMode = AccountEntryMode.Manual; });
     }
 
     public int ListNumber
@@ -244,7 +257,9 @@ public class ListPanelViewModel : ReactiveObject
     }
 
     public string StatusTag => RunState.ToString();
-    public string StatusText => RunState switch
+    public string StatusText => !string.IsNullOrWhiteSpace(_customStatusText) && RunState == ListRunState.Processing
+        ? _customStatusText
+        : RunState switch
     {
         ListRunState.Pending => "Pending",
         ListRunState.Processing => "Processing",
@@ -275,6 +290,73 @@ public class ListPanelViewModel : ReactiveObject
     public string InstallmentInputTag => IsInstallmentSuggestionActive ? "InstallmentSuggested" : "InstallmentInput";
     public string InstallmentSuggestionHint => _installmentSuggestionHint;
     public bool HasInstallmentSuggestionHint => !string.IsNullOrWhiteSpace(InstallmentSuggestionHint);
+
+    public AccountEntryMode EntryMode
+    {
+        get => _entryMode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _entryMode, value);
+            this.RaisePropertyChanged(nameof(IsShortCodeEntryMode));
+            this.RaisePropertyChanged(nameof(IsManualEntryMode));
+            this.RaisePropertyChanged(nameof(AccountInputWatermark));
+            this.RaisePropertyChanged(nameof(AccountInputMaxLength));
+            _ = RefreshInstallmentSuggestionAsync(PendingAccountNo);
+        }
+    }
+
+    public bool IsShortCodeEntryMode
+    {
+        get => _entryMode == AccountEntryMode.ShortCode;
+        set
+        {
+            if (value) EntryMode = AccountEntryMode.ShortCode;
+        }
+    }
+
+    public bool IsManualEntryMode
+    {
+        get => _entryMode == AccountEntryMode.Manual;
+        set
+        {
+            if (value) EntryMode = AccountEntryMode.Manual;
+        }
+    }
+
+    public string AccountInputWatermark => IsShortCodeEntryMode
+        ? "Short code (e.g. 5 or 5_2)"
+        : "10 or 12 digit account no";
+
+    public int AccountInputMaxLength => IsShortCodeEntryMode ? 14 : 12;
+
+    public string ShortCodePreviewText
+    {
+        get => _shortCodePreviewText;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _shortCodePreviewText, value);
+            this.RaisePropertyChanged(nameof(HasShortCodePreview));
+        }
+    }
+
+    public bool HasShortCodePreview => !string.IsNullOrWhiteSpace(_shortCodePreviewText);
+
+    public bool IsShortCodePreviewError
+    {
+        get => _isShortCodePreviewError;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isShortCodePreviewError, value);
+            this.RaisePropertyChanged(nameof(ShortCodePreviewForeground));
+        }
+    }
+
+    public IBrush ShortCodePreviewForeground => _isShortCodePreviewError
+        ? (IBrush)new SolidColorBrush(Color.Parse("#D94848"))
+        : (IBrush)new SolidColorBrush(Color.Parse("#1F8A62"));
+
+    public ReactiveCommand<Unit, Unit> SwitchToShortCodeModeCommand { get; }
+    public ReactiveCommand<Unit, Unit> SwitchToManualModeCommand { get; }
 
     public ObservableCollection<ListItem> Items { get; }
 
@@ -459,37 +541,54 @@ public class ListPanelViewModel : ReactiveObject
 
     public void MarkPending()
     {
+        _customStatusText = string.Empty;
         RunState = ListRunState.Pending;
         ReferenceNumber = string.Empty;
         FailureReason = string.Empty;
         ResetProcessingMarkers();
+        this.RaisePropertyChanged(nameof(StatusText));
         RefreshDisplayName();
     }
 
     public void MarkProcessing()
     {
+        _customStatusText = string.Empty;
         RunState = ListRunState.Processing;
         FailureReason = string.Empty;
+        this.RaisePropertyChanged(nameof(StatusText));
+        RefreshDisplayName();
+    }
+
+    public void MarkRetrying(int attempt, string reason)
+    {
+        RunState = ListRunState.Processing;
+        _customStatusText = $"Retrying (Attempt {attempt})...";
+        FailureReason = string.Empty;
+        this.RaisePropertyChanged(nameof(StatusText));
         RefreshDisplayName();
     }
 
     public void MarkSuccess(string referenceNumber)
     {
+        _customStatusText = string.Empty;
         ReferenceNumber = (referenceNumber ?? string.Empty).Trim();
         FailureReason = string.Empty;
         RunState = ListRunState.Success;
         MarkAllAccountsProcessed();
         _lastProcessedSignature = GetPayloadSignature();
         _lastProcessedPaymentMode = SelectedPaymentMode;
+        this.RaisePropertyChanged(nameof(StatusText));
         RefreshDisplayName();
     }
 
     public void MarkFailed(string reason)
     {
+        _customStatusText = string.Empty;
         FailureReason = string.IsNullOrWhiteSpace(reason) ? "Processing failed." : reason.Trim();
         RunState = ListRunState.Failed;
         _lastProcessedSignature = GetPayloadSignature();
         _lastProcessedPaymentMode = SelectedPaymentMode;
+        this.RaisePropertyChanged(nameof(StatusText));
         RefreshDisplayName();
     }
 
@@ -561,17 +660,75 @@ public class ListPanelViewModel : ReactiveObject
 
     private async Task<bool> AddPendingAccountAsync()
     {
-        var accountNo = PendingAccountNo.Trim();
-        var installment = ParseInstallment(PendingInstallmentText);
+        var rawInput = PendingAccountNo.Trim();
+        if (string.IsNullOrWhiteSpace(rawInput))
+        {
+            SetEntryErrorMessage("Enter an account number or short code.");
+            return false;
+        }
+
+        string accountNoToSubmit;
+        int installmentToSubmit = ParseInstallment(PendingInstallmentText);
+
+        // Check if input has compound format like "5_2" or "5/2" or "5 2"
+        string identifier = rawInput;
+        var parts = rawInput.Split(new[] { '_', '/', '-', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 2 && int.TryParse(parts[1], out var parsedInst) && parsedInst > 0)
+        {
+            identifier = parts[0];
+            installmentToSubmit = parsedInst;
+        }
+
+        identifier = identifier.TrimStart('#').Trim();
+
+        if (IsShortCodeEntryMode)
+        {
+            if (identifier.Length >= 10 && identifier.All(char.IsDigit))
+            {
+                accountNoToSubmit = identifier;
+            }
+            else
+            {
+                var acct = await _databaseService.GetAccountByShortCodeAsync(identifier);
+                if (acct == null)
+                {
+                    SetEntryErrorMessage($"Short code #{identifier} not found in database.");
+                    return false;
+                }
+
+                if (!acct.IsActive ||
+                    string.Equals(acct.Status, "closed", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(acct.Status, "matured", StringComparison.OrdinalIgnoreCase))
+                {
+                    SetEntryErrorMessage($"#{identifier} ({acct.AccountName} - {acct.AccountNo}) is closed/matured and cannot be added.");
+                    return false;
+                }
+
+                accountNoToSubmit = acct.AccountNo;
+            }
+        }
+        else
+        {
+            if (rawInput.StartsWith("#") || identifier.Length < 6)
+            {
+                var acct = await _databaseService.GetAccountByShortCodeAsync(identifier);
+                accountNoToSubmit = acct?.AccountNo ?? identifier;
+            }
+            else
+            {
+                accountNoToSubmit = identifier;
+            }
+        }
 
         var wasAdded = _addAccountHandler != null
-            ? await _addAccountHandler(this, accountNo, installment)
-            : await AddAccountWithInstallmentAsync(accountNo, installment);
+            ? await _addAccountHandler(this, accountNoToSubmit, installmentToSubmit)
+            : await AddAccountWithInstallmentAsync(accountNoToSubmit, installmentToSubmit);
 
         if (wasAdded)
         {
             PendingAccountNo = string.Empty;
             PendingInstallmentText = "1";
+            ShortCodePreviewText = string.Empty;
         }
 
         return wasAdded;
@@ -602,9 +759,13 @@ public class ListPanelViewModel : ReactiveObject
         };
     }
 
-    private static string NormalizeAccountInput(string? value)
+    private string NormalizeAccountInput(string? value)
     {
         var input = value ?? string.Empty;
+        if (IsShortCodeEntryMode)
+        {
+            return new string(input.Where(c => char.IsDigit(c) || c == '#' || c == '_' || c == '/' || c == '-' || c == ' ').Take(14).ToArray());
+        }
         return new string(input.Where(char.IsDigit).Take(12).ToArray());
     }
 
@@ -630,20 +791,53 @@ public class ListPanelViewModel : ReactiveObject
         return int.TryParse(text, out var parsed) && parsed > 0 ? parsed : 1;
     }
 
-    private async Task RefreshInstallmentSuggestionAsync(string accountNo)
+    private async Task RefreshInstallmentSuggestionAsync(string rawInput)
     {
         var requestId = ++_installmentSuggestionRequestId;
-        // Support both 10-digit and 12-digit account numbers.
-        if (string.IsNullOrWhiteSpace(accountNo) || accountNo.Length < 10)
+        var trimmed = (rawInput ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
         {
+            ShortCodePreviewText = string.Empty;
             ClearInstallmentSuggestion(resetInstallmentValue: true);
             return;
         }
 
-        RDAccount? account;
+        string identifier = trimmed;
+        int? compoundInstallment = null;
+        var parts = trimmed.Split(new[] { '_', '/', '-', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 2 && int.TryParse(parts[1], out var parsedComp) && parsedComp > 0)
+        {
+            identifier = parts[0];
+            compoundInstallment = parsedComp;
+        }
+
+        identifier = identifier.TrimStart('#').Trim();
+
+        RDAccount? account = null;
         try
         {
-            account = await _databaseService.GetAccountByNumberAsync(accountNo);
+            if (IsShortCodeEntryMode)
+            {
+                if (identifier.Length >= 10 && identifier.All(char.IsDigit))
+                {
+                    account = await _databaseService.GetAccountByNumberAsync(identifier);
+                }
+                else
+                {
+                    account = await _databaseService.GetAccountByShortCodeAsync(identifier);
+                }
+            }
+            else
+            {
+                if (identifier.Length >= 10 && identifier.All(char.IsDigit))
+                {
+                    account = await _databaseService.GetAccountByNumberAsync(identifier);
+                }
+                else if (trimmed.StartsWith("#"))
+                {
+                    account = await _databaseService.GetAccountByShortCodeAsync(identifier);
+                }
+            }
         }
         catch
         {
@@ -655,31 +849,66 @@ public class ListPanelViewModel : ReactiveObject
             return;
         }
 
-        if (account == null || !account.IsActive)
+        if (account == null)
         {
-            ClearInstallmentSuggestion(resetInstallmentValue: true);
+            if (IsShortCodeEntryMode && !string.IsNullOrWhiteSpace(identifier))
+            {
+                ShortCodePreviewText = $"#{identifier} not found";
+                IsShortCodePreviewError = true;
+            }
+            else
+            {
+                ShortCodePreviewText = string.Empty;
+            }
+            ClearInstallmentSuggestion(resetInstallmentValue: compoundInstallment == null);
             return;
+        }
+
+        var codeLabel = !string.IsNullOrWhiteSpace(account.ShortCode) ? $"#{account.ShortCode}" : account.AccountNo;
+        if (!account.IsActive ||
+            string.Equals(account.Status, "closed", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(account.Status, "matured", StringComparison.OrdinalIgnoreCase))
+        {
+            ShortCodePreviewText = $"⚠️ {codeLabel}: {account.AccountName} ({account.AccountNo}) is closed/matured";
+            IsShortCodePreviewError = true;
+            ClearInstallmentSuggestion(resetInstallmentValue: compoundInstallment == null);
+            return;
+        }
+
+        ShortCodePreviewText = $"✓ {codeLabel}: {account.AccountName} · ₹{account.GetAmount():N0} (Due: {account.NextInstallmentDate})";
+        IsShortCodePreviewError = false;
+
+        if (compoundInstallment.HasValue)
+        {
+            _isApplyingInstallmentSuggestion = true;
+            PendingInstallmentText = compoundInstallment.Value.ToString(CultureInfo.InvariantCulture);
+            _isApplyingInstallmentSuggestion = false;
         }
 
         var suggestedInstallments = account.GetPendingInstallmentsTill(DateTime.Today);
         _suggestedInstallment = suggestedInstallments;
         if (suggestedInstallments <= 1)
         {
-            ClearInstallmentSuggestion(resetInstallmentValue: true);
+            if (!compoundInstallment.HasValue)
+            {
+                ClearInstallmentSuggestion(resetInstallmentValue: false);
+            }
             return;
         }
 
-        _installmentSuggestionHint =
-            $"Suggested to clear dues: {suggestedInstallments}. Edit if needed.";
+        _installmentSuggestionHint = $"Suggested to clear dues: {suggestedInstallments}. Edit if needed.";
         this.RaisePropertyChanged(nameof(InstallmentSuggestionHint));
         this.RaisePropertyChanged(nameof(HasInstallmentSuggestionHint));
 
-        var currentInstallment = ParseInstallment(PendingInstallmentText);
-        if (currentInstallment <= 1 || IsInstallmentSuggestionActive)
+        if (!compoundInstallment.HasValue)
         {
-            _isApplyingInstallmentSuggestion = true;
-            PendingInstallmentText = suggestedInstallments.ToString(CultureInfo.InvariantCulture);
-            _isApplyingInstallmentSuggestion = false;
+            var currentInstallment = ParseInstallment(PendingInstallmentText);
+            if (currentInstallment <= 1 || IsInstallmentSuggestionActive)
+            {
+                _isApplyingInstallmentSuggestion = true;
+                PendingInstallmentText = suggestedInstallments.ToString(CultureInfo.InvariantCulture);
+                _isApplyingInstallmentSuggestion = false;
+            }
         }
 
         SetInstallmentSuggestionState(ParseInstallment(PendingInstallmentText) == suggestedInstallments);
@@ -773,6 +1002,10 @@ public class ListManagementViewModel : ViewModelBase
 
     private static readonly Regex ProcessingListRegex = new(
         @"PROCESSING LIST #\s*(\d+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static readonly Regex RetryingListRegex = new(
+        @"Retrying list #\s*(\d+)\s*(?:\(attempt\s*(\d+)\))?:\s*(.+)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex ReferenceRegex = new(
@@ -1039,6 +1272,48 @@ public class ListManagementViewModel : ViewModelBase
     public Interaction<AslaasPromptRequest, string?> AslaasPrompt { get; } = new();
     public Interaction<DopChequePromptRequest, DopChequePromptResult?> DopChequePrompt { get; } = new();
     public Interaction<ConfirmDialogRequest, bool> ConfirmPrompt { get; } = new();
+
+    public static readonly string[] EntryModeOptions =
+    {
+        "⚡ Short Code",
+        "Manual Account No"
+    };
+
+    public IReadOnlyList<string> AvailableEntryModes => EntryModeOptions;
+
+    private string _selectedEntryMode = "⚡ Short Code";
+    public string SelectedEntryMode
+    {
+        get => _selectedEntryMode;
+        set
+        {
+            if (string.Equals(_selectedEntryMode, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _selectedEntryMode, value);
+            var mode = string.Equals(value, "Manual Account No", StringComparison.Ordinal)
+                ? AccountEntryMode.Manual
+                : AccountEntryMode.ShortCode;
+
+            GlobalEntryMode = mode;
+        }
+    }
+
+    private AccountEntryMode _globalEntryMode = AccountEntryMode.ShortCode;
+    public AccountEntryMode GlobalEntryMode
+    {
+        get => _globalEntryMode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _globalEntryMode, value);
+            foreach (var list in Lists)
+            {
+                list.EntryMode = value;
+            }
+        }
+    }
     public Interaction<ConfirmListDialogRequest, bool> ConfirmListPrompt { get; } = new();
     public Interaction<DuplicateFocusRequest, Unit> DuplicateFocusPrompt { get; } = new();
     public Interaction<SavedLotTemplatesViewModel, Unit> ManageTemplatesPrompt { get; } = new();
@@ -2291,6 +2566,25 @@ public class ListManagementViewModel : ViewModelBase
                         return;
                     }
 
+                    var retryMatch = RetryingListRegex.Match(line);
+                    if (retryMatch.Success && int.TryParse(retryMatch.Groups[1].Value, out var retryIndex))
+                    {
+                        var attempt = 2;
+                        if (retryMatch.Groups[2].Success && int.TryParse(retryMatch.Groups[2].Value, out var parsedAttempt))
+                        {
+                            attempt = parsedAttempt;
+                        }
+                        var reason = retryMatch.Groups[3].Value.Trim();
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (indexedProcessableLists.TryGetValue(retryIndex, out var list))
+                            {
+                                list.MarkRetrying(attempt, reason);
+                            }
+                        });
+                        return;
+                    }
+
                     var accountProcessedMatch = AccountProcessedRegex.Match(line);
                     if (accountProcessedMatch.Success)
                     {
@@ -2429,10 +2723,13 @@ public class ListManagementViewModel : ViewModelBase
                 _notificationService?.Warning("Lists Partially Processed", $"Success: {completed}, Failed: {failed}.");
             }
 
-            if (failed == 0 && completed > 0)
+            if (completed > 0)
             {
                 await EnsureMissingReportsAsync();
+            }
 
+            if (failed == 0 && completed > 0)
+            {
                 var runReferences = GetAllSuccessReferences();
 
                 if (runReferences.Count > 0)
@@ -2442,7 +2739,7 @@ public class ListManagementViewModel : ViewModelBase
             }
             else if (failed > 0 && completed > 0)
             {
-                var message = "Some lists failed. Retry failed lists to enable printing and payslips.";
+                var message = "Some lists failed. Reports for completed lists have been saved. Retry failed lists to complete all.";
                 ProcessStatus = message;
                 AppendProcessingLog(message);
                 _notificationService?.Info("Printing On Hold", message);
@@ -2716,6 +3013,7 @@ public class ListManagementViewModel : ViewModelBase
             _validationService,
             (panel, accountNo, installment) => AddSingleAccountToListAsync(panel, accountNo, installment));
 
+        list.EntryMode = GlobalEntryMode;
         list.PropertyChanged += OnListPropertyChanged;
         list.StateChanged += OnListStateChanged;
         list.ContentChanged += OnListContentChanged;

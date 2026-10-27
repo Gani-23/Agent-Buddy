@@ -14,3 +14,6 @@ installer/staging/
 *.suo
 *.log
 .env*
+*.db
+*.db-shm
+*.db-wal

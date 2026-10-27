@@ -69,6 +69,45 @@ public class ValidationService
     }
 
     /// <summary>
+    /// Validate by short code
+    /// </summary>
+    public async Task<(AccountValidationStatus status, RDAccount? account)> ValidateShortCodeAsync(
+        string shortCode,
+        List<string> existingAccountsInLists)
+    {
+        var normalized = (shortCode ?? string.Empty).Trim().TrimStart('#').Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return (AccountValidationStatus.Invalid, null);
+        }
+
+        var account = await _databaseService.GetAccountByShortCodeAsync(normalized);
+        if (account == null)
+        {
+            return (AccountValidationStatus.Invalid, null);
+        }
+
+        if (IsMaturedCompletely(account))
+        {
+            return (AccountValidationStatus.Matured, account);
+        }
+
+        if (!account.IsActive || IsClosedStatus(account.Status))
+        {
+            return (AccountValidationStatus.Closed, account);
+        }
+
+        var isDuplicate = existingAccountsInLists.Any(existing =>
+            string.Equals(existing?.Trim(), account.AccountNo?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (isDuplicate)
+        {
+            return (AccountValidationStatus.Duplicate, account);
+        }
+
+        return (AccountValidationStatus.Valid, account);
+    }
+
+    /// <summary>
     /// Validate multiple account numbers
     /// </summary>
     public async Task<List<ListItem>> ValidateAccountsAsync(

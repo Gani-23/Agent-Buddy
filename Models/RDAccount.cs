@@ -21,6 +21,9 @@ public class RDAccount
     public string NextDueDateIso { get; set; } = string.Empty;
     public decimal TotalDeposit { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string ShortCode { get; set; } = string.Empty;
+    public bool HasShortCode => !string.IsNullOrWhiteSpace(ShortCode);
+    public string ShortCodeDisplay => HasShortCode ? $"#{ShortCode}" : string.Empty;
     public DateTime FirstSeen { get; set; }
     public DateTime LastUpdated { get; set; }
     public bool IsActive { get; set; }
@@ -270,10 +273,15 @@ public class RDAccount
     }
 
     /// <summary>
-    /// Gets the short code (last 2 digits of account number, fallback to name)
+    /// Gets the short code (falls back to last 2 digits if database short code not set)
     /// </summary>
     public string GetShortCode()
     {
+        if (!string.IsNullOrWhiteSpace(ShortCode))
+        {
+            return ShortCode;
+        }
+
         if (!string.IsNullOrWhiteSpace(AccountNo))
         {
             var digits = new string(AccountNo.Where(char.IsDigit).ToArray());
@@ -295,6 +303,4 @@ public class RDAccount
 
         return AccountName.Substring(0, 2).ToUpper();
     }
-
-    public string ShortCode => GetShortCode();
 }

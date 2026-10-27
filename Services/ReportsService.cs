@@ -64,7 +64,37 @@ public class ReportsService
         }
         else
         {
-            _pythonCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "python" : "python3";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _pythonCommand = "python";
+            }
+            else
+            {
+                var candidatePaths = new[]
+                {
+                    "/Library/Frameworks/Python.framework/Versions/Current/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+                    "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
+                    "/usr/local/bin/python3",
+                    "/opt/homebrew/bin/python3",
+                    "/usr/bin/python3"
+                };
+
+                string? found = null;
+                foreach (var candidate in candidatePaths)
+                {
+                    if (File.Exists(candidate))
+                    {
+                        found = candidate;
+                        break;
+                    }
+                }
+
+                _pythonCommand = found ?? "python3";
+            }
         }
     }
 
@@ -1032,6 +1062,18 @@ public class ReportsService
             };
             process.StartInfo.Environment["PYTHONUTF8"] = "1";
             process.StartInfo.Environment["PYTHONIOENCODING"] = "utf-8";
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var existingPath = process.StartInfo.Environment.TryGetValue("PATH", out var currentPath)
+                    ? currentPath
+                    : Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+
+                var extraPaths = "/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/Library/Frameworks/Python.framework/Versions/3.12/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/Library/Frameworks/Python.framework/Versions/3.10/bin:/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin";
+                process.StartInfo.Environment["PATH"] = string.IsNullOrWhiteSpace(existingPath)
+                    ? extraPaths
+                    : $"{extraPaths}:{existingPath}";
+            }
 
             process.StartInfo.ArgumentList.Add(scriptPath);
             process.StartInfo.ArgumentList.Add("--refs-json");
