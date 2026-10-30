@@ -3,14 +3,18 @@ package com.gani.agentbuddy
 import android.content.Context
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
+import android.view.WindowManager
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -50,7 +54,19 @@ class MainActivity : ComponentActivity() {
                 var password by remember { mutableStateOf(savedPassword) }
                 var passwordVisible by remember { mutableStateOf(false) }
                 var isLoggingIn by remember { mutableStateOf(false) }
+                var showLiveWebView by remember { mutableStateOf(true) }
                 val syncState by syncManager.syncState.collectAsState()
+                val loadProgress by syncManager.loadProgress.collectAsState()
+
+                // Keep screen awake while sync dialog is open so sleep timer NEVER interrupts sync!
+                DisposableEffect(showPortalSyncDialog) {
+                    if (showPortalSyncDialog) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    onDispose {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     DashboardScreen(
@@ -68,11 +84,20 @@ class MainActivity : ComponentActivity() {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("DOP Portal Sync", style = MaterialTheme.typography.titleMedium)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text("India Post Portal Sync", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color(0xFFDCFCE7), RoundedCornerShape(6.dp))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text("Screen Awake", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF166534))
+                                        }
+                                    }
                                     IconButton(onClick = { 
                                         showPortalSyncDialog = false
                                         isLoggingIn = false
@@ -86,12 +111,12 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(20.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                        verticalArrangement = Arrangement.spacedBy(14.dp)
                                     ) {
                                         Text(
                                             "Enter credentials to sync latest RD schedule. On-device ML Kit will automatically read & solve the CAPTCHA.",
-                                            fontSize = 13.sp,
-                                            color = Color(0xFF6B7280)
+                                            fontSize = 14.sp,
+                                            color = Color(0xFF475569)
                                         )
 
                                         OutlinedTextField(
@@ -99,7 +124,8 @@ class MainActivity : ComponentActivity() {
                                             onValueChange = { agentId = it },
                                             label = { Text("Agent ID") },
                                             modifier = Modifier.fillMaxWidth(),
-                                            singleLine = true
+                                            singleLine = true,
+                                            shape = RoundedCornerShape(12.dp)
                                         )
 
                                         OutlinedTextField(
@@ -108,6 +134,7 @@ class MainActivity : ComponentActivity() {
                                             label = { Text("Password") },
                                             modifier = Modifier.fillMaxWidth(),
                                             singleLine = true,
+                                            shape = RoundedCornerShape(12.dp),
                                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                             trailingIcon = {
                                                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
@@ -126,9 +153,12 @@ class MainActivity : ComponentActivity() {
                                                 isLoggingIn = true 
                                             },
                                             enabled = agentId.isNotBlank() && password.isNotBlank(),
-                                            modifier = Modifier.fillMaxWidth()
+                                            shape = RoundedCornerShape(12.dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(50.dp)
                                         ) {
-                                            Text("Start Automatic Portal Sync")
+                                            Text("Start Automatic Portal Sync", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
                                 } else {
@@ -141,11 +171,11 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                     val statusText = when (syncState) {
-                                        is SyncState.Idle -> "Opening portal..."
-                                        is SyncState.LoadingPage -> "Loading DOP Agent page..."
-                                        is SyncState.SolvingCaptcha -> "Reading CAPTCHA with On-Device ML Kit OCR..."
-                                        is SyncState.Authenticating -> "Submitting login..."
-                                        is SyncState.NavigatingToAccounts -> "Navigating to Schedule Report..."
+                                        is SyncState.Idle -> "Opening India Post portal..."
+                                        is SyncState.LoadingPage -> "Loading portal (${loadProgress}%)..."
+                                        is SyncState.SolvingCaptcha -> "Reading CAPTCHA with ML Kit OCR..."
+                                        is SyncState.Authenticating -> "Submitting login credentials..."
+                                        is SyncState.NavigatingToAccounts -> "Navigating to Accounts & Schedule..."
                                         is SyncState.ScrapingAccounts -> (syncState as SyncState.ScrapingAccounts).progressText
                                         is SyncState.Success -> "✓ Synced ${(syncState as SyncState.Success).count} accounts!"
                                         is SyncState.Error -> "Error: ${(syncState as SyncState.Error).message}"
@@ -154,18 +184,58 @@ class MainActivity : ComponentActivity() {
                                     var manualCaptcha by remember { mutableStateOf("") }
 
                                     Surface(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
                                         color = Color(0xFFEFF6FF),
-                                        shape = MaterialTheme.shapes.medium
+                                        shape = RoundedCornerShape(14.dp)
                                     ) {
-                                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Text(
-                                                text = statusText,
-                                                color = Color(0xFF1E40AF),
-                                                fontSize = 13.sp,
-                                                fontWeight = FontWeight.Medium
-                                            )
+                                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = statusText,
+                                                    color = Color(0xFF1E40AF),
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                IconButton(
+                                                    onClick = { showLiveWebView = !showLiveWebView },
+                                                    modifier = Modifier.size(28.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Language,
+                                                        contentDescription = "Toggle Portal View",
+                                                        tint = Color(0xFF2563EB),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+                                            }
 
+                                            // Linear Progress Bar
+                                            if (loadProgress in 1..99) {
+                                                LinearProgressIndicator(
+                                                    progress = { loadProgress / 100f },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(5.dp),
+                                                    color = Color(0xFF2563EB),
+                                                    trackColor = Color(0xFFDBEAFE)
+                                                )
+                                            } else if (syncState is SyncState.Authenticating || syncState is SyncState.ScrapingAccounts) {
+                                                LinearProgressIndicator(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(5.dp),
+                                                    color = Color(0xFF2563EB),
+                                                    trackColor = Color(0xFFDBEAFE)
+                                                )
+                                            }
+
+                                            // Manual CAPTCHA override if needed
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -174,9 +244,10 @@ class MainActivity : ComponentActivity() {
                                                 OutlinedTextField(
                                                     value = manualCaptcha,
                                                     onValueChange = { manualCaptcha = it },
-                                                    placeholder = { Text("Verify CAPTCHA", fontSize = 12.sp) },
+                                                    placeholder = { Text("Manual CAPTCHA override", fontSize = 13.sp) },
                                                     modifier = Modifier.weight(1f),
                                                     singleLine = true,
+                                                    shape = RoundedCornerShape(10.dp),
                                                     colors = OutlinedTextFieldDefaults.colors(
                                                         focusedContainerColor = Color.White,
                                                         unfocusedContainerColor = Color.White
@@ -189,7 +260,8 @@ class MainActivity : ComponentActivity() {
                                                             syncManager.submitLogin(manualCaptcha.trim())
                                                         }
                                                     },
-                                                    enabled = manualCaptcha.isNotBlank()
+                                                    enabled = manualCaptcha.isNotBlank(),
+                                                    shape = RoundedCornerShape(10.dp)
                                                 ) {
                                                     Text("Submit")
                                                 }
@@ -205,16 +277,52 @@ class MainActivity : ComponentActivity() {
 
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    // Embedded WebView where portal loads and DOM scripts execute
-                                    AndroidView(
-                                        modifier = Modifier.fillMaxSize(),
-                                        factory = { context ->
-                                            WebView(context).apply {
-                                                syncManager.attachWebView(this, agentId, password)
-                                                loadUrl("https://dopagent.indiapost.gov.in")
+                                    // WebView Container with Loading Placeholder (No Blank White Screen!)
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        AndroidView(
+                                            modifier = Modifier.fillMaxSize(),
+                                            factory = { context ->
+                                                WebView(context).apply {
+                                                    syncManager.attachWebView(this, agentId, password)
+                                                    loadUrl("https://dopagent.indiapost.gov.in")
+                                                }
+                                            }
+                                        )
+
+                                        // Overlaid loading state so user never sees a bare white screen
+                                        if (loadProgress < 80 && syncState !is SyncState.ScrapingAccounts && syncState !is SyncState.Success) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(Color(0xFFF8FAFC)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                                                    modifier = Modifier.padding(24.dp)
+                                                ) {
+                                                    CircularProgressIndicator(
+                                                        color = Color(0xFF2563EB),
+                                                        strokeWidth = 3.5.dp,
+                                                        modifier = Modifier.size(44.dp)
+                                                    )
+                                                    Text(
+                                                        text = "Connecting to India Post...",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 16.sp,
+                                                        color = Color(0xFF0F172A)
+                                                    )
+                                                    Text(
+                                                        text = "Loading portal resources (${loadProgress}%)\nScreen is locked awake to prevent interruption.",
+                                                        fontSize = 13.sp,
+                                                        color = Color(0xFF64748B),
+                                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                                    )
+                                                }
                                             }
                                         }
-                                    )
+                                    }
                                 }
                             }
                         }

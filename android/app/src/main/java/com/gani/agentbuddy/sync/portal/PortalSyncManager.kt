@@ -34,19 +34,28 @@ class PortalSyncManager(
     private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
     val syncState: StateFlow<SyncState> = _syncState
 
+    private val _loadProgress = MutableStateFlow(0)
+    val loadProgress: StateFlow<Int> = _loadProgress
+
     private var targetWebView: WebView? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     fun attachWebView(webView: WebView, agentId: String, accessCode: String) {
         targetWebView = webView
+        webView.setBackgroundColor(android.graphics.Color.WHITE)
+        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
-            databaseEnabled = true
             useWideViewPort = true
             loadWithOverviewMode = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            cacheMode = WebSettings.LOAD_DEFAULT
+            loadsImagesAutomatically = true
             userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            setSupportZoom(true)
+            builtInZoomControls = false
+            displayZoomControls = false
         }
 
         val jsBridge = PortalJsBridge(agentId, accessCode)
@@ -54,8 +63,13 @@ class PortalSyncManager(
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                if (newProgress < 100 && _syncState.value is SyncState.Idle) {
+                _loadProgress.value = newProgress
+                if (newProgress in 1..99 && _syncState.value is SyncState.Idle) {
                     _syncState.value = SyncState.LoadingPage
+                }
+                // Check DOM state early once progress passes 60% so we don't wait for lagging external images
+                if (newProgress >= 60 && agentId.isNotBlank()) {
+                    handlePageLifecycle(agentId, accessCode)
                 }
             }
         }
@@ -77,7 +91,7 @@ class PortalSyncManager(
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 val currentUrl = url?.lowercase() ?: ""
-                if (currentUrl.contains("dopagent.indiapost.gov.in")) {
+                if (currentUrl.contains("dopagent.indiapost.gov.in") && agentId.isNotBlank()) {
                     handlePageLifecycle(agentId, accessCode)
                 }
             }
@@ -91,6 +105,10 @@ class PortalSyncManager(
                 var userField = document.getElementsByName('AuthenticationFG.USER_PRINCIPAL')[0];
                 var captchaImg = document.getElementById('IMAGECAPTCHA');
                 if (userField && captchaImg) {
+                    var alreadySent = sessionStorage.getItem('agentbuddy_captcha_sent') === 'true';
+                    if (alreadySent) return;
+                    sessionStorage.setItem('agentbuddy_captcha_sent', 'true');
+
                     userField.value = '$agentId';
                     var passField = document.getElementsByName('AuthenticationFG.ACCESS_CODE')[0];
                     if (passField) passField.value = '$accessCode';

@@ -54,4 +54,10 @@ data class RDAccount(
 
     @ColumnInfo(name = "short_code")
     val shortCode: String? = null
-)
+) {
+    val numericAmount: Long
+        get() = if (amount > 0) amount else denomination.replace("Cr.", "", ignoreCase = true).replace(",", "").trim().toLongOrNull() ?: 0L
+
+    val cleanDenomination: String
+        get() = "₹%,d".format(numericAmount)
+}

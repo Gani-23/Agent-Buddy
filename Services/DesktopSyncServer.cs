@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -11,14 +13,14 @@ using System.Threading.Tasks;
 namespace AgentBuddy.Services;
 
 /// <summary>
-/// Lightweight local Wi-Fi / Hotspot HTTP server to sync Account IDs & Short Codes to the Android app.
+/// Lightweight local Wi-Fi / Hotspot HTTP server to sync Account data & IDs to the Android app.
 /// </summary>
 public sealed class DesktopSyncServer : IDisposable
 {
     private HttpListener? _listener;
     private CancellationTokenSource? _cts;
     private readonly DatabaseService _databaseService;
-    private const int DefaultPort = 5055;
+    public const int DefaultPort = 5055;
 
     public DesktopSyncServer(DatabaseService databaseService)
     {
@@ -28,10 +30,16 @@ public sealed class DesktopSyncServer : IDisposable
     public bool IsRunning => _listener?.IsListening == true;
 
     public string? ServerUrl { get; private set; }
+    public string? AccountsUrl { get; private set; }
+    public string? LocalIp { get; private set; }
 
     public void Start(int port = DefaultPort)
     {
         if (IsRunning) return;
+
+        LocalIp = GetLocalIpAddress() ?? "127.0.0.1";
+        ServerUrl = $"http://{LocalIp}:{port}/";
+        AccountsUrl = $"http://{LocalIp}:{port}/accounts";
 
         try
         {
@@ -40,27 +48,25 @@ public sealed class DesktopSyncServer : IDisposable
             _listener.Start();
 
             _cts = new CancellationTokenSource();
-            var localIp = GetLocalIpAddress() ?? "127.0.0.1";
-            ServerUrl = $"http://{localIp}:{port}/ids";
-
             Task.Run(() => ListenLoopAsync(_cts.Token));
         }
         catch (Exception)
         {
-            // If wildcard fails due to permissions, fallback to localhost/direct IP
+            // If wildcard fails due to OS permissions, bind specifically to local IP
             try
             {
                 _listener = new HttpListener();
-                var localIp = GetLocalIpAddress() ?? "127.0.0.1";
-                _listener.Prefixes.Add($"http://{localIp}:{port}/");
+                _listener.Prefixes.Add($"http://{LocalIp}:{port}/");
+                _listener.Prefixes.Add($"http://localhost:{port}/");
                 _listener.Start();
+
                 _cts = new CancellationTokenSource();
-                ServerUrl = $"http://{localIp}:{port}/ids";
                 Task.Run(() => ListenLoopAsync(_cts.Token));
             }
-            catch
+            catch (Exception ex)
             {
                 Stop();
+                System.Diagnostics.Debug.WriteLine($"[DesktopSyncServer] Failed to start: {ex.Message}");
             }
         }
     }
@@ -79,6 +85,7 @@ public sealed class DesktopSyncServer : IDisposable
             _listener = null;
             _cts = null;
             ServerUrl = null;
+            AccountsUrl = null;
         }
     }
 
@@ -106,14 +113,72 @@ public sealed class DesktopSyncServer : IDisposable
     {
         try
         {
+            // Add CORS headers for web/mobile cross-origin requests
+            context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+            context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+
+            if (context.Request.HttpMethod == "OPTIONS")
+            {
+                context.Response.StatusCode = 200;
+                context.Response.Close();
+                return;
+            }
+
             var path = context.Request.Url?.AbsolutePath.TrimEnd('/').ToLowerInvariant() ?? "";
-            if (path == "/ids")
+            if (path == "/accounts" || path == "/sync")
+            {
+                var accounts = await _databaseService.GetAllAccountsAsync();
+                var dtoList = accounts.Select(a => new
+                {
+                    account_no = a.AccountNo,
+                    account_name = a.AccountName,
+                    aslaas_no = a.AslaasNo,
+                    denomination = a.Denomination,
+                    month_paid_upto = a.MonthPaidUpto,
+                    next_installment_date = a.NextInstallmentDate,
+                    amount = (long)a.Amount,
+                    month_paid_upto_num = a.MonthPaidUptoNumber,
+                    next_due_date_iso = a.NextDueDateIso,
+                    total_deposit = (long)a.TotalDeposit,
+                    status = a.Status,
+                    is_active = a.IsActive ? 1 : 0,
+                    short_code = a.ShortCode
+                }).ToList();
+
+                var json = JsonSerializer.Serialize(dtoList);
+                var bytes = Encoding.UTF8.GetBytes(json);
+
+                context.Response.ContentType = "application/json; charset=utf-8";
+                context.Response.StatusCode = 200;
+                context.Response.ContentLength64 = bytes.Length;
+                await context.Response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
+            }
+            else if (path == "/ids")
             {
                 var mappings = await _databaseService.GetAccountShortCodeMappingsAsync();
                 var json = JsonSerializer.Serialize(mappings);
                 var bytes = Encoding.UTF8.GetBytes(json);
 
-                context.Response.ContentType = "application/json";
+                context.Response.ContentType = "application/json; charset=utf-8";
+                context.Response.StatusCode = 200;
+                context.Response.ContentLength64 = bytes.Length;
+                await context.Response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
+            }
+            else if (path == "" || path == "/status")
+            {
+                var count = (await _databaseService.GetAllAccountsAsync()).Count;
+                var info = new
+                {
+                    service = "AgentBuddy Desktop Sync",
+                    status = "online",
+                    accounts_count = count,
+                    endpoints = new[] { "/accounts", "/ids", "/status" }
+                };
+                var json = JsonSerializer.Serialize(info);
+                var bytes = Encoding.UTF8.GetBytes(json);
+
+                context.Response.ContentType = "application/json; charset=utf-8";
                 context.Response.StatusCode = 200;
                 context.Response.ContentLength64 = bytes.Length;
                 await context.Response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
@@ -123,9 +188,17 @@ public sealed class DesktopSyncServer : IDisposable
                 context.Response.StatusCode = 404;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            context.Response.StatusCode = 500;
+            try
+            {
+                context.Response.StatusCode = 500;
+                var errBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { error = ex.Message }));
+                context.Response.ContentType = "application/json; charset=utf-8";
+                context.Response.ContentLength64 = errBytes.Length;
+                await context.Response.OutputStream.WriteAsync(errBytes, 0, errBytes.Length);
+            }
+            catch { }
         }
         finally
         {
@@ -133,7 +206,7 @@ public sealed class DesktopSyncServer : IDisposable
         }
     }
 
-    private static string? GetLocalIpAddress()
+    public static string? GetLocalIpAddress()
     {
         try
         {
@@ -145,7 +218,29 @@ public sealed class DesktopSyncServer : IDisposable
             }
         }
         catch { }
-        return null;
+
+        // Fallback: enumerate interfaces
+        try
+        {
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != OperationalStatus.Up ||
+                    ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+                    continue;
+
+                foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork &&
+                        !IPAddress.IsLoopback(ip.Address))
+                    {
+                        return ip.Address.ToString();
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return "127.0.0.1";
     }
 
     public void Dispose()

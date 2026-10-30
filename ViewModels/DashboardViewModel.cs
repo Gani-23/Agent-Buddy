@@ -32,6 +32,9 @@ public class DashboardViewModel : ViewModelBase
     private const string RdCertificateRenewalDateKey = "rd_certificate_renewal_date";
 
     private readonly DatabaseService _databaseService;
+    private readonly DesktopSyncServer? _desktopSyncServer;
+    public DatabaseService DatabaseService => _databaseService;
+    public DesktopSyncServer? DesktopSyncServer => _desktopSyncServer;
     private readonly MetricsCalculator _metricsCalculator;
     private readonly PythonService _pythonService;
     private readonly MobileSyncService _mobileSyncService;
@@ -116,9 +119,11 @@ public class DashboardViewModel : ViewModelBase
         PythonService pythonService,
         MobileSyncService mobileSyncService,
         NotificationService? notificationService = null,
-        IPortalAutomationService? portalAutomationService = null)
+        IPortalAutomationService? portalAutomationService = null,
+        DesktopSyncServer? desktopSyncServer = null)
     {
         _databaseService = databaseService;
+        _desktopSyncServer = desktopSyncServer;
         _metricsCalculator = metricsCalculator;
         _pythonService = pythonService;
         _mobileSyncService = mobileSyncService;

@@ -2,20 +2,38 @@ package com.gani.agentbuddy.sync.desktop
 
 import android.content.Context
 import com.gani.agentbuddy.data.local.AgentBuddyDatabase
+import com.gani.agentbuddy.data.model.RDAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 
 object DesktopIdSyncClient {
 
-    suspend fun syncIdsFromDesktopUrl(context: Context, desktopSyncUrl: String): Result<Int> = withContext(Dispatchers.IO) {
+    suspend fun syncIdsFromDesktopUrl(context: Context, rawInput: String): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val url = URL(desktopSyncUrl)
+            var urlString = rawInput.trim()
+            if (!urlString.startsWith("http://") && !urlString.startsWith("https://")) {
+                urlString = "http://$urlString"
+            }
+
+            // If user or QR just provided IP/host (e.g. 192.168.1.15:5055 or 192.168.1.15), add default port & path
+            try {
+                val uri = URI(urlString)
+                val host = uri.host ?: urlString.substringAfter("://").substringBefore(":")
+                val port = if (uri.port > 0) uri.port else 5055
+                val path = if (uri.path.isNullOrBlank() || uri.path == "/") "/accounts" else uri.path
+                urlString = "http://$host:$port$path"
+            } catch (_: Exception) { }
+
+            android.util.Log.i("DesktopSync", "Connecting to Desktop Sync URL: $urlString")
+
+            val url = URL(urlString)
             val connection = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 4000
-                readTimeout = 6000
+                connectTimeout = 5000
+                readTimeout = 12000
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
             }
@@ -25,25 +43,80 @@ object DesktopIdSyncClient {
             }
 
             val body = connection.inputStream.bufferedReader().use { it.readText() }
-            val array = JSONArray(body)
             val database = AgentBuddyDatabase.getDatabase(context)
             val dao = database.rdAccountDao()
 
-            var updatedCount = 0
-            for (i in 0 until array.length()) {
-                val item = array.getJSONObject(i)
-                val accountNo = item.optString("account_no", "").trim()
-                val shortCode = item.optString("short_code", "").trim()
-
-                if (accountNo.isNotEmpty() && shortCode.isNotEmpty()) {
-                    val rows = dao.updateShortCode(accountNo, shortCode)
-                    if (rows > 0) updatedCount++
+            if (body.trim().startsWith("[")) {
+                val array = JSONArray(body)
+                if (array.length() == 0) {
+                    return@withContext Result.success("Desktop server returned 0 records.")
                 }
-            }
 
-            Result.success(updatedCount)
+                val first = array.getJSONObject(0)
+                // If it contains full account fields (like account_name, denomination, or month_paid_upto)
+                if (first.has("account_name") || first.has("denomination") || first.has("month_paid_upto")) {
+                    val existingAccounts = dao.getAllAccountsList()
+                    val existingMap = existingAccounts.associateBy { it.accountNo }
+                    val accountsToUpsert = ArrayList<RDAccount>(array.length())
+
+                    for (i in 0 until array.length()) {
+                        val obj = array.getJSONObject(i)
+                        val accNo = obj.optString("account_no", "").trim()
+                        if (accNo.length >= 8) {
+                            val existing = existingMap[accNo]
+                            val shortCode = obj.optString("short_code", "").takeIf { it.isNotBlank() } ?: existing?.shortCode
+                            val amount = obj.optLong("amount", 0L).let {
+                                if (it > 0) it else parseDenomination(obj.optString("denomination", "0"))
+                            }
+                            val totalDep = obj.optLong("total_deposit", 0L)
+                            val monthNum = obj.optInt("month_paid_upto_num", 0)
+
+                            accountsToUpsert.add(
+                                RDAccount(
+                                    id = existing?.id ?: 0,
+                                    accountNo = accNo,
+                                    accountName = obj.optString("account_name", "").trim().ifEmpty { existing?.accountName ?: "" },
+                                    aslaasNo = obj.optString("aslaas_no", "").trim().ifEmpty { existing?.aslaasNo ?: "" },
+                                    denomination = obj.optString("denomination", "").ifEmpty { existing?.denomination ?: "0" },
+                                    monthPaidUpto = obj.optString("month_paid_upto", "").ifEmpty { existing?.monthPaidUpto ?: "" },
+                                    nextInstallmentDate = obj.optString("next_installment_date", "").ifEmpty { existing?.nextInstallmentDate ?: "" },
+                                    amount = amount,
+                                    monthPaidUptoNum = if (monthNum > 0) monthNum else (existing?.monthPaidUptoNum ?: 0),
+                                    nextDueDateIso = obj.optString("next_due_date_iso", "").ifEmpty { existing?.nextDueDateIso ?: "" },
+                                    totalDeposit = if (totalDep > 0) totalDep else (existing?.totalDeposit ?: 0L),
+                                    status = obj.optString("status", "active"),
+                                    isActive = obj.optInt("is_active", 1),
+                                    shortCode = shortCode
+                                )
+                            )
+                        }
+                    }
+
+                    dao.insertOrUpdateAll(accountsToUpsert)
+                    return@withContext Result.success("✓ Synced ${accountsToUpsert.size} accounts & IDs from Desktop!")
+                } else {
+                    // Fast short-code mapping
+                    var updated = 0
+                    for (i in 0 until array.length()) {
+                        val obj = array.getJSONObject(i)
+                        val accNo = obj.optString("account_no", "").trim()
+                        val shortCode = obj.optString("short_code", "").trim()
+                        if (accNo.isNotEmpty() && shortCode.isNotEmpty()) {
+                            val rows = dao.updateShortCode(accNo, shortCode)
+                            if (rows > 0) updated++
+                        }
+                    }
+                    return@withContext Result.success("✓ Updated $updated account IDs/short codes!")
+                }
+            } else {
+                return@withContext Result.failure(Exception("Unrecognized data format received from Desktop"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun parseDenomination(str: String): Long {
+        return str.replace("Cr.", "", ignoreCase = true).replace(",", "").trim().toLongOrNull() ?: 0L
     }
 }

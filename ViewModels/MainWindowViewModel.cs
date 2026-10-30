@@ -45,11 +45,14 @@ public class MainWindowViewModel : ViewModelBase
     private readonly MobileSyncService _mobileSyncService;
     private readonly LocalizationService _localizationService;
     private readonly UpdateService _updateService;
+    private readonly DesktopSyncServer _desktopSyncServer;
     private readonly IPortalAutomationService _portalAutomationService;
     private readonly CancellationTokenSource _updateCts = new();
     private string _latestVersion = string.Empty;
     private bool _isUpdateAvailable;
     private string? _updateReleaseUrl;
+
+    public DesktopSyncServer DesktopSyncServer => _desktopSyncServer;
 
     // View Models
     public DashboardViewModel DashboardViewModel { get; }
@@ -85,10 +88,12 @@ public class MainWindowViewModel : ViewModelBase
         _mobileSyncService = new MobileSyncService();
         _localizationService = new LocalizationService();
         _updateService = new UpdateService(_databaseService);
+        _desktopSyncServer = new DesktopSyncServer(_databaseService);
+        _desktopSyncServer.Start();
         _portalAutomationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? new DesktopPythonPortalAutomationService(_pythonService);
 
         // Initialize view models
-        DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService);
+        DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService, _desktopSyncServer);
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService, _portalAutomationService);
         FixedDepositViewModel = new FixedDepositViewModel(_databaseService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);

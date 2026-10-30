@@ -115,6 +115,15 @@
                                 </Grid>
                             </Button>
                             <Button Classes="Secondary"
+                                    Click="SyncMobileQr_Click"
+                                    Margin="0,0,8,0"
+                                    ToolTip.Tip="Sync accounts with Mobile app via Wi-Fi QR code">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_QrCode}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Sync Mobile (QR)" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
+                            <Button Classes="Secondary"
                                     Command="{Binding SyncToMobileCommand}"
                                     Margin="0,0,8,0"
                                     IsEnabled="{Binding !IsBusy}">

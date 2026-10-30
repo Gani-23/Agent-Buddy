@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        x:Class="AgentBuddy.Views.MobileQrSyncWindow"
+        x:DataType="vm:MobileQrSyncViewModel"
+        mc:Ignorable="d"
+        Width="520"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="Mobile App Wi-Fi Sync">
+
+    <Border Classes="DialogBackdrop" Padding="12">
+        <Border Classes="DialogSurface" Padding="24" CornerRadius="16">
+            <StackPanel Spacing="16">
+                <!-- Header -->
+                <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Classes="DialogDot" Background="#10B981" Width="8" Height="8" CornerRadius="4"/>
+                        <TextBlock Text="LOCAL WI-FI PAIRING" Classes="Kicker" Foreground="#10B981" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <TextBlock Text="Sync with AgentBuddy Mobile" Classes="DialogTitle" FontSize="20" FontWeight="Bold"/>
+                    <TextBlock Text="Open AgentBuddy on your phone, tap the QR scanner in top bar, and point your camera here."
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"
+                               FontSize="13"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- QR Code Box -->
+                <Border Background="White"
+                        CornerRadius="16"
+                        Padding="16"
+                        HorizontalAlignment="Center"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1">
+                    <Grid>
+                        <Image Source="{Binding QrBitmap}"
+                               Width="230"
+                               Height="230"/>
+                        <ProgressBar IsIndeterminate="True"
+                                     IsVisible="{Binding QrBitmap, Converter={x:Static ObjectConverters.IsNull}}"
+                                     Width="140"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- URL & Copy Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Sync Endpoint URL:"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding SyncUrl}"
+                                 IsReadOnly="True"
+                                 FontSize="13"
+                                 FontFamily="Monospace, Consolas"
+                                 VerticalContentAlignment="Center"/>
+                        <Button Grid.Column="1"
+                                Classes="Secondary"
+                                Click="CopyUrl_Click"
+                                Padding="14,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource Icon_Check}"
+                                          Width="12" Height="12"
+                                          IsVisible="{Binding IsCopied}"/>
+                                <TextBlock Text="{Binding IsCopied, Converter={x:Null}, FallbackValue='Copy', TargetNullValue='Copy'}">
+                                    <!-- Handled in Code-behind -->
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Status & Tips -->
+                <Border Background="{DynamicResource AppHoverBackgroundBrush}"
+                        CornerRadius="10"
+                        Padding="12,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
+                        <PathIcon Grid.Column="0"
+                                  Data="{StaticResource Icon_Info}"
+                                  Width="16" Height="16"
+                                  Foreground="#10B981"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding StatusMessage}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Action Button -->
+                <Grid Margin="0,4,0,0">
+                    <Button Classes="Primary"
+                            HorizontalAlignment="Right"
+                            Click="Close_Click"
+                            Padding="24,10">
+                        <TextBlock Text="Done" FontWeight="SemiBold"/>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Border>
+</Window>

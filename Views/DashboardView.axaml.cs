@@ -177,4 +177,23 @@ public partial class DashboardView : UserControl
         {
         }
     }
+
+    private async void SyncMobileQr_Click(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel?.DatabaseService is null)
+        {
+            return;
+        }
+
+        var window = new MobileQrSyncWindow(ViewModel.DatabaseService, ViewModel.DesktopSyncServer);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
 }
