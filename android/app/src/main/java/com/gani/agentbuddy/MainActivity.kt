@@ -1,6 +1,8 @@
 package com.gani.agentbuddy
 
+import android.content.Context
 import android.os.Bundle
+import android.text.method.PasswordTransformationMethod
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,11 +11,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -31,11 +37,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val prefs = getSharedPreferences("dop_credentials", Context.MODE_PRIVATE)
+        val savedAgentId = prefs.getString("agent_id", "") ?: ""
+        val savedPassword = prefs.getString("password", "") ?: ""
+
         setContent {
             MaterialTheme {
                 var showPortalSyncDialog by remember { mutableStateOf(false) }
-                var agentId by remember { mutableStateOf("") }
-                var password by remember { mutableStateOf("") }
+                var agentId by remember { mutableStateOf(savedAgentId) }
+                var password by remember { mutableStateOf(savedPassword) }
+                var passwordVisible by remember { mutableStateOf(false) }
                 var isLoggingIn by remember { mutableStateOf(false) }
                 val syncState by syncManager.syncState.collectAsState()
 
@@ -60,7 +71,10 @@ class MainActivity : ComponentActivity() {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text("DOP Portal Sync", style = MaterialTheme.typography.titleMedium)
-                                    IconButton(onClick = { showPortalSyncDialog = false }) {
+                                    IconButton(onClick = { 
+                                        showPortalSyncDialog = false
+                                        isLoggingIn = false
+                                    }) {
                                         Icon(Icons.Default.Close, contentDescription = "Close")
                                     }
                                 }
@@ -91,11 +105,24 @@ class MainActivity : ComponentActivity() {
                                             onValueChange = { password = it },
                                             label = { Text("Password") },
                                             modifier = Modifier.fillMaxWidth(),
-                                            singleLine = true
+                                            singleLine = true,
+                                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                            trailingIcon = {
+                                                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                                    Icon(image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                                                }
+                                            }
                                         )
 
                                         Button(
-                                            onClick = { isLoggingIn = true },
+                                            onClick = { 
+                                                prefs.edit()
+                                                    .putString("agent_id", agentId)
+                                                    .putString("password", password)
+                                                    .apply()
+                                                isLoggingIn = true 
+                                            },
                                             enabled = agentId.isNotBlank() && password.isNotBlank(),
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
