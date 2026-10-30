@@ -16,6 +16,9 @@ interface RDAccountDao {
     @Query("SELECT * FROM rd_accounts ORDER BY CAST(short_code AS INTEGER) ASC, account_no ASC")
     fun getAllAccounts(): Flow<List<RDAccount>>
 
+    @Query("SELECT * FROM rd_accounts")
+    suspend fun getAllAccountsList(): List<RDAccount>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAll(accounts: List<RDAccount>)
 

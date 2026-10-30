@@ -133,6 +133,13 @@ class MainActivity : ComponentActivity() {
                                     }
                                 } else {
                                     // Portal Sync Active: Live Status Banner
+                                    if (syncState is SyncState.Success) {
+                                        LaunchedEffect(Unit) {
+                                            kotlinx.coroutines.delay(1800)
+                                            showPortalSyncDialog = false
+                                        }
+                                    }
+
                                     val statusText = when (syncState) {
                                         is SyncState.Idle -> "Opening portal..."
                                         is SyncState.LoadingPage -> "Loading DOP Agent page..."
