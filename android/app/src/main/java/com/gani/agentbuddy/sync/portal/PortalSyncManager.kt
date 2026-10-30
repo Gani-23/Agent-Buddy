@@ -82,6 +82,13 @@ class PortalSyncManager(
         }
     }
 
+    fun retryExtractCaptcha(agentId: String, accessCode: String) {
+        _syncState.value = SyncState.SolvingCaptcha
+        targetWebView?.post {
+            injectLoginAutomation(agentId, accessCode)
+        }
+    }
+
     private fun injectLoginAutomation(agentId: String, accessCode: String) {
         val script = """
             (function() {
@@ -93,12 +100,19 @@ class PortalSyncManager(
                     userField.value = '$agentId';
                     passField.value = '$accessCode';
 
-                    // Draw rendered captcha onto canvas to extract exact base64
+                    // Zoom / Scale rendered captcha 3.5x onto canvas for clear OCR
+                    var scale = 3.5;
+                    var w = captchaImg.naturalWidth || captchaImg.width || 120;
+                    var h = captchaImg.naturalHeight || captchaImg.height || 35;
                     var canvas = document.createElement('canvas');
-                    canvas.width = captchaImg.naturalWidth || captchaImg.width;
-                    canvas.height = captchaImg.naturalHeight || captchaImg.height;
+                    canvas.width = Math.round(w * scale);
+                    canvas.height = Math.round(h * scale);
                     var ctx = canvas.getContext('2d');
-                    ctx.drawImage(captchaImg, 0, 0);
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(captchaImg, 0, 0, canvas.width, canvas.height);
 
                     var base64 = canvas.toDataURL('image/png');
                     AgentBuddyMobile.onCaptchaExtracted(base64);

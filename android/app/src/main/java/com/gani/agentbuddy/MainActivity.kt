@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -142,20 +144,59 @@ class MainActivity : ComponentActivity() {
                                         is SyncState.Error -> "Error: ${(syncState as SyncState.Error).message}"
                                     }
 
+                                    var manualCaptcha by remember { mutableStateOf("") }
+
                                     Surface(
                                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                                         color = Color(0xFFEFF6FF),
                                         shape = MaterialTheme.shapes.medium
                                     ) {
-                                        Text(
-                                            text = statusText,
-                                            modifier = Modifier.padding(12.dp),
-                                            color = Color(0xFF1E40AF),
-                                            fontSize = 13.sp
-                                        )
+                                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                text = statusText,
+                                                color = Color(0xFF1E40AF),
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                OutlinedTextField(
+                                                    value = manualCaptcha,
+                                                    onValueChange = { manualCaptcha = it },
+                                                    placeholder = { Text("Verify CAPTCHA", fontSize = 12.sp) },
+                                                    modifier = Modifier.weight(1f),
+                                                    singleLine = true,
+                                                    colors = OutlinedTextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.White,
+                                                        unfocusedContainerColor = Color.White
+                                                    )
+                                                )
+
+                                                Button(
+                                                    onClick = {
+                                                        if (manualCaptcha.isNotBlank()) {
+                                                            syncManager.submitLogin(manualCaptcha.trim())
+                                                        }
+                                                    },
+                                                    enabled = manualCaptcha.isNotBlank()
+                                                ) {
+                                                    Text("Submit")
+                                                }
+
+                                                IconButton(
+                                                    onClick = { syncManager.retryExtractCaptcha(agentId, password) }
+                                                ) {
+                                                    Icon(Icons.Default.Refresh, contentDescription = "Retry OCR", tint = Color(0xFF2563EB))
+                                                }
+                                            }
+                                        }
                                     }
 
-                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
 
                                     // Embedded WebView where portal loads and DOM scripts execute
                                     AndroidView(
