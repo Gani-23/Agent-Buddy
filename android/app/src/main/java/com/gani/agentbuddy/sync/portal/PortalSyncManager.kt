@@ -2,9 +2,8 @@ package com.gani.agentbuddy.sync.portal
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.net.http.SslError
+import android.webkit.*
 import com.gani.agentbuddy.data.local.AgentBuddyDatabase
 import com.gani.agentbuddy.data.model.RDAccount
 import kotlinx.coroutines.CoroutineScope
@@ -38,13 +37,41 @@ class PortalSyncManager(
     @SuppressLint("SetJavaScriptEnabled")
     fun attachWebView(webView: WebView, agentId: String, accessCode: String) {
         targetWebView = webView
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            databaseEnabled = true
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        }
 
         val jsBridge = PortalJsBridge(agentId, accessCode)
         webView.addJavascriptInterface(jsBridge, "AgentBuddyMobile")
 
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                if (newProgress < 100 && _syncState.value is SyncState.Idle) {
+                    _syncState.value = SyncState.LoadingPage
+                }
+            }
+        }
+
         webView.webViewClient = object : WebViewClient() {
+            @SuppressLint("WebViewClientOnReceivedSslError")
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                // Allow India Post government SSL certificate chains
+                handler?.proceed()
+            }
+
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                if (request?.isForMainFrame == true) {
+                    _syncState.value = SyncState.Error("Network error: ${error?.description}")
+                }
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 val currentUrl = url?.lowercase() ?: ""
