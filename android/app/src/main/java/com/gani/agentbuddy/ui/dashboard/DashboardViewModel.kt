@@ -119,18 +119,28 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         var aboutToMature = 0
         var newAcc = 0
 
-        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        val currentMonthYear = SimpleDateFormat("MMM-yyyy", Locale.ENGLISH).format(Date()).lowercase()
+        val calMonthEnd = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+        val monthEndDate = calMonthEnd.time
+
+        val cal30DaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -30) }.time
+        val cal60DaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -60) }.time
 
         for (acc in accounts) {
             val denom = acc.amount.takeIf { it > 0 } ?: acc.denomination.toLongOrNull() ?: 0L
             totalAmount += denom
 
             val dueDay = extractDueDay(acc.nextInstallmentDate)
-            val isPaidCurrentMonth = acc.monthPaidUpto.lowercase().contains(currentMonthYear)
+            val dueDate = parseDueDate(acc.nextInstallmentDate)
+            val isDepositedThisMonth = dueDate != null && dueDate.after(monthEndDate)
 
             if (dueDay in 1..15) {
-                if (isPaidCurrentMonth) {
+                if (isDepositedThisMonth) {
                     firstHalfDepositedCount++
                     firstHalfDepositedAmount += denom
                 } else {
@@ -138,7 +148,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     firstHalfPendingAmount += denom
                 }
             } else {
-                if (isPaidCurrentMonth) {
+                if (isDepositedThisMonth) {
                     secondHalfDepositedCount++
                     secondHalfDepositedAmount += denom
                 } else {
@@ -147,16 +157,20 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             }
 
-            // Segments estimation
+            // Segments calculation matching desktop
             val paidUptoNum = acc.monthPaidUptoNum
             if (paidUptoNum >= 60) {
                 matured++
-            } else if (paidUptoNum >= 54) {
+            } else if (paidUptoNum in 54..59) {
                 aboutToMature++
-            } else if (isPaidCurrentMonth) {
+            } else if (isDepositedThisMonth) {
                 upToDate++
-            } else {
+            } else if (dueDate != null && dueDate.after(cal30DaysAgo)) {
                 due1++
+            } else if (dueDate != null && dueDate.after(cal60DaysAgo)) {
+                due2++
+            } else {
+                due3Plus++
             }
         }
 
@@ -182,12 +196,34 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun filterBySegment(accounts: List<RDAccount>, segment: AccountSegment): List<RDAccount> {
-        val currentMonthYear = SimpleDateFormat("MMM-yyyy", Locale.ENGLISH).format(Date()).lowercase()
+        val calMonthEnd = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+        val monthEndDate = calMonthEnd.time
+        val cal30DaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -30) }.time
+        val cal60DaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -60) }.time
+
         return when (segment) {
-            AccountSegment.UP_TO_DATE -> accounts.filter { it.monthPaidUpto.lowercase().contains(currentMonthYear) }
-            AccountSegment.DUE_1_MONTH -> accounts.filter { !it.monthPaidUpto.lowercase().contains(currentMonthYear) && it.monthPaidUptoNum < 54 }
-            AccountSegment.DUE_2_MONTHS -> accounts.filter { !it.monthPaidUpto.lowercase().contains(currentMonthYear) }
-            AccountSegment.DUE_3_PLUS -> accounts.filter { it.status.equals("defaulter", ignoreCase = true) }
+            AccountSegment.UP_TO_DATE -> accounts.filter {
+                val due = parseDueDate(it.nextInstallmentDate)
+                due != null && due.after(monthEndDate) && it.monthPaidUptoNum < 54
+            }
+            AccountSegment.DUE_1_MONTH -> accounts.filter {
+                val due = parseDueDate(it.nextInstallmentDate)
+                due != null && !due.after(monthEndDate) && due.after(cal30DaysAgo) && it.monthPaidUptoNum < 54
+            }
+            AccountSegment.DUE_2_MONTHS -> accounts.filter {
+                val due = parseDueDate(it.nextInstallmentDate)
+                due != null && !due.after(cal30DaysAgo) && due.after(cal60DaysAgo) && it.monthPaidUptoNum < 54
+            }
+            AccountSegment.DUE_3_PLUS -> accounts.filter {
+                val due = parseDueDate(it.nextInstallmentDate)
+                (due != null && !due.after(cal60DaysAgo) && it.monthPaidUptoNum < 54) || it.status.equals("defaulter", ignoreCase = true)
+            }
             AccountSegment.MATURED -> accounts.filter { it.monthPaidUptoNum >= 60 }
             AccountSegment.ABOUT_TO_MATURE -> accounts.filter { it.monthPaidUptoNum in 54..59 }
             AccountSegment.CLOSED -> accounts.filter { it.isActive == 0 }
@@ -198,5 +234,19 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private fun extractDueDay(dateStr: String): Int {
         val parts = dateStr.split("-", "/")
         return parts.firstOrNull()?.toIntOrNull() ?: 10
+    }
+
+    private fun parseDueDate(dateStr: String): Date? {
+        if (dateStr.isBlank()) return null
+        val formats = listOf("dd-MMM-yyyy", "d-MMM-yyyy", "dd-MMMM-yyyy", "d-MMMM-yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy")
+        for (fmt in formats) {
+            try {
+                val sdf = SimpleDateFormat(fmt, Locale.ENGLISH)
+                sdf.isLenient = false
+                val d = sdf.parse(dateStr.trim())
+                if (d != null) return d
+            } catch (_: Exception) {}
+        }
+        return null
     }
 }
