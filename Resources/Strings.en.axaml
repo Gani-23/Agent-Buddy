@@ -153,6 +153,7 @@
         <x:String x:Key="L_Set_AslaasMaintenance">ASLAAS Maintenance</x:String>
         <x:String x:Key="L_Set_UpdateMissingAslaasAll">Update Missing ASLAAS Number (All)</x:String>
         <x:String x:Key="L_Set_ForceUpdateAslaasAll">Force Update ASLAAS (All Active)</x:String>
+        <x:String x:Key="L_Set_SyncAslaasFromPortal">Sync ASLAAS from Website to Database</x:String>
         <x:String x:Key="L_Set_BackupDb">Backup Database</x:String>
         <x:String x:Key="L_Set_ExportExcel">Export to Excel</x:String>
         <x:String x:Key="L_Set_LegacySync">Legacy DB Sync</x:String>
@@ -265,6 +266,9 @@
         <x:String x:Key="L_Balance_SortAmount">Amount high to low</x:String>
         <x:String x:Key="L_Balance_ColumnAccount">Account</x:String>
         <x:String x:Key="L_Balance_ColumnName">Name</x:String>
+        <x:String x:Key="L_Balance_ColumnDenom">Denom</x:String>
+        <x:String x:Key="L_Balance_ColumnOverdue">Overdue</x:String>
+        <x:String x:Key="L_Balance_ColumnTotalDue">Total Due</x:String>
         <x:String x:Key="L_Balance_ColumnBalance">Balance</x:String>
         <x:String x:Key="L_Balance_ColumnPaidUpto">Paid Upto</x:String>
         <x:String x:Key="L_Balance_ColumnNextDue">Next Due</x:String>

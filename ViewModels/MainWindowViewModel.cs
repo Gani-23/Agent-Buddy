@@ -150,10 +150,10 @@ public class MainWindowViewModel : ViewModelBase
 
     public string ThemeModeLabel => CurrentThemeMode switch
     {
-        ThemeMode.NeumorphicLight => "Soft Light",
-        ThemeMode.NeumorphicDark => "Soft Dark",
+        ThemeMode.NeumorphicLight => "Modern Light",
+        ThemeMode.NeumorphicDark => "Modern Dark",
         ThemeMode.ClassicNotion => "Classic Notion",
-        _ => "Soft Light"
+        _ => "Modern Light"
     };
 
     public string ThemeIconKey => CurrentThemeMode switch
@@ -355,37 +355,37 @@ public class MainWindowViewModel : ViewModelBase
 
         if (mode == ThemeMode.NeumorphicLight)
         {
-            background = "#E6ECF5";
-            card = "#E6ECF5";
-            sidebar = "#DFE6F0";
-            textPrimary = "#2D3748";
-            textSecondary = "#627289";
-            border = "#D5DFED";
-            hover = "#DDE5F0";
-            pressed = "#D3DCE8";
+            background = "#F8F9FA";
+            card = "#FFFFFF";
+            sidebar = "#F3F4F6";
+            textPrimary = "#111827";
+            textSecondary = "#4B5563";
+            border = "#E5E7EB";
+            hover = "#F3F4F6";
+            pressed = "#E5E7EB";
 
-            cardShadow = "-6 -6 14 0 #FFFFFFFF, 6 6 14 0 #30456224";
-            cardHoverShadow = "-8 -8 18 0 #FFFFFFFF, 8 8 18 0 #30456230";
-            insetShadow = "inset 3 3 6 0 #30456228, inset -3 -3 6 0 #FFFFFFFF";
-            buttonShadow = "-4 -4 10 0 #FFFFFFFF, 4 4 10 0 #30456224";
-            buttonPressedShadow = "inset 3 3 6 0 #30456230, inset -3 -3 6 0 #FFFFFFFF";
+            cardShadow = "0 1 3 0 #0000000D, 0 1 2 0 #00000008";
+            cardHoverShadow = "0 4 12 0 #00000014, 0 2 4 0 #0000000A";
+            insetShadow = "0 0 0 0 Transparent";
+            buttonShadow = "0 1 2 0 #0000000A";
+            buttonPressedShadow = "0 0 0 0 Transparent";
         }
         else if (mode == ThemeMode.NeumorphicDark)
         {
-            background = "#1E222B";
-            card = "#1E222B";
-            sidebar = "#181B22";
-            textPrimary = "#E2E8F0";
-            textSecondary = "#8A99AD";
-            border = "#2A303C";
-            hover = "#252A35";
-            pressed = "#191C24";
+            background = "#0D1117";
+            card = "#161B22";
+            sidebar = "#0D1117";
+            textPrimary = "#F0F6FC";
+            textSecondary = "#8B949E";
+            border = "#30363D";
+            hover = "#21262D";
+            pressed = "#282E37";
 
-            cardShadow = "-5 -5 12 0 #2A303C80, 5 5 12 0 #0E1015";
-            cardHoverShadow = "-7 -7 16 0 #2A303C90, 7 7 16 0 #0A0C10";
-            insetShadow = "inset 3 3 6 0 #0E1015, inset -3 -3 6 0 #2A303C80";
-            buttonShadow = "-4 -4 9 0 #2A303C80, 4 4 9 0 #0E1015";
-            buttonPressedShadow = "inset 3 3 6 0 #0E1015, inset -3 -3 6 0 #2A303C80";
+            cardShadow = "0 2 8 0 #00000040";
+            cardHoverShadow = "0 4 16 0 #00000060";
+            insetShadow = "0 0 0 0 Transparent";
+            buttonShadow = "0 1 2 0 #00000050";
+            buttonPressedShadow = "0 0 0 0 Transparent";
         }
         else // Classic Notion
         {
@@ -406,7 +406,11 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         string successTint = isDark ? "#1E2E26" : "#D9F0E2";
-        string warningTint = isDark ? "#332A17" : "#FCECC7";
+        string warningTint = isDark ? "#382805" : "#FCECC7";
+        string warningColor = isDark ? "#FBBF24" : "#B45309";
+        string successColor = isDark ? "#34D399" : "#1F8A62";
+        string errorColor = isDark ? "#F87171" : "#D94848";
+        string infoColor = isDark ? "#60A5FA" : "#2F76E6";
         string dangerTint = isDark ? "#342121" : "#FCDCDC";
         string infoTint = isDark ? "#1A273B" : "#DBE7FA";
         string tintText = isDark ? "#ECECEC" : "#2D3748";
@@ -445,6 +449,10 @@ public class MainWindowViewModel : ViewModelBase
 
         resources["SuccessTintBrush"] = new SolidColorBrush(Color.Parse(successTint));
         resources["WarningTintBrush"] = new SolidColorBrush(Color.Parse(warningTint));
+        resources["WarningBrush"] = new SolidColorBrush(Color.Parse(warningColor));
+        resources["SuccessBrush"] = new SolidColorBrush(Color.Parse(successColor));
+        resources["ErrorBrush"] = new SolidColorBrush(Color.Parse(errorColor));
+        resources["InfoBrush"] = new SolidColorBrush(Color.Parse(infoColor));
         resources["DangerTintBrush"] = new SolidColorBrush(Color.Parse(dangerTint));
         resources["InfoTintBrush"] = new SolidColorBrush(Color.Parse(infoTint));
         resources["TintTextBrush"] = new SolidColorBrush(Color.Parse(tintText));

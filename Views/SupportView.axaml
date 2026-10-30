@@ -9,7 +9,7 @@
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="22" Margin="0,0,0,24" MaxWidth="1040">
-            <Border Classes="SectionCard" Padding="26">
+            <Border Classes="Card" Padding="22">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
                     <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Center">
                         <TextBlock Text="{DynamicResource L_Support_Kicker}" Classes="Kicker"/>
@@ -23,9 +23,9 @@
                     </StackPanel>
 
                     <Border Grid.Column="1"
-                            Width="76"
-                            Height="76"
-                            CornerRadius="38"
+                            Width="64"
+                            Height="64"
+                            CornerRadius="32"
                             Padding="0"
                             Background="{DynamicResource SuccessTintBrush}"
                             BorderBrush="{StaticResource SuccessBrush}"
@@ -39,22 +39,22 @@
             </Border>
 
             <Grid ColumnDefinitions="*,340" ColumnSpacing="18">
-                <StackPanel Grid.Column="0" Spacing="18">
-                    <Border Classes="SectionCard" Padding="22">
-                        <StackPanel Spacing="18">
+                <StackPanel Grid.Column="0" Spacing="16">
+                    <Border Classes="Card" Padding="20">
+                        <StackPanel Spacing="16">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <Border Width="42"
-                                        Height="42"
-                                        CornerRadius="12"
+                                <Border Width="38"
+                                        Height="38"
+                                        CornerRadius="10"
                                         Background="{DynamicResource InfoTintBrush}"
                                         BorderBrush="{StaticResource AccentBlueBrush}"
                                         BorderThickness="1">
                                     <PathIcon Data="{StaticResource Icon_Mail}"
-                                              Width="20"
-                                              Height="20"
+                                              Width="18"
+                                              Height="18"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <StackPanel Grid.Column="1" Spacing="3">
+                                <StackPanel Grid.Column="1" Spacing="2">
                                     <TextBlock Text="{DynamicResource L_Support_Contact}" Classes="SubHeader"/>
                                     <TextBlock Text="{DynamicResource L_Support_ContactHint}"
                                                TextWrapping="Wrap"
@@ -64,27 +64,36 @@
 
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                                 <Border Grid.Row="0" Grid.Column="0"
-                                        Classes="DefaultSummaryCard"
-                                        Padding="14">
-                                    <StackPanel Spacing="5">
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="12">
+                                    <StackPanel Spacing="4">
                                         <TextBlock Text="{DynamicResource L_Common_Name}" Classes="Kicker"/>
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
                                 <Border Grid.Row="0" Grid.Column="1"
-                                        Classes="DefaultSummaryCard"
-                                        Padding="14">
-                                    <StackPanel Spacing="5">
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="12">
+                                    <StackPanel Spacing="4">
                                         <TextBlock Text="{DynamicResource L_Common_Email}" Classes="Kicker"/>
                                         <TextBlock Text="{Binding Email}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
                                 <Border Grid.Row="1" Grid.ColumnSpan="2"
-                                        Classes="DefaultSummaryCard"
-                                        Padding="14">
-                                    <StackPanel Spacing="5">
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="12">
+                                    <StackPanel Spacing="4">
                                         <TextBlock Text="{DynamicResource L_Common_Address}" Classes="Kicker"/>
                                         <TextBlock Text="{Binding Address}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                     </StackPanel>
@@ -94,20 +103,20 @@
                             <WrapPanel>
                                 <Button Classes="Primary"
                                         Command="{Binding OpenEmailCommand}"
-                                        Padding="18,11"
+                                        Padding="16,9"
                                         Margin="0,0,10,10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_Mail}" Width="16" Height="16"/>
+                                        <PathIcon Data="{StaticResource Icon_Mail}" Width="15" Height="15"/>
                                         <TextBlock Text="{DynamicResource L_Support_SendEmail}"/>
                                     </StackPanel>
                                 </Button>
 
                                 <Button Classes="Success"
                                         Command="{Binding OpenWhatsAppCommand}"
-                                        Padding="18,11"
+                                        Padding="16,9"
                                         Margin="0,0,10,10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="16" Height="16"/>
+                                        <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="15" Height="15"/>
                                         <TextBlock Text="{DynamicResource L_Support_OpenWhatsapp}"/>
                                     </StackPanel>
                                 </Button>
@@ -115,11 +124,11 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="SectionCard" Padding="18" IsVisible="{Binding HasStatusMessage}">
+                    <Border Classes="Card" Padding="16" IsVisible="{Binding HasStatusMessage}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                            <Border Width="10"
-                                    Height="10"
-                                    CornerRadius="5"
+                            <Border Width="8"
+                                    Height="8"
+                                    CornerRadius="4"
                                     Background="{StaticResource AccentGreenBrush}"
                                     VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
@@ -130,7 +139,7 @@
                     </Border>
                 </StackPanel>
 
-                <Border Grid.Column="1" Classes="SectionCard" Padding="22">
+                <Border Grid.Column="1" Classes="Card" Padding="20">
                     <StackPanel Spacing="16">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                             <Border Width="44"

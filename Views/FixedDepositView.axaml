@@ -110,56 +110,56 @@
                         <!-- Account No -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
                             <TextBlock Text="Account Number *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryAccountNo}" PlaceholderText="10-digit A/C No" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryAccountNo}" PlaceholderText="10-digit A/C No" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Customer Name -->
                         <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                             <TextBlock Text="Customer Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Customer Phone -->
                         <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4">
                             <TextBlock Text="Phone (for WhatsApp Alerts)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryCustomerPhone}" PlaceholderText="10-digit Mobile" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryCustomerPhone}" PlaceholderText="10-digit Mobile" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Scheme Type -->
                         <StackPanel Grid.Row="0" Grid.Column="3" Spacing="4">
                             <TextBlock Text="Scheme Type *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding EntrySchemeType}" Height="42" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <ComboBox ItemsSource="{Binding SchemeOptions}" SelectedItem="{Binding EntrySchemeType}" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Deposit Amount -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
                             <TextBlock Text="Deposit Amount (Rs.) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryDepositAmount}" PlaceholderText="e.g. 100000" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryDepositAmount}" PlaceholderText="e.g. 100000" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Interest Rate -->
                         <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
                             <TextBlock Text="Interest Rate (%) *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryInterestRate}" PlaceholderText="e.g. 7.5" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryInterestRate}" PlaceholderText="e.g. 7.5" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Deposit Date -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Spacing="4">
                             <TextBlock Text="Deposit Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <DatePicker SelectedDate="{Binding EntryDepositDate}" Height="42" HorizontalAlignment="Stretch"/>
+                            <DatePicker SelectedDate="{Binding EntryDepositDate}" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Notes -->
                         <StackPanel Grid.Row="1" Grid.Column="3" Spacing="4">
                             <TextBlock Text="Notes / Agent Ref" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" Height="42" VerticalContentAlignment="Center" FontSize="13.5"/>
+                            <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" FontSize="13"/>
                         </StackPanel>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
                         <TextBlock Grid.Column="0"
                                    Text="{Binding EntryValidationMessage}"
-                                   Foreground="#C62828"
+                                   Foreground="{StaticResource ErrorBrush}"
                                    FontSize="11.5"
                                    VerticalAlignment="Center"
                                    IsVisible="{Binding HasEntryValidationMessage}"/>
@@ -401,7 +401,7 @@
                                                                 Command="{ReflectionBinding DataContext.CopyReminderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}"
                                                                 ToolTip.Tip="Copy WhatsApp Maturity Reminder">
-                                                            <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="#25D366"/>
+                                                            <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="{StaticResource AccentGreenBrush}"/>
                                                         </Button>
 
                                                         <Button Classes="Icon"

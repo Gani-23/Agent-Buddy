@@ -42,7 +42,7 @@
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Appearance &amp; Theme" Classes="SubHeader"/>
-                            <TextBlock Text="Choose between Soft Neumorphic surfaces or the classic Notion styling."
+                            <TextBlock Text="Choose between modern light, dark surfaces or the classic Notion styling."
                                        Classes="SectionLead"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -690,6 +690,18 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
                                 <TextBlock Text="{DynamicResource L_Set_ForceUpdateAslaasAll}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding SyncOfficialAslaasFromPortalCommand}"
+                                IsEnabled="{Binding !IsUpdatingMissingAslaas}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Download}" Width="16" Height="16"/>
+                                <TextBlock Text="{DynamicResource L_Set_SyncAslaasFromPortal}"/>
                             </StackPanel>
                         </Button>
                     </WrapPanel>

@@ -13,48 +13,51 @@
             <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
         </Style>
         <Style Selector="Border[Tag=RenewalNormal]">
             <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
-            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
         </Style>
         <Style Selector="Border[Tag=RenewalUrgent]">
             <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
-            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
         </Style>
         <Style Selector="Border.DashboardHeader">
             <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="14"/>
-            <Setter Property="BoxShadow" Value="0 2 8 0 #00000008"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         </Style>
         <Style Selector="Border.DashboardSearch">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,8"/>
         </Style>
         <Style Selector="Border.DashboardBadge">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="999"/>
-            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,6"/>
         </Style>
         <Style Selector="Border.MetricCard.FeaturedMetric">
             <Setter Property="Padding" Value="16"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         </Style>
         <Style Selector="Border.MetricIcon">
             <Setter Property="Width" Value="34"/>
             <Setter Property="Height" Value="34"/>
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style Selector="Border.DefaultSummaryCard">
@@ -62,15 +65,15 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16"/>
-            <Setter Property="BoxShadow" Value="0 4 14 0 #0000000A"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         </Style>
         <Style Selector="Border.SummaryMiniStat">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,8"/>
         </Style>
     </UserControl.Styles>
 

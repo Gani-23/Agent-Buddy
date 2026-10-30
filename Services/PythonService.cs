@@ -23,6 +23,9 @@ public class PythonService
     private static readonly Regex AslaasSubmittedRegex = new(
         @"ASLAAS update submitted:\s*(?<account>[A-Z0-9]+)\s*->\s*(?<aslaas>[A-Z0-9]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex OfficialAslaasFetchedRegex = new(
+        @"Official ASLAAS (?:found|fetched):\s*(?<account>[A-Z0-9]+)\s*->\s*(?<aslaas>[^\r\n]+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex PopupFetchCountRegex = new(
         @"NEXT_ACCOUNTS popup fetch collected\s+(?<count>\d+)\s+unique accounts",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -942,6 +945,166 @@ public class PythonService
         catch (Exception ex)
         {
             return (false, $"Error executing ASLAAS update: {ex.Message}");
+        }
+        finally
+        {
+            if (!string.IsNullOrWhiteSpace(payloadFilePath))
+            {
+                try
+                {
+                    File.Delete(payloadFilePath);
+                }
+                catch
+                {
+                    // Ignore temp-file cleanup failures.
+                }
+            }
+        }
+    }
+
+    private static List<AslaasUpdateItem> ExtractOfficialAslaasFetched(string output)
+    {
+        var items = new List<AslaasUpdateItem>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var rawLine in (output ?? string.Empty)
+                     .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            var match = OfficialAslaasFetchedRegex.Match(line);
+            if (!match.Success)
+            {
+                continue;
+            }
+
+            var accountNo = match.Groups["account"].Value.Trim();
+            if (string.IsNullOrWhiteSpace(accountNo) || !seen.Add(accountNo))
+            {
+                continue;
+            }
+
+            var aslaasNo = match.Groups["aslaas"].Value.Trim();
+            items.Add(new AslaasUpdateItem
+            {
+                AccountNo = accountNo,
+                AslaasNo = string.IsNullOrWhiteSpace(aslaasNo) ? "APPLIED" : aslaasNo.ToUpperInvariant()
+            });
+        }
+
+        return items;
+    }
+
+    public async Task<(bool Success, string Output)> FetchOfficialAslaasAsync(
+        IReadOnlyCollection<string> accountNumbers,
+        Action<string>? progressCallback = null)
+    {
+        if (accountNumbers == null || accountNumbers.Count == 0)
+        {
+            return (false, "No active accounts found to sync.");
+        }
+
+        var scriptPath = Path.Combine(_scriptsPath, "ScheduleArguments.py");
+        if (!File.Exists(scriptPath))
+        {
+            return (false, $"Script not found: {scriptPath}");
+        }
+
+        var normalized = accountNumbers
+            .Where(acct => !string.IsNullOrWhiteSpace(acct))
+            .Select(acct => acct.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (normalized.Count == 0)
+        {
+            return (false, "No valid account numbers to sync.");
+        }
+
+        var payload = JsonSerializer.Serialize(normalized);
+        var output = new StringBuilder();
+        string? payloadFilePath = null;
+
+        try
+        {
+            var browserArg = await GetPreferredBrowserArgAsync();
+            payloadFilePath = Path.Combine(
+                _scriptsPath,
+                $"aslaas_fetch_accounts_{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}.json");
+            await File.WriteAllTextAsync(payloadFilePath, payload, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _pythonCommand,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
+                    CreateNoWindow = true,
+                    WorkingDirectory = _scriptsPath
+                }
+            };
+
+            process.StartInfo.ArgumentList.Add("-u");
+            process.StartInfo.ArgumentList.Add(scriptPath);
+            process.StartInfo.ArgumentList.Add("--fetch-aslaas-report-file");
+            process.StartInfo.ArgumentList.Add(payloadFilePath);
+            process.StartInfo.ArgumentList.Add("--browser");
+            process.StartInfo.ArgumentList.Add(browserArg);
+            ApplyPythonRuntimeEnvironment(process.StartInfo);
+
+            process.OutputDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                output.AppendLine(args.Data);
+                progressCallback?.Invoke(args.Data);
+            };
+
+            process.ErrorDataReceived += (_, args) =>
+            {
+                if (args.Data == null)
+                {
+                    return;
+                }
+
+                output.AppendLine(args.Data);
+                progressCallback?.Invoke(args.Data);
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+
+            var outputText = output.ToString();
+            var completedUpdates = ExtractOfficialAslaasFetched(outputText);
+            if (completedUpdates.Count > 0)
+            {
+                await _databaseService.SaveAslaasUpdatesAsync(completedUpdates);
+                _databaseService.NotifyDatabaseChanged();
+            }
+
+            if (process.ExitCode != 0)
+            {
+                return (false, outputText);
+            }
+
+            return (true, outputText);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error fetching ASLAAS numbers: {ex.Message}");
         }
         finally
         {

@@ -10,9 +10,9 @@
         x:Class="AgentBuddy.Views.OverdueBalanceWindow"
         x:DataType="vm:OverdueBalanceWindowViewModel"
         Title="{DynamicResource L_Balance_WindowTitle}"
-        Width="960"
-        Height="650"
-        MinWidth="840"
+        Width="980"
+        Height="660"
+        MinWidth="860"
         MinHeight="560"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
@@ -25,7 +25,7 @@
     <Border Padding="18"
             Classes="FadeIn"
             BorderBrush="{DynamicResource AppBorderBrush}"
-            BorderThickness="1.5">
+            BorderThickness="1">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
             <Grid Grid.Row="0">
                 <StackPanel Spacing="2">
@@ -33,6 +33,7 @@
                     <TextBlock Text="{DynamicResource L_Balance_Title}"
                                FontSize="24"
                                FontWeight="Bold"
+                               Foreground="{DynamicResource AppTextPrimaryBrush}"
                                TextWrapping="Wrap"
                                LineHeight="32"/>
                     <TextBlock Text="{Binding SummaryText}"
@@ -57,6 +58,7 @@
                         <TextBlock Text="{Binding CountDisplay}"
                                    FontSize="18"
                                    FontWeight="Bold"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
                                    HorizontalAlignment="Right"/>
                     </StackPanel>
                 </Border>
@@ -67,14 +69,14 @@
                         <TextBlock Text="{Binding TotalBalanceDisplay}"
                                    FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
                                    HorizontalAlignment="Right"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <Border Grid.Row="2" Classes="Card" Padding="12">
-                <Grid ColumnDefinitions="*,150,190,Auto" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,170,190,Auto" ColumnSpacing="10">
                     <TextBox x:Name="SearchBox"
                              Grid.Column="0"
                              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
@@ -109,14 +111,16 @@
                             BorderBrush="{DynamicResource AppBorderBrush}"
                             BorderThickness="0,0,0,1"
                             Padding="12,10">
-                        <Grid ColumnDefinitions="130,*,100,85,115,110"
-                              ColumnSpacing="10">
+                        <Grid ColumnDefinitions="125,*,85,75,95,75,95,100"
+                              ColumnSpacing="8">
                             <TextBlock Grid.Column="0" Text="{DynamicResource L_Balance_ColumnAccount}" Classes="Kicker"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Balance_ColumnName}" Classes="Kicker"/>
-                            <TextBlock Grid.Column="2" Text="{DynamicResource L_Balance_ColumnBalance}" Classes="Kicker"/>
-                            <TextBlock Grid.Column="3" Text="{DynamicResource L_Balance_ColumnPaidUpto}" Classes="Kicker"/>
-                            <TextBlock Grid.Column="4" Text="{DynamicResource L_Balance_ColumnNextDue}" Classes="Kicker"/>
-                            <TextBlock Grid.Column="5" Text="{DynamicResource L_Balance_ColumnActions}" Classes="Kicker" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="{DynamicResource L_Balance_ColumnDenom}" Classes="Kicker" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="3" Text="{DynamicResource L_Balance_ColumnOverdue}" Classes="Kicker" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="4" Text="{DynamicResource L_Balance_ColumnTotalDue}" Classes="Kicker" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="5" Text="{DynamicResource L_Balance_ColumnPaidUpto}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="6" Text="{DynamicResource L_Balance_ColumnNextDue}" Classes="Kicker"/>
+                            <TextBlock Grid.Column="7" Text="{DynamicResource L_Balance_ColumnActions}" Classes="Kicker" HorizontalAlignment="Center"/>
                         </Grid>
                     </Border>
 
@@ -129,39 +133,52 @@
                                     <Border BorderBrush="{DynamicResource AppBorderBrush}"
                                             BorderThickness="0,0,0,1"
                                             Padding="12,9">
-                                        <Grid ColumnDefinitions="130,*,100,85,115,110"
-                                              ColumnSpacing="10"
+                                        <Grid ColumnDefinitions="125,*,85,75,95,75,95,100"
+                                              ColumnSpacing="8"
                                               VerticalAlignment="Center">
                                             <TextBlock Grid.Column="0"
                                                        Text="{Binding AccountNo}"
                                                        FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding AccountName}"
                                                        TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
-                                            <Border Grid.Column="2"
-                                                    Background="{DynamicResource AppWarningSoftBrush}"
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding AmountDisplay}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Grid.Column="3"
+                                                    Background="{DynamicResource WarningTintBrush}"
                                                     CornerRadius="6"
                                                     Padding="8,4"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppWarningBrush}">
-                                                    <Run Text="{Binding BalanceMonths}"/>
-                                                    <Run Text=" "/>
-                                                    <Run Text="{DynamicResource L_Balance_MonthsSuffix}"/>
-                                                </TextBlock>
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    ToolTip.Tip="{Binding DurationTooltip}">
+                                                <TextBlock Text="{Binding DurationShortDisplay}"
+                                                           FontWeight="Bold"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource WarningBrush}"/>
                                             </Border>
-                                            <TextBlock Grid.Column="3"
+                                            <TextBlock Grid.Column="4"
+                                                       Text="{Binding BalanceAmountDisplay}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5"
                                                        Text="{Binding MonthPaidUpto}"
                                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
                                                        VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="4"
+                                            <TextBlock Grid.Column="6"
                                                        Text="{Binding NextInstallmentDate}"
                                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
                                                        VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Column="5"
+                                            <StackPanel Grid.Column="7"
                                                         Orientation="Horizontal"
                                                         Spacing="6"
                                                         HorizontalAlignment="Center"

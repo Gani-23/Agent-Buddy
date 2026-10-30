@@ -788,6 +788,7 @@ public class DashboardViewModel : ViewModelBase
             SecondHalfDepositedAmount = metrics.SecondHalfDepositedAmount;
 
             DefaulterAccountsCount = metrics.DefaulterAccounts;
+            DefaulterAccountsAmount = _segmentAccounts.TryGetValue("defaulters", out var defs) ? defs.Sum(a => a.GetAmount()) : 0;
             EligibleForLoanCount = metrics.EligibleForLoanAccounts;
             EligibleForPrematureClosureCount = metrics.EligibleForPrematureClosureAccounts;
 
@@ -908,28 +909,18 @@ public class DashboardViewModel : ViewModelBase
             .Where(a =>
             {
                 var due = a.GetNextInstallmentDate();
-                return due.HasValue &&
-                       due.Value.Date >= monthStart &&
-                       due.Value.Date <= monthEnd;
+                return due.HasValue && due.Value.Date <= monthEnd;
             })
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
         var firstHalfPendingWindow = pendingThisMonth
-            .Where(a =>
-            {
-                var due = a.GetNextInstallmentDate();
-                return due.HasValue && due.Value.Day >= 1 && due.Value.Day <= 15;
-            })
+            .Where(a => a.IsFirstHalfCycle)
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
         var secondHalfPendingWindow = pendingThisMonth
-            .Where(a =>
-            {
-                var due = a.GetNextInstallmentDate();
-                return due.HasValue && due.Value.Day >= 16;
-            })
+            .Where(a => !a.IsFirstHalfCycle)
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
@@ -943,20 +934,12 @@ public class DashboardViewModel : ViewModelBase
             .ToList();
 
         var firstHalfDepositedWindow = depositedThisMonth
-            .Where(a =>
-            {
-                var due = a.GetNextInstallmentDate();
-                return due.HasValue && due.Value.Day >= 1 && due.Value.Day <= 15;
-            })
+            .Where(a => a.IsFirstHalfCycle)
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
         var secondHalfDepositedWindow = depositedThisMonth
-            .Where(a =>
-            {
-                var due = a.GetNextInstallmentDate();
-                return due.HasValue && due.Value.Day >= 16;
-            })
+            .Where(a => !a.IsFirstHalfCycle)
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
 
@@ -1063,41 +1046,27 @@ public class DashboardViewModel : ViewModelBase
             .OrderBy(a => a.GetNextInstallmentDate())
             .ToList();
             
-        // Agent Insights logic
-        var currentMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        // Agent Insights logic (strictly follows India Post overdue rules)
         _segmentAccounts["defaulters"] = accounts.Where(a => {
-            var next = a.GetNextInstallmentDate();
-            if(!next.HasValue) return false;
-            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
-            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
-            return overdue >= 4;
+            return a.CalculateOverdueMonths(DateTime.Today) >= 4;
         }).ToList();
         
         _segmentAccounts["loan-eligible"] = accounts.Where(a => a.GetMonthPaidNumber() >= 12 && a.GetMonthPaidNumber() < 60).ToList();
         _segmentAccounts["premature-closure"] = accounts.Where(a => a.GetMonthPaidNumber() >= 36 && a.GetMonthPaidNumber() < 60).ToList();
         _segmentAccounts["vip-accounts"] = accounts.Where(a => a.GetAmount() >= 5000).ToList();
         _segmentAccounts["at-risk-accounts"] = accounts.Where(a => {
-            var next = a.GetNextInstallmentDate();
-            if(!next.HasValue) return false;
-            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
-            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+            var overdue = a.CalculateOverdueMonths(DateTime.Today);
             return overdue >= 1 && overdue <= 3;
         }).ToList();
 
         _segmentAccounts["rebate-upsell"] = accounts.Where(a => {
-            var next = a.GetNextInstallmentDate();
-            if(!next.HasValue) return false;
-            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
-            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
-            return overdue <= 0; // Completely on-time or advance
+            var overdue = a.CalculateOverdueMonths(DateTime.Today);
+            return overdue == 0; // Completely on-time or advance
         }).ToList();
         
         _segmentAccounts["critical-discontinuation"] = accounts.Where(a => {
-            var next = a.GetNextInstallmentDate();
-            if(!next.HasValue) return false;
-            var dueMonthStart = new DateTime(next.Value.Year, next.Value.Month, 1);
-            var overdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
-            return overdue == 5 || overdue == 6; // Last chance before default limit
+            var overdue = a.CalculateOverdueMonths(DateTime.Today);
+            return overdue == 5 || overdue == 6; // Last chance before default limit (discontinued accounts within 2 months revival window)
         }).ToList();
 
         PendingThisMonthCount = pendingThisMonth.Count;

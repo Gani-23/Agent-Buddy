@@ -15,7 +15,7 @@
                 <TextBlock Text="{DynamicResource L_Report_Title}" Classes="SectionHeader"/>
             </StackPanel>
 
-            <Border Classes="SectionCard" Padding="16">
+            <Border Classes="Card" Padding="16">
                 <StackPanel Spacing="8">
                     <TextBlock Text="{DynamicResource L_Report_DailySummary}" Classes="SubHeader"/>
                     <TextBlock Text="{Binding SummaryText}"
@@ -169,7 +169,7 @@
                 </WrapPanel>
             </Border>
 
-            <Border Classes="SectionCard" Padding="16" IsVisible="{Binding HasReports}">
+            <Border Classes="Card" Padding="16" IsVisible="{Binding HasReports}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="{DynamicResource L_Report_TodayLists}" Classes="SubHeader"/>
 
@@ -178,7 +178,10 @@
                             <DataTemplate x:DataType="models:DailyListReport">
                                 <Border Margin="0,4"
                                         Padding="12"
-                                        Classes="Card">
+                                        Background="{DynamicResource AppSidebarBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
                                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="10">
                                         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                             <CheckBox IsChecked="{Binding IsSelectedForPayslip}"
@@ -235,7 +238,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Classes="SectionCard" Padding="16" IsVisible="{Binding !HasReports}">
+            <Border Classes="Card" Padding="16" IsVisible="{Binding !HasReports}">
                 <TextBlock Text="{DynamicResource L_Report_NoListsToday}"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
             </Border>

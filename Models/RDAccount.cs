@@ -116,6 +116,115 @@ public class RDAccount
     }
 
     /// <summary>
+    /// In India Post, RD accounts are divided into two distinct cycles based on opening date:
+    /// - First Half: Opened 1st to 15th. Monthly due date is the 15th.
+    /// - Second Half: Opened 16th to end of month. Monthly due date is the last calendar day of the month
+    ///   (28th/29th Feb, 30th for 30-day months, 31st for 31-day months).
+    /// </summary>
+    public bool IsFirstHalfCycle
+    {
+        get
+        {
+            var dueDate = GetNextInstallmentDate();
+            if (dueDate.HasValue)
+            {
+                return dueDate.Value.Day <= 15;
+            }
+
+            var openingDate = GetEstimatedOpeningDate();
+            if (openingDate.HasValue)
+            {
+                return openingDate.Value.Day <= 15;
+            }
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Gets the exact official India Post due date for a specific year and month.
+    /// - 1st Half: 15th of the month.
+    /// - 2nd Half: exact last calendar day of the month (accurately handles Feb leap years 29/28, 30, and 31 days).
+    /// </summary>
+    public DateTime GetCycleDueDateForMonth(int year, int month)
+    {
+        if (IsFirstHalfCycle)
+        {
+            return new DateTime(year, month, 15);
+        }
+
+        int lastDay = DateTime.DaysInMonth(year, month);
+        return new DateTime(year, month, lastDay);
+    }
+
+    /// <summary>
+    /// Computes the exact number of defaulted (overdue) months according to Indian Postal rules.
+    /// An installment is only in default if today has strictly passed its due date:
+    /// - 1st Half: in default from 16th onward.
+    /// - 2nd Half: in default from 1st of the next month onward.
+    /// </summary>
+    public int CalculateOverdueMonths(DateTime asOfDate, int maturityInstallments = 120)
+    {
+        var dueDate = GetNextInstallmentDate();
+        if (!dueDate.HasValue)
+        {
+            return 0;
+        }
+
+        var refDate = asOfDate.Date;
+        if (refDate <= dueDate.Value.Date)
+        {
+            // Not yet passed the due date -> Not overdue
+            return 0;
+        }
+
+        // The installment due on dueDate was missed.
+        // Now advance month by month to count all missed deadlines up to refDate.
+        int overdueCount = 0;
+        var checkYear = dueDate.Value.Year;
+        var checkMonth = dueDate.Value.Month;
+
+        while (true)
+        {
+            var cycleDue = GetCycleDueDateForMonth(checkYear, checkMonth);
+            if (refDate > cycleDue)
+            {
+                overdueCount++;
+
+                // Advance to next month
+                checkMonth++;
+                if (checkMonth > 12)
+                {
+                    checkMonth = 1;
+                    checkYear++;
+                }
+
+                // Safety break for limit
+                if (overdueCount >= maturityInstallments)
+                {
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (maturityInstallments > 0)
+        {
+            var paid = Math.Max(0, GetMonthPaidNumber());
+            var remaining = Math.Max(0, maturityInstallments - paid);
+            if (remaining > 0)
+            {
+                overdueCount = Math.Min(overdueCount, remaining);
+            }
+        }
+
+        return Math.Max(0, overdueCount);
+    }
+
+    /// <summary>
     /// Checks if account is due within specified days
     /// </summary>
     public bool IsDueWithinDays(int days)

@@ -153,6 +153,7 @@
         <x:String x:Key="L_Set_AslaasMaintenance">ASLAAS నిర్వహణ</x:String>
         <x:String x:Key="L_Set_UpdateMissingAslaasAll">లేని ASLAAS నంబర్లు అప్డేట్ చేయండి (అన్ని)</x:String>
         <x:String x:Key="L_Set_ForceUpdateAslaasAll">ASLAAS ఫోర్స్ అప్డేట్ (అన్ని యాక్టివ్)</x:String>
+        <x:String x:Key="L_Set_SyncAslaasFromPortal">వెబ్‌సైట్ నుండి ASLAAS సమకాలీకరించు</x:String>
         <x:String x:Key="L_Set_BackupDb">డేటాబేస్ బ్యాకప్</x:String>
         <x:String x:Key="L_Set_ExportExcel">ఎక్సెల్ ఎగుమతి</x:String>
         <x:String x:Key="L_Set_LegacySync">లెగసీ DB సింక్</x:String>
@@ -265,6 +266,9 @@
         <x:String x:Key="L_Balance_SortAmount">మొత్తం ఎక్కువ నుండి తక్కువ</x:String>
         <x:String x:Key="L_Balance_ColumnAccount">ఖాతా</x:String>
         <x:String x:Key="L_Balance_ColumnName">పేరు</x:String>
+        <x:String x:Key="L_Balance_ColumnDenom">వాయిదా</x:String>
+        <x:String x:Key="L_Balance_ColumnOverdue">వ్యవధి</x:String>
+        <x:String x:Key="L_Balance_ColumnTotalDue">మొత్తం బకాయి</x:String>
         <x:String x:Key="L_Balance_ColumnBalance">బ్యాలెన్స్</x:String>
         <x:String x:Key="L_Balance_ColumnPaidUpto">చెల్లింపు వరకు</x:String>
         <x:String x:Key="L_Balance_ColumnNextDue">తదుపరి బకాయి</x:String>

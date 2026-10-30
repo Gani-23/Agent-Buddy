@@ -20,57 +20,54 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="240,*" Background="{DynamicResource AppBackgroundBrush}">
+    <Grid ColumnDefinitions="250,*" Background="{DynamicResource AppBackgroundBrush}">
 
         <!-- SIDEBAR -->
         <Border Grid.Column="0"
                 Background="{DynamicResource AppSidebarBackgroundBrush}"
                 BorderBrush="{DynamicResource AppBorderBrush}"
                 BorderThickness="0,0,1,0"
-                Padding="16">
+                Padding="16,20">
 
             <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="16">
-                <!-- App Brand Card -->
-                <Border Grid.Row="0" Classes="Card" Padding="12">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
-                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="12" 
-                                Background="{StaticResource AccentBlueBrush}" 
-                                BorderBrush="#40FFFFFF"
-                                BorderThickness="1"
-                                VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource Icon_Logo}" Width="20" Height="20" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="{DynamicResource L_Main_AppName}"
-                                       FontSize="19"
-                                       FontWeight="Black"
-                                       LetterSpacing="-0.5"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                            <TextBlock Text="{DynamicResource L_Main_Subtitle}"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                       FontSize="11"
-                                       FontWeight="Medium"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                <!-- App Brand Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
+                    <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" 
+                            Background="{StaticResource AccentBlueBrush}" 
+                            VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource Icon_Logo}" Width="18" Height="18" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource L_Main_AppName}"
+                                   FontSize="17"
+                                   FontWeight="Bold"
+                                   LetterSpacing="-0.3"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="{DynamicResource L_Main_Subtitle}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   FontSize="11"
+                                   FontWeight="Medium"/>
+                    </StackPanel>
+                </Grid>
 
                 <TextBlock Grid.Row="1"
                            Text="{DynamicResource L_Main_Navigation}"
                            Classes="Kicker"
-                           LetterSpacing="1.5"
-                           Margin="8,4,8,0"/>
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           LetterSpacing="1.2"
+                           Margin="4,6,4,0"/>
 
                 <!-- Navigation List -->
-                <StackPanel Grid.Row="2" Spacing="8">
+                <StackPanel Grid.Row="2" Spacing="4">
                     <Button x:Name="DashboardNavButton"
                             Classes="NavItem"
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Dashboard">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Dashboard}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Dashboard}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -80,8 +77,8 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Lists">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Lists}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Lists}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -91,8 +88,8 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="FixedDeposits">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_FixedDeposits}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -102,8 +99,8 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Reports">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -113,8 +110,8 @@
                             IsEnabled="{Binding IsLicenseActive}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Support">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Support}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Support}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -123,91 +120,97 @@
                             Classes="NavItem"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Settings">
-                        <Grid ColumnDefinitions="24,*" ColumnSpacing="12" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
                 </StackPanel>
 
-                <!-- Footer / Theme & License -->
-                <StackPanel Grid.Row="3" Spacing="10">
-                    <Border Classes="Card" Padding="10">
-                        <Border Classes="LicenseBadge" Padding="10"
-                                Background="{DynamicResource InfoTintBrush}"
-                                BorderBrush="{DynamicResource AppBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="10">
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Shield}" Width="14" Height="14" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding LicenseStatusText}"
-                                           FontWeight="SemiBold"
-                                           FontSize="12"
-                                           VerticalAlignment="Center"
-                                           TextWrapping="Wrap"/>
-                            </Grid>
-                        </Border>
+                <!-- Footer: License & Theme Panel -->
+                <StackPanel Grid.Row="3" Spacing="8">
+                    <!-- License Badge -->
+                    <Border Background="{DynamicResource InfoTintBrush}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="10,8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Shield}" Width="13" Height="13" Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding LicenseStatusText}"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap"/>
+                        </Grid>
                     </Border>
 
-                    <Border Classes="Card" Padding="6">
-                        <Button Classes="NavItem" Command="{Binding ToggleThemeCommand}">
-                            <Grid ColumnDefinitions="24,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
-                                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Theme_Palette}" Width="16" Height="16" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="{DynamicResource L_Main_ToggleTheme}" FontSize="13" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding ThemeModeLabel}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Grid>
-                        </Button>
-                    </Border>
+                    <!-- Theme Switcher Button -->
+                    <Button Classes="NavItem"
+                            Command="{Binding ToggleThemeCommand}"
+                            ToolTip.Tip="{DynamicResource L_Main_ToggleTheme}"
+                            Background="{DynamicResource AppCardBackgroundBrush}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="10,8">
+                        <Grid ColumnDefinitions="20,*" ColumnSpacing="8" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Theme_Palette}" Width="14" Height="14" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{DynamicResource L_Main_ToggleTheme}" FontSize="12" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- MAIN CONTENT -->
         <Border Grid.Column="1" Padding="20">
-            <Border Classes="SectionCard" Padding="22">
-                <ContentControl Content="{Binding CurrentView}">
-                    <ContentControl.DataTemplates>
-                        <DataTemplate DataType="vm:DashboardViewModel">
-                            <views:DashboardView/>
-                        </DataTemplate>
-                        <DataTemplate DataType="vm:ListManagementViewModel">
-                            <views:ListManagementView/>
-                        </DataTemplate>
-                        <DataTemplate DataType="vm:FixedDepositViewModel">
-                            <views:FixedDepositView/>
-                        </DataTemplate>
-                        <DataTemplate DataType="vm:ReportsViewModel">
-                            <views:ReportsView/>
-                        </DataTemplate>
-                        <DataTemplate DataType="vm:SupportViewModel">
-                            <views:SupportView/>
-                        </DataTemplate>
-                        <DataTemplate DataType="vm:SettingsViewModel">
-                            <views:SettingsView/>
-                        </DataTemplate>
-                    </ContentControl.DataTemplates>
-                </ContentControl>
-            </Border>
+            <ContentControl Content="{Binding CurrentView}">
+                <ContentControl.DataTemplates>
+                    <DataTemplate DataType="vm:DashboardViewModel">
+                        <views:DashboardView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:ListManagementViewModel">
+                        <views:ListManagementView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:FixedDepositViewModel">
+                        <views:FixedDepositView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:ReportsViewModel">
+                        <views:ReportsView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:SupportViewModel">
+                        <views:SupportView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:SettingsViewModel">
+                        <views:SettingsView/>
+                    </DataTemplate>
+                </ContentControl.DataTemplates>
+            </ContentControl>
         </Border>
 
-        <Button Grid.Column="1"
-                Classes="Primary"
-                Height="42"
-                Padding="16,0"
+        <!-- FLOATING OVERDUE BALANCE BUTTON -->
+        <Border Grid.Column="1"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
-                Margin="0,0,36,34"
-                IsEnabled="{Binding IsLicenseActive}"
-                Click="OpenBalanceBuddy_Click"
-                ToolTip.Tip="Open overdue balance accounts">
-            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
-                <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="16" Height="16" Foreground="White"/>
-                <TextBlock Grid.Column="1" Text="Balance" FontWeight="Bold" VerticalAlignment="Center"/>
-            </Grid>
-        </Button>
+                Margin="0,0,28,24"
+                CornerRadius="20"
+                BoxShadow="0 4 14 0 #332563EB, 0 2 6 0 #0000001A">
+            <Button Classes="Primary"
+                    Height="40"
+                    Padding="16,0"
+                    CornerRadius="20"
+                    IsEnabled="{Binding IsLicenseActive}"
+                    Click="OpenBalanceBuddy_Click"
+                    ToolTip.Tip="Open overdue balance accounts">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="15" Height="15" Foreground="White"/>
+                    <TextBlock Grid.Column="1" Text="Balance" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+        </Border>
 
     </Grid>
 

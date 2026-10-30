@@ -21,7 +21,7 @@
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Background="{DynamicResource AppHoverBrush}">
+        Background="{DynamicResource AppCardBackgroundBrush}">
 
     <Border Padding="20" Classes="FadeIn DialogSurface">
         <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="14">
@@ -89,7 +89,7 @@
             </Border>
 
             <Border Grid.Row="2" Classes="Card" Padding="10,8">
-                <Grid ColumnDefinitions="140,*,110,110,130,60,78" ColumnSpacing="10">
+                <Grid ColumnDefinitions="140,*,110,110,130,60,60" ColumnSpacing="10">
                     <TextBlock Text="{DynamicResource L_Segment_ColumnAccountNo}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="1" Text="{DynamicResource L_Segment_ColumnAccountName}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Column="2" Text="{DynamicResource L_Segment_ColumnAmount}" FontWeight="SemiBold" TextAlignment="Right"/>
@@ -112,7 +112,7 @@
                                 <Border BorderThickness="0,0,0,1"
                                         BorderBrush="{DynamicResource AppBorderBrush}">
                                     <StackPanel>
-                                        <Grid ColumnDefinitions="140,*,110,110,130,60,78"
+                                        <Grid ColumnDefinitions="140,*,110,110,130,60,60"
                                               ColumnSpacing="10">
                                             <Border Grid.ColumnSpan="5"
                                                     Padding="10,8"
@@ -147,9 +147,16 @@
                                                     VerticalAlignment="Center"
                                                     IsVisible="{ReflectionBinding DataContext.CanDeleteAccounts, ElementName=Root}">
                                                 <Button Classes="Danger"
-                                                        Padding="10,5"
-                                                        Content="{DynamicResource L_Report_Delete}"
-                                                        Click="DeleteAccount_Click"/>
+                                                        Width="34"
+                                                        Height="34"
+                                                        Padding="0"
+                                                        CornerRadius="10"
+                                                        ToolTip.Tip="{DynamicResource L_Report_Delete}"
+                                                        Click="DeleteAccount_Click">
+                                                    <PathIcon Data="{StaticResource Icon_Trash}"
+                                                              Width="14"
+                                                              Height="14"/>
+                                                </Button>
                                             </Border>
                                         </Grid>
                                         <Border Background="{DynamicResource AppHoverBrush}"

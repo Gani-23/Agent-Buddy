@@ -22,7 +22,7 @@
             <Setter Property="Padding" Value="0"/>
         </Style>
         <Style Selector="Button[Tag=RowDelete]:pointerover">
-            <Setter Property="Background" Value="#26FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
         </Style>
         <Style Selector="Border[Tag=Ready]">
@@ -645,41 +645,42 @@
                                                                 <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
                                                                 <Setter Property="BorderThickness" Value="1"/>
+                                                                <Setter Property="CornerRadius" Value="6"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=AdvancePayment]">
                                                                 <Setter Property="Background" Value="{DynamicResource ListAdvanceTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource ListAdvanceBorderBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=CatchUpPayment]">
                                                                 <Setter Property="Background" Value="{DynamicResource ListCatchUpTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource ListCatchUpBorderBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=PartialCatchUpPayment]">
                                                                 <Setter Property="Background" Value="{DynamicResource ListPartialCatchUpTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource ListPartialCatchUpBorderBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=MissingDueDate]">
                                                                 <Setter Property="Background" Value="{DynamicResource ListMissingDueTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource ListMissingDueBorderBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=Invalid]">
                                                                 <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=Duplicate]">
                                                                 <Setter Property="Background" Value="{DynamicResource ListDuplicateTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{DynamicResource ListDuplicateBorderBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                             <Style Selector="Border[Tag=Processed]">
                                                                 <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
                                                                 <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
-                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
                                                             </Style>
                                                         </Border.Styles>
                                                         

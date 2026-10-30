@@ -65,7 +65,10 @@ public sealed class OverdueBalanceWindowViewModel : ViewModelBase
         T("L_Balance_DefaultSummaryBody", "Starter view shows accounts up to {0} months. Higher month filters are still available."),
         StarterMonthLimit);
     public string SummaryText => HasAccounts
-        ? string.Format(T("L_Balance_SummaryFormat", "{0} account(s), highest balance {1} month(s)"), Accounts.Count, MaxBalanceMonths)
+        ? string.Format(
+            T("L_Balance_SummaryFormat", "{0} account(s), highest balance {1} month(s)"),
+            Accounts.Count,
+            MaxBalanceMonths < 12 ? $"{MaxBalanceMonths}" : $"{MaxBalanceMonths} ({FormatDurationShort(MaxBalanceMonths)})")
         : T("L_Balance_Empty", "No overdue balance accounts found.");
 
     public string SearchQuery
@@ -151,28 +154,7 @@ public sealed class OverdueBalanceWindowViewModel : ViewModelBase
 
     private static int CalculateBalanceMonths(RDAccount account, DateTime asOfDate)
     {
-        var dueDate = account.GetNextInstallmentDate();
-        if (!dueDate.HasValue)
-        {
-            return 0;
-        }
-
-        var dueMonth = new DateTime(dueDate.Value.Year, dueDate.Value.Month, 1);
-        var currentMonth = new DateTime(asOfDate.Year, asOfDate.Month, 1);
-        if (dueMonth > currentMonth)
-        {
-            return 0;
-        }
-
-        var months = ((currentMonth.Year - dueMonth.Year) * 12) + currentMonth.Month - dueMonth.Month + 1;
-        var paid = Math.Max(0, account.GetMonthPaidNumber());
-        var remaining = Math.Max(0, 120 - paid);
-        if (remaining > 0)
-        {
-            months = Math.Min(months, remaining);
-        }
-
-        return Math.Max(0, months);
+        return account.CalculateOverdueMonths(asOfDate);
     }
 
     private void RebuildMonthOptions()
@@ -191,11 +173,12 @@ public sealed class OverdueBalanceWindowViewModel : ViewModelBase
 
         for (var month = 1; month <= max; month++)
         {
+            var shortCode = FormatDurationShort(month);
             MonthFilterOptions.Add(FilterOption.Exact(
                 month,
                 month == 1
-                    ? T("L_Balance_FilterOneMonth", "1 month")
-                    : string.Format(T("L_Balance_FilterMonthsFormat", "{0} months"), month)));
+                    ? $"{T("L_Balance_FilterOneMonth", "1 month")} (1M)"
+                    : $"{string.Format(T("L_Balance_FilterMonthsFormat", "{0} months"), month)} ({shortCode})"));
         }
 
         _selectedMonthFilter = FindEquivalentFilter(previous)
@@ -266,6 +249,18 @@ public sealed class OverdueBalanceWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(TotalBalanceAmount));
         this.RaisePropertyChanged(nameof(CountDisplay));
         this.RaisePropertyChanged(nameof(TotalBalanceDisplay));
+    }
+
+    public static string FormatDurationShort(int balanceMonths)
+    {
+        if (balanceMonths <= 0)
+            return "0M";
+        if (balanceMonths < 12)
+            return $"{balanceMonths}M";
+
+        int years = balanceMonths / 12;
+        int remMonths = balanceMonths % 12;
+        return remMonths == 0 ? $"{years}Y" : $"{years}Y {remMonths}M";
     }
 
     private static string T(string key, string fallback)

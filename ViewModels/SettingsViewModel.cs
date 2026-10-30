@@ -118,6 +118,7 @@ public class SettingsViewModel : ViewModelBase
         SaveDatabaseLocationCommand = ReactiveCommand.CreateFromTask(SaveDatabaseLocationAsync);
         UpdateMissingAslaasAllCommand = ReactiveCommand.CreateFromTask(UpdateMissingAslaasAllAsync);
         ForceUpdateAllAslaasCommand = ReactiveCommand.CreateFromTask(ForceUpdateAllAslaasAsync);
+        SyncOfficialAslaasFromPortalCommand = ReactiveCommand.CreateFromTask(SyncOfficialAslaasFromPortalAsync);
         RefreshPrintersCommand = ReactiveCommand.CreateFromTask(LoadPrintersAsync);
         SaveDefaultPrinterCommand = ReactiveCommand.CreateFromTask(SaveDefaultPrinterAsync);
         SaveBrowserSettingsCommand = ReactiveCommand.CreateFromTask(SaveBrowserSettingsAsync);
@@ -517,6 +518,7 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SaveLanguageCommand { get; }
     public ReactiveCommand<Unit, Unit> UpdateMissingAslaasAllCommand { get; }
     public ReactiveCommand<Unit, Unit> ForceUpdateAllAslaasCommand { get; }
+    public ReactiveCommand<Unit, Unit> SyncOfficialAslaasFromPortalCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshPrintersCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveDefaultPrinterCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveBrowserSettingsCommand { get; }
@@ -1400,6 +1402,70 @@ public class SettingsViewModel : ViewModelBase
     private async Task ForceUpdateAllAslaasAsync()
     {
         await RunAslaasUpdateAsync(forceAllActiveAccounts: true);
+    }
+
+    private async Task SyncOfficialAslaasFromPortalAsync()
+    {
+        if (IsUpdatingMissingAslaas || IsSyncing)
+        {
+            return;
+        }
+
+        try
+        {
+            IsUpdatingMissingAslaas = true;
+            AslaasUpdateStatus = "Finding active accounts to sync ASLAAS numbers...";
+
+            var activeAccounts = await _databaseService.GetAllActiveAslaasAccountsAsync();
+            if (activeAccounts.Count == 0)
+            {
+                AslaasUpdateStatus = "No active accounts found to sync.";
+                return;
+            }
+
+            var (isPythonInstalled, _) = await _pythonService.CheckPythonInstalledAsync();
+            if (!isPythonInstalled)
+            {
+                AslaasUpdateStatus = "Python is not installed. Install Python 3.x and retry.";
+                return;
+            }
+
+            var accountNumbers = activeAccounts.Select(a => a.AccountNo).ToList();
+            AslaasUpdateStatus = $"Found {accountNumbers.Count} active account(s). Opening portal to sync ASLAAS numbers from website...";
+
+            var (success, output) = await _pythonService.FetchOfficialAslaasAsync(
+                accountNumbers,
+                line =>
+                {
+                    var trimmed = (line ?? string.Empty).Trim();
+                    if (string.IsNullOrWhiteSpace(trimmed))
+                    {
+                        return;
+                    }
+
+                    Dispatcher.UIThread.Post(() => AslaasUpdateStatus = trimmed);
+                });
+
+            if (success)
+            {
+                AslaasUpdateStatus = $"Successfully synced ASLAAS numbers from website for {accountNumbers.Count} active account(s).";
+                _notificationService?.Success("ASLAAS Sync Complete", "ASLAAS numbers synced to database from website.");
+            }
+            else
+            {
+                AslaasUpdateStatus = $"ASLAAS sync finished: {output}";
+                _notificationService?.Warning("ASLAAS Sync", "Website ASLAAS sync completed with notices.");
+            }
+        }
+        catch (Exception ex)
+        {
+            AslaasUpdateStatus = $"ASLAAS sync error: {ex.Message}";
+            _notificationService?.Error("ASLAAS Sync Error", ex.Message);
+        }
+        finally
+        {
+            IsUpdatingMissingAslaas = false;
+        }
     }
 
     private async Task RunAslaasUpdateAsync(bool forceAllActiveAccounts)

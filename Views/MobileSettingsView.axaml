@@ -20,7 +20,7 @@
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 <TextBlock Text="App Configuration"
                            FontSize="20"
-                           FontWeight="Black"
+                           FontWeight="Bold"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
             </StackPanel>
 

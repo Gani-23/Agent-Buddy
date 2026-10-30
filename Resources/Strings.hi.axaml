@@ -153,6 +153,7 @@
         <x:String x:Key="L_Set_AslaasMaintenance">ASLAAS मेंटेनेंस</x:String>
         <x:String x:Key="L_Set_UpdateMissingAslaasAll">गुम ASLAAS नंबर अपडेट करें (सभी)</x:String>
         <x:String x:Key="L_Set_ForceUpdateAslaasAll">ASLAAS फोर्स अपडेट करें (सभी सक्रिय)</x:String>
+        <x:String x:Key="L_Set_SyncAslaasFromPortal">वेबसाइट से ASLAAS सिंक करें</x:String>
         <x:String x:Key="L_Set_BackupDb">डेटाबेस बैकअप</x:String>
         <x:String x:Key="L_Set_ExportExcel">Excel निर्यात</x:String>
         <x:String x:Key="L_Set_LegacySync">लेगेसी DB सिंक</x:String>
@@ -265,6 +266,9 @@
         <x:String x:Key="L_Balance_SortAmount">राशि ज्यादा से कम</x:String>
         <x:String x:Key="L_Balance_ColumnAccount">खाता</x:String>
         <x:String x:Key="L_Balance_ColumnName">नाम</x:String>
+        <x:String x:Key="L_Balance_ColumnDenom">किस्त</x:String>
+        <x:String x:Key="L_Balance_ColumnOverdue">अवधि</x:String>
+        <x:String x:Key="L_Balance_ColumnTotalDue">कुल बकाया</x:String>
         <x:String x:Key="L_Balance_ColumnBalance">बैलेंस</x:String>
         <x:String x:Key="L_Balance_ColumnPaidUpto">भुगतान तक</x:String>
         <x:String x:Key="L_Balance_ColumnNextDue">अगली देय</x:String>

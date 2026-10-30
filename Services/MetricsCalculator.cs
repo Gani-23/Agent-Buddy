@@ -58,11 +58,10 @@ public class MetricsCalculator
             var nextDate = account.GetNextInstallmentDate();
             var monthsPaid = account.GetMonthPaidNumber();
 
-            // Defaulter: unpaid for 4+ months
+            // Defaulter: unpaid for 4+ months (discontinued account under India Post rules)
             if (nextDate.HasValue)
             {
-                var dueMonthStart = new DateTime(nextDate.Value.Year, nextDate.Value.Month, 1);
-                var monthsOverdue = ((currentMonthStart.Year - dueMonthStart.Year) * 12) + (currentMonthStart.Month - dueMonthStart.Month);
+                var monthsOverdue = account.CalculateOverdueMonths(currentDate);
                 if (monthsOverdue >= 4)
                 {
                     metrics.DefaulterAccounts++;
@@ -107,6 +106,8 @@ public class MetricsCalculator
     private void CalculateHalfYearSummaries(List<RDAccount> accounts, DashboardMetrics metrics)
     {
         var today = DateTime.Today;
+        var monthStart = new DateTime(today.Year, today.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
         foreach (var account in accounts)
         {
@@ -114,24 +115,15 @@ public class MetricsCalculator
             if (!nextDate.HasValue) continue;
 
             var amount = account.GetAmount();
-            var isPending = nextDate.Value.Date <= today;
             
-            // In India Post, RD accounts are divided by opening day (1-15 vs 16-end)
-            var openingDate = account.GetEstimatedOpeningDate();
-            // If opening date is unknown, fallback to next installment date's day, though standard RD due dates are always end of month.
-            // Actually, the portal sets next_due_date to either the 15th or the last day of the month based on account creation.
-            var isFirstHalf = nextDate.Value.Day <= 15;
-            
-            // Wait, standard next installment date might just be the actual exact date. 
-            // If opening date is known, use that.
-            if (openingDate.HasValue)
-            {
-                isFirstHalf = openingDate.Value.Day <= 15;
-            }
+            // In India Post, if next due date is strictly beyond the current month end,
+            // this month's installment is already deposited. Otherwise it is pending deposit.
+            var isDeposited = nextDate.Value.Date > monthEnd;
+            var isFirstHalf = account.IsFirstHalfCycle;
 
             if (isFirstHalf)
             {
-                if (isPending)
+                if (!isDeposited)
                 {
                     metrics.FirstHalfPendingCount++;
                     metrics.FirstHalfPendingAmount += amount;
@@ -144,7 +136,7 @@ public class MetricsCalculator
             }
             else
             {
-                if (isPending)
+                if (!isDeposited)
                 {
                     metrics.SecondHalfPendingCount++;
                     metrics.SecondHalfPendingAmount += amount;

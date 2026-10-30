@@ -98,30 +98,29 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Padding" Value="12,0"/>
     </Style>
 
     <Style Selector="DatePicker">
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
     <Style Selector="DatePicker /template/ Button#PART_FlyoutButton">
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
     <Style Selector="TextBox /template/ Border#PART_BorderElement">
         <Setter Property="BoxShadow" Value="{DynamicResource AppInsetShadow}"/>
-        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Transitions">
             <Transitions>
-                <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
-                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
             </Transitions>
         </Setter>
     </Style>
@@ -135,8 +134,8 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="12,0"/>
     </Style>
@@ -146,10 +145,10 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="MinHeight" Value="26"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="MinHeight" Value="28"/>
         <Setter Property="Padding" Value="8,2"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="12"/>
     </Style>
 
     <Style Selector="ComboBoxItem">
@@ -172,8 +171,8 @@
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
@@ -183,21 +182,21 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="Padding" Value="10"/>
-        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="CornerRadius" Value="6"/>
     </Style>
 
-    <!-- Cards with Neumorphic elevation -->
+    <!-- Modern Clean Cards -->
     <Style Selector="Border.Card">
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="Padding" Value="18"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="16"/>
         <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         <Setter Property="Transitions">
             <Transitions>
-                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.25"/>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
             </Transitions>
         </Setter>
     </Style>
@@ -206,12 +205,12 @@
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="20"/>
         <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         <Setter Property="Transitions">
             <Transitions>
-                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.25"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
             </Transitions>
         </Setter>
     </Style>
@@ -220,22 +219,22 @@
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="18"/>
-        <Setter Property="Padding" Value="24"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="18"/>
         <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
     </Style>
 
     <Style Selector="Border.DialogBackdrop">
         <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}"/>
-        <Setter Property="Padding" Value="24"/>
+        <Setter Property="Padding" Value="20"/>
     </Style>
 
     <Style Selector="Border.DialogSurface">
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="20"/>
-        <Setter Property="Padding" Value="24"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="22"/>
         <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
     </Style>
 
@@ -335,47 +334,43 @@
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
 
-    <!-- Neumorphic Buttons with Soft Embossed Elevation -->
+    <!-- Modern Buttons with Subtle Elevation -->
     <Style Selector="Button">
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="MinHeight" Value="38"/>
-        <Setter Property="Padding" Value="16,9"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="Padding" Value="14,8"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Transitions">
             <Transitions>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15"/>
-                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12"/>
+                <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
             </Transitions>
         </Setter>
     </Style>
 
     <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BoxShadow" Value="{DynamicResource AppButtonShadow}"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Transitions">
-            <Transitions>
-                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.15"/>
-            </Transitions>
-        </Setter>
+        <Setter Property="CornerRadius" Value="8"/>
     </Style>
 
     <Style Selector="Button:pointerover">
         <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
-        <Setter Property="RenderTransform" Value="translate(0px, -1px)"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
     </Style>
 
     <Style Selector="Button:pressed">
         <Setter Property="Background" Value="{DynamicResource AppPressedBrush}"/>
-        <Setter Property="RenderTransform" Value="scale(0.98)"/>
+        <Setter Property="RenderTransform" Value="scale(0.985)"/>
     </Style>
 
     <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BoxShadow" Value="{DynamicResource AppButtonPressedShadow}"/>
+        <Setter Property="BoxShadow" Value="none"/>
     </Style>
 
     <Style Selector="Button.Primary">
@@ -423,10 +418,10 @@
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="8"/>
-        <Setter Property="Width" Value="36"/>
-        <Setter Property="Height" Value="36"/>
-        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="7"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="CornerRadius" Value="8"/>
     </Style>
 
     <Style Selector="Button.Icon:pointerover">
@@ -437,19 +432,24 @@
     <Style Selector="Button.NavItem">
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="Padding" Value="12,9"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="MinHeight" Value="38"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12"/>
+            </Transitions>
+        </Setter>
     </Style>
 
     <Style Selector="Button.NavItem /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BoxShadow" Value="none"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="8"/>
     </Style>
 
     <Style Selector="Button.NavItem:pointerover">
@@ -457,17 +457,17 @@
     </Style>
 
     <Style Selector="Button.NavItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BoxShadow" Value="{DynamicResource AppButtonShadow}"/>
+        <Setter Property="BoxShadow" Value="none"/>
     </Style>
 
     <Style Selector="Button.NavItem.Current">
-        <Setter Property="Background" Value="{DynamicResource AppPressedBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
-        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
     <Style Selector="Button.NavItem.Current /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BoxShadow" Value="{DynamicResource AppInsetShadow}"/>
+        <Setter Property="BoxShadow" Value="none"/>
     </Style>
 
     <Style Selector="TextBox.Notion">
@@ -525,15 +525,75 @@
         <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}"/>
+    </Style>
+
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+
+    <Style Selector="DataGridRow">
+        <Setter Property="MinHeight" Value="36"/>
     </Style>
 
     <Style Selector="DataGridRow:pointerover">
         <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
     </Style>
 
+    <Style Selector="DataGridRow:selected">
+        <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
+    </Style>
+
+    <Style Selector="DataGridCell">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Modern Badge / Pill Classes -->
+    <Style Selector="Border.Badge">
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+    </Style>
+
+    <Style Selector="Border.Badge TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style Selector="Border.Badge.Ready">
+        <Setter Property="Background" Value="{DynamicResource SuccessTintBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AccentGreenBrush}"/>
+    </Style>
+
+    <Style Selector="Border.Badge.Review">
+        <Setter Property="Background" Value="{DynamicResource WarningTintBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AccentYellowBrush}"/>
+    </Style>
+
+    <Style Selector="Border.Badge.Blocked">
+        <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AccentRedBrush}"/>
+    </Style>
+
+    <Style Selector="Border.Badge.Idle">
+        <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+    </Style>
+
     <Style Selector="CheckBox">
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
     </Style>
 
 </Styles>

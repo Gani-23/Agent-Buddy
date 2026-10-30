@@ -87,7 +87,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Text="{Binding TotalAccounts, StringFormat='{}{0:N0}'}"
                                    FontSize="24"
-                                   FontWeight="Black"
+                                   FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="Active RD Accounts"
                                    FontSize="11"
@@ -103,7 +103,7 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Text="{Binding TotalAmount, StringFormat='₹ {0:N0}'}"
                                    FontSize="24"
-                                   FontWeight="Black"
+                                   FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlueBrush}"/>
                         <TextBlock Text="Monthly Denomination"
                                    FontSize="11"
@@ -124,7 +124,7 @@
                         BorderThickness="1">
                     <StackPanel Spacing="3">
                         <TextBlock Text="1st Half Pending (1-15)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
-                        <TextBlock Text="{Binding FirstHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                         <TextBlock Text="{Binding FirstHalfPendingAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                     </StackPanel>
                 </Border>
@@ -139,7 +139,7 @@
                         BorderThickness="1">
                     <StackPanel Spacing="3">
                         <TextBlock Text="1st Half Deposited" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
-                        <TextBlock Text="{Binding FirstHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding FirstHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                         <TextBlock Text="{Binding FirstHalfDepositedAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                     </StackPanel>
                 </Border>
@@ -154,7 +154,7 @@
                         BorderThickness="1">
                     <StackPanel Spacing="3">
                         <TextBlock Text="2nd Half Pending (16+)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
-                        <TextBlock Text="{Binding SecondHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfPending, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                         <TextBlock Text="{Binding SecondHalfPendingAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                     </StackPanel>
                 </Border>
@@ -169,7 +169,7 @@
                         BorderThickness="1">
                     <StackPanel Spacing="3">
                         <TextBlock Text="2nd Half Deposited" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
-                        <TextBlock Text="{Binding SecondHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Black" Foreground="{DynamicResource TintTextBrush}"/>
+                        <TextBlock Text="{Binding SecondHalfDeposited, StringFormat='{}{0:N0} Accounts'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                         <TextBlock Text="{Binding SecondHalfDepositedAmount, StringFormat='₹ {0:N0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
                     </StackPanel>
                 </Border>
@@ -272,7 +272,7 @@
                                             Background="{DynamicResource AppHoverBrush}">
                                         <TextBlock Text="{Binding AccountNo}"
                                                    FontSize="11"
-                                                   FontFamily="Consolas,Menlo,Monospace"
+                                                   FontFamily="{StaticResource AppMonoFontFamily}"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                     </Border>
@@ -302,13 +302,13 @@
                                             Classes="Secondary"
                                             Padding="10,8"
                                             CornerRadius="8"
-                                            Background="#1525D366"
-                                            BorderBrush="#4025D366"
+                                            Background="{DynamicResource SuccessTintBrush}"
+                                            BorderBrush="{StaticResource SuccessBrush}"
                                             Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).SendWhatsAppReminderCommand, FallbackValue={x:Null}}"
                                             CommandParameter="{Binding}">
                                         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                            <PathIcon Data="{StaticResource Icon_Share}" Width="13" Height="13" Foreground="#25D366"/>
-                                            <TextBlock Text="Send WhatsApp Reminder" FontSize="11" FontWeight="Bold" Foreground="#25D366"/>
+                                            <PathIcon Data="{StaticResource Icon_Share}" Width="13" Height="13" Foreground="{StaticResource SuccessBrush}"/>
+                                            <TextBlock Text="Send WhatsApp Reminder" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                                         </StackPanel>
                                     </Button>
 
