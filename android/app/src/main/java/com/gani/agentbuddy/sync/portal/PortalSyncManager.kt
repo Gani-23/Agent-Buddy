@@ -113,10 +113,25 @@ class PortalSyncManager(
                     return;
                 }
 
-                // 2. If on Deposit Accounts screen with Print Preview link -> Scrape schedule!
+                // 2. If on Deposit Accounts screen:
+                // Always click "Fetch More Accounts" first before opening print preview!
+                var nextBtn = document.getElementById("NEXT_ACCOUNTS") 
+                           || document.querySelector("input[name='Action.NEXT_ACCOUNTS']")
+                           || document.querySelector("input[value*='Fetch More Accounts']");
+                var alreadyFetchedMore = sessionStorage.getItem("agentbuddy_fetched_more") === "true";
+
+                if (nextBtn && !nextBtn.disabled && !alreadyFetchedMore) {
+                    sessionStorage.setItem("agentbuddy_fetched_more", "true");
+                    AgentBuddyMobile.onStepStatus("Clicking 'Fetch More Accounts'...");
+                    nextBtn.click();
+                    return;
+                }
+
+                // Once 'Fetch More Accounts' is clicked (or if unavailable), download schedule via Print Preview
                 var printLink = document.getElementById('HREF_printPreview');
                 if (printLink) {
-                    AgentBuddyMobile.onStepStatus("Downloading schedule report...");
+                    sessionStorage.removeItem("agentbuddy_fetched_more");
+                    AgentBuddyMobile.onStepStatus("Downloading schedule report via Print Preview...");
                     fetch(printLink.href)
                         .then(function(res) { return res.text(); })
                         .then(function(html) {
