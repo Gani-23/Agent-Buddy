@@ -318,6 +318,35 @@ public class DatabaseService
     }
 
     /// <summary>
+    /// Get all account_no to short_code mappings for syncing with mobile app.
+    /// </summary>
+    public async Task<List<Dictionary<string, string>>> GetAccountShortCodeMappingsAsync()
+    {
+        EnsureAnalyticsSchema();
+        var mappings = new List<Dictionary<string, string>>();
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT account_no, short_code 
+            FROM rd_accounts 
+            WHERE short_code IS NOT NULL AND trim(short_code) != ''";
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            mappings.Add(new Dictionary<string, string>
+            {
+                ["account_no"] = reader.GetString(0),
+                ["short_code"] = reader.GetString(1)
+            });
+        }
+
+        return mappings;
+    }
+
+    /// <summary>
     /// Get account by short code (checks active rd_accounts first, then closed_accounts)
     /// </summary>
     public async Task<RDAccount?> GetAccountByShortCodeAsync(string shortCode)
