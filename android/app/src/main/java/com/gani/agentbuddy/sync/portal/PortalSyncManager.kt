@@ -18,8 +18,8 @@ import java.util.Locale
 sealed class SyncState {
     object Idle : SyncState()
     object LoadingPage : SyncState()
-    object SolvingCaptcha : SyncState()
-    object Authenticating : SyncState()
+    data class SolvingCaptcha(val message: String = "Reading CAPTCHA with ML Kit OCR...") : SyncState()
+    data class Authenticating(val message: String = "Submitting login credentials...") : SyncState()
     object NavigatingToAccounts : SyncState()
     data class ScrapingAccounts(val progressText: String) : SyncState()
     data class Success(val count: Int) : SyncState()
@@ -38,10 +38,18 @@ class PortalSyncManager(
     val loadProgress: StateFlow<Int> = _loadProgress
 
     private var targetWebView: WebView? = null
+    private var savedAgentId: String = ""
+    private var savedAccessCode: String = ""
+    private var loginAttemptCount: Int = 0
+    private val MAX_AUTO_LOGIN_ATTEMPTS = 3
 
     @SuppressLint("SetJavaScriptEnabled")
     fun attachWebView(webView: WebView, agentId: String, accessCode: String) {
         targetWebView = webView
+        savedAgentId = agentId
+        savedAccessCode = accessCode
+        loginAttemptCount = 0
+
         webView.setBackgroundColor(android.graphics.Color.WHITE)
         webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         webView.settings.apply {
@@ -103,16 +111,45 @@ class PortalSyncManager(
             (function() {
                 // 1. If on login form
                 var userField = document.getElementsByName('AuthenticationFG.USER_PRINCIPAL')[0];
+                var passField = document.getElementsByName('AuthenticationFG.ACCESS_CODE')[0];
                 var captchaImg = document.getElementById('IMAGECAPTCHA');
-                if (userField && captchaImg) {
-                    var alreadySent = sessionStorage.getItem('agentbuddy_captcha_sent') === 'true';
-                    if (alreadySent) return;
-                    sessionStorage.setItem('agentbuddy_captcha_sent', 'true');
 
+                if (userField && passField && captchaImg) {
+                    // Ensure captcha image has actually loaded in DOM
+                    if (!captchaImg.complete || (captchaImg.naturalWidth || 0) === 0) {
+                        captchaImg.onload = function() {
+                            if (window.AgentBuddyMobile) {
+                                AgentBuddyMobile.onPageReady();
+                            }
+                        };
+                        return;
+                    }
+
+                    // Check if page displays an error message from previous attempt
+                    var bodyText = document.body ? (document.body.innerText || "") : "";
+                    var hasError = document.querySelector("div.redbg") != null
+                                || bodyText.indexOf("Enter the characters that you see in the picture") !== -1
+                                || bodyText.indexOf("invalid verification code") !== -1
+                                || bodyText.indexOf("wrong captcha") !== -1
+                                || bodyText.indexOf("Invalid User ID or Password") !== -1;
+
+                    var currentSrc = captchaImg.src || "";
+                    var lastProcessed = sessionStorage.getItem('agentbuddy_last_captcha_src') || "";
+
+                    // If we already extracted this exact captcha and no error was flagged, wait for server response
+                    if (lastProcessed === currentSrc && !hasError) {
+                        return;
+                    }
+
+                    // Re-ensure Agent ID and Password are populated (portal clears password on bad captcha!)
                     userField.value = '$agentId';
-                    var passField = document.getElementsByName('AuthenticationFG.ACCESS_CODE')[0];
-                    if (passField) passField.value = '$accessCode';
-                    
+                    userField.dispatchEvent(new Event('input', {bubbles: true}));
+                    passField.value = '$accessCode';
+                    passField.dispatchEvent(new Event('input', {bubbles: true}));
+
+                    sessionStorage.setItem('agentbuddy_last_captcha_src', currentSrc);
+
+                    // Render scaled captcha on canvas for ML Kit OCR
                     var scale = 3.5;
                     var w = captchaImg.naturalWidth || captchaImg.width || 120;
                     var h = captchaImg.naturalHeight || captchaImg.height || 35;
@@ -127,7 +164,7 @@ class PortalSyncManager(
                     ctx.drawImage(captchaImg, 0, 0, canvas.width, canvas.height);
 
                     var base64 = canvas.toDataURL('image/png');
-                    AgentBuddyMobile.onCaptchaExtracted(base64);
+                    AgentBuddyMobile.onCaptchaReady(base64, hasError);
                     return;
                 }
 
@@ -253,51 +290,46 @@ class PortalSyncManager(
         }
     }
 
-    fun retryExtractCaptcha(agentId: String, accessCode: String) {
-        _syncState.value = SyncState.SolvingCaptcha
+    fun retryExtractCaptcha(agentId: String? = null, accessCode: String? = null) {
+        if (!agentId.isNullOrBlank()) savedAgentId = agentId
+        if (!accessCode.isNullOrBlank()) savedAccessCode = accessCode
+        loginAttemptCount = 0
+        _syncState.value = SyncState.SolvingCaptcha("Refreshing CAPTCHA...")
         targetWebView?.post {
-            injectLoginAutomation(agentId, accessCode)
+            val refreshScript = """
+                (function() {
+                    sessionStorage.removeItem('agentbuddy_last_captcha_src');
+                    var refreshIcon = document.querySelector("img[src*='refresh'], a[href*='refresh'], [onclick*='refresh']");
+                    if (refreshIcon) {
+                        refreshIcon.click();
+                    } else {
+                        window.location.reload();
+                    }
+                })();
+            """.trimIndent()
+            targetWebView?.evaluateJavascript(refreshScript, null)
         }
     }
 
-    private fun injectLoginAutomation(agentId: String, accessCode: String) {
-        val script = """
-            (function() {
-                var userField = document.getElementsByName('AuthenticationFG.USER_PRINCIPAL')[0];
-                var passField = document.getElementsByName('AuthenticationFG.ACCESS_CODE')[0];
-                var captchaImg = document.getElementById('IMAGECAPTCHA');
-
-                if (userField && passField && captchaImg) {
-                    userField.value = '$agentId';
-                    passField.value = '$accessCode';
-
-                    // Zoom / Scale rendered captcha 3.5x onto canvas for clear OCR
-                    var scale = 3.5;
-                    var w = captchaImg.naturalWidth || captchaImg.width || 120;
-                    var h = captchaImg.naturalHeight || captchaImg.height || 35;
-                    var canvas = document.createElement('canvas');
-                    canvas.width = Math.round(w * scale);
-                    canvas.height = Math.round(h * scale);
-                    var ctx = canvas.getContext('2d');
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(captchaImg, 0, 0, canvas.width, canvas.height);
-
-                    var base64 = canvas.toDataURL('image/png');
-                    AgentBuddyMobile.onCaptchaExtracted(base64);
-                }
-            })();
-        """.trimIndent()
-
-        targetWebView?.evaluateJavascript(script, null)
-    }
-
-    fun submitLogin(captchaCode: String) {
-        _syncState.value = SyncState.Authenticating
+    fun submitLogin(captchaCode: String, overridePassword: String? = null) {
+        val pwd = overridePassword ?: savedAccessCode
+        _syncState.value = SyncState.Authenticating("Submitting login credentials ($captchaCode)...")
         val submitScript = """
             (function() {
+                sessionStorage.removeItem('agentbuddy_last_captcha_src');
+
+                var userField = document.getElementsByName('AuthenticationFG.USER_PRINCIPAL')[0];
+                if (userField && (!userField.value || userField.value.length === 0)) {
+                    userField.value = '$savedAgentId';
+                }
+
+                var passField = document.getElementsByName('AuthenticationFG.ACCESS_CODE')[0];
+                if (passField) {
+                    passField.value = '$pwd';
+                    passField.dispatchEvent(new Event('input', {bubbles: true}));
+                    passField.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+
                 var codeField = document.getElementsByName('AuthenticationFG.VERIFICATION_CODE')[0];
                 if (codeField) {
                     codeField.value = '$captchaCode';
@@ -352,19 +384,40 @@ class PortalSyncManager(
     inner class PortalJsBridge(private val agentId: String, private val accessCode: String) {
 
         @JavascriptInterface
+        fun onPageReady() {
+            targetWebView?.post {
+                handlePageLifecycle(agentId, accessCode)
+            }
+        }
+
+        @JavascriptInterface
         fun onStepStatus(status: String) {
             _syncState.value = SyncState.ScrapingAccounts(status)
         }
 
         @JavascriptInterface
-        fun onCaptchaExtracted(base64Data: String) {
-            _syncState.value = SyncState.SolvingCaptcha
+        fun onCaptchaReady(base64Data: String, isRetryAfterError: Boolean) {
+            if (isRetryAfterError) {
+                loginAttemptCount++
+                if (loginAttemptCount > MAX_AUTO_LOGIN_ATTEMPTS) {
+                    _syncState.value = SyncState.Error("CAPTCHA incorrect after $MAX_AUTO_LOGIN_ATTEMPTS attempts. Enter the CAPTCHA in the manual box above and tap Submit.")
+                    return
+                }
+                _syncState.value = SyncState.SolvingCaptcha("CAPTCHA was incorrect. Retrying automatically (Attempt ${loginAttemptCount + 1}/$MAX_AUTO_LOGIN_ATTEMPTS)...")
+            } else {
+                _syncState.value = SyncState.SolvingCaptcha("Reading CAPTCHA with ML Kit OCR...")
+            }
+
             scope.launch(Dispatchers.IO) {
+                if (isRetryAfterError) {
+                    kotlinx.coroutines.delay(600)
+                }
                 val resolvedCaptcha = CaptchaOcrProcessor.recognizeFromBase64(base64Data)
                 if (resolvedCaptcha.isNotEmpty()) {
-                    submitLogin(resolvedCaptcha)
+                    _syncState.value = SyncState.Authenticating("Submitting login credentials ($resolvedCaptcha)...")
+                    submitLogin(resolvedCaptcha, accessCode)
                 } else {
-                    _syncState.value = SyncState.Error("OCR could not read CAPTCHA clearly. Please tap retry.")
+                    _syncState.value = SyncState.Error("OCR could not read CAPTCHA clearly. Please enter it manually above.")
                 }
             }
         }

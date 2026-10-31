@@ -170,15 +170,16 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
 
+                                    val isError = syncState is SyncState.Error
                                     val statusText = when (syncState) {
                                         is SyncState.Idle -> "Opening India Post portal..."
                                         is SyncState.LoadingPage -> "Loading portal (${loadProgress}%)..."
-                                        is SyncState.SolvingCaptcha -> "Reading CAPTCHA with ML Kit OCR..."
-                                        is SyncState.Authenticating -> "Submitting login credentials..."
+                                        is SyncState.SolvingCaptcha -> (syncState as SyncState.SolvingCaptcha).message
+                                        is SyncState.Authenticating -> (syncState as SyncState.Authenticating).message
                                         is SyncState.NavigatingToAccounts -> "Navigating to Accounts & Schedule..."
                                         is SyncState.ScrapingAccounts -> (syncState as SyncState.ScrapingAccounts).progressText
                                         is SyncState.Success -> "✓ Synced ${(syncState as SyncState.Success).count} accounts!"
-                                        is SyncState.Error -> "Error: ${(syncState as SyncState.Error).message}"
+                                        is SyncState.Error -> (syncState as SyncState.Error).message
                                     }
 
                                     var manualCaptcha by remember { mutableStateOf("") }
@@ -187,8 +188,9 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 16.dp),
-                                        color = Color(0xFFEFF6FF),
-                                        shape = RoundedCornerShape(14.dp)
+                                        color = if (isError) Color(0xFFFEF2F2) else Color(0xFFEFF6FF),
+                                        shape = RoundedCornerShape(14.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isError) Color(0xFFFCA5A5) else Color(0xFFBFDBFE))
                                     ) {
                                         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Row(
@@ -198,9 +200,10 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Text(
                                                     text = statusText,
-                                                    color = Color(0xFF1E40AF),
+                                                    color = if (isError) Color(0xFFDC2626) else Color(0xFF1E40AF),
                                                     fontSize = 14.sp,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.weight(1f)
                                                 )
                                                 IconButton(
                                                     onClick = { showLiveWebView = !showLiveWebView },
@@ -209,7 +212,7 @@ class MainActivity : ComponentActivity() {
                                                     Icon(
                                                         imageVector = Icons.Default.Language,
                                                         contentDescription = "Toggle Portal View",
-                                                        tint = Color(0xFF2563EB),
+                                                        tint = if (isError) Color(0xFFDC2626) else Color(0xFF2563EB),
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                 }
@@ -225,7 +228,7 @@ class MainActivity : ComponentActivity() {
                                                     color = Color(0xFF2563EB),
                                                     trackColor = Color(0xFFDBEAFE)
                                                 )
-                                            } else if (syncState is SyncState.Authenticating || syncState is SyncState.ScrapingAccounts) {
+                                            } else if (syncState is SyncState.Authenticating || syncState is SyncState.ScrapingAccounts || syncState is SyncState.SolvingCaptcha) {
                                                 LinearProgressIndicator(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -248,6 +251,16 @@ class MainActivity : ComponentActivity() {
                                                     modifier = Modifier.weight(1f),
                                                     singleLine = true,
                                                     shape = RoundedCornerShape(10.dp),
+                                                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                                                    ),
+                                                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                                                        onDone = {
+                                                            if (manualCaptcha.isNotBlank()) {
+                                                                syncManager.submitLogin(manualCaptcha.trim(), password)
+                                                            }
+                                                        }
+                                                    ),
                                                     colors = OutlinedTextFieldDefaults.colors(
                                                         focusedContainerColor = Color.White,
                                                         unfocusedContainerColor = Color.White
@@ -257,7 +270,7 @@ class MainActivity : ComponentActivity() {
                                                 Button(
                                                     onClick = {
                                                         if (manualCaptcha.isNotBlank()) {
-                                                            syncManager.submitLogin(manualCaptcha.trim())
+                                                            syncManager.submitLogin(manualCaptcha.trim(), password)
                                                         }
                                                     },
                                                     enabled = manualCaptcha.isNotBlank(),
