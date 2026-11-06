@@ -513,8 +513,7 @@ public static class DueListPdfService
         messageBuilder.AppendLine($"*[India Post DOP] {title}*");
         messageBuilder.AppendLine($"Total Accounts: {totalCount} | Expected Collection: Rs. {totalAmount:N0}");
         messageBuilder.AppendLine();
-        messageBuilder.AppendLine("📋 Visual table is ready: Press Cmd+V (Mac) or Ctrl+V (Windows) to send image.");
-        messageBuilder.AppendLine("📄 Or drag & drop the highlighted PDF from Finder to send document.");
+        messageBuilder.AppendLine("📄 Detailed PDF list attached. (Drag & drop from the open Finder window into this chat)");
 
         var phoneQuery = string.IsNullOrWhiteSpace(agentPhoneNumber) ? string.Empty : $"phone={agentPhoneNumber}&";
         var encodedMessage = Uri.EscapeDataString(messageBuilder.ToString());
@@ -553,34 +552,6 @@ public static class DueListPdfService
                 Process.Start(new ProcessStartInfo(webUrl) { UseShellExecute = true });
             }
             catch { }
-        }
-
-        // 6. On macOS, automatically activate WhatsApp and trigger Cmd+V after a brief delay
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(1200);
-                    var pasteScript = @"
-tell application ""WhatsApp"" to activate
-delay 0.3
-tell application ""System Events""
-    keystroke ""v"" using command down
-end tell";
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = "osascript",
-                        Arguments = $"-e '{pasteScript}'",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    using var proc = Process.Start(psi);
-                    proc?.WaitForExit(3000);
-                }
-                catch { }
-            });
         }
 
         return (true, pdfPath, nativeUrl);
