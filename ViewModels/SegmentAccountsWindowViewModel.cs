@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using ReactiveUI;
 using AgentBuddy.Models;
+using AgentBuddy.Services;
 using Avalonia.Input.Platform;
 
 namespace AgentBuddy.ViewModels;
@@ -65,50 +66,26 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
     {
         if (FilteredAccounts == null || !FilteredAccounts.Any()) return;
         
-        var messageBuilder = new System.Text.StringBuilder();
-        messageBuilder.AppendLine($"*{Title} Summary*");
-        messageBuilder.AppendLine($"Total: {Count} accounts (Rs. {TotalAmount:N0})");
-        messageBuilder.AppendLine();
+        var accountsList = FilteredAccounts.ToList();
+        var title = Title;
+        var totalCount = accountsList.Count;
+        var totalAmount = accountsList.Sum(a => a.GetAmount());
 
-        int i = 1;
-        // Don't limit to 50 anymore, take all of them!
-        foreach (var account in FilteredAccounts) 
+        string? agentName = null;
+        if (DashboardContext.DatabaseService != null)
         {
-            var date = account.GetNextInstallmentDate()?.ToString("dd-MMM") ?? account.NextInstallmentDate;
-            messageBuilder.AppendLine($"{i}. {account.AccountName} - Rs.{account.Denomination} (Due: {date})");
-            i++;
+            agentName = await DashboardContext.DatabaseService.GetAgentNameAsync();
         }
 
-        var fullMessage = messageBuilder.ToString();
-        var encodedMessage = System.Uri.EscapeDataString(fullMessage);
-        
-        if (encodedMessage.Length > 1500)
-        {
-            if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                var clipboard = desktop.MainWindow?.Clipboard;
-                if (clipboard != null)
-                {
-                    await clipboard.SetTextAsync(fullMessage);
-                }
-            }
-            encodedMessage = System.Uri.EscapeDataString($"*{Title} Summary*\n\n(The list is too long for a single link. The full list has been copied to your clipboard. Please Paste it here!)");
-        }
+        var (_, pdfPath, _) = DueListPdfService.DispatchToWhatsApp(
+            title,
+            agentName ?? "DOP Agent",
+            accountsList,
+            DashboardContext.AgentPhoneNumber);
 
-        var phoneQuery = string.IsNullOrWhiteSpace(DashboardContext.AgentPhoneNumber) ? "" : $"phone={DashboardContext.AgentPhoneNumber}&";
-        var url = $"https://api.whatsapp.com/send?{phoneQuery}text={encodedMessage}";
-        
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (System.Exception)
-        {
-        }
+        DashboardContext.NotificationService?.Success(
+            "WhatsApp PDF Ready",
+            $"{title} PDF ({totalCount} accounts, Rs.{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
     }
 
     private void SendWhatsAppReminder(RDAccount account)

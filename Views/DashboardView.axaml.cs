@@ -146,60 +146,28 @@ public partial class DashboardView : UserControl
     {
         if (ViewModel == null || sender is not Button button || button.Tag is not string segmentKey) return;
         
-        var accountsList = ViewModel.GetAccountsForSegment(segmentKey);
-        var accounts = accountsList.Take(50).ToList();
-        if (!accounts.Any()) return;
+        var accountsList = ViewModel.GetAccountsForSegment(segmentKey).ToList();
+        if (!accountsList.Any()) return;
 
         var title = ViewModel.GetSegmentTitle(segmentKey);
-        var totalCount = accountsList.Count();
+        var totalCount = accountsList.Count;
         var totalAmount = accountsList.Sum(a => a.GetAmount());
         
-        var messageBuilder = new System.Text.StringBuilder();
-        messageBuilder.AppendLine($"*[Bot Automation] {title} Summary*");
-        messageBuilder.AppendLine($"Total: {totalCount} accounts (Rs. {totalAmount:N0})");
-        messageBuilder.AppendLine();
-
-        int i = 1;
-        foreach (var account in accounts)
+        string? agentName = null;
+        if (ViewModel.DatabaseService != null)
         {
-            var date = account.GetNextInstallmentDate()?.ToString("dd-MMM") ?? account.NextInstallmentDate;
-            messageBuilder.AppendLine($"{i}. {account.AccountName} - Rs.{account.Denomination} (Due: {date})");
-            i++;
+            agentName = await ViewModel.DatabaseService.GetAgentNameAsync();
         }
 
-        if (totalCount > 50)
-        {
-            messageBuilder.AppendLine($"... and {totalCount - 50} more.");
-        }
+        var (_, pdfPath, _) = DueListPdfService.DispatchToWhatsApp(
+            title,
+            agentName ?? "DOP Agent",
+            accountsList,
+            ViewModel.AgentPhoneNumber);
 
-        var fullMessage = messageBuilder.ToString();
-        var encodedMessage = System.Uri.EscapeDataString(fullMessage);
-        
-        // WhatsApp Web / API URLs typically max out around 2000-2048 characters.
-        if (encodedMessage.Length > 1500)
-        {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel?.Clipboard != null)
-            {
-                await topLevel.Clipboard.SetTextAsync(fullMessage);
-            }
-            encodedMessage = System.Uri.EscapeDataString($"*[Bot Automation] {title} Summary*\n\n(The list is too long for a single link. The full list has been copied to your clipboard. Please Paste it here!)");
-        }
-
-        var phoneQuery = string.IsNullOrWhiteSpace(ViewModel.AgentPhoneNumber) ? "" : $"phone={ViewModel.AgentPhoneNumber}&";
-        var url = $"https://api.whatsapp.com/send?{phoneQuery}text={encodedMessage}";
-        
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (System.Exception)
-        {
-        }
+        ViewModel.NotificationService?.Success(
+            "WhatsApp PDF Ready",
+            $"{title} PDF ({totalCount} accounts, Rs.{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
     }
 
     private async void SyncMobileQr_Click(object? sender, RoutedEventArgs e)

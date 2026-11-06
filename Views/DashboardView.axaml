@@ -380,7 +380,7 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="AUTOMATED ACTIONS" Classes="Kicker" LetterSpacing="2" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <TextBlock Text="1-Click WhatsApp dispatch for bulk collection reminders." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="13"/>
+                                    <TextBlock Text="1-Click PDF export &amp; WhatsApp dispatch for bulk collection reminders." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="13"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                     <TextBlock Text="OWNER NUMBER:" Classes="Kicker" VerticalAlignment="Center"/>
@@ -390,7 +390,8 @@
 
                             <WrapPanel Margin="0,4,0,0">
                                 <!-- 15th Deadline Auto -->
-                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}">
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}"
+                                        ToolTip.Tip="Generate 15th deadline due list PDF, copy to clipboard, and open WhatsApp">
                                     <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Calendar}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="Remind 15th Deadline" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -399,7 +400,8 @@
                                 </Button>
                                 
                                 <!-- Month End Auto -->
-                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-second-half" Click="SmartAutomation_Click">
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-second-half" Click="SmartAutomation_Click"
+                                        ToolTip.Tip="Generate month-end due list PDF, copy to clipboard, and open WhatsApp">
                                     <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="Remind Month-End" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -408,7 +410,8 @@
                                 </Button>
 
                                 <!-- Rebate Upsell Auto -->
-                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}">
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}"
+                                        ToolTip.Tip="Generate advance rebate eligibility list PDF, copy to clipboard, and open WhatsApp">
                                     <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sparkle}" Width="16" Height="16" Foreground="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="Pitch 6-Month Rebates" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
@@ -417,7 +420,8 @@
                                 </Button>
 
                                 <!-- Critical Discontinuation Auto -->
-                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}">
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}"
+                                        ToolTip.Tip="Generate discontinuation warning list PDF, copy to clipboard, and open WhatsApp">
                                     <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Alert}" Width="16" Height="16" Foreground="{StaticResource AccentRedBrush}" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="Warn Discontinuations" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center"/>

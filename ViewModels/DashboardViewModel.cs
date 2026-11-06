@@ -35,6 +35,7 @@ public class DashboardViewModel : ViewModelBase
     private readonly DesktopSyncServer? _desktopSyncServer;
     public DatabaseService DatabaseService => _databaseService;
     public DesktopSyncServer? DesktopSyncServer => _desktopSyncServer;
+    public NotificationService? NotificationService => _notificationService;
     private readonly MetricsCalculator _metricsCalculator;
     private readonly PythonService _pythonService;
     private readonly MobileSyncService _mobileSyncService;

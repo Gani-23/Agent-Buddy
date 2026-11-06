@@ -240,10 +240,11 @@
             </Border>
 
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                <Button Classes="Secondary" Padding="16,8" Command="{Binding SendBulkWhatsAppCommand}">
+                <Button Classes="Secondary" Padding="16,8" Command="{Binding SendBulkWhatsAppCommand}"
+                        ToolTip.Tip="Generate Due List PDF, copy to clipboard, and open WhatsApp">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="16" Height="16" Foreground="{StaticResource SuccessBrush}"/>
-                        <TextBlock Text="Bulk WhatsApp List" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                        <TextBlock Text="WhatsApp List (PDF)" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
                 <Button Classes="Secondary" Padding="16,8" Click="Close_Click">
