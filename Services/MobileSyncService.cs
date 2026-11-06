@@ -276,6 +276,7 @@ public sealed class MobileSyncService
             Status = account.Status ?? string.Empty,
             IsActive = account.IsActive,
             AslaasNo = aslaas,
+            ShortCode = string.IsNullOrWhiteSpace(account.ShortCode) ? null : account.ShortCode.Trim(),
             FirstSeen = account.FirstSeen == default ? null : account.FirstSeen.ToString("yyyy-MM-dd HH:mm:ss"),
             LastUpdated = account.LastUpdated == default ? null : account.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")
         };
@@ -345,6 +346,9 @@ public sealed class MobileSyncService
         [JsonPropertyName("aslaas_no")]
         public string? AslaasNo { get; init; }
 
+        [JsonPropertyName("short_code")]
+        public string? ShortCode { get; init; }
+
         [JsonPropertyName("first_seen")]
         public string? FirstSeen { get; init; }
 
@@ -389,6 +393,9 @@ public sealed class MobileSyncService
 
         [JsonPropertyName("aslaas_no")]
         public string? AslaasNo { get; init; }
+
+        [JsonPropertyName("short_code")]
+        public string? ShortCode { get; init; }
 
         [JsonPropertyName("first_seen")]
         public string? FirstSeen { get; init; }
