@@ -55,7 +55,7 @@ fun DashboardScreen(
     var isViewingAccountList by remember { mutableStateOf(false) }
     var showQrScanner by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
-    var desktopUrlInput by remember { mutableStateOf("http://192.168.1.") }
+    var desktopUrlInput by remember { mutableStateOf("https://rdbase.onrender.com/accounts") }
     var selectedAccountForDetails by remember { mutableStateOf<RDAccount?>(null) }
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
     val searchFocusRequester = remember { FocusRequester() }

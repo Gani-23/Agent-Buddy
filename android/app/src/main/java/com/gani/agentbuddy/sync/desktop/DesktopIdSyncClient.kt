@@ -16,24 +16,34 @@ object DesktopIdSyncClient {
         try {
             var urlString = rawInput.trim()
             if (!urlString.startsWith("http://") && !urlString.startsWith("https://")) {
-                urlString = "http://$urlString"
+                val isNumericIp = urlString.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}(:\d+)?.*"""))
+                urlString = if (isNumericIp) "http://$urlString" else "https://$urlString"
             }
 
-            // If user or QR just provided IP/host (e.g. 192.168.1.15:5055 or 192.168.1.15), add default port & path
+            // Cleanly format URL: add default port :5055 ONLY for local IPs / .local, not for public domains
             try {
                 val uri = URI(urlString)
+                val scheme = uri.scheme ?: "https"
                 val host = uri.host ?: urlString.substringAfter("://").substringBefore(":")
-                val port = if (uri.port > 0) uri.port else 5055
+                val isLocalNetwork = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) ||
+                                     host.endsWith(".local", ignoreCase = true) ||
+                                     host.equals("localhost", ignoreCase = true)
+
+                val portStr = when {
+                    uri.port > 0 -> ":${uri.port}"
+                    isLocalNetwork -> ":5055"
+                    else -> ""
+                }
                 val path = if (uri.path.isNullOrBlank() || uri.path == "/") "/accounts" else uri.path
-                urlString = "http://$host:$port$path"
+                urlString = "$scheme://$host$portStr$path"
             } catch (_: Exception) { }
 
-            android.util.Log.i("DesktopSync", "Connecting to Desktop Sync URL: $urlString")
+            android.util.Log.i("DesktopSync", "Connecting to Sync URL: $urlString")
 
             val url = URL(urlString)
             val connection = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 5000
-                readTimeout = 12000
+                connectTimeout = 15000
+                readTimeout = 30000
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
             }

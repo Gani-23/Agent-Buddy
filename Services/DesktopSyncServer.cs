@@ -285,15 +285,34 @@ public sealed class DesktopSyncServer : IDisposable
     }
 
     /// <summary>
-    /// Discovers all available endpoints (Live Wi-Fi IP, Mac Bonjour Hostname, and other interfaces)
-    /// for seamless dynamic Wi-Fi pairing with the mobile app.
+    /// Discovers all available endpoints (Cloud Sync, Live Wi-Fi IP, Mac Bonjour Hostname, and other interfaces)
+    /// for seamless pairing with the mobile app.
     /// </summary>
-    public static List<NetworkEndpointOption> GetAvailableEndpoints(int port = DefaultPort)
+    public static List<NetworkEndpointOption> GetAvailableEndpoints(int port = DefaultPort, string? cloudApiUrl = null)
     {
         var list = new List<NetworkEndpointOption>();
         var seenHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // 1. Primary active Dynamic IP (via active default gateway)
+        // 1. Cloud Sync (Render / Netlify) - Works anywhere on 4G/5G/any Wi-Fi
+        var cloud = (cloudApiUrl ?? "https://rdbase.onrender.com").Trim();
+        if (!string.IsNullOrWhiteSpace(cloud) && Uri.TryCreate(cloud, UriKind.Absolute, out var cloudUri))
+        {
+            var baseClean = cloud.TrimEnd('/');
+            var accountsUrl = baseClean.EndsWith("/accounts", StringComparison.OrdinalIgnoreCase)
+                ? baseClean
+                : $"{baseClean}/accounts";
+
+            list.Add(new NetworkEndpointOption(
+                $"☁️ Cloud Sync ({cloudUri.Host})",
+                cloudUri.Host,
+                accountsUrl,
+                false,
+                "Universal Sync: Works anywhere over mobile 4G/5G or any Wi-Fi"
+            ));
+            seenHosts.Add(cloudUri.Host);
+        }
+
+        // 2. Primary active Dynamic IP (via active default gateway)
         var primaryIp = GetLocalIpAddress();
         if (!string.IsNullOrEmpty(primaryIp) && primaryIp != "127.0.0.1")
         {
@@ -302,7 +321,7 @@ public sealed class DesktopSyncServer : IDisposable
                 primaryIp,
                 $"http://{primaryIp}:{port}/accounts",
                 true,
-                "Recommended: Fast direct local Wi-Fi pairing"
+                "Local Wi-Fi: Fast direct local network sync"
             ));
             seenHosts.Add(primaryIp);
         }

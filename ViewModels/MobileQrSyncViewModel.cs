@@ -122,16 +122,17 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
         try
         {
             _syncServer.RefreshEndpoints(Port);
-            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port);
+            var (cloudUrl, _) = await _databaseService.GetMobileSyncSettingsAsync();
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl);
             AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
 
-            var best = AvailableEndpoints.FirstOrDefault(e => e.IsDynamicIp) ?? AvailableEndpoints.FirstOrDefault();
+            var best = AvailableEndpoints.FirstOrDefault();
             SelectedEndpoint = best;
 
             var accounts = await _databaseService.GetAllAccountsAsync();
             AccountsCount = accounts.Count;
 
-            StatusMessage = $"✓ Live network re-scanned: {LocalIp}. {AccountsCount} accounts ready.";
+            StatusMessage = $"✓ Endpoints refreshed. {AccountsCount} accounts ready.";
         }
         catch (Exception ex)
         {
@@ -152,10 +153,11 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
             var accounts = await _databaseService.GetAllAccountsAsync();
             AccountsCount = accounts.Count;
 
-            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port);
+            var (cloudUrl, _) = await _databaseService.GetMobileSyncSettingsAsync();
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl);
             AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
 
-            var best = AvailableEndpoints.FirstOrDefault(e => e.IsDynamicIp) ?? AvailableEndpoints.FirstOrDefault();
+            var best = AvailableEndpoints.FirstOrDefault();
             if (best != null)
             {
                 SelectedEndpoint = best;

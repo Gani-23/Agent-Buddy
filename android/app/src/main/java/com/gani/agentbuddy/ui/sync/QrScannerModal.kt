@@ -72,7 +72,7 @@ fun QrScannerModal(
     }
 
     var showManualDialog by remember { mutableStateOf(false) }
-    var manualUrlInput by remember { mutableStateOf("http://192.168.1.") }
+    var manualUrlInput by remember { mutableStateOf("https://rdbase.onrender.com/accounts") }
     var isTorchOn by remember { mutableStateOf(false) }
     var cameraControl by remember { mutableStateOf<CameraControl?>(null) }
     var hasScanned by remember { mutableStateOf(false) }
