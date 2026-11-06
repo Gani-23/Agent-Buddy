@@ -1280,6 +1280,27 @@ public class DatabaseService
                 createFixedDeposits.ExecuteNonQuery();
             }
 
+            using (var createAccountDetail = connection.CreateCommand())
+            {
+                createAccountDetail.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS account_detail (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        account_number TEXT UNIQUE NOT NULL,
+                        account_holder_name TEXT,
+                        amount INTEGER,
+                        month_paid_upto INTEGER,
+                        next_due_date DATE,
+                        total_deposit INTEGER,
+                        status TEXT,
+                        first_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        short_code TEXT
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_account_detail_status ON account_detail(status);
+                    CREATE INDEX IF NOT EXISTS idx_account_detail_next_due_date ON account_detail(next_due_date);";
+                createAccountDetail.ExecuteNonQuery();
+            }
+
             EnsureColumn(connection, "credentials", "encrypted_password", "TEXT");
             EnsureColumn(connection, "rd_accounts", "amount", "INTEGER DEFAULT 0");
             EnsureColumn(connection, "rd_accounts", "month_paid_upto_num", "INTEGER DEFAULT 0");
