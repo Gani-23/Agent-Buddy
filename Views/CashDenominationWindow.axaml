@@ -1,0 +1,126 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="680"
+        d:DesignHeight="600"
+        x:Class="AgentBuddy.Views.CashDenominationWindow"
+        x:DataType="vm:CashDenominationViewModel"
+        Title="Cash Denomination &amp; Deposit Slip"
+        Width="680"
+        Height="620"
+        MinWidth="600"
+        MinHeight="550"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource AppCardBackgroundBrush}">
+
+    <Border Padding="24" Classes="FadeIn DialogSurface">
+        <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="16">
+            <!-- Header -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="POST OFFICE DEPOSIT ASSISTANT" Classes="Kicker" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" FontWeight="Bold"/>
+                    <TextBlock Text="Cash Denomination Calculator" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Click="CloseButton_Click" Background="Transparent" Foreground="{DynamicResource AppTextSecondaryBrush}" Padding="8" Content="✕" FontSize="16"/>
+            </Grid>
+
+            <!-- Target Lot Amount Input Card -->
+            <Border Grid.Row="1" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="12" Padding="14">
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Text="Target Lot Total (₹)" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <NumericUpDown Value="{Binding TargetLotAmount, Mode=TwoWay}"
+                                       FormatString="N0"
+                                       Minimum="0"
+                                       Maximum="10000000"
+                                       Increment="500"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       BorderThickness="0"
+                                       Background="Transparent"/>
+                    </StackPanel>
+                    <Border Grid.Column="1"
+                            IsVisible="{Binding HasTarget}"
+                            CornerRadius="8"
+                            Padding="10,6"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Notes Denomination Grid -->
+            <ScrollViewer Grid.Row="2">
+                <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="12" Padding="16">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnDefinitions="120,*,140"
+                          RowSpacing="12"
+                          ColumnSpacing="12">
+                        <!-- Header Row -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Note" FontWeight="Bold" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Number of Notes" FontWeight="Bold" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Amount (₹)" FontWeight="Bold" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="12" HorizontalAlignment="Right"/>
+
+                        <!-- ₹500 -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="₹ 500" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Count500, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Total500, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+
+                        <!-- ₹200 -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="₹ 200" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Count200, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Total200, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+
+                        <!-- ₹100 -->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="₹ 100" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Count100, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Total100, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+
+                        <!-- ₹50 -->
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="₹ 50" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding Count50, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Total50, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+
+                        <!-- ₹20 -->
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="₹ 20" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding Count20, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding Total20, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+
+                        <!-- ₹10 -->
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="₹ 10" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                        <NumericUpDown Grid.Row="6" Grid.Column="1" Value="{Binding Count10, Mode=TwoWay}" Minimum="0" Maximum="10000" Increment="1" HorizontalAlignment="Stretch"/>
+                        <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding Total10, StringFormat='₹ {0:N0}'}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14"/>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+
+            <!-- Grand Total Bar -->
+            <Border Grid.Row="3" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="12" Padding="16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Text="Total Notes Count" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding TotalNotesCount, StringFormat='{}{0} notes'}" FontSize="15" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="2">
+                        <TextBlock Text="Grand Total Cash" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Right"/>
+                        <TextBlock Text="{Binding GrandTotal, StringFormat='₹ {0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppAccentBrush}" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Action Buttons Footer -->
+            <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                <Button Grid.Column="0" Command="{Binding ClearCommand}" Content="🔄 Reset" Padding="14,10" CornerRadius="8"/>
+                <TextBlock x:Name="CopyStatusText" Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold" FontSize="12"/>
+                <Button Grid.Column="2" Click="CopySlip_Click" Classes="PrimaryButton" Content="📋 Copy Deposit Slip" Padding="16,10" CornerRadius="8"/>
+                <Button Grid.Column="3" Click="CloseButton_Click" Content="Done" Padding="16,10" CornerRadius="8"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

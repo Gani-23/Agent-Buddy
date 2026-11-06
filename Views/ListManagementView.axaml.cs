@@ -224,4 +224,22 @@ public partial class ListManagementView : UserControl
         _manageTemplatesPromptHandler?.Dispose();
         _manageTemplatesPromptHandler = null;
     }
+
+    private async void OpenCashDenomination_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ListManagementViewModel vm) return;
+        var lotTotal = vm.GrandTotalAmount;
+        var agentName = await vm.DatabaseService.GetAgentNameAsync();
+        var denomVm = new CashDenominationViewModel(lotTotal, agentName);
+        var window = new CashDenominationWindow(denomVm);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
 }

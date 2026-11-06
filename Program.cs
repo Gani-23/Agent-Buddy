@@ -42,6 +42,19 @@ class Program
             {
                 File.AppendAllText(Path.Combine(desktop, "AgentBuddy_crash.log"), $"[{DateTime.Now}] {context}: {ex}\n\n");
             }
+
+            // Silent Field Crash Dispatcher -> Telegram / Discord Alert
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                appId = "agentbuddy",
+                error = $"{context}: {ex?.Message}",
+                stack = ex?.ToString(),
+                os = $"{System.Runtime.InteropServices.RuntimeInformation.OSDescription} ({System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture})",
+                version = "1.0.0",
+            });
+            using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            using var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            client.PostAsync("https://oauth4-0.onrender.com/api/telemetry/crash", content).GetAwaiter().GetResult();
         }
         catch { }
     }

@@ -15,6 +15,9 @@ public sealed record LicenseSettings
 public sealed record LicenseStatus
 {
     public bool IsActive { get; init; }
+    public bool IsGracePeriod { get; init; }
+    public bool IsExpiringSoon { get; init; }
+    public int DaysRemaining { get; init; }
     public string Message { get; init; } = string.Empty;
     public string ServerUrl { get; init; } = string.Empty;
     public string AppId { get; init; } = string.Empty;

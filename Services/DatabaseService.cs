@@ -70,6 +70,9 @@ public class DatabaseService
     /// Get database file path
     /// </summary>
     public string GetDatabasePath() => _dbPath;
+    public string DatabasePath => _dbPath;
+
+    public async Task<string?> GetAgentNameAsync() => await GetAppSettingAsync("agent_name");
 
     public void NotifyDatabaseChanged()
     {

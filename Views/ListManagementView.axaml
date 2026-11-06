@@ -198,6 +198,18 @@
                             </Button>
 
                             <Button Classes="Secondary" 
+                                    Click="OpenCashDenomination_Click"
+                                    MinHeight="30"
+                                    Padding="10,4"
+                                    Margin="0,0,6,0"
+                                    ToolTip.Tip="Generate Cash Denomination &amp; Deposit Slip for this lot">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="12" Height="12" Foreground="{DynamicResource AccentBlueBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Cash Slip" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="Secondary" 
                                     Command="{Binding ReloadLotCommand}"
                                     MinHeight="30"
                                     Padding="10,4"

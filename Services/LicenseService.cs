@@ -197,7 +197,7 @@ public sealed class LicenseService
         await _databaseService.SaveAppSettingAsync(LicenseSubjectKey, string.Empty);
     }
 
-    private async Task SaveLicenseSettingsAsync(LicenseSettings settings)
+    public async Task SaveLicenseSettingsAsync(LicenseSettings settings)
     {
         await _databaseService.SaveAppSettingAsync(LicenseServerUrlKey, settings.ServerUrl);
         await _databaseService.SaveAppSettingAsync(LicenseAppIdKey, settings.AppId);
@@ -209,6 +209,13 @@ public sealed class LicenseService
             LicenseValidatedAtKey,
             settings.LastValidatedAtUtc?.UtcDateTime.ToString("O", CultureInfo.InvariantCulture) ?? string.Empty);
         await _databaseService.SaveAppSettingAsync(LicenseSubjectKey, settings.Subject);
+    }
+
+    public async Task<LicenseActivationResult> ApplyNewTokenAsync(string newToken, CancellationToken cancellationToken = default)
+    {
+        var current = await GetLicenseSettingsAsync();
+        var updated = current with { Token = newToken.Trim() };
+        return await ActivateLicenseAsync(updated.ServerUrl, updated.AppId, updated.Token, cancellationToken);
     }
 
     private async Task<LicenseStatus> BuildStatusAsync(
@@ -282,11 +289,39 @@ public sealed class LicenseService
             };
         }
 
+        var timeRemaining = expiresAt - DateTimeOffset.UtcNow;
+        var daysRemaining = (int)Math.Max(0, Math.Ceiling(timeRemaining.TotalDays));
+        var isExpiringSoon = daysRemaining <= 7 && daysRemaining > 0;
+
         if (expiresAt <= DateTimeOffset.UtcNow)
         {
+            // 3-Day Emergency Grace Period Shield
+            var graceCutoff = expiresAt.AddDays(3);
+            if (DateTimeOffset.UtcNow <= graceCutoff)
+            {
+                var graceHoursRemaining = Math.Max(0, (graceCutoff - DateTimeOffset.UtcNow).TotalHours);
+                var graceDaysRemaining = (int)Math.Max(1, Math.Ceiling(graceHoursRemaining / 24.0));
+                return new LicenseStatus
+                {
+                    IsActive = true,
+                    IsGracePeriod = true,
+                    IsExpiringSoon = false,
+                    DaysRemaining = 0,
+                    Message = $"License expired on {expiresAt:yyyy-MM-dd}. 3-Day Grace Period Active ({graceDaysRemaining} day(s) left). Please request renewal.",
+                    ServerUrl = settings.ServerUrl,
+                    AppId = effectiveAppId,
+                    ExpiresAtUtc = expiresAt,
+                    LastValidatedAtUtc = settings.LastValidatedAtUtc,
+                    Subject = payload.Subject ?? settings.Subject,
+                };
+            }
+
             return new LicenseStatus
             {
                 IsActive = false,
+                IsGracePeriod = false,
+                IsExpiringSoon = false,
+                DaysRemaining = 0,
                 Message = $"License expired on {expiresAt:yyyy-MM-dd HH:mm} UTC.",
                 ServerUrl = settings.ServerUrl,
                 AppId = effectiveAppId,
@@ -311,6 +346,9 @@ public sealed class LicenseService
                 return new LicenseStatus
                 {
                     IsActive = false,
+                    IsGracePeriod = false,
+                    IsExpiringSoon = false,
+                    DaysRemaining = daysRemaining,
                     Message = onlineCheck.Message,
                     ServerUrl = updatedSettings.ServerUrl,
                     AppId = updatedSettings.AppId,
@@ -330,6 +368,9 @@ public sealed class LicenseService
         return new LicenseStatus
         {
             IsActive = true,
+            IsGracePeriod = false,
+            IsExpiringSoon = isExpiringSoon,
+            DaysRemaining = daysRemaining,
             Message = $"License active for app '{updatedSettings.AppId}' until {updatedSettings.ExpiresAtUtc:yyyy-MM-dd HH:mm} UTC.",
             ServerUrl = updatedSettings.ServerUrl,
             AppId = updatedSettings.AppId,

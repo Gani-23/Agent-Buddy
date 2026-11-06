@@ -1320,6 +1320,8 @@ public class ListManagementViewModel : ViewModelBase
 
     public ObservableCollection<SavedLotTemplate> SavedLotTemplates { get; } = new();
     public bool HasSavedLotTemplates => SavedLotTemplates.Count > 0;
+    public DatabaseService DatabaseService => _databaseService;
+    public decimal GrandTotalAmount => Lists.Sum(l => l.TotalAmount);
 
     public ReactiveCommand<Unit, Unit> AddNewListCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveLotCommand { get; }
@@ -2445,6 +2447,10 @@ public class ListManagementViewModel : ViewModelBase
             _notificationService?.Warning("Nothing To Process", ProcessStatus);
             return;
         }
+
+        // Automatic safety database snapshot before batch lot processing
+        var backupService = new DatabaseBackupService(_databaseService);
+        _ = Task.Run(() => backupService.CreateAutoSnapshotAsync("lot_batch_processing"));
 
         IsProcessing = true;
         ClearProcessingLogs();

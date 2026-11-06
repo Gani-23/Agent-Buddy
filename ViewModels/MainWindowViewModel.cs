@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
 using Avalonia.Media;
+using Avalonia.Threading;
 using ReactiveUI;
 using AgentBuddy.Services;
 using AgentBuddy.Models;
@@ -47,6 +48,9 @@ public class MainWindowViewModel : ViewModelBase
     private readonly UpdateService _updateService;
     private readonly DesktopSyncServer _desktopSyncServer;
     private readonly IPortalAutomationService _portalAutomationService;
+    private readonly TelemetryService _telemetryService;
+    private readonly WhatsAppReminderService _whatsAppReminderService;
+    private readonly DatabaseBackupService _databaseBackupService;
     private readonly CancellationTokenSource _updateCts = new();
     private string _latestVersion = string.Empty;
     private bool _isUpdateAvailable;
@@ -91,6 +95,9 @@ public class MainWindowViewModel : ViewModelBase
         _desktopSyncServer = new DesktopSyncServer(_databaseService);
         _desktopSyncServer.Start();
         _portalAutomationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? new DesktopPythonPortalAutomationService(_pythonService);
+        _telemetryService = new TelemetryService(_licenseService);
+        _whatsAppReminderService = new WhatsAppReminderService(_databaseService);
+        _databaseBackupService = new DatabaseBackupService(_databaseService);
 
         // Initialize view models
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService, _desktopSyncServer);
@@ -98,7 +105,7 @@ public class MainWindowViewModel : ViewModelBase
         FixedDepositViewModel = new FixedDepositViewModel(_databaseService, _notificationService);
         ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
-        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService);
+        SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService, _telemetryService);
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
         SettingsViewModel.RdCertificateRenewalChanged += OnRdCertificateRenewalChanged;
         SettingsViewModel.ThemeModeChanged += OnThemeModeChanged;
@@ -122,6 +129,7 @@ public class MainWindowViewModel : ViewModelBase
         _ = InitializeLocalizationAsync();
         _ = InitializeLicenseAsync();
         _ = InitializeUpdateChecksAsync();
+        _ = InitializeTelemetryAsync();
     }
 
     /// <summary>
@@ -241,7 +249,7 @@ public class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Navigate to a specific view
     /// </summary>
-    private void Navigate(string viewName)
+    public void Navigate(string viewName)
     {
         if (IsLicenseLocked && !string.Equals(viewName, "Settings", StringComparison.OrdinalIgnoreCase))
         {
@@ -572,6 +580,13 @@ public class MainWindowViewModel : ViewModelBase
         IsLicenseActive = state.IsActive || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
         LicenseStatusText = BuildLicenseBadgeText(state);
 
+        // Update dashboard banner with grace period or expiration warning
+        DashboardViewModel.IsLicenseGracePeriod = state.IsGracePeriod;
+        DashboardViewModel.IsLicenseExpiringSoon = state.IsExpiringSoon;
+        DashboardViewModel.LicenseWarningMessage = state.IsGracePeriod
+            ? "⚠️ Emergency Grace Period Active! You have 3 days of uninterrupted access while renewal is arranged."
+            : (state.IsExpiringSoon ? $"⏳ License Expiring Soon ({state.DaysRemaining} days remaining). Request renewal to ensure continuous access." : string.Empty);
+
         if (!IsLicenseActive)
         {
             CurrentView = SettingsViewModel;
@@ -580,6 +595,30 @@ public class MainWindowViewModel : ViewModelBase
             {
                 _notificationService.Warning("License required", "Activate a valid license in Settings.");
             }
+        }
+    }
+
+    private async Task InitializeTelemetryAsync()
+    {
+        try
+        {
+            var agentName = await _databaseService.GetAgentNameAsync();
+            await _telemetryService.SendHeartbeatAsync(agentName);
+
+            var status = await _licenseService.GetCurrentStatusAsync(validateOnline: false);
+            if (!status.IsActive || status.IsGracePeriod || status.IsExpiringSoon)
+            {
+                var renewal = await _telemetryService.CheckAutoRenewalAsync();
+                if (renewal.Renewed)
+                {
+                    var updatedState = await _licenseService.GetCurrentStatusAsync(validateOnline: false);
+                    Dispatcher.UIThread.Post(() => ApplyLicenseState(updatedState, notifyWhenLocked: false));
+                }
+            }
+        }
+        catch
+        {
+            // Silent background telemetry
         }
     }
 

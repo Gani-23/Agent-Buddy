@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using AgentBuddy.ViewModels;
+using AgentBuddy.Services;
 using System.Linq;
 
 namespace AgentBuddy.Views;
@@ -217,6 +218,52 @@ public partial class DashboardView : UserControl
         else
         {
             window.Show();
+        }
+    }
+
+    private async void OpenCashDenomination_Click(object? sender, RoutedEventArgs e)
+    {
+        string? agentName = null;
+        if (ViewModel != null)
+        {
+            agentName = await ViewModel.DatabaseService.GetAgentNameAsync();
+        }
+        var vm = new CashDenominationViewModel(0, agentName);
+        var window = new CashDenominationWindow(vm);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
+
+    private async void OpenDueReminders_Click(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel == null) return;
+        var reminderService = new WhatsAppReminderService(ViewModel.DatabaseService);
+        var vm = new DueRemindersViewModel(reminderService);
+        var window = new DueRemindersWindow(vm);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
+
+    private void NavigateToSettings_Click(object? sender, RoutedEventArgs e)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel?.DataContext is MainWindowViewModel mainVm)
+        {
+            mainVm.Navigate("Settings");
         }
     }
 }

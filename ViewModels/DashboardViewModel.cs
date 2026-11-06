@@ -51,6 +51,37 @@ public class DashboardViewModel : ViewModelBase
     private string _halfMonthTitleSuffix = string.Empty;
     private string _globalAccountSearchQuery = string.Empty;
     private string _agentPhoneNumber = string.Empty;
+    private bool _isLicenseGracePeriod;
+    private bool _isLicenseExpiringSoon;
+    private string _licenseWarningMessage = string.Empty;
+
+    public bool IsLicenseGracePeriod
+    {
+        get => _isLicenseGracePeriod;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isLicenseGracePeriod, value);
+            this.RaisePropertyChanged(nameof(HasLicenseNotice));
+        }
+    }
+
+    public bool IsLicenseExpiringSoon
+    {
+        get => _isLicenseExpiringSoon;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isLicenseExpiringSoon, value);
+            this.RaisePropertyChanged(nameof(HasLicenseNotice));
+        }
+    }
+
+    public string LicenseWarningMessage
+    {
+        get => _licenseWarningMessage;
+        set => this.RaiseAndSetIfChanged(ref _licenseWarningMessage, value);
+    }
+
+    public bool HasLicenseNotice => IsLicenseGracePeriod || IsLicenseExpiringSoon;
     private DateTime? _rdCertificateRenewalDate;
     private string _rdCertificateRenewalHeadline = "Renewal date not set";
     private string _rdCertificateRenewalMessage = "Set the next postal RD certificate renewal date in Settings.";
@@ -1629,6 +1660,10 @@ public class DashboardViewModel : ViewModelBase
 
         try
         {
+            // Create automated safety snapshot before syncing portal
+            var backupService = new DatabaseBackupService(_databaseService);
+            _ = Task.Run(() => backupService.CreateAutoSnapshotAsync("portal_sync"));
+
             var automationService = PortalAutomationProvider.Factory?.Invoke(_databaseService) ?? _portalAutomationService;
 
             // If running on mobile / non-desktop platform without python, run on-device portal automation

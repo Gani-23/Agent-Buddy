@@ -506,6 +506,32 @@
                             </StackPanel>
                         </Button>
 
+                        <Button Classes="Secondary"
+                                Command="{Binding RequestRenewalCommand}"
+                                IsEnabled="{Binding !IsRequestingRenewal}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0"
+                                ToolTip.Tip="Submit renewal request to administrator via Telegram &amp; Discord">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Upload}" Width="16" Height="16"/>
+                                <TextBlock Text="Request Renewal"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="Secondary"
+                                Command="{Binding CheckAutoRenewalCommand}"
+                                IsEnabled="{Binding !IsCheckingRenewal}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10"
+                                Margin="12,0,0,0"
+                                ToolTip.Tip="Check if administrator approved renewal">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
+                                <TextBlock Text="Check Approved Renewal"/>
+                            </StackPanel>
+                        </Button>
+
                         <Button Classes="Danger"
                                 Command="{Binding ClearLicenseCommand}"
                                 IsEnabled="{Binding !IsProcessingLicense}"
@@ -518,6 +544,13 @@
                             </StackPanel>
                         </Button>
                     </WrapPanel>
+
+                    <TextBlock Text="{Binding RenewalStatus}"
+                               IsVisible="{Binding RenewalStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                               Foreground="{DynamicResource AccentBlueBrush}"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               Margin="0,8,0,0"/>
 
                     <Separator/>
 

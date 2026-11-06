@@ -26,6 +26,7 @@ public class SettingsViewModel : ViewModelBase
     private readonly LicenseService _licenseService;
     private readonly UpdateService _updateService;
     private readonly NotificationService? _notificationService;
+    private readonly TelemetryService _telemetryService;
 
     private bool _isDarkTheme;
     private string? _pythonVersion;
@@ -94,7 +95,8 @@ public class SettingsViewModel : ViewModelBase
         ReportsService reportsService,
         LicenseService licenseService,
         UpdateService updateService,
-        NotificationService? notificationService = null)
+        NotificationService? notificationService = null,
+        TelemetryService? telemetryService = null)
     {
         _databaseService = databaseService;
         _pythonService = pythonService;
@@ -103,6 +105,7 @@ public class SettingsViewModel : ViewModelBase
         _licenseService = licenseService;
         _updateService = updateService;
         _notificationService = notificationService;
+        _telemetryService = telemetryService ?? new TelemetryService(_licenseService);
 
         LanguageOptions = new ObservableCollection<LanguageOption>(_localizationService.AvailableLanguages);
         _selectedLanguage = LanguageOptions.FirstOrDefault(option =>
@@ -127,6 +130,8 @@ public class SettingsViewModel : ViewModelBase
         ActivateLicenseCommand = ReactiveCommand.CreateFromTask(ActivateLicenseAsync);
         ValidateStoredLicenseCommand = ReactiveCommand.CreateFromTask(ValidateStoredLicenseAsync);
         ClearLicenseCommand = ReactiveCommand.CreateFromTask(ClearLicenseAsync);
+        RequestRenewalCommand = ReactiveCommand.CreateFromTask(RequestRenewalAsync);
+        CheckAutoRenewalCommand = ReactiveCommand.CreateFromTask(CheckAutoRenewalAsync);
         CheckUpdatesCommand = ReactiveCommand.CreateFromTask(CheckForUpdatesAsync);
 
         // Load initial data
@@ -510,6 +515,27 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isProcessingLicense, value);
     }
 
+    private string _renewalStatus = string.Empty;
+    public string RenewalStatus
+    {
+        get => _renewalStatus;
+        set => this.RaiseAndSetIfChanged(ref _renewalStatus, value);
+    }
+
+    private bool _isRequestingRenewal;
+    public bool IsRequestingRenewal
+    {
+        get => _isRequestingRenewal;
+        set => this.RaiseAndSetIfChanged(ref _isRequestingRenewal, value);
+    }
+
+    private bool _isCheckingRenewal;
+    public bool IsCheckingRenewal
+    {
+        get => _isCheckingRenewal;
+        set => this.RaiseAndSetIfChanged(ref _isCheckingRenewal, value);
+    }
+
     public ReactiveCommand<Unit, Unit> CheckPythonCommand { get; }
     public ReactiveCommand<Unit, Unit> SyncLegacyDatabaseCommand { get; }
     public ReactiveCommand<Unit, Unit> ForceSyncLegacyDatabaseCommand { get; }
@@ -528,6 +554,8 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ActivateLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ValidateStoredLicenseCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearLicenseCommand { get; }
+    public ReactiveCommand<Unit, Unit> RequestRenewalCommand { get; }
+    public ReactiveCommand<Unit, Unit> CheckAutoRenewalCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckUpdatesCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
     public event EventHandler? RdCertificateRenewalChanged;
@@ -1274,6 +1302,63 @@ public class SettingsViewModel : ViewModelBase
         finally
         {
             IsProcessingLicense = false;
+        }
+    }
+
+    private async Task RequestRenewalAsync()
+    {
+        if (IsRequestingRenewal) return;
+        IsRequestingRenewal = true;
+        RenewalStatus = "Submitting renewal request to administrator...";
+        try
+        {
+            var result = await _telemetryService.RequestRenewalAsync();
+            RenewalStatus = result.Message;
+            if (result.Success)
+            {
+                _notificationService?.Success("Renewal Requested", "Interactive 1-tap notification delivered to Telegram admin!");
+            }
+            else
+            {
+                _notificationService?.Warning("Renewal Request Failed", result.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            RenewalStatus = $"Renewal request error: {ex.Message}";
+        }
+        finally
+        {
+            IsRequestingRenewal = false;
+        }
+    }
+
+    private async Task CheckAutoRenewalAsync()
+    {
+        if (IsCheckingRenewal) return;
+        IsCheckingRenewal = true;
+        RenewalStatus = "Checking if administrator approved renewal...";
+        try
+        {
+            var result = await _telemetryService.CheckAutoRenewalAsync();
+            RenewalStatus = result.Message;
+            if (result.Renewed)
+            {
+                _notificationService?.Success("License Renewed!", "Your new license was remotely approved and activated!");
+                await LoadLicenseSettingsAsync();
+            }
+            else
+            {
+                _notificationService?.Info("Renewal Status", result.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            RenewalStatus = $"Renewal check error: {ex.Message}";
+        }
+        finally
+        {
+            IsCheckingRenewal = false;
         }
     }
 

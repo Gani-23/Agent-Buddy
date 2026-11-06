@@ -132,6 +132,24 @@
                                     <TextBlock Grid.Column="1" Text="{DynamicResource L_Dash_SyncToMobile}" VerticalAlignment="Center"/>
                                 </Grid>
                             </Button>
+                            <Button Classes="Secondary"
+                                    Click="OpenDueReminders_Click"
+                                    Margin="0,0,8,0"
+                                    ToolTip.Tip="Customer WhatsApp Due Date Reminders">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Due Reminders" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
+                            <Button Classes="Secondary"
+                                    Click="OpenCashDenomination_Click"
+                                    Margin="0,0,8,0"
+                                    ToolTip.Tip="Cash Denomination Calculator &amp; Postal Deposit Slip">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="14" Height="14" Foreground="{DynamicResource AccentBlueBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Cash Slip" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
                             <Button Classes="Primary"
                                     Command="{Binding UpdateDatabaseCommand}"
                                     Margin="0"
@@ -192,6 +210,51 @@
             </Border>
 
             <StackPanel Spacing="18" IsVisible="{Binding !IsLoading}">
+                <!-- License Grace Period / Expiring Soon Alert Banner -->
+                <Border Classes="Card"
+                        Padding="0"
+                        Background="{DynamicResource DangerTintBrush}"
+                        BorderBrush="{StaticResource ErrorBrush}"
+                        BorderThickness="1"
+                        IsVisible="{Binding HasLicenseNotice}">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource ErrorBrush}" CornerRadius="12,0,0,12"/>
+                        <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="14,12">
+                            <Border Width="40"
+                                    Height="40"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource AppCardBackgroundBrush}"
+                                    BorderBrush="{StaticResource ErrorBrush}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Shield}"
+                                          Width="18"
+                                          Height="18"
+                                          Foreground="{StaticResource ErrorBrush}"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="License Renewal Notice"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TintTextBrush}"/>
+                                <TextBlock Text="{Binding LicenseWarningMessage}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TintTextBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <WrapPanel Grid.Column="2"
+                                   Margin="0,12,14,4"
+                                   VerticalAlignment="Center">
+                            <Button Classes="Primary"
+                                    Padding="14,8"
+                                    Click="NavigateToSettings_Click"
+                                    Content="Manage License"
+                                    Margin="0,0,8,8"/>
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+
                 <Border Classes="Card"
                         Padding="0"
                         Background="{DynamicResource WarningTintBrush}"
