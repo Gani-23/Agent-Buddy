@@ -164,7 +164,8 @@
                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                             </StackPanel>
 
-                            <TextBox Grid.Column="1"
+                            <TextBox x:Name="SearchAllAccountsTextBox"
+                                     Grid.Column="1"
                                      Text="{Binding GlobalAccountSearchQuery, UpdateSourceTrigger=PropertyChanged}"
                                      PlaceholderText="{DynamicResource L_Search_Watermark}"
                                      VerticalAlignment="Center"

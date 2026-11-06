@@ -85,12 +85,14 @@ public partial class DashboardView : UserControl
         }
     }
 
-    private async System.Threading.Tasks.Task OpenSegmentAsync(string? segmentKey, bool focusSearch)
+    private bool _isOpeningSearch;
+
+    private async System.Threading.Tasks.Task OpenSegmentAsync(string? segmentKey, bool focusSearch, string? initialSearchQuery = null)
     {
         if (ViewModel is null)
             return;
 
-        var window = new SegmentAccountsWindow(ViewModel, ViewModel.IsDarkTheme, focusSearch, null, segmentKey);
+        var window = new SegmentAccountsWindow(ViewModel, ViewModel.IsDarkTheme, focusSearch, initialSearchQuery, segmentKey);
         var owner = TopLevel.GetTopLevel(this) as Window;
         if (owner != null)
         {
@@ -102,20 +104,41 @@ public partial class DashboardView : UserControl
         }
     }
 
+    private async System.Threading.Tasks.Task ExecuteDashboardSearchAsync()
+    {
+        if (_isOpeningSearch)
+            return;
+
+        _isOpeningSearch = true;
+        try
+        {
+            var searchBox = this.FindControl<TextBox>("SearchAllAccountsTextBox");
+            var query = !string.IsNullOrWhiteSpace(searchBox?.Text)
+                ? searchBox.Text.Trim()
+                : ViewModel?.GlobalAccountSearchQuery?.Trim();
+
+            await OpenSegmentAsync("all-accounts", focusSearch: string.IsNullOrWhiteSpace(query), query);
+        }
+        finally
+        {
+            _isOpeningSearch = false;
+        }
+    }
+
     private async void SearchAllAccounts_Click(object? sender, RoutedEventArgs e)
     {
-        await OpenSegmentAsync("all-accounts", focusSearch: true);
+        await ExecuteDashboardSearchAsync();
     }
 
     private async void SearchAllAccountsBox_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Enter)
+        if (e.Key != Key.Enter && e.Key != Key.Return)
         {
             return;
         }
 
         e.Handled = true;
-        await OpenSegmentAsync("all-accounts", focusSearch: true);
+        await ExecuteDashboardSearchAsync();
     }
     
     private async void SmartAutomation_Click(object? sender, RoutedEventArgs e)

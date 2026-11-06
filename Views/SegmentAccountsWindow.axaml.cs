@@ -45,7 +45,7 @@ public partial class SegmentAccountsWindow : Window
         string? initialSearchQuery = null,
         string? segmentKey = null) : this()
     {
-        DataContext = new SegmentAccountsWindowViewModel(dashboardViewModel, segmentKey);
+        DataContext = new SegmentAccountsWindowViewModel(dashboardViewModel, segmentKey, initialSearchQuery);
         RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
         _focusSearchOnOpen = focusSearchOnOpen;
         _isDarkTheme = isDarkTheme;

@@ -11,9 +11,10 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
 {
     private string _searchQuery = string.Empty;
 
-    public SegmentAccountsWindowViewModel(DashboardViewModel dashboardViewModel, string? initialSegmentKey = null)
+    public SegmentAccountsWindowViewModel(DashboardViewModel dashboardViewModel, string? initialSegmentKey = null, string? initialSearchQuery = null)
     {
         DashboardContext = dashboardViewModel;
+        _searchQuery = initialSearchQuery?.Trim() ?? string.Empty;
         
         if (!string.IsNullOrEmpty(initialSegmentKey))
         {
@@ -168,7 +169,9 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
                     (!string.IsNullOrWhiteSpace(a.AccountNo) &&
                      a.AccountNo.Contains(query, System.StringComparison.OrdinalIgnoreCase)) ||
                     (!string.IsNullOrWhiteSpace(a.AccountName) &&
-                     a.AccountName.Contains(query, System.StringComparison.OrdinalIgnoreCase)))
+                     a.AccountName.Contains(query, System.StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(a.ShortCode) &&
+                     a.ShortCode.Equals(query.TrimStart('#'), System.StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
         FilteredAccounts.Clear();

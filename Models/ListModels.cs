@@ -51,6 +51,16 @@ public class ListItem : ReactiveObject
     public int MonthPaidNumber => AccountDetails?.GetMonthPaidNumber() ?? 0;
     public string InstallmentsPaidDisplay =>
         AccountDetails != null ? $"Paid: {AccountDetails.GetMonthPaidNumber()}" : "-";
+    public decimal TotalDepositedSoFar
+    {
+        get
+        {
+            if (AccountDetails == null) return 0;
+            var calculated = AccountDetails.GetAmount() * MonthPaidNumber;
+            return calculated > 0 ? calculated : AccountDetails.TotalDeposit;
+        }
+    }
+    public string TotalDepositedDisplay => $"Rs. {TotalDepositedSoFar:N0}";
     
     /// <summary>
     /// Gets the formatted string for Python script: AccountNo_Installment

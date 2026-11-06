@@ -744,7 +744,8 @@
                                                                             <TextBlock Text="{Binding AccountNameDisplay, StringFormat='Name: {0}'}"/>
                                                                             <TextBlock Text="{Binding DenominationDisplay, StringFormat='Amount: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextInstallmentDateDisplay, StringFormat='Next Due: {0}'}"/>
-                                                                            <TextBlock Text="{Binding InstallmentsPaidDisplay, StringFormat='Installments Paid So Far: {0}'}"/>
+                                                                            <TextBlock Text="{Binding MonthPaidNumber, StringFormat='Installments Paid So Far: {0}'}"/>
+                                                                            <TextBlock Text="{Binding TotalDepositedDisplay, StringFormat='Total Deposited: {0}'}"/>
                                                                             <TextBlock Text="{Binding DueMonthDisplay, StringFormat='Due Month: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextDueAfterPaymentDisplay, StringFormat='Next Due After Payment: {0}'}"/>
                                                                             <TextBlock Text="{Binding Installment, StringFormat='Installments: {0}'}"/>
