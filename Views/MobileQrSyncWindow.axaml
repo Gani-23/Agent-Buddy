@@ -3,10 +3,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:AgentBuddy.ViewModels"
+        xmlns:models="using:AgentBuddy.Models"
         x:Class="AgentBuddy.Views.MobileQrSyncWindow"
         x:DataType="vm:MobileQrSyncViewModel"
         mc:Ignorable="d"
-        Width="520"
+        Width="540"
         SizeToContent="Height"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
@@ -14,19 +15,50 @@
 
     <Border Classes="DialogBackdrop" Padding="12">
         <Border Classes="DialogSurface" Padding="24" CornerRadius="16">
-            <StackPanel Spacing="16">
+            <StackPanel Spacing="14">
                 <!-- Header -->
                 <StackPanel Spacing="6">
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <Border Classes="DialogDot" Background="#10B981" Width="8" Height="8" CornerRadius="4"/>
-                        <TextBlock Text="LOCAL WI-FI PAIRING" Classes="Kicker" Foreground="#10B981" FontWeight="SemiBold"/>
+                        <TextBlock Text="LOCAL WI-FI PAIRING (DYNAMIC IP / DHCP)" Classes="Kicker" Foreground="#10B981" FontWeight="SemiBold"/>
                     </StackPanel>
                     <TextBlock Text="Sync with AgentBuddy Mobile" Classes="DialogTitle" FontSize="20" FontWeight="Bold"/>
-                    <TextBlock Text="Open AgentBuddy on your phone, tap the QR scanner in top bar, and point your camera here."
+                    <TextBlock Text="Open AgentBuddy on your phone, tap the QR scanner in the top bar, and point your camera here. No static IP setup needed."
                                Foreground="{DynamicResource AppTextSecondaryBrush}"
                                FontSize="13"
                                TextWrapping="Wrap"/>
                 </StackPanel>
+
+                <!-- Network Interface Selection & Refresh -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="Network Interface / IP:"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ComboBox ItemsSource="{Binding AvailableEndpoints}"
+                                  SelectedItem="{Binding SelectedEndpoint}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:NetworkEndpointOption">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Classes="Secondary"
+                            Click="RefreshNetwork_Click"
+                            ToolTip.Tip="Re-detect active Wi-Fi and network interfaces"
+                            VerticalAlignment="Bottom"
+                            Height="32"
+                            Padding="12,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource Icon_Refresh}" Width="12" Height="12"/>
+                            <TextBlock Text="Refresh IP" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
 
                 <!-- QR Code Box -->
                 <Border Background="White"
@@ -37,8 +69,8 @@
                         BorderThickness="1">
                     <Grid>
                         <Image Source="{Binding QrBitmap}"
-                               Width="230"
-                               Height="230"/>
+                               Width="220"
+                               Height="220"/>
                         <ProgressBar IsIndeterminate="True"
                                      IsVisible="{Binding QrBitmap, Converter={x:Static ObjectConverters.IsNull}}"
                                      Width="140"
@@ -48,7 +80,7 @@
                 </Border>
 
                 <!-- URL & Copy Section -->
-                <StackPanel Spacing="8">
+                <StackPanel Spacing="6">
                     <TextBlock Text="Sync Endpoint URL:"
                                FontSize="12"
                                FontWeight="SemiBold"
@@ -68,9 +100,10 @@
                                 <PathIcon Data="{StaticResource Icon_Check}"
                                           Width="12" Height="12"
                                           IsVisible="{Binding IsCopied}"/>
-                                <TextBlock Text="{Binding IsCopied, Converter={x:Null}, FallbackValue='Copy', TargetNullValue='Copy'}">
-                                    <!-- Handled in Code-behind -->
-                                </TextBlock>
+                                <PathIcon Data="{StaticResource Icon_Copy}"
+                                          Width="12" Height="12"
+                                          IsVisible="{Binding !IsCopied}"/>
+                                <TextBlock Text="{Binding CopyButtonText}"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -80,22 +113,29 @@
                 <Border Background="{DynamicResource AppHoverBackgroundBrush}"
                         CornerRadius="10"
                         Padding="12,10">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                        <PathIcon Grid.Column="0"
-                                  Data="{StaticResource Icon_Info}"
-                                  Width="16" Height="16"
-                                  Foreground="#10B981"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding StatusMessage}"
-                                   FontSize="12"
+                    <StackPanel Spacing="4">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <PathIcon Grid.Column="0"
+                                      Data="{StaticResource Icon_Info}"
+                                      Width="16" Height="16"
+                                      Foreground="#10B981"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding StatusMessage}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="💡 Note: Your Mac's dynamic IP is detected automatically. If you switch Wi-Fi networks or reboot your router, clicking 'Refresh IP' updates the QR code immediately."
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
                                    TextWrapping="Wrap"
-                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
-                                   VerticalAlignment="Center"/>
-                    </Grid>
+                                   Margin="26,2,0,0"/>
+                    </StackPanel>
                 </Border>
 
                 <!-- Action Button -->
-                <Grid Margin="0,4,0,0">
+                <Grid Margin="0,2,0,0">
                     <Button Classes="Primary"
                             HorizontalAlignment="Right"
                             Click="Close_Click"

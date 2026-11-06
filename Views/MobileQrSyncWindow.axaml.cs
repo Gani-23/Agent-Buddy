@@ -35,11 +35,15 @@ public partial class MobileQrSyncWindow : Window
         if (clipboard != null && _viewModel != null && !string.IsNullOrEmpty(_viewModel.SyncUrl))
         {
             await clipboard.SetTextAsync(_viewModel.SyncUrl);
-            _viewModel.IsCopied = true;
-            if (sender is Button btn && btn.Content is StackPanel sp && sp.Children.Count > 1 && sp.Children[1] is TextBlock tb)
-            {
-                tb.Text = "Copied!";
-            }
+            _viewModel.OnCopied();
+        }
+    }
+
+    private async void RefreshNetwork_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_viewModel != null)
+        {
+            await _viewModel.RefreshNetworkAsync();
         }
     }
 

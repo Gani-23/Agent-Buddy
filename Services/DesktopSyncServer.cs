@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using AgentBuddy.Models;
 
 namespace AgentBuddy.Services;
 
@@ -33,13 +34,22 @@ public sealed class DesktopSyncServer : IDisposable
     public string? AccountsUrl { get; private set; }
     public string? LocalIp { get; private set; }
 
-    public void Start(int port = DefaultPort)
+    /// <summary>
+    /// Re-evaluates active network adapters and updates the current IP and URLs.
+    /// Can be called at any time (even while the server is running) to adapt to dynamic DHCP changes.
+    /// </summary>
+    public void RefreshEndpoints(int port = DefaultPort)
     {
-        if (IsRunning) return;
-
         LocalIp = GetLocalIpAddress() ?? "127.0.0.1";
         ServerUrl = $"http://{LocalIp}:{port}/";
         AccountsUrl = $"http://{LocalIp}:{port}/accounts";
+    }
+
+    public void Start(int port = DefaultPort)
+    {
+        RefreshEndpoints(port);
+
+        if (IsRunning) return;
 
         try
         {
@@ -219,15 +229,32 @@ public sealed class DesktopSyncServer : IDisposable
         }
         catch { }
 
-        // Fallback: enumerate interfaces
+        // Fallback: enumerate interfaces prioritizing physical Wi-Fi / Ethernet
         try
         {
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.OperationalStatus != OperationalStatus.Up ||
-                    ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-                    continue;
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
+                             ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .ToList();
 
+            // First try non-virtual interfaces
+            foreach (var ni in interfaces)
+            {
+                if (IsVirtualOrBridge(ni)) continue;
+
+                foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork &&
+                        !IPAddress.IsLoopback(ip.Address))
+                    {
+                        return ip.Address.ToString();
+                    }
+                }
+            }
+
+            // Fallback to any active non-loopback
+            foreach (var ni in interfaces)
+            {
                 foreach (var ip in ni.GetIPProperties().UnicastAddresses)
                 {
                     if (ip.Address.AddressFamily == AddressFamily.InterNetwork &&
@@ -241,6 +268,114 @@ public sealed class DesktopSyncServer : IDisposable
         catch { }
 
         return "127.0.0.1";
+    }
+
+    private static bool IsVirtualOrBridge(NetworkInterface ni)
+    {
+        var name = ni.Name.ToLowerInvariant();
+        var desc = ni.Description.ToLowerInvariant();
+        return name.StartsWith("vmenet") ||
+               name.StartsWith("bridge") ||
+               name.StartsWith("utun") ||
+               name.StartsWith("awdl") ||
+               name.StartsWith("llw") ||
+               desc.Contains("virtual") ||
+               desc.Contains("vmware") ||
+               desc.Contains("parallels");
+    }
+
+    /// <summary>
+    /// Discovers all available endpoints (Live Wi-Fi IP, Mac Bonjour Hostname, and other interfaces)
+    /// for seamless dynamic Wi-Fi pairing with the mobile app.
+    /// </summary>
+    public static List<NetworkEndpointOption> GetAvailableEndpoints(int port = DefaultPort)
+    {
+        var list = new List<NetworkEndpointOption>();
+        var seenHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 1. Primary active Dynamic IP (via active default gateway)
+        var primaryIp = GetLocalIpAddress();
+        if (!string.IsNullOrEmpty(primaryIp) && primaryIp != "127.0.0.1")
+        {
+            list.Add(new NetworkEndpointOption(
+                $"Wi-Fi (Dynamic: {primaryIp})",
+                primaryIp,
+                $"http://{primaryIp}:{port}/accounts",
+                true,
+                "Recommended: Fast direct local Wi-Fi pairing"
+            ));
+            seenHosts.Add(primaryIp);
+        }
+
+        // 2. Bonjour / mDNS Hostname (.local) - persistent across DHCP reassignments
+        try
+        {
+            var hostName = Dns.GetHostName();
+            if (!string.IsNullOrWhiteSpace(hostName))
+            {
+                var mdnsHost = hostName.EndsWith(".local", StringComparison.OrdinalIgnoreCase)
+                    ? hostName
+                    : $"{hostName}.local";
+
+                list.Add(new NetworkEndpointOption(
+                    $"Mac Hostname ({mdnsHost})",
+                    mdnsHost,
+                    $"http://{mdnsHost}:{port}/accounts",
+                    false,
+                    "Zero-Config Bonjour: Remains constant even when DHCP assigns a new IP"
+                ));
+                seenHosts.Add(mdnsHost);
+            }
+        }
+        catch { }
+
+        // 3. Other active physical network interfaces (e.g. Hotspot, Ethernet)
+        try
+        {
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != OperationalStatus.Up ||
+                    ni.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                    IsVirtualOrBridge(ni))
+                {
+                    continue;
+                }
+
+                foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork &&
+                        !IPAddress.IsLoopback(ip.Address))
+                    {
+                        var ipStr = ip.Address.ToString();
+                        if (seenHosts.Add(ipStr))
+                        {
+                            var nicName = !string.IsNullOrWhiteSpace(ni.Name) ? ni.Name : "Network";
+                            list.Add(new NetworkEndpointOption(
+                                $"{nicName} ({ipStr})",
+                                ipStr,
+                                $"http://{ipStr}:{port}/accounts",
+                                true,
+                                $"Active physical interface: {ni.Description}"
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+
+        if (list.Count == 0)
+        {
+            list.Add(new NetworkEndpointOption(
+                "Localhost (127.0.0.1)",
+                "127.0.0.1",
+                $"http://127.0.0.1:{port}/accounts",
+                false,
+                "Loopback only"
+            ));
+        }
+
+        return list;
     }
 
     public void Dispose()

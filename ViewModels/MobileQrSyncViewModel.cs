@@ -1,7 +1,11 @@
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using AgentBuddy.Models;
 using AgentBuddy.Services;
 using QRCoder;
 using ReactiveUI;
@@ -19,8 +23,13 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
     private string _localIp = string.Empty;
     private int _port = DesktopSyncServer.DefaultPort;
     private int _accountsCount;
-    private string _statusMessage = "Starting Wi-Fi server...";
+    private string _statusMessage = "Starting Wi-Fi sync server...";
     private bool _isCopied;
+    private string _copyButtonText = "Copy";
+    private bool _isRefreshing;
+
+    private ObservableCollection<NetworkEndpointOption> _availableEndpoints = new();
+    private NetworkEndpointOption? _selectedEndpoint;
 
     public MobileQrSyncViewModel(DatabaseService databaseService, DesktopSyncServer? syncServer = null)
     {
@@ -29,6 +38,28 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
         _syncServer = syncServer ?? new DesktopSyncServer(_databaseService);
 
         _ = InitializeAsync();
+    }
+
+    public ObservableCollection<NetworkEndpointOption> AvailableEndpoints
+    {
+        get => _availableEndpoints;
+        set => this.RaiseAndSetIfChanged(ref _availableEndpoints, value);
+    }
+
+    public NetworkEndpointOption? SelectedEndpoint
+    {
+        get => _selectedEndpoint;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedEndpoint, value);
+            if (value != null)
+            {
+                LocalIp = value.Host;
+                SyncUrl = value.Url;
+                GenerateQrBitmap(SyncUrl);
+                StatusMessage = $"✓ Server ready on {value.Name}. {AccountsCount} accounts available to sync.";
+            }
+        }
     }
 
     public Bitmap? QrBitmap
@@ -73,24 +104,88 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
         set => this.RaiseAndSetIfChanged(ref _isCopied, value);
     }
 
+    public string CopyButtonText
+    {
+        get => _copyButtonText;
+        set => this.RaiseAndSetIfChanged(ref _copyButtonText, value);
+    }
+
+    public bool IsRefreshing
+    {
+        get => _isRefreshing;
+        set => this.RaiseAndSetIfChanged(ref _isRefreshing, value);
+    }
+
+    public async Task RefreshNetworkAsync()
+    {
+        IsRefreshing = true;
+        try
+        {
+            _syncServer.RefreshEndpoints(Port);
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port);
+            AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
+
+            var best = AvailableEndpoints.FirstOrDefault(e => e.IsDynamicIp) ?? AvailableEndpoints.FirstOrDefault();
+            SelectedEndpoint = best;
+
+            var accounts = await _databaseService.GetAllAccountsAsync();
+            AccountsCount = accounts.Count;
+
+            StatusMessage = $"✓ Live network re-scanned: {LocalIp}. {AccountsCount} accounts ready.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Network refresh notice: {ex.Message}";
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
     private async Task InitializeAsync()
     {
         try
         {
             _syncServer.Start(Port);
-            LocalIp = _syncServer.LocalIp ?? "127.0.0.1";
-            SyncUrl = _syncServer.AccountsUrl ?? $"http://{LocalIp}:{Port}/accounts";
 
             var accounts = await _databaseService.GetAllAccountsAsync();
             AccountsCount = accounts.Count;
 
-            GenerateQrBitmap(SyncUrl);
-            StatusMessage = $"✓ Server ready. {AccountsCount} accounts available to sync.";
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port);
+            AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
+
+            var best = AvailableEndpoints.FirstOrDefault(e => e.IsDynamicIp) ?? AvailableEndpoints.FirstOrDefault();
+            if (best != null)
+            {
+                SelectedEndpoint = best;
+            }
+            else
+            {
+                LocalIp = _syncServer.LocalIp ?? "127.0.0.1";
+                SyncUrl = _syncServer.AccountsUrl ?? $"http://{LocalIp}:{Port}/accounts";
+                GenerateQrBitmap(SyncUrl);
+                StatusMessage = $"✓ Server ready. {AccountsCount} accounts available to sync.";
+            }
         }
         catch (Exception ex)
         {
             StatusMessage = $"Server initialization notice: {ex.Message}";
         }
+    }
+
+    public void OnCopied()
+    {
+        IsCopied = true;
+        CopyButtonText = "Copied!";
+        Task.Delay(2000).ContinueWith(_ =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsCopied = false;
+                CopyButtonText = "Copy";
+            });
+        });
     }
 
     private void GenerateQrBitmap(string url)
