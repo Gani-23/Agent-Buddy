@@ -221,240 +221,6 @@ public static class DueListPdfService
     }
 
     /// <summary>
-    /// Generates a high-resolution visual table image (PNG) of the due list.
-    /// </summary>
-    public static string GenerateDueListPng(string title, string agentName, IReadOnlyList<RDAccount> accounts)
-    {
-        var outputDir = Path.Combine(AppPaths.BaseDirectory, "Reports", "reminders");
-        try
-        {
-            if (!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-        }
-        catch { }
-
-        var safeTitle = Regex.Replace(title ?? "Due_List", @"[^\w\-]", "_").Trim('_');
-        var fileName = $"{safeTitle}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-        var fullPath = Path.Combine(outputDir, fileName);
-
-        const float width = 800f;
-        const float margin = 30f;
-        const float contentWidth = width - (margin * 2);
-        const float rowHeight = 26f;
-        const float headerHeight = 140f;
-        const float footerHeight = 75f;
-
-        // Draw up to 100 rows in PNG for sharp display
-        int totalAccounts = accounts.Count;
-        int maxRows = Math.Min(totalAccounts, 100);
-        float height = headerHeight + (maxRows * rowHeight) + footerHeight;
-        if (totalAccounts > maxRows)
-        {
-            height += rowHeight; // extra line for truncated notice
-        }
-
-        decimal totalAmount = 0;
-        foreach (var a in accounts)
-        {
-            totalAmount += a.GetAmount();
-        }
-
-        using var surface = SKSurface.Create(new SKImageInfo((int)width, (int)height, SKColorType.Rgba8888, SKAlphaType.Premul));
-        var canvas = surface.Canvas;
-        canvas.Clear(SKColors.White);
-
-        using var boldTypeface = SKTypeface.FromFamilyName("Helvetica", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
-        using var normalTypeface = SKTypeface.FromFamilyName("Helvetica", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
-
-        using var fontTitle = new SKFont(boldTypeface, 17);
-        using var fontSub = new SKFont(normalTypeface, 11);
-        using var fontMeta = new SKFont(normalTypeface, 11.5f);
-        using var fontMetaBold = new SKFont(boldTypeface, 11.5f);
-        using var fontHeader = new SKFont(boldTypeface, 11);
-        using var fontRow = new SKFont(normalTypeface, 10.5f);
-        using var fontRowBold = new SKFont(boldTypeface, 10.5f);
-
-        using var paintDark = new SKPaint { Color = new SKColor(15, 23, 42), IsAntialias = true };
-        using var paintSlate = new SKPaint { Color = new SKColor(100, 116, 139), IsAntialias = true };
-        using var paintBody = new SKPaint { Color = new SKColor(30, 41, 59), IsAntialias = true };
-        using var paintWhite = new SKPaint { Color = SKColors.White, IsAntialias = true };
-
-        using var headerBgPaint = new SKPaint { Color = new SKColor(30, 58, 138), Style = SKPaintStyle.Fill };
-        using var rowBgAltPaint = new SKPaint { Color = new SKColor(248, 250, 252), Style = SKPaintStyle.Fill };
-        using var borderPaint = new SKPaint { Color = new SKColor(226, 232, 240), Style = SKPaintStyle.Stroke, StrokeWidth = 1f };
-
-        float y = margin;
-        // Top Red Bar
-        using (var bp = new SKPaint { Color = new SKColor(220, 38, 38) })
-        {
-            canvas.DrawRect(new SKRect(margin, y, margin + contentWidth, y + 4), bp);
-        }
-        y += 16;
-
-        canvas.DrawText("DEPARTMENT OF POSTS (INDIA) • RD COLLECTION DUE LIST", margin, y + 16, fontTitle, paintDark);
-        canvas.DrawText($"Generated: {DateTime.Now:dd-MMM-yyyy hh:mm tt}  |  Category: {title}", margin, y + 34, fontSub, paintSlate);
-        y += 46;
-
-        // Summary Card
-        var summaryRect = new SKRect(margin, y, margin + contentWidth, y + 42);
-        using (var sbg = new SKPaint { Color = new SKColor(241, 245, 249) })
-        {
-            canvas.DrawRoundRect(summaryRect, 8, 8, sbg);
-        }
-        canvas.DrawRoundRect(summaryRect, 8, 8, borderPaint);
-
-        float boxY = y + 26;
-        canvas.DrawText("Agent: ", margin + 16, boxY, fontMeta, paintBody);
-        var displayAgent = string.IsNullOrWhiteSpace(agentName) ? "DOP Agent" : agentName;
-        canvas.DrawText(displayAgent, margin + 58, boxY, fontMetaBold, paintDark);
-
-        canvas.DrawText("Total Dues: ", margin + 280, boxY, fontMeta, paintBody);
-        canvas.DrawText($"{totalAccounts} Accounts", margin + 355, boxY, fontMetaBold, paintDark);
-
-        canvas.DrawText("Total Amount: ", margin + 500, boxY, fontMeta, paintBody);
-        canvas.DrawText($"Rs. {totalAmount:N0}", margin + 590, boxY, fontMetaBold, paintDark);
-        y += 56;
-
-        // Columns: [# (36)] [Account No (150)] [Name (264)] [Amount (110)] [Due Date (90)] [Paid Upto (90)] = 740
-        float c0 = margin;
-        float c1 = c0 + 36;
-        float c2 = c1 + 150;
-        float c3 = c2 + 264;
-        float c4 = c3 + 110;
-        float c5 = c4 + 90;
-
-        // Table Header
-        canvas.DrawRect(new SKRect(margin, y, margin + contentWidth, y + rowHeight), headerBgPaint);
-        float hY = y + 18;
-        canvas.DrawText("#", c0 + 8, hY, fontHeader, paintWhite);
-        canvas.DrawText("Account Number", c1 + 8, hY, fontHeader, paintWhite);
-        canvas.DrawText("Customer Name", c2 + 8, hY, fontHeader, paintWhite);
-        canvas.DrawText("Amount (Rs)", c3 + 8, hY, fontHeader, paintWhite);
-        canvas.DrawText("Due Date", c4 + 8, hY, fontHeader, paintWhite);
-        canvas.DrawText("Paid Upto", c5 + 8, hY, fontHeader, paintWhite);
-        y += rowHeight;
-
-        for (int i = 0; i < maxRows; i++)
-        {
-            var item = accounts[i];
-            var rowRect = new SKRect(margin, y, margin + contentWidth, y + rowHeight);
-            if (i % 2 == 1)
-            {
-                canvas.DrawRect(rowRect, rowBgAltPaint);
-            }
-            canvas.DrawLine(margin, y + rowHeight, margin + contentWidth, y + rowHeight, borderPaint);
-
-            float rY = y + 18;
-            canvas.DrawText($"{i + 1}", c0 + 8, rY, fontSub, paintSlate);
-            canvas.DrawText(item.AccountNo ?? string.Empty, c1 + 8, rY, fontRowBold, paintDark);
-
-            var name = item.AccountName ?? string.Empty;
-            if (name.Length > 34)
-            {
-                name = string.Concat(name.AsSpan(0, 32), "..");
-            }
-            canvas.DrawText(name, c2 + 8, rY, fontRow, paintBody);
-
-            var amt = item.GetAmount();
-            canvas.DrawText($"{amt:N0}", c3 + 8, rY, fontRowBold, paintDark);
-
-            var dueDate = item.GetNextInstallmentDate()?.ToString("dd-MMM") ?? item.NextInstallmentDate ?? string.Empty;
-            canvas.DrawText(dueDate, c4 + 8, rY, fontRow, paintBody);
-
-            var paidUpto = item.MonthPaidUpto ?? string.Empty;
-            canvas.DrawText(paidUpto, c5 + 8, rY, fontRow, paintBody);
-
-            y += rowHeight;
-        }
-
-        if (totalAccounts > maxRows)
-        {
-            var truncRect = new SKRect(margin, y, margin + contentWidth, y + rowHeight);
-            using (var tbg = new SKPaint { Color = new SKColor(254, 243, 199) })
-            {
-                canvas.DrawRect(truncRect, tbg);
-            }
-            canvas.DrawRect(truncRect, borderPaint);
-            float trY = y + 18;
-            canvas.DrawText($"... and {totalAccounts - maxRows} more accounts in the attached PDF report", c1 + 8, trY, fontRowBold, paintDark);
-            y += rowHeight;
-        }
-
-        // Grand Total Row
-        var totRect = new SKRect(margin, y, margin + contentWidth, y + rowHeight);
-        using (var tbg = new SKPaint { Color = new SKColor(241, 245, 249) })
-        {
-            canvas.DrawRect(totRect, tbg);
-        }
-        canvas.DrawRect(totRect, borderPaint);
-        float tY = y + 18;
-        canvas.DrawText("GRAND TOTAL", c1 + 8, tY, fontMetaBold, paintDark);
-        canvas.DrawText($"{totalAccounts} Accounts", c2 + 8, tY, fontMetaBold, paintDark);
-        canvas.DrawText($"Rs. {totalAmount:N0}", c3 + 8, tY, fontMetaBold, paintDark);
-        y += rowHeight + 12;
-
-        canvas.DrawText("Generated by AgentBuddy • Confidential DOP Agent Record", margin, y + 14, fontSub, paintSlate);
-
-        using var image = surface.Snapshot();
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var fs = File.OpenWrite(fullPath);
-        data.SaveTo(fs);
-
-        return fullPath;
-    }
-
-    /// <summary>
-    /// Copies an image file directly to the system clipboard as native image data (PNGf)
-    /// so pasting (Cmd+V) in WhatsApp Desktop/Web instantly attaches the image.
-    /// </summary>
-    public static bool CopyImageToClipboard(string imagePath)
-    {
-        if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
-        {
-            return false;
-        }
-
-        try
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // AppleScript sets native PNG picture on macOS pasteboard (accepted by WhatsApp Cmd+V)
-                var escapedPath = imagePath.Replace("\"", "\\\"");
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "osascript",
-                    Arguments = $"-e 'set the clipboard to (read (POSIX file \"{escapedPath}\") as «class PNGf»)'",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                using var proc = Process.Start(psi);
-                proc?.WaitForExit(3000);
-                return proc?.ExitCode == 0;
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var escapedPath = imagePath.Replace("'", "''");
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell",
-                    Arguments = $"-NoProfile -Command \"Set-Clipboard -Path '{escapedPath}'\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                using var proc = Process.Start(psi);
-                proc?.WaitForExit(3000);
-                return proc?.ExitCode == 0;
-            }
-        }
-        catch { }
-
-        return false;
-    }
-
-    /// <summary>
     /// Reveals the given file in Finder (macOS) or File Explorer (Windows).
     /// </summary>
     public static void RevealInFinder(string filePath)
@@ -480,8 +246,7 @@ public static class DueListPdfService
     }
 
     /// <summary>
-    /// Generates due list PDF and PNG, copies the image to clipboard, reveals the PDF in Finder,
-    /// opens WhatsApp directly (bypassing Safari), and automatically triggers paste into WhatsApp.
+    /// Generates due list PDF, reveals it in Finder, and automatically attaches & sends the PDF via WhatsApp Desktop.
     /// </summary>
     public static (bool Success, string PdfPath, string WhatsAppUrl) DispatchToWhatsApp(
         string title,
@@ -499,61 +264,215 @@ public static class DueListPdfService
         // 1. Generate multi-page PDF document
         var pdfPath = GenerateDueListPdf(title, agentName, accounts);
 
-        // 2. Generate crisp high-resolution graphic table image
-        var pngPath = GenerateDueListPng(title, agentName, accounts);
-
-        // 3. Put the graphic table image onto clipboard so Cmd+V in WhatsApp pastes the image preview
-        CopyImageToClipboard(pngPath);
-
-        // 4. Reveal PDF file in Finder with the file selected so the user can easily drag & drop it
+        // 2. Reveal PDF in Finder for user reference
         RevealInFinder(pdfPath);
 
-        // 5. Open WhatsApp DIRECTLY (using whatsapp:// URI to avoid Safari)
-        var messageBuilder = new System.Text.StringBuilder();
-        messageBuilder.AppendLine($"*[India Post DOP] {title}*");
-        messageBuilder.AppendLine($"Total Accounts: {totalCount} | Expected Collection: Rs. {totalAmount:N0}");
-        messageBuilder.AppendLine();
-        messageBuilder.AppendLine("📄 Detailed PDF list attached. (Drag & drop from the open Finder window into this chat)");
-
         var phoneQuery = string.IsNullOrWhiteSpace(agentPhoneNumber) ? string.Empty : $"phone={agentPhoneNumber}&";
-        var encodedMessage = Uri.EscapeDataString(messageBuilder.ToString());
-        
-        // Primary: native whatsapp:// desktop protocol (bypasses Safari completely)
-        var nativeUrl = $"whatsapp://send?{phoneQuery}text={encodedMessage}";
-        var webUrl = $"https://api.whatsapp.com/send?{phoneQuery}text={encodedMessage}";
+        var nativeUrl = $"whatsapp://send?{phoneQuery}";
 
-        bool launched = false;
-        try
+        // 3. Automated dispatch on macOS via Accessibility script
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            Task.Run(() =>
             {
-                // On macOS, 'open whatsapp://...' opens WhatsApp Desktop without launching Safari
-                var psi = new ProcessStartInfo("open", $"\"{nativeUrl}\"")
+                try
                 {
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                using var proc = Process.Start(psi);
-                proc?.WaitForExit(2000);
-                launched = proc?.ExitCode == 0;
-            }
-            else
-            {
-                Process.Start(new ProcessStartInfo(nativeUrl) { UseShellExecute = true });
-                launched = true;
-            }
+                    var scriptPath = EnsureAutomationScript();
+                    var phoneArg = string.IsNullOrWhiteSpace(agentPhoneNumber) ? "" : $"--phone \"{agentPhoneNumber}\"";
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "python3",
+                        Arguments = $"\"{scriptPath}\" --pdf \"{pdfPath}\" {phoneArg}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    using var proc = Process.Start(psi);
+                    proc?.WaitForExit(20000);
+                }
+                catch { }
+            });
         }
-        catch { }
-
-        if (!launched)
+        else
         {
+            // Windows fallback: open whatsapp:// URL
             try
             {
+                Process.Start(new ProcessStartInfo(nativeUrl) { UseShellExecute = true });
+            }
+            catch
+            {
+                var webUrl = $"https://api.whatsapp.com/send?{phoneQuery}";
                 Process.Start(new ProcessStartInfo(webUrl) { UseShellExecute = true });
             }
-            catch { }
         }
 
         return (true, pdfPath, nativeUrl);
     }
+
+    private static string EnsureAutomationScript()
+    {
+        var scriptsDir = Path.Combine(AppPaths.BaseDirectory, "scripts");
+        if (!Directory.Exists(scriptsDir))
+        {
+            Directory.CreateDirectory(scriptsDir);
+        }
+        var scriptPath = Path.Combine(scriptsDir, "send_whatsapp_pdf.py");
+        if (!File.Exists(scriptPath))
+        {
+            File.WriteAllText(scriptPath, PythonScriptSource);
+        }
+        return scriptPath;
+    }
+
+    private const string PythonScriptSource = @"#!/usr/bin/env python3
+import sys
+import os
+import time
+import ctypes
+import subprocess
+import argparse
+
+app_services = ctypes.cdll.LoadLibrary('/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices')
+core_foundation = ctypes.cdll.LoadLibrary('/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation')
+
+kCFStringEncodingUTF8 = 0x08000100
+
+CFStringCreateWithCString = core_foundation.CFStringCreateWithCString
+CFStringCreateWithCString.restype = ctypes.c_void_p
+CFStringCreateWithCString.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
+
+CFStringGetCString = core_foundation.CFStringGetCString
+CFStringGetCString.restype = ctypes.c_bool
+CFStringGetCString.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_long, ctypes.c_uint32]
+
+CFArrayGetCount = core_foundation.CFArrayGetCount
+CFArrayGetCount.restype = ctypes.c_long
+CFArrayGetCount.argtypes = [ctypes.c_void_p]
+
+CFArrayGetValueAtIndex = core_foundation.CFArrayGetValueAtIndex
+CFArrayGetValueAtIndex.restype = ctypes.c_void_p
+CFArrayGetValueAtIndex.argtypes = [ctypes.c_void_p, ctypes.c_long]
+
+def cf_to_str(cf):
+    if not cf:
+        return """"
+    buf = ctypes.create_string_buffer(512)
+    CFStringGetCString(cf, buf, 512, kCFStringEncodingUTF8)
+    return buf.value.decode('utf-8', errors='ignore')
+
+def str_to_cf(s):
+    return CFStringCreateWithCString(None, s.encode('utf-8'), kCFStringEncodingUTF8)
+
+AXUIElementCreateApplication = app_services.AXUIElementCreateApplication
+AXUIElementCreateApplication.restype = ctypes.c_void_p
+AXUIElementCreateApplication.argtypes = [ctypes.c_int]
+
+AXUIElementCopyAttributeValue = app_services.AXUIElementCopyAttributeValue
+AXUIElementCopyAttributeValue.restype = ctypes.c_int
+AXUIElementCopyAttributeValue.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+
+AXUIElementPerformAction = app_services.AXUIElementPerformAction
+AXUIElementPerformAction.restype = ctypes.c_int
+AXUIElementPerformAction.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+def get_attr(elem, attr_name):
+    cf_attr = str_to_cf(attr_name)
+    val = ctypes.c_void_p()
+    res = AXUIElementCopyAttributeValue(elem, cf_attr, ctypes.byref(val))
+    if res == 0 and val.value:
+        return val.value
+    return None
+
+def find_by_desc(elem, keyword, max_depth=12):
+    if max_depth <= 0 or not elem:
+        return None
+    desc = cf_to_str(get_attr(elem, ""AXDescription""))
+    if keyword.lower() in desc.lower():
+        return elem
+    children_cf = get_attr(elem, ""AXChildren"")
+    if children_cf:
+        count = CFArrayGetCount(children_cf)
+        for i in range(count):
+            child = CFArrayGetValueAtIndex(children_cf, i)
+            found = find_by_desc(child, keyword, max_depth - 1)
+            if found:
+                return found
+    return None
+
+def send_pdf(pdf_path, phone=None):
+    if not os.path.isfile(pdf_path):
+        return False
+
+    pdf_path = os.path.abspath(pdf_path)
+
+    phone_clean = ''.join(c for c in (phone or '') if c.isdigit())
+    if phone_clean:
+        uri = f""whatsapp://send?phone={phone_clean}""
+    else:
+        uri = ""whatsapp://send""
+    
+    subprocess.call(['open', uri])
+    time.sleep(1.0)
+
+    out = subprocess.check_output(['pgrep', '-x', 'WhatsApp']).decode().strip().split()
+    if not out:
+        return False
+    pid = int(out[0])
+    app = AXUIElementCreateApplication(pid)
+
+    def get_main_window():
+        wins = get_attr(app, ""AXWindows"")
+        if wins and CFArrayGetCount(wins) > 0:
+            return CFArrayGetValueAtIndex(wins, 0)
+        return None
+
+    win = get_main_window()
+    share_btn = find_by_desc(win, ""share media"")
+    if not share_btn:
+        return False
+
+    AXUIElementPerformAction(share_btn, str_to_cf(""AXPress""))
+    time.sleep(0.4)
+
+    win = get_main_window()
+    file_btn = find_by_desc(win, ""file"")
+    if not file_btn:
+        return False
+
+    AXUIElementPerformAction(file_btn, str_to_cf(""AXPress""))
+    time.sleep(1.0)
+
+    script = f''''
+    tell application ""System Events""
+        tell process ""WhatsApp""
+            keystroke ""g"" using {{command down, shift down}}
+            delay 0.6
+            keystroke ""{pdf_path}""
+            delay 0.4
+            key code 36
+            delay 0.8
+            key code 36
+        end tell
+    end tell
+    ''''
+    subprocess.call(['osascript', '-e', script])
+    time.sleep(1.2)
+
+    win = get_main_window()
+    send_btn = find_by_desc(win, ""send"")
+    if send_btn:
+        AXUIElementPerformAction(send_btn, str_to_cf(""AXPress""))
+        return True
+    else:
+        subprocess.call(['osascript', '-e', 'tell application ""System Events"" to tell process ""WhatsApp"" to key code 36'])
+        return True
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pdf', required=True, help=""Path to PDF"")
+    parser.add_argument('--phone', default=None, help=""Phone number"")
+    args = parser.parse_args()
+    success = send_pdf(args.pdf, args.phone)
+    sys.exit(0 if success else 1)
+";
 }
