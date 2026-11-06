@@ -123,33 +123,6 @@
                                     <TextBlock Grid.Column="1" Text="Sync Mobile (QR)" VerticalAlignment="Center"/>
                                 </Grid>
                             </Button>
-                            <Button Classes="Secondary"
-                                    Command="{Binding SyncToMobileCommand}"
-                                    Margin="0,0,8,0"
-                                    IsEnabled="{Binding !IsBusy}">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{DynamicResource L_Dash_SyncToMobile}" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Button>
-                            <Button Classes="Secondary"
-                                    Click="OpenDueReminders_Click"
-                                    Margin="0,0,8,0"
-                                    ToolTip.Tip="Customer WhatsApp Due Date Reminders">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Due Reminders" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Button>
-                            <Button Classes="Secondary"
-                                    Click="OpenCashDenomination_Click"
-                                    Margin="0,0,8,0"
-                                    ToolTip.Tip="Cash Denomination Calculator &amp; Postal Deposit Slip">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="14" Height="14" Foreground="{DynamicResource AccentBlueBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Cash Slip" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Button>
                             <Button Classes="Primary"
                                     Command="{Binding UpdateDatabaseCommand}"
                                     Margin="0"

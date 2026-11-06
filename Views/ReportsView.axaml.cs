@@ -41,4 +41,25 @@ public partial class ReportsView : UserControl
 
         await vm.DeleteReportAsync(report);
     }
+
+    private async void OpenCashDenomination_Click(object? sender, RoutedEventArgs e)
+    {
+        string? agentName = null;
+        if (DataContext is ReportsViewModel vm && vm.DatabaseService != null)
+        {
+            agentName = await vm.DatabaseService.GetAgentNameAsync();
+        }
+
+        var denomVm = new CashDenominationViewModel(0, agentName);
+        var window = new CashDenominationWindow(denomVm);
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            window.Show();
+        }
+    }
 }

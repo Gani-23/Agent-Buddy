@@ -103,7 +103,7 @@ public class MainWindowViewModel : ViewModelBase
         DashboardViewModel = new DashboardViewModel(_databaseService, _metricsCalculator, _pythonService, _mobileSyncService, _notificationService, _portalAutomationService, _desktopSyncServer);
         ListManagementViewModel = new ListManagementViewModel(_databaseService, _validationService, _pythonService, _reportsService, _notificationService, _portalAutomationService);
         FixedDepositViewModel = new FixedDepositViewModel(_databaseService, _notificationService);
-        ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService);
+        ReportsViewModel = new ReportsViewModel(_reportsService, _pythonService, _notificationService, _databaseService);
         SupportViewModel = new SupportViewModel(_reportsService, _notificationService);
         SettingsViewModel = new SettingsViewModel(_databaseService, _pythonService, _localizationService, _reportsService, _licenseService, _updateService, _notificationService, _telemetryService);
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;

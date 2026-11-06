@@ -15,6 +15,7 @@ public class ReportsViewModel : ViewModelBase
     private readonly ReportsService _reportsService;
     private readonly PythonService _pythonService;
     private readonly NotificationService? _notificationService;
+    private readonly DatabaseService? _databaseService;
 
     private bool _isDarkTheme;
     private string _statusMessage = string.Empty;
@@ -27,11 +28,18 @@ public class ReportsViewModel : ViewModelBase
     private bool _showPayslipRebate;
     private bool _isPayslipOptionsOpen;
 
-    public ReportsViewModel(ReportsService reportsService, PythonService pythonService, NotificationService? notificationService = null)
+    public DatabaseService? DatabaseService => _databaseService;
+
+    public ReportsViewModel(
+        ReportsService reportsService,
+        PythonService pythonService,
+        NotificationService? notificationService = null,
+        DatabaseService? databaseService = null)
     {
         _reportsService = reportsService;
         _pythonService = pythonService;
         _notificationService = notificationService;
+        _databaseService = databaseService;
 
         var settings = AppSettings.Load();
         _selectedPayslipLayout = PayslipLayoutOptions.FirstOrDefault(o => o.Key == settings.PayslipLayout)
