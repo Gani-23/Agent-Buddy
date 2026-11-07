@@ -17,7 +17,7 @@ namespace AgentBuddy.Services;
 /// </summary>
 public class DatabaseService
 {
-    private const string DefaultMobileSyncApiUrl = "https://rd-base.vercel.app";
+    private const string DefaultMobileSyncApiUrl = "https://rdbase.onrender.com";
     private const string MobileSyncApiUrlKey = "mobile_sync_api_url";
     private const string MobileSyncApiKeyKey = "mobile_sync_api_key";
     private readonly string _dbPath = string.Empty;
@@ -1044,13 +1044,14 @@ public class DatabaseService
         var apiUrl = (await GetAppSettingAsync(MobileSyncApiUrlKey) ?? string.Empty).Trim();
         var apiKey = (await GetAppSettingAsync(MobileSyncApiKeyKey) ?? string.Empty).Trim();
 
-        // Migrate old localhost defaults to cloud URL.
-        var isLegacyLocalhost = apiUrl.Equals("http://127.0.0.1:8080", StringComparison.OrdinalIgnoreCase) ||
-                                apiUrl.Equals("http://localhost:8080", StringComparison.OrdinalIgnoreCase) ||
-                                apiUrl.Equals("https://127.0.0.1:8080", StringComparison.OrdinalIgnoreCase) ||
-                                apiUrl.Equals("https://localhost:8080", StringComparison.OrdinalIgnoreCase);
+        // Migrate old localhost or outdated defaults to current cloud URL.
+        var isLegacyUrl = apiUrl.Equals("http://127.0.0.1:8080", StringComparison.OrdinalIgnoreCase) ||
+                          apiUrl.Equals("http://localhost:8080", StringComparison.OrdinalIgnoreCase) ||
+                          apiUrl.Equals("https://127.0.0.1:8080", StringComparison.OrdinalIgnoreCase) ||
+                          apiUrl.Equals("https://localhost:8080", StringComparison.OrdinalIgnoreCase) ||
+                          apiUrl.Equals("https://rd-base.vercel.app", StringComparison.OrdinalIgnoreCase);
 
-        if (string.IsNullOrWhiteSpace(apiUrl) || isLegacyLocalhost)
+        if (string.IsNullOrWhiteSpace(apiUrl) || isLegacyUrl)
         {
             apiUrl = DefaultMobileSyncApiUrl;
         }

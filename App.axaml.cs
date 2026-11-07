@@ -28,10 +28,12 @@ public partial class App : Application
         catch { }
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var vm = new MainWindowViewModel();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = vm,
             };
+            desktop.Exit += (_, _) => vm.Dispose();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
         {

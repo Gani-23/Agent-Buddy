@@ -827,7 +827,7 @@ public class SettingsViewModel : ViewModelBase
 
         if (!Uri.TryCreate(apiUrl, UriKind.Absolute, out _))
         {
-            MobileSyncStatus = "Enter a valid API URL (example: https://rd-base.vercel.app).";
+            MobileSyncStatus = "Enter a valid API URL (example: https://rdbase.onrender.com).";
             return;
         }
 

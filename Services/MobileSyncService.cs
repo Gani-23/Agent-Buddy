@@ -15,9 +15,18 @@ namespace AgentBuddy.Services;
 /// <summary>
 /// Service for syncing local data to mobile dashboard API.
 /// </summary>
-public sealed class MobileSyncService
+public sealed class MobileSyncService : IDisposable
 {
+    public const string DefaultCloudUrl = "https://rdbase.onrender.com";
+
     private readonly HttpClient _httpClient;
+    private CancellationTokenSource? _keepAliveCts;
+    private Task? _keepAliveTask;
+
+    public DateTime? LastKeepAlivePingUtc { get; private set; }
+    public bool? LastKeepAliveSuccess { get; private set; }
+    public string? LastKeepAliveMessage { get; private set; }
+    public bool IsKeepAliveRunning => _keepAliveCts != null && !_keepAliveCts.IsCancellationRequested;
 
     public MobileSyncService()
     {
@@ -28,6 +37,138 @@ public sealed class MobileSyncService
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
+    }
+
+    /// <summary>
+    /// Sends a lightweight GET /health ping to the backend cloud API.
+    /// This warms up Render or keeps it alive to avoid cold-start delays.
+    /// </summary>
+    public async Task<(bool success, string message)> PingHealthAsync(
+        string? apiBaseUrl = null,
+        CancellationToken cancellationToken = default)
+    {
+        var targetUrl = string.IsNullOrWhiteSpace(apiBaseUrl) ? DefaultCloudUrl : apiBaseUrl;
+        var normalizedBaseUrl = NormalizeBaseUrl(targetUrl);
+        if (string.IsNullOrWhiteSpace(normalizedBaseUrl) || !Uri.TryCreate(normalizedBaseUrl, UriKind.Absolute, out var baseUri))
+        {
+            return (false, "Invalid API URL");
+        }
+
+        var endpoint = new Uri(baseUri, "health");
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(35)); // Allow Render up to 35s to spin up if completely cold
+
+        try
+        {
+            using var response = await _httpClient.GetAsync(endpoint, timeoutCts.Token);
+            var isSuccess = response.IsSuccessStatusCode;
+            var msg = isSuccess ? "OK" : $"HTTP {(int)response.StatusCode}";
+            LastKeepAlivePingUtc = DateTime.UtcNow;
+            LastKeepAliveSuccess = isSuccess;
+            LastKeepAliveMessage = msg;
+            return (isSuccess, msg);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            var msg = "Ping timed out (Render may still be waking up)";
+            LastKeepAlivePingUtc = DateTime.UtcNow;
+            LastKeepAliveSuccess = false;
+            LastKeepAliveMessage = msg;
+            return (false, msg);
+        }
+        catch (OperationCanceledException)
+        {
+            return (false, "Canceled");
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.Message;
+            LastKeepAlivePingUtc = DateTime.UtcNow;
+            LastKeepAliveSuccess = false;
+            LastKeepAliveMessage = msg;
+            return (false, msg);
+        }
+    }
+
+    /// <summary>
+    /// Starts periodic background keep-alive ping to the cloud backend (Render)
+    /// to keep it warm and prevent free-tier spin-down while the desktop app is running.
+    /// Default interval is 10 minutes (Render free tier sleeps after 15 minutes of inactivity).
+    /// </summary>
+    public void StartKeepAlive(Func<Task<string>> getBaseUrlAsync, TimeSpan? interval = null)
+    {
+        StopKeepAlive();
+
+        _keepAliveCts = new CancellationTokenSource();
+        var token = _keepAliveCts.Token;
+        var pingInterval = interval ?? TimeSpan.FromMinutes(10);
+
+        _keepAliveTask = Task.Run(async () =>
+        {
+            // Initial short delay (2 seconds) so desktop app finishes starting up smoothly
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    var baseUrl = await getBaseUrlAsync();
+                    if (!string.IsNullOrWhiteSpace(baseUrl))
+                    {
+                        var (success, msg) = await PingHealthAsync(baseUrl, token);
+                        System.Diagnostics.Debug.WriteLine($"[CloudKeepAlive] Ping to {baseUrl}health: {(success ? "Success" : msg)}");
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CloudKeepAlive] Ping exception: {ex.Message}");
+                }
+
+                try
+                {
+                    await Task.Delay(pingInterval, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }, token);
+    }
+
+    /// <summary>
+    /// Stops the recurring keep-alive background ping.
+    /// </summary>
+    public void StopKeepAlive()
+    {
+        if (_keepAliveCts != null)
+        {
+            try
+            {
+                _keepAliveCts.Cancel();
+                _keepAliveCts.Dispose();
+            }
+            catch { }
+            _keepAliveCts = null;
+        }
+        _keepAliveTask = null;
+    }
+
+    public void Dispose()
+    {
+        StopKeepAlive();
+        _httpClient.Dispose();
     }
 
     public async Task<(bool success, string message)> RunSyncAsync(

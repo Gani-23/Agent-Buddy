@@ -24,7 +24,7 @@ public enum ThemeMode
 /// <summary>
 /// Main window ViewModel - handles navigation and theme switching
 /// </summary>
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private const string DailyGreetingDateKey = "daily_greeting_date";
     private ViewModelBase? _currentView;
@@ -130,6 +130,7 @@ public class MainWindowViewModel : ViewModelBase
         _ = InitializeLicenseAsync();
         _ = InitializeUpdateChecksAsync();
         _ = InitializeTelemetryAsync();
+        _ = InitializeCloudKeepAliveAsync();
     }
 
     /// <summary>
@@ -548,6 +549,24 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         _updateCts.Cancel();
+    }
+
+    private Task InitializeCloudKeepAliveAsync()
+    {
+        _mobileSyncService.StartKeepAlive(async () =>
+        {
+            var (url, _) = await _databaseService.GetMobileSyncSettingsAsync();
+            return string.IsNullOrWhiteSpace(url) ? MobileSyncService.DefaultCloudUrl : url;
+        }, TimeSpan.FromMinutes(10));
+
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        StopUpdateChecks();
+        _mobileSyncService.StopKeepAlive();
+        _desktopSyncServer.Dispose();
     }
 
     /// <summary>

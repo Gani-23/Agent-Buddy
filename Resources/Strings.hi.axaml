@@ -140,7 +140,7 @@
         <x:String x:Key="L_Set_MobileSync">मोबाइल सिंक (डैशबोर्ड API)</x:String>
         <x:String x:Key="L_Set_ApiUrl">API URL:</x:String>
         <x:String x:Key="L_Set_ApiKey">API Key:</x:String>
-        <x:String x:Key="L_Set_WmApiUrl">https://rd-base.vercel.app</x:String>
+        <x:String x:Key="L_Set_WmApiUrl">https://rdbase.onrender.com</x:String>
         <x:String x:Key="L_Set_WmApiKey">x-api-key (वैकल्पिक)</x:String>
         <x:String x:Key="L_Set_SaveMobileSync">मोबाइल सिंक सेटिंग्स सेव करें</x:String>
         <x:String x:Key="L_Set_PrinterConfig">प्रिंटर कॉन्फ़िगरेशन</x:String>

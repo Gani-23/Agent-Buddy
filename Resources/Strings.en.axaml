@@ -140,7 +140,7 @@
         <x:String x:Key="L_Set_MobileSync">Mobile Sync (Dashboard API)</x:String>
         <x:String x:Key="L_Set_ApiUrl">API URL:</x:String>
         <x:String x:Key="L_Set_ApiKey">API Key:</x:String>
-        <x:String x:Key="L_Set_WmApiUrl">https://rd-base.vercel.app</x:String>
+        <x:String x:Key="L_Set_WmApiUrl">https://rdbase.onrender.com</x:String>
         <x:String x:Key="L_Set_WmApiKey">x-api-key (optional)</x:String>
         <x:String x:Key="L_Set_SaveMobileSync">Save Mobile Sync Settings</x:String>
         <x:String x:Key="L_Set_PrinterConfig">Printer Configuration</x:String>

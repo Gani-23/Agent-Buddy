@@ -223,7 +223,7 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="Endpoint URL" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Text="{Binding MobileSyncApiUrl, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="https://rd-base.vercel.app"
+                                 PlaceholderText="https://rdbase.onrender.com"
                                  CornerRadius="10"
                                  Padding="10,8"/>
                     </StackPanel>

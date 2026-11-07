@@ -140,7 +140,7 @@
         <x:String x:Key="L_Set_MobileSync">ಮೊಬೈಲ್ ಸಿಂಕ್ (Dashboard API)</x:String>
         <x:String x:Key="L_Set_ApiUrl">API URL:</x:String>
         <x:String x:Key="L_Set_ApiKey">API Key:</x:String>
-        <x:String x:Key="L_Set_WmApiUrl">https://rd-base.vercel.app</x:String>
+        <x:String x:Key="L_Set_WmApiUrl">https://rdbase.onrender.com</x:String>
         <x:String x:Key="L_Set_WmApiKey">x-api-key (ಐಚ್ಛಿಕ)</x:String>
         <x:String x:Key="L_Set_SaveMobileSync">ಮೊಬೈಲ್ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಉಳಿಸಿ</x:String>
         <x:String x:Key="L_Set_PrinterConfig">ಪ್ರಿಂಟರ್ ಕಾನ್ಫಿಗರೇಶನ್</x:String>

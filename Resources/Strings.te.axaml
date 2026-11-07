@@ -140,7 +140,7 @@
         <x:String x:Key="L_Set_MobileSync">మొబైల్ సింక్ (డ్యాష్‌బోర్డ్ API)</x:String>
         <x:String x:Key="L_Set_ApiUrl">API URL:</x:String>
         <x:String x:Key="L_Set_ApiKey">API Key:</x:String>
-        <x:String x:Key="L_Set_WmApiUrl">https://rd-base.vercel.app</x:String>
+        <x:String x:Key="L_Set_WmApiUrl">https://rdbase.onrender.com</x:String>
         <x:String x:Key="L_Set_WmApiKey">x-api-key (ఐచ్చికం)</x:String>
         <x:String x:Key="L_Set_SaveMobileSync">మొబైల్ సింక్ సెట్టింగ్స్ సేవ్</x:String>
         <x:String x:Key="L_Set_PrinterConfig">ప్రింటర్ కాన్ఫిగరేషన్</x:String>
