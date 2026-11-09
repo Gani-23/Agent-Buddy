@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Strictly disallow cleartext HTTP for external cloud endpoints -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">onrender.com</domain>
+        <domain includeSubdomains="true">render.com</domain>
+        <domain includeSubdomains="true">mongodb.net</domain>
+        <domain includeSubdomains="true">github.com</domain>
+    </domain-config>
+
+    <!-- Permit cleartext solely for local network sync (numeric Wi-Fi IP / hotspot) -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

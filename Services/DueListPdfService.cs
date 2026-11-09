@@ -231,15 +231,22 @@ public static class DueListPdfService
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start("open", $"-R \"{filePath}\"");
+                var psi = new ProcessStartInfo("open") { UseShellExecute = false };
+                psi.ArgumentList.Add("-R");
+                psi.ArgumentList.Add(filePath);
+                Process.Start(psi);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+                var psi = new ProcessStartInfo("explorer.exe") { UseShellExecute = false };
+                psi.ArgumentList.Add($"/select,{filePath}");
+                Process.Start(psi);
             }
             else
             {
-                Process.Start("xdg-open", Path.GetDirectoryName(filePath) ?? ".");
+                var psi = new ProcessStartInfo("xdg-open") { UseShellExecute = false };
+                psi.ArgumentList.Add(Path.GetDirectoryName(filePath) ?? ".");
+                Process.Start(psi);
             }
         }
         catch { }

@@ -21,6 +21,7 @@ object DesktopIdSyncClient {
             }
 
             // Cleanly format URL: add default port :5055 ONLY for local IPs / .local, not for public domains
+            var tokenOrApiKey: String? = null
             try {
                 val uri = URI(urlString)
                 val scheme = uri.scheme ?: "https"
@@ -29,14 +30,37 @@ object DesktopIdSyncClient {
                                      host.endsWith(".local", ignoreCase = true) ||
                                      host.equals("localhost", ignoreCase = true)
 
+                // Enforce HTTPS for any non-local network domain
+                val effectiveScheme = if (!isLocalNetwork) "https" else scheme
+
                 val portStr = when {
                     uri.port > 0 -> ":${uri.port}"
                     isLocalNetwork -> ":5055"
                     else -> ""
                 }
                 val path = if (uri.path.isNullOrBlank() || uri.path == "/") "/accounts" else uri.path
-                urlString = "$scheme://$host$portStr$path"
+                val queryStr = if (!uri.query.isNullOrBlank()) "?${uri.query}" else ""
+                urlString = "$effectiveScheme://$host$portStr$path$queryStr"
+
+                // Extract token / key from query parameters
+                tokenOrApiKey = uri.query?.split("&")
+                    ?.mapNotNull { q ->
+                        val parts = q.split("=")
+                        if (parts.size == 2) parts[0].trim() to parts[1].trim() else null
+                    }
+                    ?.firstOrNull { (k, _) -> k in listOf("token", "key", "api_key") }
+                    ?.second
             } catch (_: Exception) { }
+
+            val prefs = context.getSharedPreferences("agent_buddy_sync", Context.MODE_PRIVATE)
+            if (!tokenOrApiKey.isNullOrBlank()) {
+                prefs.edit().putString("last_sync_key", tokenOrApiKey).apply()
+            } else {
+                tokenOrApiKey = prefs.getString("last_sync_key", null)
+            }
+
+            val defaultCloudApiKey = "f2ac5bc8751b64a16c00abc16e6f9eecb9be171570a7f10c668adb9e7b3b1a70"
+            val finalAuthToken = tokenOrApiKey ?: if (urlString.contains("onrender.com", ignoreCase = true)) defaultCloudApiKey else null
 
             android.util.Log.i("DesktopSync", "Connecting to Sync URL: $urlString")
 
@@ -46,6 +70,10 @@ object DesktopIdSyncClient {
                 readTimeout = 30000
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
+                if (!finalAuthToken.isNullOrBlank()) {
+                    setRequestProperty("x-api-key", finalAuthToken)
+                    setRequestProperty("x-sync-token", finalAuthToken)
+                }
             }
 
             if (connection.responseCode !in 200..299) {

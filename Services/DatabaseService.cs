@@ -835,19 +835,16 @@ public class DatabaseService
             {
                 var agentId = GetStringOrEmpty(reader, 0);
                 var encryptedPassword = GetStringOrEmpty(reader, 1);
-                string? password = null;
-                if (!string.IsNullOrWhiteSpace(encryptedPassword))
+                string? password = SecureCredentialStorage.DecryptSecret(encryptedPassword);
+
+                // Auto-upgrade legacy Base64 stored credentials to AES-256-GCM
+                if (!string.IsNullOrWhiteSpace(agentId) &&
+                    !string.IsNullOrWhiteSpace(password) &&
+                    !encryptedPassword.StartsWith("v1:", StringComparison.Ordinal))
                 {
-                    try
-                    {
-                        var bytes = Convert.FromBase64String(encryptedPassword);
-                        password = Encoding.UTF8.GetString(bytes);
-                    }
-                    catch
-                    {
-                        password = null;
-                    }
+                    _ = Task.Run(() => SaveCredentialsAsync(agentId, password));
                 }
+
                 return (string.IsNullOrWhiteSpace(agentId) ? null : agentId, password);
             }
         }
@@ -897,7 +894,7 @@ public class DatabaseService
         }
 
         var passwordHash = ComputeSha256(normalizedPassword);
-        var encryptedPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(normalizedPassword));
+        var encryptedPassword = SecureCredentialStorage.EncryptSecret(normalizedPassword);
 
         using var upsert = connection.CreateCommand();
         upsert.CommandText = @"

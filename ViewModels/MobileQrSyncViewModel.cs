@@ -122,8 +122,8 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
         try
         {
             _syncServer.RefreshEndpoints(Port);
-            var (cloudUrl, _) = await _databaseService.GetMobileSyncSettingsAsync();
-            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl);
+            var (cloudUrl, cloudKey) = await _databaseService.GetMobileSyncSettingsAsync();
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl, cloudKey, _syncServer.SyncToken);
             AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
 
             var best = AvailableEndpoints.FirstOrDefault();
@@ -153,8 +153,8 @@ public sealed class MobileQrSyncViewModel : ViewModelBase, IDisposable
             var accounts = await _databaseService.GetAllAccountsAsync();
             AccountsCount = accounts.Count;
 
-            var (cloudUrl, _) = await _databaseService.GetMobileSyncSettingsAsync();
-            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl);
+            var (cloudUrl, cloudKey) = await _databaseService.GetMobileSyncSettingsAsync();
+            var endpoints = DesktopSyncServer.GetAvailableEndpoints(Port, cloudUrl, cloudKey, _syncServer.SyncToken);
             AvailableEndpoints = new ObservableCollection<NetworkEndpointOption>(endpoints);
 
             var best = AvailableEndpoints.FirstOrDefault();

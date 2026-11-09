@@ -29,6 +29,7 @@ public sealed class DesktopSyncServer : IDisposable
     }
 
     public bool IsRunning => _listener?.IsListening == true;
+    public string SyncToken { get; } = Guid.NewGuid().ToString("N")[..16];
 
     public string? ServerUrl { get; private set; }
     public string? AccountsUrl { get; private set; }
@@ -42,7 +43,7 @@ public sealed class DesktopSyncServer : IDisposable
     {
         LocalIp = GetLocalIpAddress() ?? "127.0.0.1";
         ServerUrl = $"http://{LocalIp}:{port}/";
-        AccountsUrl = $"http://{LocalIp}:{port}/accounts";
+        AccountsUrl = $"http://{LocalIp}:{port}/accounts?token={SyncToken}";
     }
 
     public void Start(int port = DefaultPort)
@@ -119,18 +120,26 @@ public sealed class DesktopSyncServer : IDisposable
         }
     }
 
+    private bool IsAuthorized(HttpListenerRequest request)
+    {
+        var token = request.Headers["x-sync-token"] ??
+                    request.Headers["x-api-key"] ??
+                    request.QueryString["token"] ??
+                    request.QueryString["key"] ??
+                    request.QueryString["api_key"];
+
+        return !string.IsNullOrWhiteSpace(token) &&
+               string.Equals(token.Trim(), SyncToken, StringComparison.Ordinal);
+    }
+
     private async Task HandleRequestAsync(HttpListenerContext context)
     {
         try
         {
-            // Add CORS headers for web/mobile cross-origin requests
-            context.Response.AddHeader("Access-Control-Allow-Origin", "*");
-            context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
-
+            // Do not emit wildcard CORS headers to protect customer data from cross-origin browser extraction
             if (context.Request.HttpMethod == "OPTIONS")
             {
-                context.Response.StatusCode = 200;
+                context.Response.StatusCode = 204;
                 context.Response.Close();
                 return;
             }
@@ -138,6 +147,16 @@ public sealed class DesktopSyncServer : IDisposable
             var path = context.Request.Url?.AbsolutePath.TrimEnd('/').ToLowerInvariant() ?? "";
             if (path == "/accounts" || path == "/sync")
             {
+                if (!IsAuthorized(context.Request))
+                {
+                    context.Response.StatusCode = 401;
+                    var errBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { error = "Unauthorized: missing or invalid sync token" }));
+                    context.Response.ContentType = "application/json; charset=utf-8";
+                    context.Response.ContentLength64 = errBytes.Length;
+                    await context.Response.OutputStream.WriteAsync(errBytes, 0, errBytes.Length);
+                    return;
+                }
+
                 var accounts = await _databaseService.GetAllAccountsAsync();
                 var dtoList = accounts.Select(a => new
                 {
@@ -166,6 +185,16 @@ public sealed class DesktopSyncServer : IDisposable
             }
             else if (path == "/ids")
             {
+                if (!IsAuthorized(context.Request))
+                {
+                    context.Response.StatusCode = 401;
+                    var errBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { error = "Unauthorized: missing or invalid sync token" }));
+                    context.Response.ContentType = "application/json; charset=utf-8";
+                    context.Response.ContentLength64 = errBytes.Length;
+                    await context.Response.OutputStream.WriteAsync(errBytes, 0, errBytes.Length);
+                    return;
+                }
+
                 var mappings = await _databaseService.GetAccountShortCodeMappingsAsync();
                 var json = JsonSerializer.Serialize(mappings);
                 var bytes = Encoding.UTF8.GetBytes(json);
@@ -288,12 +317,16 @@ public sealed class DesktopSyncServer : IDisposable
     /// Discovers all available endpoints (Cloud Sync, Live Wi-Fi IP, Mac Bonjour Hostname, and other interfaces)
     /// for seamless pairing with the mobile app.
     /// </summary>
-    public static List<NetworkEndpointOption> GetAvailableEndpoints(int port = DefaultPort, string? cloudApiUrl = null)
+    public static List<NetworkEndpointOption> GetAvailableEndpoints(
+        int port = DefaultPort,
+        string? cloudApiUrl = null,
+        string? cloudApiKey = null,
+        string? syncToken = null)
     {
         var list = new List<NetworkEndpointOption>();
         var seenHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // 1. Cloud Sync (Render / Netlify) - Works anywhere on 4G/5G/any Wi-Fi
+        // 1. Cloud Sync (Render) - Works anywhere on 4G/5G/any Wi-Fi
         var cloud = (cloudApiUrl ?? "https://rdbase.onrender.com").Trim();
         if (!string.IsNullOrWhiteSpace(cloud) && Uri.TryCreate(cloud, UriKind.Absolute, out var cloudUri))
         {
@@ -301,6 +334,11 @@ public sealed class DesktopSyncServer : IDisposable
             var accountsUrl = baseClean.EndsWith("/accounts", StringComparison.OrdinalIgnoreCase)
                 ? baseClean
                 : $"{baseClean}/accounts";
+
+            if (!string.IsNullOrWhiteSpace(cloudApiKey))
+            {
+                accountsUrl += $"?key={cloudApiKey.Trim()}";
+            }
 
             list.Add(new NetworkEndpointOption(
                 $"☁️ Cloud Sync ({cloudUri.Host})",
@@ -312,6 +350,8 @@ public sealed class DesktopSyncServer : IDisposable
             seenHosts.Add(cloudUri.Host);
         }
 
+        var tokenQuery = !string.IsNullOrWhiteSpace(syncToken) ? $"?token={syncToken.Trim()}" : "";
+
         // 2. Primary active Dynamic IP (via active default gateway)
         var primaryIp = GetLocalIpAddress();
         if (!string.IsNullOrEmpty(primaryIp) && primaryIp != "127.0.0.1")
@@ -319,7 +359,7 @@ public sealed class DesktopSyncServer : IDisposable
             list.Add(new NetworkEndpointOption(
                 $"Wi-Fi (Dynamic: {primaryIp})",
                 primaryIp,
-                $"http://{primaryIp}:{port}/accounts",
+                $"http://{primaryIp}:{port}/accounts{tokenQuery}",
                 true,
                 "Local Wi-Fi: Fast direct local network sync"
             ));
@@ -339,7 +379,7 @@ public sealed class DesktopSyncServer : IDisposable
                 list.Add(new NetworkEndpointOption(
                     $"Mac Hostname ({mdnsHost})",
                     mdnsHost,
-                    $"http://{mdnsHost}:{port}/accounts",
+                    $"http://{mdnsHost}:{port}/accounts{tokenQuery}",
                     false,
                     "Zero-Config Bonjour: Remains constant even when DHCP assigns a new IP"
                 ));
@@ -372,7 +412,7 @@ public sealed class DesktopSyncServer : IDisposable
                             list.Add(new NetworkEndpointOption(
                                 $"{nicName} ({ipStr})",
                                 ipStr,
-                                $"http://{ipStr}:{port}/accounts",
+                                $"http://{ipStr}:{port}/accounts{tokenQuery}",
                                 true,
                                 $"Active physical interface: {ni.Description}"
                             ));
@@ -388,7 +428,7 @@ public sealed class DesktopSyncServer : IDisposable
             list.Add(new NetworkEndpointOption(
                 "Localhost (127.0.0.1)",
                 "127.0.0.1",
-                $"http://127.0.0.1:{port}/accounts",
+                $"http://127.0.0.1:{port}/accounts{tokenQuery}",
                 false,
                 "Loopback only"
             ));
