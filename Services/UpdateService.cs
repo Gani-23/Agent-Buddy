@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
@@ -18,7 +19,7 @@ public sealed record UpdateCheckResult(
 
 public sealed class UpdateService
 {
-    private const string LatestReleaseUrl = "https://api.github.com/repos/Gani-23/Agent-Buddy/releases/latest";
+    private const string ReleasesUrl = "https://api.github.com/repos/Gani-23/Agent-Buddy/releases?per_page=10";
     private const string LastCheckKey = "update_last_check_utc";
     private const string LastNotifiedKey = "update_last_notified_version";
     private static readonly TimeSpan MinCheckInterval = TimeSpan.FromHours(6);
@@ -63,7 +64,7 @@ public sealed class UpdateService
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, LatestReleaseUrl);
+            using var request = new HttpRequestMessage(HttpMethod.Get, ReleasesUrl);
             using var response = await Client.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
@@ -71,21 +72,48 @@ public sealed class UpdateService
             }
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            var release = JsonSerializer.Deserialize<GitHubRelease>(json, JsonOptions);
-            if (release == null || release.Draft || release.Prerelease)
+            var releases = JsonSerializer.Deserialize<List<GitHubRelease>>(json, JsonOptions);
+            if (releases == null || releases.Count == 0)
             {
                 return new UpdateCheckResult(false, currentVersion, currentVersion, null, false);
             }
 
-            var latestVersion = NormalizeVersion(release.TagName);
-            if (!TryParseVersion(currentVersion, out var current) || !TryParseVersion(latestVersion, out var latest))
+            GitHubRelease? highestRelease = null;
+            Version? highestVersion = null;
+
+            foreach (var release in releases)
             {
-                return new UpdateCheckResult(false, currentVersion, latestVersion, release.HtmlUrl, false);
+                if (release.Draft)
+                {
+                    continue;
+                }
+
+                if (TryParseVersion(release.TagName, out var ver))
+                {
+                    if (highestVersion == null || ver > highestVersion)
+                    {
+                        highestVersion = ver;
+                        highestRelease = release;
+                    }
+                }
             }
 
-            var isUpdateAvailable = latest > current;
-            var notified = false;
+            if (highestRelease == null || highestVersion == null)
+            {
+                return new UpdateCheckResult(false, currentVersion, currentVersion, null, false);
+            }
 
+            if (!TryParseVersion(currentVersion, out var current))
+            {
+                return new UpdateCheckResult(false, currentVersion, currentVersion, highestRelease.HtmlUrl, false);
+            }
+
+            var isUpdateAvailable = highestVersion > current;
+            var latestVersion = isUpdateAvailable
+                ? NormalizeVersion(highestRelease.TagName)
+                : currentVersion;
+
+            var notified = false;
             if (isUpdateAvailable)
             {
                 var lastNotified = await _databaseService.GetAppSettingAsync(LastNotifiedKey);
@@ -96,7 +124,7 @@ public sealed class UpdateService
                 }
             }
 
-            return new UpdateCheckResult(isUpdateAvailable, currentVersion, latestVersion, release.HtmlUrl, notified);
+            return new UpdateCheckResult(isUpdateAvailable, currentVersion, latestVersion, highestRelease.HtmlUrl, notified);
         }
         catch
         {
@@ -122,11 +150,15 @@ public sealed class UpdateService
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         if (!string.IsNullOrWhiteSpace(informational))
         {
-            return informational.Trim();
+            var clean = informational.Split('+')[0].Trim();
+            if (!string.IsNullOrWhiteSpace(clean))
+            {
+                return clean;
+            }
         }
 
         var version = assembly.GetName().Version;
-        return version?.ToString() ?? "0.0.0";
+        return version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "2.8.3";
     }
 
     private static string NormalizeVersion(string? tag)
@@ -136,8 +168,9 @@ public sealed class UpdateService
             return "0.0.0";
         }
 
-        var match = Regex.Match(tag, @"\d+(?:\.\d+){0,3}");
-        return match.Success ? match.Value : tag.Trim();
+        var clean = tag.Split('+')[0].Trim();
+        var match = Regex.Match(clean, @"\d+(?:\.\d+){0,3}");
+        return match.Success ? match.Value : clean;
     }
 
     private static bool TryParseVersion(string? value, out Version version)
@@ -149,6 +182,16 @@ public sealed class UpdateService
         }
 
         var normalized = NormalizeVersion(value);
+        var segments = normalized.Split('.');
+        if (segments.Length == 1)
+        {
+            normalized += ".0.0";
+        }
+        else if (segments.Length == 2)
+        {
+            normalized += ".0";
+        }
+
         if (Version.TryParse(normalized, out var parsed) && parsed is not null)
         {
             version = parsed;

@@ -589,16 +589,28 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </Grid>
 
-                    <Button Classes="Secondary"
-                            Command="{Binding CheckUpdatesCommand}"
-                            IsEnabled="{Binding !IsCheckingUpdates}"
-                            HorizontalAlignment="Left"
-                            Padding="16,10">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <PathIcon Data="{StaticResource Icon_Refresh}" Width="16" Height="16"/>
-                            <TextBlock Text="Check for Updates"/>
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Classes="Secondary"
+                                Command="{Binding CheckUpdatesCommand}"
+                                IsEnabled="{Binding !IsCheckingUpdates}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="16" Height="16"/>
+                                <TextBlock Text="Check for Updates"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="Primary"
+                                Command="{Binding OpenUpdateLinkCommand}"
+                                IsVisible="{Binding IsUpdateAvailable}"
+                                HorizontalAlignment="Left"
+                                Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sparkle}" Width="16" Height="16"/>
+                                <TextBlock Text="Download Latest Release"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
 
                     <Separator/>
 

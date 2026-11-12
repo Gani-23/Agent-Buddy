@@ -133,6 +133,7 @@ public class SettingsViewModel : ViewModelBase
         RequestRenewalCommand = ReactiveCommand.CreateFromTask(RequestRenewalAsync);
         CheckAutoRenewalCommand = ReactiveCommand.CreateFromTask(CheckAutoRenewalAsync);
         CheckUpdatesCommand = ReactiveCommand.CreateFromTask(CheckForUpdatesAsync);
+        OpenUpdateLinkCommand = ReactiveCommand.Create(OpenUpdateLink);
 
         // Load initial data
         LoadSettings();
@@ -485,6 +486,13 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isUpdateAvailable, value);
     }
 
+    private string? _updateReleaseUrl;
+    public string? UpdateReleaseUrl
+    {
+        get => _updateReleaseUrl;
+        set => this.RaiseAndSetIfChanged(ref _updateReleaseUrl, value);
+    }
+
     public string PasswordChangeStatus
     {
         get => _passwordChangeStatus;
@@ -557,6 +565,7 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RequestRenewalCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckAutoRenewalCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckUpdatesCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenUpdateLinkCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
     public event EventHandler? RdCertificateRenewalChanged;
 
@@ -1651,13 +1660,15 @@ public class SettingsViewModel : ViewModelBase
             {
                 UpdateCheckStatus = $"Update available: v{result.LatestVersion}.";
                 LatestVersion = result.LatestVersion;
+                UpdateReleaseUrl = result.ReleaseUrl;
                 IsUpdateAvailable = true;
                 _notificationService?.Info("Update available", $"Version {result.LatestVersion} is available. Download from GitHub Releases.");
             }
             else
             {
                 UpdateCheckStatus = "You're up to date.";
-                LatestVersion = result.LatestVersion;
+                LatestVersion = CurrentVersion;
+                UpdateReleaseUrl = result.ReleaseUrl;
                 IsUpdateAvailable = false;
                 _notificationService?.Success("Up to date", "You are already on the latest version.");
             }
@@ -1670,6 +1681,26 @@ public class SettingsViewModel : ViewModelBase
         finally
         {
             IsCheckingUpdates = false;
+        }
+    }
+
+    private void OpenUpdateLink()
+    {
+        var target = string.IsNullOrWhiteSpace(UpdateReleaseUrl)
+            ? UpdateService.LatestReleasePage
+            : UpdateReleaseUrl;
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = target,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService?.Error("Open link failed", ex.Message);
         }
     }
 
