@@ -134,6 +134,7 @@ public class SettingsViewModel : ViewModelBase
         CheckAutoRenewalCommand = ReactiveCommand.CreateFromTask(CheckAutoRenewalAsync);
         CheckUpdatesCommand = ReactiveCommand.CreateFromTask(CheckForUpdatesAsync);
         OpenUpdateLinkCommand = ReactiveCommand.Create(OpenUpdateLink);
+        InstallUpdateCommand = ReactiveCommand.CreateFromTask(InstallUpdateAsync);
 
         // Load initial data
         LoadSettings();
@@ -493,6 +494,34 @@ public class SettingsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _updateReleaseUrl, value);
     }
 
+    private string? _updateAssetDownloadUrl;
+    public string? UpdateAssetDownloadUrl
+    {
+        get => _updateAssetDownloadUrl;
+        set => this.RaiseAndSetIfChanged(ref _updateAssetDownloadUrl, value);
+    }
+
+    private string? _updateAssetName;
+    public string? UpdateAssetName
+    {
+        get => _updateAssetName;
+        set => this.RaiseAndSetIfChanged(ref _updateAssetName, value);
+    }
+
+    private double _updateDownloadProgress;
+    public double UpdateDownloadProgress
+    {
+        get => _updateDownloadProgress;
+        set => this.RaiseAndSetIfChanged(ref _updateDownloadProgress, value);
+    }
+
+    private bool _isDownloadingUpdate;
+    public bool IsDownloadingUpdate
+    {
+        get => _isDownloadingUpdate;
+        set => this.RaiseAndSetIfChanged(ref _isDownloadingUpdate, value);
+    }
+
     public string PasswordChangeStatus
     {
         get => _passwordChangeStatus;
@@ -566,6 +595,7 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckAutoRenewalCommand { get; }
     public ReactiveCommand<Unit, Unit> CheckUpdatesCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenUpdateLinkCommand { get; }
+    public ReactiveCommand<Unit, Unit> InstallUpdateCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
     public event EventHandler? RdCertificateRenewalChanged;
 
@@ -1661,14 +1691,18 @@ public class SettingsViewModel : ViewModelBase
                 UpdateCheckStatus = $"Update available: v{result.LatestVersion}.";
                 LatestVersion = result.LatestVersion;
                 UpdateReleaseUrl = result.ReleaseUrl;
+                UpdateAssetDownloadUrl = result.AssetDownloadUrl;
+                UpdateAssetName = result.AssetName;
                 IsUpdateAvailable = true;
-                _notificationService?.Info("Update available", $"Version {result.LatestVersion} is available. Download from GitHub Releases.");
+                _notificationService?.Info("Update available", $"Version {result.LatestVersion} is available. Click 'Download & Install' to upgrade.");
             }
             else
             {
                 UpdateCheckStatus = "You're up to date.";
                 LatestVersion = CurrentVersion;
                 UpdateReleaseUrl = result.ReleaseUrl;
+                UpdateAssetDownloadUrl = null;
+                UpdateAssetName = null;
                 IsUpdateAvailable = false;
                 _notificationService?.Success("Up to date", "You are already on the latest version.");
             }
@@ -1681,6 +1715,53 @@ public class SettingsViewModel : ViewModelBase
         finally
         {
             IsCheckingUpdates = false;
+        }
+    }
+
+    private async Task InstallUpdateAsync()
+    {
+        if (IsDownloadingUpdate)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(UpdateAssetDownloadUrl))
+        {
+            OpenUpdateLink();
+            return;
+        }
+
+        IsDownloadingUpdate = true;
+        UpdateDownloadProgress = 0;
+        UpdateCheckStatus = "Starting download...";
+
+        try
+        {
+            var fileName = !string.IsNullOrWhiteSpace(UpdateAssetName)
+                ? UpdateAssetName
+                : $"AgentBuddy_{LatestVersion}.zip";
+
+            var progress = new Progress<double>(p =>
+            {
+                UpdateDownloadProgress = Math.Round(p * 100, 1);
+                UpdateCheckStatus = $"Downloading update: {UpdateDownloadProgress:0.#}%...";
+            });
+
+            var downloadedPath = await _updateService.DownloadUpdateAsync(
+                UpdateAssetDownloadUrl,
+                fileName,
+                progress);
+
+            UpdateCheckStatus = "Extracting and applying update...";
+            await Task.Delay(500);
+
+            UpdateService.ApplyUpdateAndRestart(downloadedPath);
+        }
+        catch (Exception ex)
+        {
+            IsDownloadingUpdate = false;
+            UpdateCheckStatus = $"Update failed: {ex.Message}";
+            _notificationService?.Error("Update failed", $"Could not install update: {ex.Message}");
         }
     }
 

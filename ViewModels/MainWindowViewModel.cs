@@ -585,9 +585,12 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         LatestVersion = result.LatestVersion;
         IsUpdateAvailable = result.IsUpdateAvailable;
         UpdateReleaseUrl = result.ReleaseUrl;
-        DashboardViewModel.ApplyUpdateInfo(result.IsUpdateAvailable, result.LatestVersion, result.ReleaseUrl);
+        DashboardViewModel.ApplyUpdateInfo(result.IsUpdateAvailable, result.LatestVersion, result.ReleaseUrl, result.AssetDownloadUrl, result.AssetName);
         SettingsViewModel.LatestVersion = result.LatestVersion;
         SettingsViewModel.IsUpdateAvailable = result.IsUpdateAvailable;
+        SettingsViewModel.UpdateReleaseUrl = result.ReleaseUrl;
+        SettingsViewModel.UpdateAssetDownloadUrl = result.AssetDownloadUrl;
+        SettingsViewModel.UpdateAssetName = result.AssetName;
         SettingsViewModel.UpdateCheckStatus = result.IsUpdateAvailable
             ? $"Update available: v{result.LatestVersion}."
             : "You're up to date.";

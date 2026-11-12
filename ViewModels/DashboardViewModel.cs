@@ -250,8 +250,22 @@ public class DashboardViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _updateReleaseUrl, value);
     }
 
+    private string? _updateAssetDownloadUrl;
+    public string? UpdateAssetDownloadUrl
+    {
+        get => _updateAssetDownloadUrl;
+        set => this.RaiseAndSetIfChanged(ref _updateAssetDownloadUrl, value);
+    }
+
+    private string? _updateAssetName;
+    public string? UpdateAssetName
+    {
+        get => _updateAssetName;
+        set => this.RaiseAndSetIfChanged(ref _updateAssetName, value);
+    }
+
     public string UpdateButtonText => IsUpdateAvailable && !string.IsNullOrWhiteSpace(LatestVersion)
-        ? $"Download Update (v{LatestVersion})"
+        ? $"Upgrade to v{LatestVersion}"
         : _updateButtonText;
 
     public ReactiveCommand<Unit, Unit> OpenUpdateLinkCommand { get; }
@@ -1839,19 +1853,42 @@ public class DashboardViewModel : ViewModelBase
         }
     }
 
-    public void ApplyUpdateInfo(bool isUpdateAvailable, string latestVersion, string? releaseUrl)
+    public void ApplyUpdateInfo(bool isUpdateAvailable, string latestVersion, string? releaseUrl, string? assetDownloadUrl = null, string? assetName = null)
     {
         IsUpdateAvailable = isUpdateAvailable;
         LatestVersion = latestVersion ?? string.Empty;
         UpdateReleaseUrl = releaseUrl;
+        UpdateAssetDownloadUrl = assetDownloadUrl;
+        UpdateAssetName = assetName;
+        this.RaisePropertyChanged(nameof(UpdateButtonText));
     }
 
-    private void OpenUpdateLink()
+    private async void OpenUpdateLink()
     {
         if (!IsUpdateAvailable)
         {
             _notificationService?.Warning("No update", "No update is available right now.");
             return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(UpdateAssetDownloadUrl))
+        {
+            _notificationService?.Info("Downloading Update", $"Downloading update v{LatestVersion}... The app will restart automatically once ready.");
+            try
+            {
+                var updateService = new UpdateService(_databaseService);
+                var fileName = !string.IsNullOrWhiteSpace(UpdateAssetName)
+                    ? UpdateAssetName
+                    : $"AgentBuddy_{LatestVersion}.zip";
+
+                var downloadedPath = await updateService.DownloadUpdateAsync(UpdateAssetDownloadUrl, fileName);
+                UpdateService.ApplyUpdateAndRestart(downloadedPath);
+                return;
+            }
+            catch (Exception ex)
+            {
+                _notificationService?.Error("Auto-update failed", $"{ex.Message}. Opening release page...");
+            }
         }
 
         var target = string.IsNullOrWhiteSpace(UpdateReleaseUrl)
