@@ -17,6 +17,7 @@
         ShowInTaskbar="False"
         CanResize="True"
         WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
         Title="Recurring Lot Templates">
 
     <Border Classes="DialogBackdrop">

@@ -3,159 +3,184 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:models="using:AgentBuddy.Models"
-        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="600"
         x:Class="AgentBuddy.Views.AccountDetailsWindow"
         x:DataType="models:RDAccount"
         Title="{DynamicResource L_AccountDetails_Title}"
-        Width="560"
-        Height="580"
+        Width="580"
+        Height="620"
         WindowStartupLocation="CenterOwner"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
         ShowInTaskbar="False"
         CanResize="False"
-        Background="{DynamicResource AppCardBackgroundBrush}"
+        Background="{DynamicResource AppBackgroundBrush}"
         KeyDown="Window_KeyDown">
 
-    <Border Padding="28" Classes="FadeIn DialogSurface">
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="20">
+    <Border Classes="DialogBackdrop" Padding="14">
+        <Border Classes="FadeIn DialogSurface" Padding="22">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
             
-            <!-- Header -->
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="{DynamicResource L_AccountDetails_Kicker}" Classes="Kicker"/>
-                    <TextBlock Text="{DynamicResource L_AccountDetails_Title}" 
-                               Classes="SectionHeader"
-                               FontSize="26"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                    <Separator Margin="0,8,0,0"/>
-                </StackPanel>
-                <Button Grid.Column="1"
-                        Classes="Icon"
-                        Click="Close_Click"
-                        ToolTip.Tip="{DynamicResource L_Common_Close}">
-                    <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
-                </Button>
-            </Grid>
-
-            <!-- Account Information -->
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
-                  ColumnDefinitions="150,*"
-                  RowSpacing="16">
-                
-                <!-- Account Number -->
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_AccountNo}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1"
-                           Text="{Binding AccountNo}"
-                           FontFamily="{StaticResource AppMonoFontFamily}"
-                           FontWeight="SemiBold"
-                           FontSize="15"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                <!-- Name -->
-                <TextBlock Grid.Row="1" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_Name}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="1" Grid.Column="1"
-                           Text="{Binding AccountName}"
-                           FontWeight="Medium"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                <!-- Amount -->
-                <TextBlock Grid.Row="2" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_Amount}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="2" Grid.Column="1"
-                           Text="{Binding Denomination}"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource AccentBlueBrush}"/>
-
-                <!-- Due Date -->
-                <TextBlock Grid.Row="3" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_DueDate}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="3" Grid.Column="1"
-                           Text="{Binding NextInstallmentDate}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                <!-- Estimated Opening Date -->
-                <TextBlock Grid.Row="4" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_EstimatedOpeningDate}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <StackPanel Grid.Row="4" Grid.Column="1" Spacing="4">
-                    <TextBlock Text="{Binding EstimatedOpeningDateDisplay}"
-                               Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                    <TextBlock Text="{DynamicResource L_AccountDetails_OpeningDateNote}"
-                               FontSize="11"
-                               Foreground="{DynamicResource AppTextSecondaryBrush}"
-                               TextWrapping="Wrap"/>
-                </StackPanel>
-
-                <!-- Month Paid Upto -->
-                <TextBlock Grid.Row="5" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_MonthPaidUpto}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="5" Grid.Column="1"
-                           Text="{Binding MonthPaidUpto}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                <!-- First Seen -->
-                <TextBlock Grid.Row="6" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_FirstSeenInApp}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="6" Grid.Column="1"
-                           Text="{Binding FirstSeen, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-                <!-- Short Code -->
-                <TextBlock Grid.Row="7" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_ShortCode}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="7" Grid.Column="1"
-                           FontFamily="{StaticResource AppMonoFontFamily}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}">
-                    <Run Text="{Binding ShortCode}"/>
-                </TextBlock>
-
-                <!-- Last Updated -->
-                <TextBlock Grid.Row="8" Grid.Column="0"
-                           Text="{DynamicResource L_AccountDetails_LastUpdated}" 
-                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Grid.Row="8" Grid.Column="1"
-                           Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
-                           Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-
-            </Grid>
-
-            <!-- Action Buttons -->
-            <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Classes="Primary" 
-                        Click="AddToList_Click"
-                        Padding="16,10">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource Icon_Plus}" Width="16" Height="16"/>
-                        <TextBlock Text="{DynamicResource L_AccountDetails_AddToList}"/>
+                <!-- Header -->
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <StackPanel Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Border Classes="DialogDot"/>
+                            <TextBlock Text="{DynamicResource L_AccountDetails_Kicker}" Classes="Kicker"/>
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource L_AccountDetails_Title}" 
+                                   Classes="DialogTitle"/>
                     </StackPanel>
-                </Button>
-                
-                <Button Classes="Secondary" 
-                        Click="Close_Click"
-                        Padding="16,10">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource Icon_Close}" Width="16" Height="16"/>
-                        <TextBlock Text="{DynamicResource L_Common_Close}"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+                    <Button Grid.Column="1"
+                            Classes="Icon"
+                            Width="32"
+                            Height="32"
+                            Click="Close_Click"
+                            ToolTip.Tip="{DynamicResource L_Common_Close}">
+                        <PathIcon Data="{StaticResource Icon_Close}" Width="14" Height="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </Button>
+                </Grid>
 
-        </StackPanel>
-        </ScrollViewer>
+                <!-- Account Information Card -->
+                <Border Classes="Card" Padding="16">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
+                          ColumnDefinitions="160,*"
+                          RowSpacing="14">
+                        
+                        <!-- Account Number -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_AccountNo}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding AccountNo}"
+                                   FontFamily="{StaticResource AppMonoFontFamily}"
+                                   FontWeight="SemiBold"
+                                   FontSize="15"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Name -->
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_Name}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding AccountName}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Amount -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_Amount}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding Denomination, StringFormat='₹{0:N0}'}"
+                                   FontWeight="Bold"
+                                   FontSize="15"
+                                   Foreground="{StaticResource AccentBlueBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Due Date -->
+                        <TextBlock Grid.Row="3" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_DueDate}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1"
+                                   Text="{Binding NextInstallmentDate}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Estimated Opening Date -->
+                        <TextBlock Grid.Row="4" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_EstimatedOpeningDate}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Top"
+                                   Margin="0,2,0,0"/>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Spacing="2">
+                            <TextBlock Text="{Binding EstimatedOpeningDateDisplay}"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="{DynamicResource L_AccountDetails_OpeningDateNote}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Month Paid Upto -->
+                        <TextBlock Grid.Row="5" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_MonthPaidUpto}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1"
+                                   Text="{Binding MonthPaidUpto}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- First Seen -->
+                        <TextBlock Grid.Row="6" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_FirstSeenInApp}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1"
+                                   Text="{Binding FirstSeen, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Short Code -->
+                        <TextBlock Grid.Row="7" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_ShortCode}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Grid.Column="1"
+                                   FontFamily="{StaticResource AppMonoFontFamily}"
+                                   Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                   VerticalAlignment="Center">
+                            <Run Text="{Binding ShortCode}"/>
+                        </TextBlock>
+
+                        <!-- Last Updated -->
+                        <TextBlock Grid.Row="8" Grid.Column="0"
+                                   Text="{DynamicResource L_AccountDetails_LastUpdated}" 
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Grid.Column="1"
+                                   Text="{Binding LastUpdated, StringFormat='{}{0:dd-MMM-yyyy HH:mm}'}"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                    </Grid>
+                </Border>
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                        <Button Classes="Secondary" 
+                                Click="Close_Click"
+                                Padding="16,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Close}" Width="14" Height="14"/>
+                                <TextBlock Text="{DynamicResource L_Common_Close}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="Primary" 
+                                Click="AddToList_Click"
+                                Padding="18,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Plus}" Width="14" Height="14"/>
+                                <TextBlock Text="{DynamicResource L_AccountDetails_AddToList}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
     </Border>
 
 </Window>

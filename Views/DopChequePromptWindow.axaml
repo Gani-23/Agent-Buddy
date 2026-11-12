@@ -16,6 +16,7 @@
         ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
         Title="{Binding WindowTitle}">
 
     <Border Classes="DialogBackdrop">

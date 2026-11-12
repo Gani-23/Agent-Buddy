@@ -354,16 +354,23 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
         string background;
         string card;
+        string surface;
         string sidebar;
         string textPrimary;
         string textSecondary;
         string border;
         string hover;
         string pressed;
+        string tooltipBg;
+        string tooltipFg;
+        string tooltipBorder;
+        string tooltipFont;
+        double tooltipFontSize;
 
         string cardShadow;
         string cardHoverShadow;
         string insetShadow;
+        string inputShadow;
         string buttonShadow;
         string buttonPressedShadow;
 
@@ -371,16 +378,23 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         {
             background = "#F8F9FA";
             card = "#FFFFFF";
+            surface = "#F3F4F6";
             sidebar = "#F3F4F6";
             textPrimary = "#111827";
             textSecondary = "#4B5563";
             border = "#E5E7EB";
             hover = "#F3F4F6";
             pressed = "#E5E7EB";
+            tooltipBg = "#FFFFFF";
+            tooltipFg = "#0F172A";
+            tooltipBorder = "#CBD5E1";
+            tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, sans-serif";
+            tooltipFontSize = 12.0;
 
             cardShadow = "0 1 3 0 #0000000D, 0 1 2 0 #00000008";
             cardHoverShadow = "0 4 12 0 #00000014, 0 2 4 0 #0000000A";
             insetShadow = "0 0 0 0 Transparent";
+            inputShadow = "0 1 2 0 #0000000A";
             buttonShadow = "0 1 2 0 #0000000A";
             buttonPressedShadow = "0 0 0 0 Transparent";
         }
@@ -388,16 +402,23 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         {
             background = "#0D1117";
             card = "#161B22";
+            surface = "#1F242C";
             sidebar = "#0D1117";
             textPrimary = "#F0F6FC";
             textSecondary = "#8B949E";
             border = "#30363D";
             hover = "#21262D";
             pressed = "#282E37";
+            tooltipBg = "#1F242C";
+            tooltipFg = "#F0F6FC";
+            tooltipBorder = "#38414D";
+            tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", Roboto, sans-serif";
+            tooltipFontSize = 12.0;
 
             cardShadow = "0 2 8 0 #00000040";
             cardHoverShadow = "0 4 16 0 #00000060";
             insetShadow = "0 0 0 0 Transparent";
+            inputShadow = "0 0 0 0 Transparent";
             buttonShadow = "0 1 2 0 #00000050";
             buttonPressedShadow = "0 0 0 0 Transparent";
         }
@@ -405,16 +426,23 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         {
             background = "#F7F6F3";
             card = "#FFFFFF";
+            surface = "#F1F0EE";
             sidebar = "#FBFAF8";
             textPrimary = "#2F3437";
             textSecondary = "#6B7280";
             border = "#E7E5E4";
             hover = "#F1F0EE";
             pressed = "#E8E7E5";
+            tooltipBg = "#FAF9F6";
+            tooltipFg = "#37352F";
+            tooltipBorder = "#E3E2DE";
+            tooltipFont = "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif";
+            tooltipFontSize = 12.0;
 
             cardShadow = "0 1 2 0 #0000000E";
             cardHoverShadow = "0 4 8 0 #00000018";
             insetShadow = "0 0 0 0 Transparent";
+            inputShadow = "0 1 2 0 #0000000E";
             buttonShadow = "0 1 2 0 #0000000E";
             buttonPressedShadow = "0 0 0 0 Transparent";
         }
@@ -448,18 +476,47 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
         resources["AppBackgroundBrush"] = new SolidColorBrush(Color.Parse(background));
         resources["AppCardBackgroundBrush"] = new SolidColorBrush(Color.Parse(card));
+        resources["AppSurfaceBrush"] = new SolidColorBrush(Color.Parse(surface));
         resources["AppSidebarBackgroundBrush"] = new SolidColorBrush(Color.Parse(sidebar));
         resources["AppTextPrimaryBrush"] = new SolidColorBrush(Color.Parse(textPrimary));
         resources["AppTextSecondaryBrush"] = new SolidColorBrush(Color.Parse(textSecondary));
         resources["AppBorderBrush"] = new SolidColorBrush(Color.Parse(border));
         resources["AppHoverBrush"] = new SolidColorBrush(Color.Parse(hover));
+        resources["AppHoverBackgroundBrush"] = new SolidColorBrush(Color.Parse(hover));
         resources["AppPressedBrush"] = new SolidColorBrush(Color.Parse(pressed));
 
         resources["AppCardShadow"] = BoxShadows.Parse(cardShadow);
         resources["AppCardHoverShadow"] = BoxShadows.Parse(cardHoverShadow);
         resources["AppInsetShadow"] = BoxShadows.Parse(insetShadow);
+        resources["AppInputShadow"] = BoxShadows.Parse(inputShadow);
         resources["AppButtonShadow"] = BoxShadows.Parse(buttonShadow);
         resources["AppButtonPressedShadow"] = BoxShadows.Parse(buttonPressedShadow);
+
+        // Font & ToolTip tokens
+        resources["AppFontFamily"] = new FontFamily("-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Inter, Arial, sans-serif");
+        resources["AppMonoFontFamily"] = new FontFamily("\"SF Mono\", Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace");
+        resources["ToolTipFontFamily"] = new FontFamily(tooltipFont);
+        resources["ToolTipFontSize"] = tooltipFontSize;
+
+        resources["ToolTipBackgroundBrush"] = new SolidColorBrush(Color.Parse(tooltipBg));
+        resources["ToolTipForegroundBrush"] = new SolidColorBrush(Color.Parse(tooltipFg));
+        resources["ToolTipBorderBrush"] = new SolidColorBrush(Color.Parse(tooltipBorder));
+        resources["ToolTipBackground"] = new SolidColorBrush(Color.Parse(tooltipBg));
+        resources["ToolTipForeground"] = new SolidColorBrush(Color.Parse(tooltipFg));
+        resources["ToolTipBorderThemeBrush"] = new SolidColorBrush(Color.Parse(tooltipBorder));
+
+        // Accent aliases
+        if (resources.TryGetResource("AccentBlueBrush", null, out var accentObj) && accentObj is SolidColorBrush accentBrush)
+        {
+            resources["AccentBrush"] = accentBrush;
+            resources["AppAccentBrush"] = accentBrush;
+        }
+        else
+        {
+            var fallbackAccent = new SolidColorBrush(Color.Parse("#2F76E6"));
+            resources["AccentBrush"] = fallbackAccent;
+            resources["AppAccentBrush"] = fallbackAccent;
+        }
 
         resources["SuccessTintBrush"] = new SolidColorBrush(Color.Parse(successTint));
         resources["WarningTintBrush"] = new SolidColorBrush(Color.Parse(warningTint));

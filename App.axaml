@@ -15,6 +15,12 @@
             <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
             <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
             <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+
+            <!-- Global Cross-platform Fonts -->
+            <FontFamily x:Key="AppFontFamily">-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Inter, Arial, sans-serif</FontFamily>
+            <FontFamily x:Key="AppMonoFontFamily">"SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace</FontFamily>
+            <FontFamily x:Key="ToolTipFontFamily">-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, Arial, sans-serif</FontFamily>
+            <x:Double x:Key="ToolTipFontSize">12</x:Double>
         </ResourceDictionary>
     </Application.Resources>
     

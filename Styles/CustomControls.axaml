@@ -177,12 +177,51 @@
     </Style>
 
     <Style Selector="ToolTip">
-        <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource ToolTipBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolTipBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}"/>
-        <Setter Property="Padding" Value="10"/>
-        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource ToolTipFontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource ToolTipFontSize}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="MaxWidth" Value="420"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <Style Selector="ToolTip /template/ Border#PART_LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource ToolTipBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolTipBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="BoxShadow" Value="{DynamicResource AppCardHoverShadow}"/>
+    </Style>
+
+    <Style Selector="ToolTip ContentPresenter">
+        <Setter Property="TextBlock.Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+        <Setter Property="TextBlock.FontFamily" Value="{DynamicResource ToolTipFontFamily}"/>
+        <Setter Property="TextBlock.FontSize" Value="{DynamicResource ToolTipFontSize}"/>
+        <Setter Property="TextBlock.FontWeight" Value="Normal"/>
+        <Setter Property="TextBlock.LineHeight" Value="17"/>
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style Selector="ToolTip TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource ToolTipFontFamily}"/>
+        <Setter Property="FontSize" Value="{DynamicResource ToolTipFontSize}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="LineHeight" Value="17"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style Selector="ToolTip PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
     </Style>
 
     <!-- Modern Clean Cards -->

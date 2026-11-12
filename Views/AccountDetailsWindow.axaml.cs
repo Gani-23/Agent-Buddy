@@ -20,7 +20,6 @@ public partial class AccountDetailsWindow : Window
     {
         Account = account;
         DataContext = account;
-        RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
     }
 
     private void AddToList_Click(object? sender, RoutedEventArgs e)

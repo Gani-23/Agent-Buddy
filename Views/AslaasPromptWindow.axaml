@@ -16,6 +16,7 @@
         ShowInTaskbar="False"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
         Title="{DynamicResource L_Prompt_Aslaas_Title}">
 
     <Border Classes="DialogBackdrop">

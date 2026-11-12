@@ -46,7 +46,6 @@ public partial class SegmentAccountsWindow : Window
         string? segmentKey = null) : this()
     {
         DataContext = new SegmentAccountsWindowViewModel(dashboardViewModel, segmentKey, initialSearchQuery);
-        RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
         _focusSearchOnOpen = focusSearchOnOpen;
         _isDarkTheme = isDarkTheme;
         _initialSearchQuery = initialSearchQuery?.Trim() ?? string.Empty;
@@ -83,10 +82,7 @@ public partial class SegmentAccountsWindow : Window
             "Delete",
             "Cancel");
 
-        var dialog = new ConfirmDialogWindow(request)
-        {
-            RequestedThemeVariant = _isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light
-        };
+        var dialog = new ConfirmDialogWindow(request);
 
         var confirmed = await dialog.ShowDialog<bool>(this);
         if (!confirmed)

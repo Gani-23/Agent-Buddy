@@ -17,7 +17,6 @@ public partial class AccountSearchDialog : Window
     public AccountSearchDialog(AccountSearchViewModel viewModel) : this()
     {
         DataContext = viewModel;
-        RequestedThemeVariant = viewModel.IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
     }
 
     private void AddSelected_Click(object? sender, RoutedEventArgs e)

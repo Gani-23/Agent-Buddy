@@ -15,9 +15,12 @@ public partial class OverdueBalanceWindow : Window
     private readonly ListManagementViewModel _listManagementViewModel = null!;
     private readonly NotificationService? _notificationService;
 
+    private readonly DatabaseService _databaseService;
+
     public OverdueBalanceWindow()
     {
         InitializeComponent();
+        _databaseService = new DatabaseService();
     }
 
     public OverdueBalanceWindow(
@@ -27,21 +30,33 @@ public partial class OverdueBalanceWindow : Window
         LocalizationService localizationService,
         NotificationService? notificationService = null) : this()
     {
-        DataContext = new OverdueBalanceWindowViewModel(databaseService);
+        _databaseService = databaseService;
+        var vm = new OverdueBalanceWindowViewModel(databaseService);
+        DataContext = vm;
         _listManagementViewModel = listManagementViewModel;
         _isDarkTheme = isDarkTheme;
         _notificationService = notificationService;
-        RequestedThemeVariant = isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
+
+        _databaseService.DatabaseChanged += OnDatabaseChanged;
+        Closed += (_, _) => _databaseService.DatabaseChanged -= OnDatabaseChanged;
 
         Opened += async (_, _) =>
         {
-            if (DataContext is OverdueBalanceWindowViewModel vm)
+            if (DataContext is OverdueBalanceWindowViewModel overdueVm)
             {
-                await vm.LoadAsync();
+                await overdueVm.LoadAsync();
             }
 
             SearchBox.Focus();
         };
+    }
+
+    private void OnDatabaseChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is OverdueBalanceWindowViewModel vm)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(async () => await vm.LoadAsync());
+        }
     }
 
     private void Close_Click(object? sender, RoutedEventArgs e)
