@@ -1153,7 +1153,9 @@ public class PythonService
                     var fileName = Path.GetFileName(file);
                     if (string.Equals(fileName, ".DS_Store", StringComparison.OrdinalIgnoreCase)) continue;
                     var destFile = Path.Combine(_scriptsPath, fileName);
-                    if (!File.Exists(destFile) || File.GetLastWriteTimeUtc(file) > File.GetLastWriteTimeUtc(destFile))
+                    var destInfo = new FileInfo(destFile);
+                    var srcInfo = new FileInfo(file);
+                    if (srcInfo.Length > 0 && (!destInfo.Exists || destInfo.Length == 0 || srcInfo.LastWriteTimeUtc > destInfo.LastWriteTimeUtc))
                     {
                         try { File.Copy(file, destFile, true); } catch { }
                     }

@@ -29,20 +29,33 @@ public class DatabaseService
 
     public DatabaseService()
     {
+        var dopAgentFolder = AppPaths.BaseDirectory;
+        if (!string.IsNullOrWhiteSpace(dopAgentFolder) && !Directory.Exists(dopAgentFolder))
+        {
+            try { Directory.CreateDirectory(dopAgentFolder); } catch { }
+        }
+        _dbPath = Path.Combine(dopAgentFolder, "dop_agent.db");
+        _connectionString = $"Data Source={_dbPath}";
+
         try
         {
-            var dopAgentFolder = AppPaths.BaseDirectory;
-            if (!string.IsNullOrWhiteSpace(dopAgentFolder) && !Directory.Exists(dopAgentFolder))
-            {
-                Directory.CreateDirectory(dopAgentFolder);
-            }
-            _dbPath = Path.Combine(dopAgentFolder, "dop_agent.db");
-            _connectionString = $"Data Source={_dbPath}";
             EnsureAnalyticsSchema();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"DatabaseService init warning: {ex.Message}");
+
+            var recovered = TryAutoRecoverFromBackup(dopAgentFolder, _dbPath);
+            if (recovered)
+            {
+                try
+                {
+                    EnsureAnalyticsSchema();
+                    return;
+                }
+                catch { }
+            }
+
             try
             {
                 var fallbackFolder = Path.Combine(Path.GetTempPath(), "DOPAgent");
@@ -56,6 +69,41 @@ public class DatabaseService
             }
             catch { }
         }
+    }
+
+    private static bool TryAutoRecoverFromBackup(string dopAgentFolder, string targetDbPath)
+    {
+        try
+        {
+            var backupsDir = Path.Combine(dopAgentFolder, "backups");
+            if (!Directory.Exists(backupsDir)) return false;
+
+            var backupFiles = new DirectoryInfo(backupsDir)
+                .GetFiles("*.db")
+                .Where(f => f.Length > 10000)
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .ToList();
+
+            foreach (var backup in backupFiles)
+            {
+                try
+                {
+                    using var testConn = new SqliteConnection($"Data Source={backup.FullName}");
+                    testConn.Open();
+                    using var cmd = testConn.CreateCommand();
+                    cmd.CommandText = "PRAGMA quick_check;";
+                    var result = cmd.ExecuteScalar()?.ToString();
+                    if (string.Equals(result, "ok", StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(backup.FullName, targetDbPath, overwrite: true);
+                        return true;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+        return false;
     }
 
     /// <summary>
