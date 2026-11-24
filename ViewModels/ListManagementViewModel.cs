@@ -284,7 +284,7 @@ public class ListPanelViewModel : ReactiveObject
     public decimal MaxAmount => HasAmountLimit ? 20000m : decimal.MaxValue;
     public decimal RemainingAmount => HasAmountLimit ? Math.Max(0, MaxAmount - TotalAmount) : 0m;
     public bool IsFull => HasAmountLimit && TotalAmount >= MaxAmount;
-    public string AmountLimitText => HasAmountLimit ? " / Rs. 20,000" : " / No Limit";
+    public string AmountLimitText => HasAmountLimit ? " / ₹20,000" : " / No Limit";
     public string PaymentModeToken => GetPaymentModeToken();
     public bool IsInstallmentSuggestionActive => _isInstallmentSuggestionActive;
     public string InstallmentInputTag => IsInstallmentSuggestionActive ? "InstallmentSuggested" : "InstallmentInput";
@@ -405,7 +405,7 @@ public class ListPanelViewModel : ReactiveObject
         var amountToAdd = account.GetAmount() * installment;
         if (HasAmountLimit && TotalAmount + amountToAdd > MaxAmount)
         {
-            SetEntryErrorMessage($"Cannot add {accountNo}. This list is limited to Rs. 20,000.");
+            SetEntryErrorMessage($"Cannot add {accountNo}. This list is limited to ₹20,000.");
             return false;
         }
 

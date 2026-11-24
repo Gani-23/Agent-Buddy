@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -17,9 +19,39 @@ public partial class DashboardView : UserControl
 
     private DashboardViewModel? ViewModel => DataContext as DashboardViewModel;
 
+    /// <summary>Whole card is clickable: opens that segment's account list.</summary>
+    private async void Tile_Tapped(object? sender, TappedEventArgs e)
+    {
+        // Ignore taps that land on a button inside the card (actions, ••• menu).
+        if (e.Source is Visual source && source.FindAncestorOfType<Button>(includeSelf: true) is not null)
+        {
+            return;
+        }
+
+        if (sender is Control { Tag: string segmentKey })
+        {
+            await OpenSegmentAsync(segmentKey, focusSearch: false);
+        }
+    }
+
+    /// <summary>Keyboard access: Enter or Space on a focused card opens it.</summary>
+    private async void Tile_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Enter or Key.Space) || e.Source != sender)
+        {
+            return;
+        }
+
+        if (sender is Control { Tag: string segmentKey })
+        {
+            e.Handled = true;
+            await OpenSegmentAsync(segmentKey, focusSearch: false);
+        }
+    }
+
     private async void OpenSegment_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is string segmentKey)
+        if (sender is Control { Tag: string segmentKey })
         {
             await OpenSegmentAsync(segmentKey, focusSearch: false);
         }
@@ -27,7 +59,7 @@ public partial class DashboardView : UserControl
 
     private async void SearchSegment_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is string segmentKey)
+        if (sender is Control { Tag: string segmentKey })
         {
             await OpenSegmentAsync(segmentKey, focusSearch: true);
         }
@@ -35,12 +67,12 @@ public partial class DashboardView : UserControl
 
     private async void PrintSegment_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is not Button button || ViewModel is null)
+        if (sender is not Control control || ViewModel is null)
         {
             return;
         }
 
-        var (success, message) = await ViewModel.PrintSegmentAsync(button.Tag?.ToString());
+        var (success, message) = await ViewModel.PrintSegmentAsync(control.Tag?.ToString());
         ViewModel.UpdateStatus = message;
     }
 
@@ -167,7 +199,7 @@ public partial class DashboardView : UserControl
 
         ViewModel.NotificationService?.Success(
             "WhatsApp PDF Ready",
-            $"{title} PDF ({totalCount} accounts, Rs.{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
+            $"{title} PDF ({totalCount} accounts, ₹{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
     }
 
     private async void SyncMobileQr_Click(object? sender, RoutedEventArgs e)

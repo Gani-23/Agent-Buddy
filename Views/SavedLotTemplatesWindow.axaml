@@ -29,9 +29,9 @@
                     <StackPanel Spacing="4">
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <Border Classes="DialogDot"/>
-                            <TextBlock Text="Recurring Lots" Classes="Kicker"/>
+                            <TextBlock Text="Recurring lots" Classes="Kicker"/>
                         </StackPanel>
-                        <TextBlock Text="Saved Lot Templates" Classes="DialogTitle"/>
+                        <TextBlock Text="Saved lot templates" Classes="DialogTitle"/>
                         <TextBlock Text="Save groups of recurring accounts (e.g. Colony RD Lot, Office Batch) and load them into any list with 1-click."
                                    FontSize="11.5"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -97,7 +97,7 @@
                                 Click="SaveList_Click">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource Icon_Save}" Width="12" Height="12" Foreground="White"/>
-                                <TextBlock Text="Save Template" FontSize="11.5" FontWeight="SemiBold"/>
+                                <TextBlock Text="Save template" FontSize="11.5" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -321,7 +321,7 @@
                                         <PathIcon Data="{StaticResource Icon_FileText}" Width="22" Height="22" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
 
-                                    <TextBlock Text="No Template Selected"
+                                    <TextBlock Text="No template selected"
                                                FontWeight="Bold"
                                                FontSize="14"
                                                Foreground="{DynamicResource AppTextPrimaryBrush}"

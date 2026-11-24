@@ -110,6 +110,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         SettingsViewModel.LicenseStateChanged += OnLicenseStateChanged;
         SettingsViewModel.RdCertificateRenewalChanged += OnRdCertificateRenewalChanged;
         SettingsViewModel.ThemeModeChanged += OnThemeModeChanged;
+        SettingsViewModel.OwnerPhoneNumberChanged += phone => DashboardViewModel.AgentPhoneNumber = phone;
 
         // Set default view
         _currentView = DashboardViewModel;
@@ -747,8 +748,14 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         if (state.ExpiresAtUtc.HasValue)
         {
             var localExpiry = state.ExpiresAtUtc.Value.ToLocalTime();
-            var label = state.IsActive ? "Next renewal" : "Expired on";
-            return $"{label}: {localExpiry:dd MMM yyyy}";
+            if (state.IsActive && localExpiry.Year >= 2090)
+            {
+                return "Lifetime license";
+            }
+
+            return state.IsActive
+                ? $"License renews {localExpiry:d MMM yyyy}"
+                : $"License expired {localExpiry:d MMM yyyy}";
         }
 
         return string.IsNullOrWhiteSpace(state.Message) ? "License status unavailable." : state.Message;

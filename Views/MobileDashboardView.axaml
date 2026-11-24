@@ -25,7 +25,7 @@
                         <StackPanel Grid.Column="0" Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="8" Height="8" Fill="{StaticResource SuccessBrush}"/>
-                                <TextBlock Text="DOP Agent Portal"
+                                <TextBlock Text="DOP agent portal"
                                            FontSize="13"
                                            FontWeight="Bold"
                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
@@ -44,7 +44,7 @@
                                 IsEnabled="{Binding !IsBusy}">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource Icon_Refresh}" Width="14" Height="14" Foreground="White"/>
-                                <TextBlock Text="Sync Portal" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="Sync portal" FontSize="12" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -89,7 +89,7 @@
                                    FontSize="24"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Active RD Accounts"
+                        <TextBlock Text="Active RD accounts"
                                    FontSize="11"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </StackPanel>
@@ -105,7 +105,7 @@
                                    FontSize="24"
                                    FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlueBrush}"/>
-                        <TextBlock Text="Monthly Denomination"
+                        <TextBlock Text="Monthly denomination"
                                    FontSize="11"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                     </StackPanel>
@@ -286,12 +286,12 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Spacing="1">
-                                        <TextBlock Text="Paid Upto" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="Paid upto" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                         <TextBlock Text="{Binding MonthPaidUpto}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Spacing="1" HorizontalAlignment="Right">
-                                        <TextBlock Text="Next Due" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="Next due" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                         <TextBlock Text="{Binding NextInstallmentDate}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
                                     </StackPanel>
                                 </Grid>
@@ -308,7 +308,7 @@
                                             CommandParameter="{Binding}">
                                         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                             <PathIcon Data="{StaticResource Icon_Share}" Width="13" Height="13" Foreground="{StaticResource SuccessBrush}"/>
-                                            <TextBlock Text="Send WhatsApp Reminder" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                            <TextBlock Text="Send WhatsApp reminder" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                                         </StackPanel>
                                     </Button>
 
@@ -336,7 +336,7 @@
                     BorderThickness="1"
                     BoxShadow="{DynamicResource AppCardShadow}">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Collection Breakdown"
+                    <TextBlock Text="Collection breakdown"
                                FontSize="13"
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>

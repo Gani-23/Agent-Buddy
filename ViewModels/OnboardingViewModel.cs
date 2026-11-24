@@ -63,13 +63,13 @@ public sealed class OnboardingViewModel : ViewModelBase
 
         TourItems = new ObservableCollection<TourItem>
         {
-            new("Icon_Dashboard", "Dashboard", "Your daily cockpit: portfolio totals, half-month pending and deposited accounts, risk insights and one-click WhatsApp reminders."),
+            new("Icon_Dashboard", "Dashboard", "Starts with Today: what's due by the 15th and month-end, with one-click WhatsApp reminders. Below: portfolio totals, risks and every account list."),
             new("Icon_Lists", "Create Lists", "Build deposit lots from pending accounts, review totals and cash, then generate reference numbers and payslips."),
             new("Icon_Clock", "Fixed Deposits (TD)", "Track time deposits, maturity dates and interest so nothing renews unnoticed."),
             new("Icon_Reports", "Reports", "Every generated report and PDF in one place: search, reopen, print or share."),
             new("Icon_Support", "Support", "Help, FAQs and a direct line to the team when something looks off."),
             new("Icon_Settings", "Settings", "Credentials, license, language, printers, backups, updates and this setup wizard."),
-            new("Icon_Bolt", "Balance button", "The floating button bottom-right jumps straight to overdue balance accounts from any page."),
+            new("Icon_Bolt", "Overdue balances", "Under the sidebar menu: jump straight to accounts with overdue balances from any page."),
             new("Icon_QrCode", "Sync Mobile (QR)", "On the Dashboard: scan the QR from the mobile app to sync accounts over Wi-Fi."),
         };
 
@@ -299,7 +299,7 @@ public sealed class OnboardingViewModel : ViewModelBase
         }
 
         OwnerMobile = digits;
-        _main.DashboardViewModel.AgentPhoneNumber = digits;
+        Settings.OwnerPhoneNumber = digits;
         await Settings.SaveAgentNameAsync();
         return true;
     }

@@ -18,7 +18,7 @@
                            FontWeight="Bold"
                            LetterSpacing="0.5"
                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                <TextBlock Text="App Configuration"
+                <TextBlock Text="App configuration"
                            FontSize="20"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
@@ -34,7 +34,7 @@
                     BoxShadow="{DynamicResource AppCardShadow}">
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                        <TextBlock Text="App License" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="App license" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <Border CornerRadius="8"
                                 Padding="8,3"
                                 Background="{DynamicResource InfoTintBrush}">
@@ -51,7 +51,7 @@
 
                     <!-- License Key Input -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="License Token" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="License token" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Text="{Binding LicenseToken, UpdateSourceTrigger=PropertyChanged}"
                                  PlaceholderText="Paste license token here"
                                  CornerRadius="10"
@@ -75,7 +75,7 @@
                                 CornerRadius="10"
                                 Command="{Binding ValidateStoredLicenseCommand}"
                                 IsEnabled="{Binding !IsProcessingLicense}">
-                            <TextBlock Text="Check License" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Check license" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         </Button>
                     </Grid>
 
@@ -95,7 +95,7 @@
                     BorderThickness="1"
                     BoxShadow="{DynamicResource AppCardShadow}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Postal Portal Credentials" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <TextBlock Text="Postal portal credentials" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     <TextBlock Text="Used by the on-device automation engine to log into dopagent.indiapost.gov.in securely."
                                FontSize="11"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -113,14 +113,14 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="Agent Name (Optional)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Text="{Binding EditableAgentName, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="Agent Name"
+                                 PlaceholderText="Agent name"
                                  CornerRadius="10"
                                  Padding="10,8"/>
                     </StackPanel>
 
                     <!-- Portal Password -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Portal Password" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="Portal password" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Text="{Binding EditablePassword, UpdateSourceTrigger=PropertyChanged}"
                                  PasswordChar="●"
                                  PlaceholderText="Portal password"
@@ -134,7 +134,7 @@
                             CornerRadius="10"
                             Command="{Binding SaveCredentialsCommand}"
                             IsEnabled="{Binding !IsSavingCredentials}">
-                        <TextBlock Text="Save Portal Credentials" FontWeight="Bold" HorizontalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Save portal credentials" FontWeight="Bold" HorizontalAlignment="Center" Foreground="White"/>
                     </Button>
 
                     <TextBlock Text="{Binding CredentialsStatus}"
@@ -153,7 +153,7 @@
                     BorderThickness="1"
                     BoxShadow="{DynamicResource AppCardShadow}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Appearance &amp; Theme" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <TextBlock Text="Appearance &amp; theme" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     
                     <ComboBox ItemsSource="{Binding ThemeModeOptions}"
                               SelectedItem="{Binding SelectedThemeModeOption}"
@@ -196,7 +196,7 @@
                             Padding="12,10"
                             CornerRadius="10"
                             Command="{Binding SaveLanguageCommand}">
-                        <TextBlock Text="Apply Language" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Apply language" FontWeight="Bold" HorizontalAlignment="Center"/>
                     </Button>
 
                     <TextBlock Text="{Binding LanguageStatus}"
@@ -214,7 +214,7 @@
                     BorderThickness="1"
                     BoxShadow="{DynamicResource AppCardShadow}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Mobile Cloud Sync" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                    <TextBlock Text="Mobile cloud sync" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     <TextBlock Text="Connect to your Vercel / Cloud Dashboard backend."
                                FontSize="11"
                                Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -243,7 +243,7 @@
                             CornerRadius="10"
                             Command="{Binding SaveMobileSyncSettingsCommand}"
                             IsEnabled="{Binding !IsSavingMobileSyncSettings}">
-                        <TextBlock Text="Save Cloud Sync Settings" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Save cloud sync settings" FontWeight="Bold" HorizontalAlignment="Center"/>
                     </Button>
 
                     <TextBlock Text="{Binding MobileSyncStatus}"

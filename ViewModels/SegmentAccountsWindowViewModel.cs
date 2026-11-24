@@ -85,7 +85,7 @@ public class SegmentAccountsWindowViewModel : ViewModelBase
 
         DashboardContext.NotificationService?.Success(
             "WhatsApp PDF Ready",
-            $"{title} PDF ({totalCount} accounts, Rs.{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
+            $"{title} PDF ({totalCount} accounts, ₹{totalAmount:N0}) copied to clipboard. Press Cmd+V/Ctrl+V in WhatsApp to attach.");
     }
 
     private void SendWhatsAppReminder(RDAccount account)

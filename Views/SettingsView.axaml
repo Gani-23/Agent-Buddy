@@ -49,7 +49,7 @@
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Appearance &amp; Theme" Classes="SubHeader"/>
+                            <TextBlock Text="Appearance &amp; theme" Classes="SubHeader"/>
                             <TextBlock Text="Choose between modern light, dark surfaces or the classic Notion styling."
                                        Classes="SectionLead"
                                        TextWrapping="Wrap"/>
@@ -62,7 +62,7 @@
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="Theme Style"
+                                   Text="Theme style"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <ComboBox Grid.Row="0"
@@ -194,7 +194,7 @@
 
                         <!-- Base Directory Override -->
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Base Directory" 
+                                   Text="Base directory" 
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         
@@ -208,7 +208,7 @@
                                     Padding="14,8">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <PathIcon Data="{StaticResource Icon_Save}" Width="14" Height="14"/>
-                                    <TextBlock Text="Save Path"/>
+                                    <TextBlock Text="Save path"/>
                                 </StackPanel>
                             </Button>
                             
@@ -236,7 +236,7 @@
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
-                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource L_Set_AgentIdField}"
                                    VerticalAlignment="Center"
@@ -246,12 +246,12 @@
                                  PlaceholderText="{DynamicResource L_Set_WmAgentId}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Agent Name"
+                                   Text="Agent name"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="1" Grid.Column="1"
                                  Text="{Binding EditableAgentName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="Agent Name"/>
+                                 PlaceholderText="Agent name"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource L_Set_PasswordField}"
@@ -259,9 +259,22 @@
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="2" Grid.Column="1"
                                  Text="{Binding EditablePassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PasswordChar="•"
                                  PlaceholderText="{DynamicResource L_Set_WmPassword}"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="1"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
+                                   Text="Owner WhatsApp"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Spacing="4">
+                            <TextBox Text="{Binding OwnerPhoneNumber, Mode=TwoWay}"
+                                     PlaceholderText="e.g. 919876543210"/>
+                            <TextBlock Text="Reminder PDFs from the Dashboard are sent from this number. Saved automatically."
+                                       FontSize="12"
+                                       Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="4" Grid.Column="1"
                                    Text="{Binding CredentialsStatus}"
                                    TextWrapping="Wrap"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -286,7 +299,7 @@
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Key}" Width="16" Height="16"/>
-                                <TextBlock Text="Change Portal Password"/>
+                                <TextBlock Text="Change portal password"/>
                             </StackPanel>
                         </Button>
                         <TextBlock Text="{Binding PasswordChangeStatus}"
@@ -339,7 +352,7 @@
 
                     <Separator/>
 
-                    <TextBlock Text="Postal RD Certificate Renewal"
+                    <TextBlock Text="Postal RD certificate renewal"
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
@@ -349,7 +362,7 @@
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="Next Renewal Date"
+                                   Text="Next renewal date"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0"
@@ -377,13 +390,13 @@
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
-                            <TextBlock Text="Save Renewal Date"/>
+                            <TextBlock Text="Save renewal date"/>
                         </StackPanel>
                     </Button>
 
                     <Separator/>
 
-                    <TextBlock Text="Retention &amp; Cleanup"
+                    <TextBlock Text="Retention &amp; cleanup"
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
@@ -393,7 +406,7 @@
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="Saved Lots"
+                                   Text="Saved lots"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0"
@@ -433,13 +446,13 @@
                             Padding="16,10">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="{StaticResource Icon_Save}" Width="16" Height="16"/>
-                            <TextBlock Text="Save Retention Settings"/>
+                            <TextBlock Text="Save retention settings"/>
                         </StackPanel>
                     </Button>
 
                     <Separator/>
 
-                    <TextBlock Text="Application License"
+                    <TextBlock Text="Application license"
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
@@ -449,7 +462,7 @@
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="License Server URL"
+                                   Text="License server URL"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="0"
@@ -469,7 +482,7 @@
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="License Token"
+                                   Text="License token"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBox Grid.Row="2"
@@ -498,7 +511,7 @@
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Sparkle}" Width="16" Height="16"/>
-                                <TextBlock Text="Activate License"/>
+                                <TextBlock Text="Activate license"/>
                             </StackPanel>
                         </Button>
 
@@ -510,7 +523,7 @@
                                 Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Shield}" Width="16" Height="16"/>
-                                <TextBlock Text="Validate Saved License"/>
+                                <TextBlock Text="Validate saved license"/>
                             </StackPanel>
                         </Button>
 
@@ -523,7 +536,7 @@
                                 ToolTip.Tip="Submit renewal request to administrator via Telegram &amp; Discord">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Upload}" Width="16" Height="16"/>
-                                <TextBlock Text="Request Renewal"/>
+                                <TextBlock Text="Request renewal"/>
                             </StackPanel>
                         </Button>
 
@@ -536,7 +549,7 @@
                                 ToolTip.Tip="Check if administrator approved renewal">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Sync}" Width="16" Height="16"/>
-                                <TextBlock Text="Check Approved Renewal"/>
+                                <TextBlock Text="Check approved renewal"/>
                             </StackPanel>
                         </Button>
 
@@ -548,7 +561,7 @@
                                 Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Trash}" Width="16" Height="16"/>
-                                <TextBlock Text="Clear License"/>
+                                <TextBlock Text="Clear license"/>
                             </StackPanel>
                         </Button>
                     </WrapPanel>
@@ -562,7 +575,7 @@
 
                     <Separator/>
 
-                    <TextBlock Text="App Updates"
+                    <TextBlock Text="App updates"
                                Classes="SubHeader"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
 
@@ -572,7 +585,7 @@
                           ColumnSpacing="12">
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="Current Version"
+                                   Text="Current version"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="0"
@@ -582,7 +595,7 @@
 
                         <TextBlock Grid.Row="1"
                                    Grid.Column="0"
-                                   Text="Latest Version"
+                                   Text="Latest version"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         <TextBlock Grid.Row="1"
@@ -617,7 +630,7 @@
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Refresh}" Width="16" Height="16"/>
-                                <TextBlock Text="Check for Updates"/>
+                                <TextBlock Text="Check for updates"/>
                             </StackPanel>
                         </Button>
                         <Button Classes="Primary"
@@ -628,7 +641,7 @@
                                 Padding="16,10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource Icon_Sparkle}" Width="16" Height="16"/>
-                                <TextBlock Text="Download &amp; Install Update"/>
+                                <TextBlock Text="Download &amp; install update"/>
                             </StackPanel>
                         </Button>
                         <Button Classes="Ghost"

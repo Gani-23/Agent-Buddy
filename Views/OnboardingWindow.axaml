@@ -326,7 +326,7 @@
                         <TextBlock Classes="PageTitle" Text="Connect your DOP account"/>
                         <TextBlock Classes="PageLead" Text="AgentBuddy signs in to the India Post agent portal for you to fetch accounts, ASLAAS numbers and to submit deposit lists."/>
                         <StackPanel>
-                            <TextBlock Classes="FieldLabel" Text="DOP Agent ID"/>
+                            <TextBlock Classes="FieldLabel" Text="DOP agent ID"/>
                             <TextBox Classes="Big" Text="{Binding Settings.EditableAgentId}" PlaceholderText="Your portal login ID"/>
                         </StackPanel>
                         <StackPanel>

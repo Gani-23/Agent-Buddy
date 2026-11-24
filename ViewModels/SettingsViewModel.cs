@@ -598,6 +598,29 @@ public class SettingsViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> InstallUpdateCommand { get; }
     public event EventHandler<LicenseStatus>? LicenseStateChanged;
     public event EventHandler? RdCertificateRenewalChanged;
+    public event Action<string>? OwnerPhoneNumberChanged;
+
+    private string _ownerPhoneNumber = AppSettings.Load().AgentPhoneNumber ?? string.Empty;
+
+    /// <summary>Owner WhatsApp number used for reminder PDFs. Persisted in settings.json.</summary>
+    public string OwnerPhoneNumber
+    {
+        get => _ownerPhoneNumber;
+        set
+        {
+            var trimmed = (value ?? string.Empty).Trim();
+            if (trimmed == _ownerPhoneNumber)
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _ownerPhoneNumber, trimmed);
+            var settings = AppSettings.Load();
+            settings.AgentPhoneNumber = trimmed;
+            settings.Save();
+            OwnerPhoneNumberChanged?.Invoke(trimmed);
+        }
+    }
 
     private async void LoadSettings()
     {

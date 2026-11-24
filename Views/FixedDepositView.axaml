@@ -28,7 +28,7 @@
                         VerticalAlignment="Center">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_Plus}" Width="14" Height="14" Foreground="White"/>
-                        <TextBlock Grid.Column="1" Text="New Fixed Deposit" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="New fixed deposit" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
             </Grid>
@@ -100,7 +100,7 @@
                     IsVisible="{Binding IsEntryPanelOpen}">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                        <TextBlock Text="Add New Fixed Deposit Account" FontWeight="Bold" FontSize="14"/>
+                        <TextBlock Text="Add new fixed deposit account" FontWeight="Bold" FontSize="14"/>
                         <Button Grid.Column="1" Classes="Icon" Command="{Binding CloseEntryPanelCommand}">
                             <PathIcon Data="{StaticResource Icon_Close}" Width="13" Height="13"/>
                         </Button>
@@ -116,7 +116,7 @@
                         <!-- Customer Name -->
                         <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                             <TextBlock Text="Customer Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor Name" FontSize="13"/>
+                            <TextBox Text="{Binding EntryCustomerName}" PlaceholderText="Depositor name" FontSize="13"/>
                         </StackPanel>
 
                         <!-- Customer Phone -->
@@ -145,13 +145,13 @@
 
                         <!-- Deposit Date -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Spacing="4">
-                            <TextBlock Text="Deposit Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBlock Text="Deposit date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                             <DatePicker SelectedDate="{Binding EntryDepositDate}" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Notes -->
                         <StackPanel Grid.Row="1" Grid.Column="3" Spacing="4">
-                            <TextBlock Text="Notes / Agent Ref" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                            <TextBlock Text="Notes / agent ref" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                             <TextBox Text="{Binding EntryNotes}" PlaceholderText="Optional notes" FontSize="13"/>
                         </StackPanel>
                     </Grid>
@@ -171,7 +171,7 @@
                         <Button Grid.Column="2" Classes="Primary" Command="{Binding SaveEntryCommand}" Padding="16,8">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource Icon_Check}" Width="12" Height="12" Foreground="White"/>
-                                <TextBlock Text="Save to Ledger" FontWeight="SemiBold"/>
+                                <TextBlock Text="Save to ledger" FontWeight="SemiBold"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -186,7 +186,7 @@
                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14">
                         <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
                             <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="15" Height="15" Foreground="{DynamicResource AccentBrush}"/>
-                            <TextBlock Grid.Column="1" Text="Official India Post Time Deposit &amp; MIS Interest Calculator" FontWeight="Bold" FontSize="13"/>
+                            <TextBlock Grid.Column="1" Text="Official India Post time deposit &amp; MIS interest calculator" FontWeight="Bold" FontSize="13"/>
                         </Grid>
 
                         <!-- Inputs Row -->
@@ -211,7 +211,7 @@
 
                             <!-- Start Date -->
                             <StackPanel Grid.Column="3" Spacing="4">
-                                <TextBlock Text="Opening Date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBlock Text="Opening date" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                 <DatePicker SelectedDate="{Binding CalcStartDate}" Height="42" HorizontalAlignment="Stretch"/>
                             </StackPanel>
                         </Grid>
@@ -304,13 +304,13 @@
                                         BorderBrush="{DynamicResource AppBorderBrush}"
                                         BorderThickness="0,0,0,1">
                                     <Grid ColumnDefinitions="140,180,120,110,120,130,110,Auto" ColumnSpacing="8">
-                                        <TextBlock Grid.Column="0" Text="Account No" FontWeight="Bold" FontSize="11"/>
-                                        <TextBlock Grid.Column="1" Text="Customer Name" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="0" Text="Account no" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="1" Text="Customer name" FontWeight="Bold" FontSize="11"/>
                                         <TextBlock Grid.Column="2" Text="Scheme" FontWeight="Bold" FontSize="11"/>
                                         <TextBlock Grid.Column="3" Text="Principal" FontWeight="Bold" FontSize="11"/>
-                                        <TextBlock Grid.Column="4" Text="Deposit Date" FontWeight="Bold" FontSize="11"/>
-                                        <TextBlock Grid.Column="5" Text="Maturity Date" FontWeight="Bold" FontSize="11"/>
-                                        <TextBlock Grid.Column="6" Text="Maturity Value" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="4" Text="Deposit date" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="5" Text="Maturity date" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="6" Text="Maturity value" FontWeight="Bold" FontSize="11"/>
                                         <TextBlock Grid.Column="7" Text="Actions" FontWeight="Bold" FontSize="11" Width="80"/>
                                     </Grid>
                                 </Border>
@@ -400,7 +400,7 @@
                                                                 Height="28"
                                                                 Command="{ReflectionBinding DataContext.CopyReminderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}"
-                                                                ToolTip.Tip="Copy WhatsApp Maturity Reminder">
+                                                                ToolTip.Tip="Copy WhatsApp maturity reminder">
                                                             <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="{StaticResource AccentGreenBrush}"/>
                                                         </Button>
 

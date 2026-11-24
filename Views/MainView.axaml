@@ -35,7 +35,7 @@
                                    FontWeight="Bold"
                                    LetterSpacing="-0.3"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Mobile Dashboard"
+                        <TextBlock Text="Mobile dashboard"
                                    FontSize="10"
                                    FontWeight="Medium"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>

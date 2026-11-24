@@ -205,7 +205,7 @@
                                     ToolTip.Tip="Generate Cash Denomination &amp; Deposit Slip for this lot">
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
                                     <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="12" Height="12" Foreground="{DynamicResource AccentBlueBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Cash Slip" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="Cash slip" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
 
@@ -228,7 +228,7 @@
                                     ToolTip.Tip="Save, view, and load recurring lot presets">
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5" VerticalAlignment="Center">
                                     <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="12" Height="12" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Lot Templates" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="Lot templates" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold"/>
                                 </Grid>
                             </Button>
                         </WrapPanel>
@@ -352,7 +352,7 @@
                     Padding="16"
                     IsVisible="{Binding HasProcessingLogs}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Runtime Logs"
+                    <TextBlock Text="Runtime logs"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     <Border Background="{DynamicResource AppHoverBrush}"
@@ -460,7 +460,7 @@
                                                             Height="28"
                                                             Padding="0"
                                                             VerticalAlignment="Center"
-                                                            ToolTip.Tip="Delete List"
+                                                            ToolTip.Tip="Delete list"
                                                             IsEnabled="{ReflectionBinding DataContext.CanEditLists, ElementName=RootView}"
                                                             Click="DeleteList_Click">
                                                         <PathIcon Data="{StaticResource Icon_Trash}"
@@ -476,7 +476,7 @@
                                                            FontSize="12"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource AppTextPrimaryBrush}">
-                                                    <Run Text="{Binding TotalAmount, StringFormat='Rs. {0:N0}'}"/>
+                                                    <Run Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}"/>
                                                     <Run Text="{Binding AmountLimitText}" 
                                                          Foreground="{DynamicResource AppTextSecondaryBrush}" 
                                                          FontWeight="Normal"/>
@@ -761,7 +761,7 @@
                                                                             <TextBlock Text="{Binding DueMonthDisplay, StringFormat='Due Month: {0}'}"/>
                                                                             <TextBlock Text="{Binding NextDueAfterPaymentDisplay, StringFormat='Next Due After Payment: {0}'}"/>
                                                                             <TextBlock Text="{Binding Installment, StringFormat='Installments: {0}'}"/>
-                                                                            <TextBlock Text="{Binding TotalAmount, StringFormat='List Amount: Rs. {0:N0}'}"/>
+                                                                            <TextBlock Text="{Binding TotalAmount, StringFormat='List amount: ₹{0:N0}'}"/>
                                                                             <TextBlock Text="{Binding PaymentCategoryLabel, StringFormat='Payment Type: {0}'}"/>
                                                                             <TextBlock Text="{Binding PaymentSummary, StringFormat='Payment Flow: {0}'}"
                                                                                         TextWrapping="Wrap"/>

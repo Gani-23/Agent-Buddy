@@ -86,10 +86,10 @@
                         Click="OpenCashDenomination_Click"
                         Padding="14,9"
                         Margin="0,0,10,8"
-                        ToolTip.Tip="Cash Denomination Calculator &amp; Postal Deposit Slip">
+                        ToolTip.Tip="Cash denomination calculator &amp; postal deposit slip">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                         <PathIcon Grid.Column="0" Data="{StaticResource Icon_FileText}" Width="14" Height="14" Foreground="{DynamicResource AccentBlueBrush}"/>
-                        <TextBlock Grid.Column="1" Text="Cash Slip" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="Cash slip" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
             </WrapPanel>
@@ -124,7 +124,7 @@
                                 Command="{Binding RefreshPrintersCommand}"
                                 Width="32"
                                 Height="32"
-                                ToolTip.Tip="Refresh Available Printers">
+                                ToolTip.Tip="Refresh available printers">
                             <PathIcon Data="{StaticResource Icon_Sync}" Width="13" Height="13" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                         </Button>
                     </StackPanel>
@@ -171,10 +171,10 @@
 
                     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,0,0,6" VerticalAlignment="Center">
                         <CheckBox IsChecked="{Binding ShowPayslipDefaultFee}" VerticalAlignment="Center">
-                            <TextBlock Text="Show Default Charges" FontSize="11.5"/>
+                            <TextBlock Text="Show default charges" FontSize="11.5"/>
                         </CheckBox>
                         <CheckBox IsChecked="{Binding ShowPayslipRebate}" VerticalAlignment="Center">
-                            <TextBlock Text="Show Rebates" FontSize="11.5"/>
+                            <TextBlock Text="Show rebates" FontSize="11.5"/>
                         </CheckBox>
                     </StackPanel>
                 </WrapPanel>

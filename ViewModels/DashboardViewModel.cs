@@ -182,7 +182,7 @@ public class DashboardViewModel : ViewModelBase
             new("next-month", "Next Month Collection", "Upcoming collection for next month."),
             new("advanced-paid", "Advance Paid", "Accounts paid ahead of next month."),
             new("new-accounts", "New Accounts", "Accounts first seen in the last 30 days."),
-            new("vip-accounts", "VIP High Value", "Accounts with Denomination >= Rs. 5000."),
+            new("vip-accounts", "VIP High Value", "Accounts with a denomination of ₹5,000 or more."),
             new("rebate-upsell", "Rebate Upsell Prospects", "On-time accounts prime for 6-month advance pitch."),
             new("critical-discontinuation", "Critical Discontinuation", "Accounts 5-6 months overdue, last chance before permanent default."),
             new("at-risk-accounts", "At Risk (1-3 Mo Overdue)", "Accounts gathering monthly penalties."),
@@ -593,6 +593,28 @@ public class DashboardViewModel : ViewModelBase
 
     public decimal PendingCommissionForecast { get; private set; }
 
+    // ---- "Today" strip ----
+    /// <summary>1st–15th is the first collection window, 16th–end the second.</summary>
+    public bool IsFirstHalfOfMonth => DateTime.Today.Day <= 15;
+    public bool IsSecondHalfOfMonth => !IsFirstHalfOfMonth;
+    public string FirstHalfDeadlineLabel => $"Due by 15 {DateTime.Today:MMM}";
+    public string SecondHalfDeadlineLabel => $"Due by {DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month)} {DateTime.Today:MMM}";
+    public string TodayHeadline => DateTime.Today.ToString("dddd, d MMMM", System.Globalization.CultureInfo.CurrentCulture);
+
+    /// <summary>Total deposited across both halves of the current month.</summary>
+    public decimal DepositedThisMonthAmount => FirstHalfDepositedWindowAmount + SecondHalfDepositedWindowAmount;
+    public int DepositedThisMonthCount => FirstHalfDepositedWindowCount + SecondHalfDepositedWindowCount;
+
+    /// <summary>The renewal banner only earns its space when a date is missing or within 60 days.</summary>
+    public bool ShowRdRenewalBanner
+    {
+        get => _showRdRenewalBanner;
+        private set => this.RaiseAndSetIfChanged(ref _showRdRenewalBanner, value);
+    }
+    private bool _showRdRenewalBanner;
+
+    private static string Days(int n) => n == 1 ? "1 day" : $"{n} days";
+
     public int AboutToFreezeCount
     {
         get => _aboutToFreezeCount;
@@ -893,6 +915,7 @@ public class DashboardViewModel : ViewModelBase
             RdCertificateRenewalMessage = "Set the next postal RD certificate renewal date in Settings.";
             RdCertificateRenewalCountdown = "No renewal date";
             RdCertificateRenewalTag = "RenewalMissing";
+            ShowRdRenewalBanner = true;
             return;
         }
 
@@ -904,8 +927,9 @@ public class DashboardViewModel : ViewModelBase
         {
             RdCertificateRenewalHeadline = "Renew immediately";
             RdCertificateRenewalMessage = $"Postal RD certificate renewal expired on {renewalDate:dd-MMM-yyyy}.";
-            RdCertificateRenewalCountdown = $"{-daysRemaining} day(s) overdue";
+            RdCertificateRenewalCountdown = $"{Days(-daysRemaining)} overdue";
             RdCertificateRenewalTag = "RenewalUrgent";
+            ShowRdRenewalBanner = true;
             return;
         }
 
@@ -915,15 +939,17 @@ public class DashboardViewModel : ViewModelBase
             RdCertificateRenewalMessage = $"Renew postal RD certificate by {renewalDate:dd-MMM-yyyy}.";
             RdCertificateRenewalCountdown = daysRemaining == 0
                 ? "Due today"
-                : $"{daysRemaining} day(s) left";
+                : $"{Days(daysRemaining)} left";
             RdCertificateRenewalTag = "RenewalUrgent";
+            ShowRdRenewalBanner = true;
             return;
         }
 
         RdCertificateRenewalHeadline = "RD certificate renewal";
         RdCertificateRenewalMessage = $"Next postal certificate renewal date: {renewalDate:dd-MMM-yyyy}.";
-        RdCertificateRenewalCountdown = $"{daysRemaining} day(s) remaining";
+        RdCertificateRenewalCountdown = $"{Days(daysRemaining)} left";
         RdCertificateRenewalTag = "RenewalNormal";
+        ShowRdRenewalBanner = daysRemaining <= 60;
     }
 
     private static bool TryParseRdCertificateRenewalDate(string raw, out DateTime renewalDate)
@@ -1172,6 +1198,7 @@ public class DashboardViewModel : ViewModelBase
         SecondHalfDepositedWindowCount = secondHalfDepositedWindow.Count;
         SecondHalfDepositedWindowAmount = secondHalfDepositedWindow.Sum(a => a.GetAmount());
         RaiseDefaultSummaryProperties();
+        RaiseComputedMetricProperties();
     }
 
     private static bool IsAslaasMissing(RDAccount account)
@@ -1523,6 +1550,26 @@ public class DashboardViewModel : ViewModelBase
             "recently-updated" => accounts.OrderByDescending(a => a.LastUpdated).ThenBy(a => a.AccountNo),
             _ => accounts.OrderBy(a => a.AccountNo)
         };
+    }
+
+    private void RaiseComputedMetricProperties()
+    {
+        foreach (var name in new[]
+        {
+            nameof(RebateUpsellCount), nameof(RebateUpsellAmount),
+            nameof(CriticalDiscontinuationCount), nameof(CriticalDiscontinuationAmount),
+            nameof(FirstHalfDeadlineCount), nameof(FirstHalfDeadlineAmount),
+            nameof(SecondHalfDeadlineCount), nameof(SecondHalfDeadlineAmount),
+            nameof(PendingCommissionForecast),
+            nameof(DefaulterAccountsCount), nameof(EligibleForLoanCount), nameof(EligibleForPrematureClosureCount),
+            nameof(VipAccountsCount), nameof(VipAccountsAmount), nameof(AtRiskAccountsCount), nameof(AtRiskAccountsAmount),
+            nameof(DepositedThisMonthAmount), nameof(DepositedThisMonthCount),
+            nameof(IsFirstHalfOfMonth), nameof(IsSecondHalfOfMonth),
+            nameof(FirstHalfDeadlineLabel), nameof(SecondHalfDeadlineLabel), nameof(TodayHeadline),
+        })
+        {
+            this.RaisePropertyChanged(name);
+        }
     }
 
     private void RaiseDefaultSummaryProperties()
