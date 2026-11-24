@@ -17,3 +17,6 @@ installer/staging/
 *.db
 *.db-shm
 *.db-wal
+
+# Ad-hoc exported reports (may contain customer account data)
+*_report.csv
