@@ -62,6 +62,12 @@ ZIP="dist/AgentBuddy-macos-$RID.zip"
 rm -f "$ZIP"
 ditto -c -k --sequesterRsrc --keepParent "$STAGE_DIR" "$ZIP"
 
+if [ "${NO_DESKTOP:-0}" = "1" ]; then
+  echo ""
+  echo "✅ Done: $ZIP  (version $VERSION, $RID; Desktop copy skipped)"
+  exit 0
+fi
+
 echo "==> Putting it on the Desktop"
 if [ -d "$DESKTOP/$APP_NAME.app" ]; then
   rm -rf "$DESKTOP/$APP_NAME.previous.app"
