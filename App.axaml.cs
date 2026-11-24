@@ -16,6 +16,7 @@ public partial class App : Application
         }
         catch { }
 
+        AgentBuddy.Animation.TransformOperationsKeyFrameAnimator.Register();
         AvaloniaXamlLoader.Load(this);
     }
 

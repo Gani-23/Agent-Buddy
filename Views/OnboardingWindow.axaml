@@ -1,0 +1,562 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AgentBuddy.ViewModels"
+        xmlns:models="using:AgentBuddy.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="720"
+        x:Class="AgentBuddy.Views.OnboardingWindow"
+        x:DataType="vm:OnboardingViewModel"
+        Title="Set up AgentBuddy"
+        Icon="/Assets/AgentBuddy.ico"
+        Width="1080"
+        Height="720"
+        MinWidth="960"
+        MinHeight="640"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}">
+
+    <Window.Styles>
+        <!-- Step rail -->
+        <Style Selector="Border.StepDot">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#66FFFFFF"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.25"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.25"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.StepDot.Current">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+        </Style>
+        <Style Selector="Border.StepDot.Done">
+            <Setter Property="Background" Value="#33FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#00FFFFFF"/>
+        </Style>
+        <Style Selector="Border.StepRow">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.25"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.StepRow.Current">
+            <Setter Property="Background" Value="#26FFFFFF"/>
+        </Style>
+        <Style Selector="Border.StepRow TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Border.StepRow.Upcoming">
+            <Setter Property="Opacity" Value="0.7"/>
+        </Style>
+
+        <!-- Selectable choice tiles (language, theme) -->
+        <Style Selector="ListBox.ChoiceTiles">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="ListBox.ChoiceTiles ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,14,14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="ListBox.ChoiceTiles ListBoxItem /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ListBox.ChoiceTiles ListBoxItem:selected /template/ ContentPresenter, ListBox.ChoiceTiles ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.ChoiceTile">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover Border.ChoiceTile">
+            <Setter Property="RenderTransform" Value="translateY(-3px)"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource AppCardLiftShadow}"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.ChoiceTile">
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource AppAccentGlowShadow}"/>
+        </Style>
+        <Style Selector="Border.ChoiceCheck">
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="CornerRadius" Value="11"/>
+            <Setter Property="Background" Value="{DynamicResource AppBrandGradientBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform" Value="scale(0.5)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25" Easing="BackEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.ChoiceCheck">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+        </Style>
+
+        <!-- Page typography -->
+        <Style Selector="TextBlock.PageTitle">
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="LetterSpacing" Value="-0.5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBlock.PageLead">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="LineHeight" Value="21"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
+            <Setter Property="MaxWidth" Value="620"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style Selector="TextBlock.FieldLabel">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style Selector="TextBlock.FieldHint">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,6,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
+        </Style>
+        <Style Selector="TextBox.Big">
+            <Setter Property="MinHeight" Value="46"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+        <Style Selector="TextBox.Big /template/ Border#PART_BorderElement">
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="300,*">
+
+        <!-- ===================== LEFT RAIL ===================== -->
+        <Border Grid.Column="0" Background="{DynamicResource AppBrandGradientBrush}" Padding="24,28">
+            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="18">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Border Width="40" Height="40" CornerRadius="12" Background="#33FFFFFF">
+                        <PathIcon Data="{StaticResource Icon_Logo}" Width="20" Height="20" Foreground="White"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                        <TextBlock Text="AgentBuddy" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Workspace setup" FontSize="11" Foreground="#CCFFFFFF"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" Text="{Binding StepCounterText}" FontSize="11" FontWeight="Bold" LetterSpacing="1.2" Foreground="#CCFFFFFF"/>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding StepItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:OnboardingStepItem">
+                                <Border Classes="StepRow"
+                                        Classes.Current="{Binding IsCurrent}"
+                                        Classes.Upcoming="{Binding IsUpcoming}"
+                                        Margin="0,0,0,4">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                        <Border Classes="StepDot"
+                                                Classes.Current="{Binding IsCurrent}"
+                                                Classes.Done="{Binding IsDone}"
+                                                VerticalAlignment="Center">
+                                            <Panel>
+                                                <PathIcon Data="{StaticResource Icon_Check}" Width="12" Height="12"
+                                                          Foreground="White" IsVisible="{Binding IsDone}"/>
+                                                <Border Width="8" Height="8" CornerRadius="4"
+                                                        Background="{StaticResource AccentBlueBrush}"
+                                                        IsVisible="{Binding IsCurrent}"/>
+                                            </Panel>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Subtitle}" FontSize="11" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="3" Spacing="8">
+                    <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="6" MinHeight="6"
+                                 Background="#33FFFFFF" Foreground="White">
+                        <ProgressBar.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Value" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                            </Transitions>
+                        </ProgressBar.Transitions>
+                    </ProgressBar>
+                    <TextBlock Text="You can change all of this later in Settings."
+                               FontSize="11" Foreground="#CCFFFFFF" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===================== CONTENT ===================== -->
+        <Grid Grid.Column="1" RowDefinitions="*,Auto">
+            <Carousel Grid.Row="0" SelectedIndex="{Binding StepIndex}" Margin="44,40,44,8">
+                <Carousel.PageTransition>
+                    <CompositePageTransition>
+                        <PageSlide Duration="0:0:0.35" Orientation="Horizontal" SlideInEasing="CubicEaseOut" SlideOutEasing="CubicEaseIn"/>
+                        <CrossFade Duration="0:0:0.3"/>
+                    </CompositePageTransition>
+                </Carousel.PageTransition>
+
+                <!-- 0 WELCOME -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18">
+                        <Border Classes="IconChip Brand" Width="64" Height="64" CornerRadius="20" HorizontalAlignment="Left">
+                            <PathIcon Data="{StaticResource Icon_Sparkle}" Width="28" Height="28" Foreground="White"/>
+                        </Border>
+                        <TextBlock Classes="PageTitle" Text="Welcome to AgentBuddy"/>
+                        <TextBlock Classes="PageLead"
+                                   Text="Your post office RD workspace: collections, deposit lists, reminders and reports in one place. Let's get it set up for you. It takes about three minutes."/>
+                        <UniformGrid Columns="3" Margin="0,10,0,0">
+                            <Border Classes="Card Stagger Delay1" Margin="0,0,12,0">
+                                <StackPanel Spacing="8">
+                                    <Border Classes="IconChip"><PathIcon Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="{DynamicResource InfoBrush}"/></Border>
+                                    <TextBlock Text="About 3 minutes" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Nine short steps. Optional ones can be skipped." FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Classes="Card Stagger Delay2" Margin="0,0,12,0">
+                                <StackPanel Spacing="8">
+                                    <Border Classes="IconChip" Background="{DynamicResource SuccessTintBrush}"><PathIcon Data="{StaticResource Icon_Lock}" Width="16" Height="16" Foreground="{DynamicResource SuccessBrush}"/></Border>
+                                    <TextBlock Text="Stays on this PC" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Your DOP password is encrypted and stored locally." FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Classes="Card Stagger Delay3">
+                                <StackPanel Spacing="8">
+                                    <Border Classes="IconChip" Background="{DynamicResource WarningTintBrush}"><PathIcon Data="{StaticResource Icon_Settings}" Width="16" Height="16" Foreground="{DynamicResource WarningBrush}"/></Border>
+                                    <TextBlock Text="Change anytime" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Everything here can be edited again from Settings." FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 1 LANGUAGE -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18">
+                        <TextBlock Classes="PageTitle" Text="Choose your language"/>
+                        <TextBlock Classes="PageLead" Text="Menus, labels and messages will use this language. You can switch at any time."/>
+                        <ListBox Classes="ChoiceTiles"
+                                 ItemsSource="{Binding Settings.LanguageOptions}"
+                                 SelectedItem="{Binding Settings.SelectedLanguage}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:LanguageOption">
+                                    <Border Classes="ChoiceTile" Width="200" Height="110">
+                                        <Panel>
+                                            <Border Classes="ChoiceCheck"><PathIcon Data="{StaticResource Icon_Check}" Width="10" Height="10" Foreground="White"/></Border>
+                                            <StackPanel VerticalAlignment="Bottom" Spacing="2">
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="22" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Code}" FontSize="11" FontWeight="SemiBold" LetterSpacing="1.5"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                        </Panel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 2 PROFILE -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18" MaxWidth="560" HorizontalAlignment="Left">
+                        <TextBlock Classes="PageTitle" Text="Tell us about you"/>
+                        <TextBlock Classes="PageLead" Text="Your name personalises greetings and reports. The owner mobile number is the WhatsApp number reminders and due lists are sent from."/>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="Your name"/>
+                            <TextBox Classes="Big" Text="{Binding Settings.EditableAgentName}" PlaceholderText="e.g. Lakshmi Devi"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="Owner mobile number (WhatsApp)"/>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Border Classes="Card" Padding="14,0" CornerRadius="12" MinHeight="46">
+                                    <TextBlock Text="🇮🇳  +91" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </Border>
+                                <TextBox Grid.Column="1" Classes="Big" Text="{Binding OwnerMobile}" PlaceholderText="98765 43210" MaxLength="14"/>
+                            </Grid>
+                            <TextBlock Classes="FieldHint" Text="10 digits. We add the 91 country code for WhatsApp automatically."/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 3 DOP LOGIN -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18" MaxWidth="560" HorizontalAlignment="Left">
+                        <TextBlock Classes="PageTitle" Text="Connect your DOP account"/>
+                        <TextBlock Classes="PageLead" Text="AgentBuddy signs in to the India Post agent portal for you to fetch accounts, ASLAAS numbers and to submit deposit lists."/>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="DOP Agent ID"/>
+                            <TextBox Classes="Big" Text="{Binding Settings.EditableAgentId}" PlaceholderText="Your portal login ID"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="Portal password"/>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <TextBox Classes="Big" Text="{Binding Settings.EditablePassword}" PasswordChar="•"
+                                         RevealPassword="{Binding #ShowPasswordToggle.IsChecked}"
+                                         PlaceholderText="••••••••"/>
+                                <ToggleButton x:Name="ShowPasswordToggle" Grid.Column="1" Classes="Icon"
+                                              Width="46" Height="46" CornerRadius="12" ToolTip.Tip="Show password">
+                                    <PathIcon Data="{StaticResource Icon_Eye}" Width="16" Height="16"/>
+                                </ToggleButton>
+                            </Grid>
+                            <TextBlock Classes="FieldHint" Text="{Binding PasswordHint}"/>
+                        </StackPanel>
+                        <Border Classes="Card" Background="{DynamicResource SuccessTintBrush}" BorderBrush="{DynamicResource SuccessEdgeBrush}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <PathIcon Data="{StaticResource Icon_Shield}" Width="18" Height="18" Foreground="{DynamicResource SuccessBrush}" VerticalAlignment="Top"/>
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TintTextBrush}"
+                                           Text="Your password is encrypted on this computer and never sent anywhere except the DOP portal. The portal asks for a new password every 180 days; update it in Settings when it does."/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 4 LICENSE -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18" MaxWidth="600" HorizontalAlignment="Left">
+                        <TextBlock Classes="PageTitle" Text="Activate your license"/>
+                        <TextBlock Classes="PageLead" Text="Paste the license key you received. Without an active license most pages stay locked."/>
+                        <Border Classes="Card" IsVisible="{Binding IsLicenseActive}"
+                                Background="{DynamicResource SuccessTintBrush}" BorderBrush="{DynamicResource SuccessEdgeBrush}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Classes="IconChip" Background="{DynamicResource SuccessBrush}">
+                                    <PathIcon Data="{StaticResource Icon_Check}" Width="16" Height="16" Foreground="White"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="License is active" FontWeight="Bold" Foreground="{DynamicResource TintTextBrush}"/>
+                                    <TextBlock Text="{Binding Settings.LicenseSummary}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TintTextBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="License key"/>
+                            <TextBox Classes="Big" Text="{Binding Settings.LicenseToken}" PlaceholderText="Paste your license key here"
+                                     FontFamily="{StaticResource AppMonoFontFamily}" TextWrapping="Wrap" AcceptsReturn="False" MinHeight="70"/>
+                            <TextBlock Classes="FieldHint" Text="Already active? Just continue. No key yet? Skip and add it later in Settings → License."/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Settings.LicenseStatus}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 5 THEME -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18">
+                        <TextBlock Classes="PageTitle" Text="Pick your look"/>
+                        <TextBlock Classes="PageLead" Text="Click a theme to preview it live. This window changes too."/>
+                        <ListBox Classes="ChoiceTiles"
+                                 ItemsSource="{Binding Settings.ThemeModeOptions}"
+                                 SelectedItem="{Binding Settings.SelectedThemeModeOption}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:ThemeModeOption">
+                                    <Border Classes="ChoiceTile" Width="220" Padding="12">
+                                        <StackPanel Spacing="12">
+                                            <Panel>
+                                                <!-- Mini mock-up of the theme -->
+                                                <Border Height="110" CornerRadius="10" ClipToBounds="True"
+                                                        Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=bg}"
+                                                        BorderBrush="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=border}"
+                                                        BorderThickness="1">
+                                                    <Grid ColumnDefinitions="44,*">
+                                                        <Border Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=sidebar}">
+                                                            <StackPanel Margin="8,10" Spacing="6">
+                                                                <Border Height="10" Width="10" CornerRadius="3" Background="{DynamicResource AppBrandGradientBrush}" HorizontalAlignment="Left"/>
+                                                                <Border Height="5" CornerRadius="2" Background="{StaticResource AccentBlueBrush}" Opacity="0.7"/>
+                                                                <Border Height="5" CornerRadius="2" Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=muted}"/>
+                                                                <Border Height="5" CornerRadius="2" Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=muted}"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Margin="10" Spacing="7">
+                                                            <Border Height="7" Width="60" CornerRadius="3" HorizontalAlignment="Left"
+                                                                    Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=text}"/>
+                                                            <UniformGrid Columns="2">
+                                                                <Border Height="34" CornerRadius="6" Margin="0,0,5,0"
+                                                                        Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=card}"
+                                                                        BorderBrush="#4D1F8A62" BorderThickness="3,1,1,1"/>
+                                                                <Border Height="34" CornerRadius="6"
+                                                                        Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=card}"
+                                                                        BorderBrush="#4DD94848" BorderThickness="3,1,1,1"/>
+                                                            </UniformGrid>
+                                                            <Border Height="22" CornerRadius="6"
+                                                                    Background="{Binding Mode, Converter={StaticResource ThemePreviewBrushConverter}, ConverterParameter=card}"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                                <Border Classes="ChoiceCheck" Margin="0,6,6,0"><PathIcon Data="{StaticResource Icon_Check}" Width="10" Height="10" Foreground="White"/></Border>
+                                            </Panel>
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 6 RD RENEWAL -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18" MaxWidth="560" HorizontalAlignment="Left">
+                        <TextBlock Classes="PageTitle" Text="RD certificate renewal"/>
+                        <TextBlock Classes="PageLead" Text="When is your postal RD agency certificate due for renewal? The Dashboard shows a countdown and turns red as the date gets close."/>
+                        <StackPanel>
+                            <TextBlock Classes="FieldLabel" Text="Renewal date"/>
+                            <CalendarDatePicker SelectedDate="{Binding RdRenewalDate}" Watermark="Select date"
+                                                SelectedDateFormat="Custom" CustomDateFormatString="dd-MMM-yyyy"
+                                                MinHeight="46" CornerRadius="12" HorizontalAlignment="Stretch"/>
+                            <TextBlock Classes="FieldHint" Text="Don't know it yet? Skip; you can add it later in Settings."/>
+                        </StackPanel>
+                        <Border Classes="Card" Background="{DynamicResource InfoTintBrush}" BorderBrush="{DynamicResource InfoEdgeBrush}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <PathIcon Data="{StaticResource Icon_Calendar}" Width="18" Height="18" Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Top"/>
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TintTextBrush}"
+                                           Text="Tip: the date is printed on your agency certificate. Renewal usually opens a few weeks before it."/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 7 TOUR -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18">
+                        <TextBlock Classes="PageTitle" Text="A quick tour"/>
+                        <TextBlock Classes="PageLead" Text="Here's what each part of AgentBuddy is for. Everything lives in the sidebar on the left."/>
+                        <ItemsControl ItemsSource="{Binding TourItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TourItem">
+                                    <Border Classes="Card Hoverable" Margin="0,0,12,12" Padding="16">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                            <Border Classes="IconChip Brand" VerticalAlignment="Top">
+                                                <PathIcon Data="{Binding IconKey, Converter={StaticResource ResourceKeyToGeometryConverter}}"
+                                                          Width="16" Height="16" Foreground="White"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Spacing="4">
+                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="12" LineHeight="17" TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 8 FINISH -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="18" MaxWidth="620" HorizontalAlignment="Left">
+                        <Border Classes="IconChip Brand" Width="64" Height="64" CornerRadius="20" HorizontalAlignment="Left">
+                            <PathIcon Data="{StaticResource Icon_Check}" Width="28" Height="28" Foreground="White"/>
+                        </Border>
+                        <TextBlock Classes="PageTitle" Text="{Binding GreetingName}"/>
+                        <TextBlock Classes="PageLead" Text="Last thing: pull your accounts from the DOP portal so the Dashboard has real numbers from day one."/>
+
+                        <Border Classes="Card">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border Classes="IconChip"><PathIcon Data="{StaticResource Icon_Bolt}" Width="16" Height="16" Foreground="{DynamicResource InfoBrush}"/></Border>
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="Python automation engine" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Status: "/><Run Text="{Binding Settings.PythonVersion}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="Secondary" Content="Check again" Command="{Binding CheckPythonCommand}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Classes="Card">
+                            <StackPanel Spacing="6">
+                                <CheckBox IsChecked="{Binding SyncAfterSetup}" IsEnabled="{Binding CanSync}" FontWeight="SemiBold"
+                                          Content="Pull my accounts now (Update Database)"/>
+                                <TextBlock FontSize="12" TextWrapping="Wrap" Margin="28,0,0,0" Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                           Text="Runs in the background after this window closes. It can take a few minutes for large portfolios."/>
+                                <TextBlock FontSize="12" TextWrapping="Wrap" Margin="28,0,0,0" Foreground="{DynamicResource WarningBrush}"
+                                           IsVisible="{Binding !CanSync}"
+                                           Text="Add your DOP ID and password first (step 4) to enable syncing."/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Carousel>
+
+            <!-- ===================== FOOTER ===================== -->
+            <Border Grid.Row="1" Padding="44,14,44,24">
+                <StackPanel Spacing="12">
+                    <Border Classes="Card FadeIn" Padding="12,10" IsVisible="{Binding HasStepError}"
+                            Background="{DynamicResource DangerTintBrush}" BorderBrush="{DynamicResource DangerEdgeBrush}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <PathIcon Data="{StaticResource Icon_Alert}" Width="14" Height="14" Foreground="{DynamicResource ErrorBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding StepError}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TintTextBrush}"/>
+                        </Grid>
+                    </Border>
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                        <Button Grid.Column="0" Classes="Secondary" Command="{Binding BackCommand}" IsVisible="{Binding !IsFirstStep}" Padding="16,10">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource Icon_ArrowLeft}" Width="12" Height="12"/>
+                                <TextBlock Text="Back"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" Classes="Secondary" Content="Skip for now" Command="{Binding SkipCommand}" IsVisible="{Binding CanSkip}" Padding="16,10"/>
+                        <Button Grid.Column="3" Classes="Hero" Command="{Binding NextCommand}" Padding="22,10" MinWidth="150" IsDefault="True">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Classes="ListSpinner Spinner" BorderBrush="White" BorderThickness="2,2,0,0" IsVisible="{Binding IsBusy}"/>
+                                <TextBlock Text="{Binding NextButtonText}" FontWeight="Bold"/>
+                                <PathIcon Data="{StaticResource Icon_ArrowRight}" Width="12" Height="12" IsVisible="{Binding !IsBusy}"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

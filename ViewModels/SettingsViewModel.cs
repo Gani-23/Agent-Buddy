@@ -756,9 +756,28 @@ public class SettingsViewModel : ViewModelBase
 
     private async Task SaveCredentialsAsync()
     {
+        await TrySaveCredentialsAsync();
+    }
+
+    public async Task SaveAgentNameAsync()
+    {
+        var agentName = (EditableAgentName ?? string.Empty).Trim();
+        await _databaseService.SaveAppSettingAsync(AgentNameSettingKey, agentName);
+        AgentName = agentName;
+    }
+
+    public async Task<bool> HasSavedPasswordAsync()
+    {
+        var (_, hasPassword) = await _databaseService.GetCredentialStatusAsync();
+        return hasPassword;
+    }
+
+    public async Task<bool> TrySaveCredentialsAsync()
+    {
+        var succeeded = false;
         if (IsSavingCredentials)
         {
-            return;
+            return false;
         }
 
         var agentId = (EditableAgentId ?? string.Empty).Trim();
@@ -768,13 +787,13 @@ public class SettingsViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(agentId))
         {
             CredentialsStatus = "Agent ID is required.";
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
             CredentialsStatus = "Password is required.";
-            return;
+            return false;
         }
 
         IsSavingCredentials = true;
@@ -788,6 +807,7 @@ public class SettingsViewModel : ViewModelBase
             AgentName = agentName;
             EditablePassword = string.Empty;
             CredentialsStatus = "Credentials saved successfully.";
+            succeeded = true;
         }
         catch (Exception ex)
         {
@@ -797,6 +817,8 @@ public class SettingsViewModel : ViewModelBase
         {
             IsSavingCredentials = false;
         }
+
+        return succeeded;
     }
 
     private static string ResolveDefaultLegacySourcePath(string? documentsPath)
@@ -991,9 +1013,15 @@ public class SettingsViewModel : ViewModelBase
 
     private async Task SaveRdCertificateRenewalAsync()
     {
+        await TrySaveRdCertificateRenewalAsync();
+    }
+
+    public async Task<bool> TrySaveRdCertificateRenewalAsync()
+    {
+        var succeeded = false;
         if (IsSavingRdCertificateRenewal)
         {
-            return;
+            return false;
         }
 
         var raw = (RdCertificateRenewalDateText ?? string.Empty).Trim();
@@ -1007,6 +1035,7 @@ public class SettingsViewModel : ViewModelBase
                 RdCertificateRenewalDateText = string.Empty;
                 RdCertificateRenewalStatus = "Renewal date cleared. Set a new date when available.";
                 RdCertificateRenewalChanged?.Invoke(this, EventArgs.Empty);
+            succeeded = true;
             }
             catch (Exception ex)
             {
@@ -1017,13 +1046,13 @@ public class SettingsViewModel : ViewModelBase
                 IsSavingRdCertificateRenewal = false;
             }
 
-            return;
+            return false;
         }
 
         if (!TryParseRdCertificateRenewalDate(raw, out var renewalDate))
         {
             RdCertificateRenewalStatus = "Enter a valid date like 23-May-2026 or 2026-05-23.";
-            return;
+            return false;
         }
 
         IsSavingRdCertificateRenewal = true;
@@ -1043,6 +1072,7 @@ public class SettingsViewModel : ViewModelBase
                 _ => $"Renewal saved. {remainingDays} day(s) remaining until {renewalDate:dd-MMM-yyyy}."
             };
             RdCertificateRenewalChanged?.Invoke(this, EventArgs.Empty);
+            succeeded = true;
         }
         catch (Exception ex)
         {
@@ -1052,6 +1082,8 @@ public class SettingsViewModel : ViewModelBase
         {
             IsSavingRdCertificateRenewal = false;
         }
+
+        return succeeded;
     }
 
     private static bool TryParseRdCertificateRenewalDate(string raw, out DateTime renewalDate)
@@ -1256,9 +1288,15 @@ public class SettingsViewModel : ViewModelBase
 
     private async Task ActivateLicenseAsync()
     {
+        await TryActivateLicenseAsync();
+    }
+
+    public async Task<bool> TryActivateLicenseAsync()
+    {
+        var succeeded = false;
         if (IsProcessingLicense)
         {
-            return;
+            return false;
         }
 
         IsProcessingLicense = true;
@@ -1275,6 +1313,7 @@ public class SettingsViewModel : ViewModelBase
                 LicenseAppId = result.Status.AppId;
             }
 
+            succeeded = result.Success;
             LicenseStateChanged?.Invoke(this, result.Status);
         }
         catch (Exception ex)
@@ -1285,6 +1324,8 @@ public class SettingsViewModel : ViewModelBase
         {
             IsProcessingLicense = false;
         }
+
+        return succeeded;
     }
 
     private async Task ValidateStoredLicenseAsync()
@@ -1488,16 +1529,22 @@ public class SettingsViewModel : ViewModelBase
 
     private async Task SaveLanguageAsync()
     {
+        await TrySaveLanguageAsync();
+    }
+
+    public async Task<bool> TrySaveLanguageAsync()
+    {
+        var succeeded = false;
         if (IsSavingLanguageSettings)
         {
-            return;
+            return false;
         }
 
         var language = SelectedLanguage;
         if (language == null)
         {
             LanguageStatus = "Choose a language first.";
-            return;
+            return false;
         }
 
         IsSavingLanguageSettings = true;
@@ -1507,6 +1554,7 @@ public class SettingsViewModel : ViewModelBase
         {
             await _localizationService.SetLanguageAsync(language.Code, _databaseService);
             LanguageStatus = "Language updated successfully.";
+            succeeded = true;
         }
         catch (Exception ex)
         {
@@ -1516,6 +1564,8 @@ public class SettingsViewModel : ViewModelBase
         {
             IsSavingLanguageSettings = false;
         }
+
+        return succeeded;
     }
 
     private async Task UpdateMissingAslaasAllAsync()

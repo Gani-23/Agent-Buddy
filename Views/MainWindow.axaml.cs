@@ -39,7 +39,40 @@ public partial class MainWindow : Window
     private void OnWindowOpened(object? sender, EventArgs e)
     {
         EnforceMaximized();
-        _ = ShowDailyGreetingAsync();
+        _ = ShowStartupFlowAsync();
+    }
+
+    private async Task ShowStartupFlowAsync()
+    {
+        if (DataContext is MainWindowViewModel vm && await vm.ShouldShowOnboardingAsync())
+        {
+            await ShowOnboardingAsync(isRerun: false);
+            return;
+        }
+
+        await ShowDailyGreetingAsync();
+    }
+
+    /// <summary>
+    /// Opens the setup wizard. Used on first run and from Settings → "Run setup again".
+    /// </summary>
+    public async Task ShowOnboardingAsync(bool isRerun)
+    {
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        var wizard = new OnboardingWindow(new OnboardingViewModel(vm, isRerun));
+        var syncNow = await wizard.ShowDialog<bool>(this);
+        await vm.MarkOnboardingCompletedAsync();
+        await vm.MarkDailyGreetingShownAsync();
+
+        if (syncNow)
+        {
+            vm.Navigate("Dashboard");
+            await vm.RunDatabaseUpdateAsync();
+        }
     }
 
     private async Task ShowDailyGreetingAsync()

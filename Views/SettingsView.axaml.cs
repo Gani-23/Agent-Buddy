@@ -94,6 +94,14 @@ public partial class SettingsView : UserControl
         return fallback;
     }
 
+    private async void RunSetupAgain_Click(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is MainWindow mainWindow)
+        {
+            await mainWindow.ShowOnboardingAsync(isRerun: true);
+        }
+    }
+
     private async void ChangePortalPassword_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not SettingsViewModel vm)

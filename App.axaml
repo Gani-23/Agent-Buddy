@@ -15,6 +15,8 @@
             <converters:StatusToTagConverter x:Key="StatusToTagConverter"/>
             <converters:ListItemToTagConverter x:Key="ListItemToTagConverter"/>
             <converters:SidebarWidthConverter x:Key="SidebarWidthConverter"/>
+            <converters:ResourceKeyToGeometryConverter x:Key="ResourceKeyToGeometryConverter"/>
+            <converters:ThemePreviewBrushConverter x:Key="ThemePreviewBrushConverter"/>
 
             <!-- Global Cross-platform Fonts -->
             <FontFamily x:Key="AppFontFamily">-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Inter, Arial, sans-serif</FontFamily>

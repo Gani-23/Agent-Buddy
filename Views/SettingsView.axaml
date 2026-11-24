@@ -25,13 +25,21 @@
                                    TextWrapping="Wrap"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Spacing="6" HorizontalAlignment="Right">
-                        <TextBlock Text="Settings tuned for daily operations" Classes="Kicker" HorizontalAlignment="Right"/>
-                        <TextBlock Text="Cleaner hierarchy, fewer scroll trips, clearer actions."
-                                   TextWrapping="Wrap"
+                    <StackPanel Grid.Column="1" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Classes="Hero"
+                                Padding="16,9"
+                                HorizontalAlignment="Right"
+                                Click="RunSetupAgain_Click"
+                                ToolTip.Tip="Walk through language, profile, DOP login, license, theme and the app tour again">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource Icon_Sparkle}" Width="14" Height="14"/>
+                                <TextBlock Text="Run setup again"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="Guided setup and quick tour"
                                    TextAlignment="Right"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                   FontSize="13"/>
+                                   FontSize="12"/>
                     </StackPanel>
                 </Grid>
             </Border>

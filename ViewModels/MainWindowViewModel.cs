@@ -27,6 +27,7 @@ public enum ThemeMode
 public class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private const string DailyGreetingDateKey = "daily_greeting_date";
+    private const string OnboardingCompletedKey = "onboarding_completed_utc";
     private ViewModelBase? _currentView;
     private bool _isDarkTheme;
     private ThemeMode _currentThemeMode = ThemeMode.NeumorphicLight;
@@ -391,8 +392,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 1 3 0 #0000000D, 0 1 2 0 #00000008";
-            cardHoverShadow = "0 4 12 0 #00000014, 0 2 4 0 #0000000A";
+            cardShadow = "0 1 2 0 #0A101828";
+            cardHoverShadow = "0 6 16 -4 #14101828, 0 2 4 -2 #0A101828";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 1 2 0 #0000000A";
             buttonShadow = "0 1 2 0 #0000000A";
@@ -415,8 +416,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", Roboto, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 2 8 0 #00000040";
-            cardHoverShadow = "0 4 16 0 #00000060";
+            cardShadow = "0 1 2 0 #33000000";
+            cardHoverShadow = "0 8 20 -6 #73000000";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 0 0 0 Transparent";
             buttonShadow = "0 1 2 0 #00000050";
@@ -439,8 +440,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 1 2 0 #0000000E";
-            cardHoverShadow = "0 4 8 0 #00000018";
+            cardShadow = "0 1 2 0 #0A000000";
+            cardHoverShadow = "0 6 16 -4 #14000000, 0 2 4 -2 #0A000000";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 1 2 0 #0000000E";
             buttonShadow = "0 1 2 0 #0000000E";
@@ -484,6 +485,12 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         resources["AppHoverBrush"] = new SolidColorBrush(Color.Parse(hover));
         resources["AppHoverBackgroundBrush"] = new SolidColorBrush(Color.Parse(hover));
         resources["AppPressedBrush"] = new SolidColorBrush(Color.Parse(pressed));
+        resources["AppBorderStrongBrush"] = new SolidColorBrush(Color.Parse(mode switch
+        {
+            ThemeMode.NeumorphicDark => "#444C56",
+            ThemeMode.ClassicNotion => "#D3D1CB",
+            _ => "#CBD2DB"
+        }));
 
         resources["AppCardShadow"] = BoxShadows.Parse(cardShadow);
         resources["AppCardHoverShadow"] = BoxShadows.Parse(cardHoverShadow);
@@ -544,6 +551,40 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         resources["ListDuplicateTintBrush"] = new SolidColorBrush(Color.Parse(listDuplicateTint));
         resources["ListDuplicateBorderBrush"] = new SolidColorBrush(Color.Parse(listDuplicateBorder));
         resources["SuggestionBorderBrush"] = new SolidColorBrush(Color.Parse(suggestionBorder));
+
+        // Elevated surfaces: soft gradient tiles, hero wash, accent glow and focus ring
+        resources["SuccessTileBrush"] = Diagonal(card, isDark ? "#173A2A" : "#E3F5EA");
+        resources["WarningTileBrush"] = Diagonal(card, isDark ? "#3A2C0C" : "#FDF1D6");
+        resources["DangerTileBrush"] = Diagonal(card, isDark ? "#3D1F22" : "#FDE5E5");
+        resources["InfoTileBrush"] = Diagonal(card, isDark ? "#172A45" : "#E4EDFC");
+        resources["SuccessEdgeBrush"] = new SolidColorBrush(Color.Parse(isDark ? "#2F6B4F" : "#8FD3AE"));
+        resources["WarningEdgeBrush"] = new SolidColorBrush(Color.Parse(isDark ? "#7A5A14" : "#EBC56A"));
+        resources["DangerEdgeBrush"] = new SolidColorBrush(Color.Parse(isDark ? "#7A3434" : "#EFA3A3"));
+        resources["InfoEdgeBrush"] = new SolidColorBrush(Color.Parse(isDark ? "#2D4F80" : "#9DBDF2"));
+        resources["AppHeroGradientBrush"] = isDark
+            ? Diagonal(card, "#141E30", "#1A2744")
+            : Diagonal(card, "#F5F8FF", "#E8F0FE");
+        resources["AppBrandGradientBrush"] = Diagonal("#3B82F6", "#6366F1");
+        resources["AppAccentGlowShadow"] = BoxShadows.Parse(isDark ? "0 1 3 0 #40000000" : "0 1 3 0 #262F76E6");
+        resources["AppFocusRingShadow"] = BoxShadows.Parse(isDark ? "0 0 0 3 #4060A5FA" : "0 0 0 3 #332F76E6");
+        resources["AppCardLiftShadow"] = BoxShadows.Parse(isDark
+            ? "0 14 30 -6 #99000000, 0 4 10 -2 #66000000"
+            : "0 12 28 -6 #1F0F172A, 0 4 10 -2 #140F172A");
+    }
+
+    private static LinearGradientBrush Diagonal(params string[] colors)
+    {
+        var brush = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative)
+        };
+        for (var i = 0; i < colors.Length; i++)
+        {
+            var offset = colors.Length == 1 ? 0 : (double)i / (colors.Length - 1);
+            brush.GradientStops.Add(new GradientStop(Color.Parse(colors[i]), offset));
+        }
+        return brush;
     }
 
     private async Task InitializeUpdateChecksAsync()
@@ -712,6 +753,30 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
         return string.IsNullOrWhiteSpace(state.Message) ? "License status unavailable." : state.Message;
     }
+
+    /// <summary>
+    /// First run: setup has never been completed and no DOP ID is saved yet.
+    /// Existing installs that already have credentials are not interrupted.
+    /// </summary>
+    public async Task<bool> ShouldShowOnboardingAsync()
+    {
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        {
+            return false;
+        }
+
+        var completed = await _databaseService.GetAppSettingAsync(OnboardingCompletedKey);
+        if (!string.IsNullOrWhiteSpace(completed))
+        {
+            return false;
+        }
+
+        var agentId = await _databaseService.GetAgentIdAsync();
+        return string.IsNullOrWhiteSpace(agentId);
+    }
+
+    public Task MarkOnboardingCompletedAsync() =>
+        _databaseService.SaveAppSettingAsync(OnboardingCompletedKey, DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
 
     public async Task<bool> ShouldShowDailyGreetingAsync()
     {

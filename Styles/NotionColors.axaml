@@ -101,8 +101,8 @@
         <SolidColorBrush x:Key="AppAccentBrush" Color="{StaticResource AccentBlue}"/>
 
         <!-- Refined Shadows -->
-        <BoxShadows x:Key="AppCardShadow">0 1 3 0 #0000000D, 0 1 2 0 #00000008</BoxShadows>
-        <BoxShadows x:Key="AppCardHoverShadow">0 4 12 0 #00000014, 0 2 4 0 #0000000A</BoxShadows>
+        <BoxShadows x:Key="AppCardShadow">0 1 2 0 #0A101828</BoxShadows>
+        <BoxShadows x:Key="AppCardHoverShadow">0 6 16 -4 #14101828, 0 2 4 -2 #0A101828</BoxShadows>
         <BoxShadows x:Key="AppInsetShadow">0 0 0 0 Transparent</BoxShadows>
         <BoxShadows x:Key="AppInputShadow">0 1 2 0 #0000000A</BoxShadows>
         <BoxShadows x:Key="AppButtonShadow">0 1 2 0 #0000000A</BoxShadows>
@@ -131,6 +131,41 @@
         <SolidColorBrush x:Key="ListDuplicateBorderBrush" Color="#C44582"/>
         <SolidColorBrush x:Key="SuggestionBorderBrush" Color="#C44582"/>
 
+        <!-- Elevated surfaces / gradients (overwritten per theme in MainWindowViewModel.ApplyThemeResources) -->
+        <LinearGradientBrush x:Key="AppHeroGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#FFFFFF"/>
+            <GradientStop Offset="0.55" Color="#F5F8FF"/>
+            <GradientStop Offset="1" Color="#E8F0FE"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="AppBrandGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#3B82F6"/>
+            <GradientStop Offset="1" Color="#6366F1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SuccessTileBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#FFFFFF"/>
+            <GradientStop Offset="1" Color="#E3F5EA"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="WarningTileBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#FFFFFF"/>
+            <GradientStop Offset="1" Color="#FDF1D6"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="DangerTileBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#FFFFFF"/>
+            <GradientStop Offset="1" Color="#FDE5E5"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="InfoTileBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#FFFFFF"/>
+            <GradientStop Offset="1" Color="#E4EDFC"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="SuccessEdgeBrush" Color="#8FD3AE"/>
+        <SolidColorBrush x:Key="WarningEdgeBrush" Color="#EBC56A"/>
+        <SolidColorBrush x:Key="DangerEdgeBrush" Color="#EFA3A3"/>
+        <SolidColorBrush x:Key="InfoEdgeBrush" Color="#9DBDF2"/>
+        <BoxShadows x:Key="AppAccentGlowShadow">0 1 3 0 #262F76E6</BoxShadows>
+        <SolidColorBrush x:Key="AppBorderStrongBrush" Color="#CBD2DB"/>
+        <BoxShadows x:Key="AppFocusRingShadow">0 0 0 3 #332F76E6</BoxShadows>
+        <BoxShadows x:Key="AppCardLiftShadow">0 12 28 -6 #1F0F172A, 0 4 10 -2 #140F172A</BoxShadows>
+
         <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
         <SolidColorBrush x:Key="AccentBlueHoverBrush" Color="{StaticResource AccentBlueHover}"/>
         <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource AccentGreen}"/>
@@ -143,6 +178,7 @@
         <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource AccentGreen}"/>
         <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource AccentYellow}"/>
         <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource AccentRed}"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource AccentRed}"/>
         <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource AccentBlue}"/>
     </Styles.Resources>
 
