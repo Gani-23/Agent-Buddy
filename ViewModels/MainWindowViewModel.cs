@@ -393,8 +393,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 1 2 0 #0A101828";
-            cardHoverShadow = "0 6 16 -4 #14101828, 0 2 4 -2 #0A101828";
+            cardShadow = "0 1 3 0 #0000000D, 0 1 2 0 #00000008";
+            cardHoverShadow = "0 4 12 0 #00000014, 0 2 4 0 #0000000A";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 1 2 0 #0000000A";
             buttonShadow = "0 1 2 0 #0000000A";
@@ -417,8 +417,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", Roboto, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 1 2 0 #33000000";
-            cardHoverShadow = "0 8 20 -6 #73000000";
+            cardShadow = "0 2 8 0 #00000040";
+            cardHoverShadow = "0 4 16 0 #00000060";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 0 0 0 Transparent";
             buttonShadow = "0 1 2 0 #00000050";
@@ -441,8 +441,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             tooltipFont = "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif";
             tooltipFontSize = 12.0;
 
-            cardShadow = "0 1 2 0 #0A000000";
-            cardHoverShadow = "0 6 16 -4 #14000000, 0 2 4 -2 #0A000000";
+            cardShadow = "0 1 2 0 #0000000E";
+            cardHoverShadow = "0 4 8 0 #00000018";
             insetShadow = "0 0 0 0 Transparent";
             inputShadow = "0 1 2 0 #0000000E";
             buttonShadow = "0 1 2 0 #0000000E";
@@ -486,12 +486,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         resources["AppHoverBrush"] = new SolidColorBrush(Color.Parse(hover));
         resources["AppHoverBackgroundBrush"] = new SolidColorBrush(Color.Parse(hover));
         resources["AppPressedBrush"] = new SolidColorBrush(Color.Parse(pressed));
-        resources["AppBorderStrongBrush"] = new SolidColorBrush(Color.Parse(mode switch
-        {
-            ThemeMode.NeumorphicDark => "#444C56",
-            ThemeMode.ClassicNotion => "#D3D1CB",
-            _ => "#CBD2DB"
-        }));
 
         resources["AppCardShadow"] = BoxShadows.Parse(cardShadow);
         resources["AppCardHoverShadow"] = BoxShadows.Parse(cardHoverShadow);
@@ -553,7 +547,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         resources["ListDuplicateBorderBrush"] = new SolidColorBrush(Color.Parse(listDuplicateBorder));
         resources["SuggestionBorderBrush"] = new SolidColorBrush(Color.Parse(suggestionBorder));
 
-        // Elevated surfaces: soft gradient tiles, hero wash, accent glow and focus ring
+        // Tokens used only by the onboarding window
         resources["SuccessTileBrush"] = Diagonal(card, isDark ? "#173A2A" : "#E3F5EA");
         resources["WarningTileBrush"] = Diagonal(card, isDark ? "#3A2C0C" : "#FDF1D6");
         resources["DangerTileBrush"] = Diagonal(card, isDark ? "#3D1F22" : "#FDE5E5");
@@ -587,6 +581,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         }
         return brush;
     }
+
 
     private async Task InitializeUpdateChecksAsync()
     {
@@ -748,14 +743,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         if (state.ExpiresAtUtc.HasValue)
         {
             var localExpiry = state.ExpiresAtUtc.Value.ToLocalTime();
-            if (state.IsActive && localExpiry.Year >= 2090)
-            {
-                return "Lifetime license";
-            }
-
-            return state.IsActive
-                ? $"License renews {localExpiry:d MMM yyyy}"
-                : $"License expired {localExpiry:d MMM yyyy}";
+            var label = state.IsActive ? "Next renewal" : "Expired on";
+            return $"{label}: {localExpiry:dd MMM yyyy}";
         }
 
         return string.IsNullOrWhiteSpace(state.Message) ? "License status unavailable." : state.Message;

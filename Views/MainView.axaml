@@ -25,7 +25,7 @@
                 <!-- App Logo & Title -->
                 <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                     <Border Width="36" Height="36" CornerRadius="10" 
-                            Background="{DynamicResource AppBrandGradientBrush}" BoxShadow="{DynamicResource AppAccentGlowShadow}"
+                            Background="{StaticResource AccentBlueBrush}" 
                             VerticalAlignment="Center">
                         <PathIcon Data="{StaticResource Icon_Logo}" Width="18" Height="18" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Border>
@@ -35,7 +35,7 @@
                                    FontWeight="Bold"
                                    LetterSpacing="-0.3"
                                    Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Mobile dashboard"
+                        <TextBlock Text="Mobile Dashboard"
                                    FontSize="10"
                                    FontWeight="Medium"
                                    Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -58,11 +58,8 @@
 
         <!-- MAIN VIEW CONTENT -->
         <Border Grid.Row="1" Padding="0">
-            <TransitioningContentControl Content="{Binding CurrentView}">
-                <TransitioningContentControl.PageTransition>
-                    <CrossFade Duration="0:0:0.2"/>
-                </TransitioningContentControl.PageTransition>
-                <TransitioningContentControl.DataTemplates>
+            <ContentControl Content="{Binding CurrentView}">
+                <ContentControl.DataTemplates>
                     <DataTemplate DataType="vm:DashboardViewModel">
                         <views:MobileDashboardView/>
                     </DataTemplate>
@@ -81,8 +78,8 @@
                     <DataTemplate DataType="vm:SettingsViewModel">
                         <views:MobileSettingsView/>
                     </DataTemplate>
-                </TransitioningContentControl.DataTemplates>
-            </TransitioningContentControl>
+                </ContentControl.DataTemplates>
+            </ContentControl>
         </Border>
 
         <!-- BOTTOM MOBILE NAVIGATION BAR -->
@@ -101,7 +98,7 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Dashboard">
                     <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <PathIcon Data="{StaticResource Icon_Dashboard}" Width="18" Height="18"/>
+                        <PathIcon Data="{StaticResource Icon_Dashboard}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{DynamicResource L_Nav_Dashboard}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>
@@ -114,7 +111,7 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Lists">
                     <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <PathIcon Data="{StaticResource Icon_Lists}" Width="18" Height="18"/>
+                        <PathIcon Data="{StaticResource Icon_Lists}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{DynamicResource L_Nav_CreateLists}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>
@@ -127,7 +124,7 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Reports">
                     <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <PathIcon Data="{StaticResource Icon_Reports}" Width="18" Height="18"/>
+                        <PathIcon Data="{StaticResource Icon_Reports}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{DynamicResource L_Nav_Reports}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>
@@ -140,7 +137,7 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Settings">
                     <StackPanel Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <PathIcon Data="{StaticResource Icon_Settings}" Width="18" Height="18"/>
+                        <PathIcon Data="{StaticResource Icon_Settings}" Width="18" Height="18" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                         <TextBlock Text="{DynamicResource L_Nav_Settings}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>

@@ -27,7 +27,7 @@
                             Spacing="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Border Classes="DialogDot"/>
-                        <TextBlock Text="Action required"
+                        <TextBlock Text="Action Required"
                                    Classes="Kicker"/>
                     </StackPanel>
 

@@ -28,8 +28,8 @@ public sealed class FixedDepositViewModel : ViewModelBase
     private DateTimeOffset _calcStartDate = DateTimeOffset.Now;
 
     // Calculator outputs
-    private string _calcMaturityAmountDisplay = "₹1,44,995";
-    private string _calcTotalInterestDisplay = "₹44,995";
+    private string _calcMaturityAmountDisplay = "Rs. 1,44,995";
+    private string _calcTotalInterestDisplay = "Rs. 44,995";
     private string _calcPayoutDisplay = "At Maturity (Compounded Quarterly)";
     private string _calcMaturityDateDisplay = DateTime.Today.AddYears(5).ToString("dd-MMM-yyyy");
 
@@ -120,8 +120,8 @@ public sealed class FixedDepositViewModel : ViewModelBase
     public int MaturingSoonCount => Accounts.Count(a => a.IsMaturingSoon);
     public int MaturedCount => Accounts.Count(a => a.IsMatured);
 
-    public string FormattedTotalDeposit => $"₹{TotalDepositAmount:N0}";
-    public string FormattedTotalMaturity => $"₹{TotalMaturityAmount:N0}";
+    public string FormattedTotalDeposit => $"Rs. {TotalDepositAmount:N0}";
+    public string FormattedTotalMaturity => $"Rs. {TotalMaturityAmount:N0}";
     #endregion
 
     #region Filters & Search
@@ -360,9 +360,9 @@ public sealed class FixedDepositViewModel : ViewModelBase
         }
 
         var res = FixedDepositCalculator.Calculate(CalcSchemeType, principal, rate, CalcStartDate.DateTime);
-        CalcMaturityAmountDisplay = $"₹{res.MaturityAmount:N0}";
-        CalcTotalInterestDisplay = $"₹{res.TotalInterest:N0}";
-        CalcPayoutDisplay = $"{res.PayoutFrequency} (payout ₹{res.PeriodicPayout:N0})";
+        CalcMaturityAmountDisplay = $"Rs. {res.MaturityAmount:N0}";
+        CalcTotalInterestDisplay = $"Rs. {res.TotalInterest:N0}";
+        CalcPayoutDisplay = $"{res.PayoutFrequency} (Payout: Rs. {res.PeriodicPayout:N0})";
         CalcMaturityDateDisplay = res.MaturityDate.ToString("dd-MMM-yyyy");
     }
 

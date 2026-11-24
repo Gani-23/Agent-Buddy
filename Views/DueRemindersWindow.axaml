@@ -28,7 +28,7 @@
                             <Border Classes="DialogDot" Background="#25D366"/>
                             <TextBlock Text="CUSTOMER OUTREACH &amp; DEPOSITS" Classes="Kicker" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" FontWeight="Bold"/>
                         </StackPanel>
-                        <TextBlock Text="WhatsApp due date reminders" Classes="DialogTitle" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                        <TextBlock Text="WhatsApp Due Date Reminders" Classes="DialogTitle" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                     </StackPanel>
                     <Button Grid.Column="1" Click="CloseButton_Click" Classes="Icon" Width="32" Height="32" ToolTip.Tip="Close">
                         <PathIcon Data="{StaticResource Icon_Close}" Width="14" Height="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
@@ -86,7 +86,7 @@
                                         <!-- Due Amount -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
                                             <TextBlock Text="{Binding Amount, StringFormat='₹ {0:N0}'}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AppAccentBrush}" HorizontalAlignment="Right"/>
-                                            <TextBlock Text="Installment due" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Installment Due" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" HorizontalAlignment="Right"/>
                                         </StackPanel>
 
                                         <!-- Copy Message Button -->

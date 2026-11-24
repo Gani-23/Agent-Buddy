@@ -33,7 +33,7 @@
                 <!-- App Brand Header -->
                 <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
                     <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" 
-                            Background="{DynamicResource AppBrandGradientBrush}"
+                            Background="{StaticResource AccentBlueBrush}" 
                             VerticalAlignment="Center">
                         <PathIcon Data="{StaticResource Icon_Logo}" Width="18" Height="18" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Border>
@@ -53,6 +53,9 @@
                 <TextBlock Grid.Row="1"
                            Text="{DynamicResource L_Main_Navigation}"
                            Classes="Kicker"
+                           Foreground="{DynamicResource AppTextSecondaryBrush}"
+                           FontSize="10"
+                           FontWeight="Bold"
                            LetterSpacing="1.2"
                            Margin="4,6,4,0"/>
 
@@ -64,7 +67,7 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Dashboard">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Dashboard}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Dashboard}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Dashboard}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -75,7 +78,7 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Lists">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Lists}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Lists}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_CreateLists}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -86,7 +89,7 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="FixedDeposits">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_FixedDeposits}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -97,7 +100,7 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Reports">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Reports}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Reports}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -108,7 +111,7 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Support">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Support}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Support}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Support}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
@@ -118,22 +121,8 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="Settings">
                         <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="15" Height="15"/>
+                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Settings}" Width="15" Height="15" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Nav_Settings}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Button>
-
-                    <TextBlock Text="QUICK ACTIONS"
-                               Classes="Kicker"
-                               LetterSpacing="1.2"
-                               Margin="4,18,4,4"/>
-                    <Button Classes="NavItem"
-                            IsEnabled="{Binding IsLicenseActive}"
-                            Click="OpenBalanceBuddy_Click"
-                            ToolTip.Tip="Open accounts with overdue balances">
-                        <Grid ColumnDefinitions="22,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="15" Height="15" Foreground="{DynamicResource WarningBrush}"/>
-                            <TextBlock Grid.Column="1" Text="Overdue balances" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
                 </StackPanel>
@@ -178,11 +167,8 @@
 
         <!-- MAIN CONTENT -->
         <Border Grid.Column="1" Padding="20">
-            <TransitioningContentControl Content="{Binding CurrentView}">
-                <TransitioningContentControl.PageTransition>
-                    <CrossFade Duration="0:0:0.2"/>
-                </TransitioningContentControl.PageTransition>
-                <TransitioningContentControl.DataTemplates>
+            <ContentControl Content="{Binding CurrentView}">
+                <ContentControl.DataTemplates>
                     <DataTemplate DataType="vm:DashboardViewModel">
                         <views:DashboardView/>
                     </DataTemplate>
@@ -201,8 +187,29 @@
                     <DataTemplate DataType="vm:SettingsViewModel">
                         <views:SettingsView/>
                     </DataTemplate>
-                </TransitioningContentControl.DataTemplates>
-            </TransitioningContentControl>
+                </ContentControl.DataTemplates>
+            </ContentControl>
+        </Border>
+
+        <!-- FLOATING OVERDUE BALANCE BUTTON -->
+        <Border Grid.Column="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,28,24"
+                CornerRadius="20"
+                BoxShadow="0 4 14 0 #332563EB, 0 2 6 0 #0000001A">
+            <Button Classes="Primary"
+                    Height="40"
+                    Padding="16,0"
+                    CornerRadius="20"
+                    IsEnabled="{Binding IsLicenseActive}"
+                    Click="OpenBalanceBuddy_Click"
+                    ToolTip.Tip="Open overdue balance accounts">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
+                    <PathIcon Grid.Column="0" Data="{StaticResource Icon_Bolt}" Width="15" Height="15" Foreground="White"/>
+                    <TextBlock Grid.Column="1" Text="Balance" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
         </Border>
 
     </Grid>

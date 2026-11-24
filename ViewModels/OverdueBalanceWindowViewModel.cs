@@ -59,7 +59,7 @@ public sealed class OverdueBalanceWindowViewModel : ViewModelBase
     public decimal TotalBalanceAmount => FilteredAccounts.Sum(a => a.BalanceAmount);
     public bool HasAccounts => Accounts.Count > 0;
     public string CountDisplay => string.Format(T("L_Balance_ShownFormat", "{0} shown"), Count);
-    public string TotalBalanceDisplay => string.Format(T("L_Balance_TotalFormat", "Balance ₹{0:N0}"), TotalBalanceAmount);
+    public string TotalBalanceDisplay => string.Format(T("L_Balance_TotalFormat", "Balance Rs. {0:N0}"), TotalBalanceAmount);
     public string StarterSummaryTitle => T("L_Balance_DefaultSummary", "Default summary");
     public string StarterSummaryText => string.Format(
         T("L_Balance_DefaultSummaryBody", "Starter view shows accounts up to {0} months. Higher month filters are still available."),

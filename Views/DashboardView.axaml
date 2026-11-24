@@ -17,13 +17,13 @@
         </Style>
         <Style Selector="Border[Tag=RenewalNormal]">
             <Setter Property="Background" Value="{DynamicResource InfoTintBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource InfoEdgeBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10"/>
         </Style>
         <Style Selector="Border[Tag=RenewalUrgent]">
             <Setter Property="Background" Value="{DynamicResource DangerTintBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource DangerEdgeBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10"/>
         </Style>
@@ -31,16 +31,16 @@
             <Setter Property="Background" Value="{DynamicResource AppCardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="20"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
             <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         </Style>
         <Style Selector="Border.DashboardSearch">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,8"/>
         </Style>
         <Style Selector="Border.DashboardBadge">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
@@ -68,19 +68,6 @@
             <Setter Property="Padding" Value="20"/>
             <Setter Property="BoxShadow" Value="{DynamicResource AppCardShadow}"/>
         </Style>
-        <Style Selector="Border.CountPill">
-            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
-            <Setter Property="CornerRadius" Value="999"/>
-            <Setter Property="Padding" Value="7,1"/>
-            <Setter Property="MinWidth" Value="22"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style Selector="Border.CountPill TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondaryBrush}"/>
-        </Style>
         <Style Selector="Border.SummaryMiniStat">
             <Setter Property="Background" Value="{DynamicResource AppSidebarBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
@@ -101,10 +88,7 @@
                 <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
                         <StackPanel Grid.Column="0" Spacing="4" Width="310">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Classes="TileDot" Background="{DynamicResource SuccessBrush}"/>
-                                <TextBlock Text="{DynamicResource L_Dash_Kicker}" Classes="Kicker" VerticalAlignment="Center" Margin="0"/>
-                            </StackPanel>
+                            <TextBlock Text="{DynamicResource L_Dash_Kicker}" Classes="Kicker"/>
                             <TextBlock Text="{DynamicResource L_Dash_Title}"
                                        FontSize="26"
                                        FontWeight="Bold"
@@ -133,13 +117,13 @@
                             <Button Classes="Secondary"
                                     Click="SyncMobileQr_Click"
                                     Margin="0,0,8,0"
-                                    ToolTip.Tip="Sync accounts with the mobile app over Wi-Fi using a QR code">
+                                    ToolTip.Tip="Sync accounts with Mobile app via Wi-Fi QR code">
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                                     <PathIcon Grid.Column="0" Data="{StaticResource Icon_QrCode}" Width="14" Height="14" Foreground="{StaticResource AccentGreenBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="Sync mobile (QR)" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Sync Mobile (QR)" VerticalAlignment="Center"/>
                                 </Grid>
                             </Button>
-                            <Button Classes="Hero"
+                            <Button Classes="Primary"
                                     Command="{Binding UpdateDatabaseCommand}"
                                     Margin="0"
                                     IsEnabled="{Binding !IsBusy}">
@@ -166,8 +150,8 @@
                                 <TextBlock Text="Search all accounts"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                <TextBlock Text="By account number or customer name"
-                                           FontSize="12"
+                                <TextBlock Text="Find by account number or customer name"
+                                           FontSize="11"
                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                             </StackPanel>
 
@@ -193,18 +177,8 @@
             </Border>
 
             <Border Classes="Card" Padding="28" IsVisible="{Binding IsLoading}">
-                <StackPanel Spacing="16">
-                    <StackPanel Spacing="8" HorizontalAlignment="Center">
-                        <TextBlock Text="{DynamicResource L_Dash_Loading}" FontSize="14" HorizontalAlignment="Center" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <ProgressBar IsIndeterminate="True" Width="220"/>
-                    </StackPanel>
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
-                        <Border Grid.Column="0" Classes="Skeleton" Height="96"/>
-                        <Border Grid.Column="1" Classes="Skeleton" Height="96"/>
-                        <Border Grid.Column="2" Classes="Skeleton" Height="96"/>
-                        <Border Grid.Column="3" Classes="Skeleton" Height="96"/>
-                    </Grid>
-                    <Border Classes="Skeleton" Height="180"/>
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock Text="{DynamicResource L_Dash_Loading}" FontSize="14" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </StackPanel>
             </Border>
 
@@ -213,10 +187,11 @@
                 <Border Classes="Card"
                         Padding="0"
                         Background="{DynamicResource DangerTintBrush}"
-                        BorderBrush="{DynamicResource DangerEdgeBrush}"
+                        BorderBrush="{StaticResource ErrorBrush}"
                         BorderThickness="1"
                         IsVisible="{Binding HasLicenseNotice}">
-                    <Grid ColumnDefinitions="0,*,Auto" ColumnSpacing="0">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource ErrorBrush}" CornerRadius="12,0,0,12"/>
                         <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="14,12">
                             <Border Width="40"
                                     Height="40"
@@ -232,7 +207,7 @@
                             </Border>
 
                             <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Text="License renewal"
+                                <TextBlock Text="License Renewal Notice"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TintTextBrush}"/>
                                 <TextBlock Text="{Binding LicenseWarningMessage}"
@@ -247,7 +222,7 @@
                             <Button Classes="Primary"
                                     Padding="14,8"
                                     Click="NavigateToSettings_Click"
-                                    Content="Manage license"
+                                    Content="Manage License"
                                     Margin="0,0,8,8"/>
                         </WrapPanel>
                     </Grid>
@@ -256,10 +231,11 @@
                 <Border Classes="Card"
                         Padding="0"
                         Background="{DynamicResource WarningTintBrush}"
-                        BorderBrush="{DynamicResource WarningEdgeBrush}"
+                        BorderBrush="{StaticResource WarningBrush}"
                         BorderThickness="1"
                         IsVisible="{Binding HasNewAccountsMissingAslaasNotice}">
-                    <Grid ColumnDefinitions="0,*,Auto" ColumnSpacing="0">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource WarningBrush}" CornerRadius="12,0,0,12"/>
                         <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="14,12">
                             <Border Width="40"
                                     Height="40"
@@ -309,15 +285,15 @@
 
                 <Border Classes="Card"
                         Padding="0"
-                        IsVisible="{Binding ShowRdRenewalBanner}"
                         Tag="{Binding RdCertificateRenewalTag}">
-                    <Grid ColumnDefinitions="0,*,Auto" ColumnSpacing="0">
+                    <Grid ColumnDefinitions="5,*,Auto" ColumnSpacing="0">
+                        <Border Background="{StaticResource AccentBlueBrush}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Spacing="4" Margin="14,12">
-                                <TextBlock Text="Postal RD certificate"
+                                <TextBlock Text="Postal RD Certificate Renewal"
                                            Classes="Kicker"/>
                                 <TextBlock Text="{Binding RdCertificateRenewalHeadline}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
+                                           FontSize="22"
+                                           FontWeight="Bold"
                                            Foreground="{DynamicResource TintTextBrush}"/>
                                 <TextBlock Text="{Binding RdCertificateRenewalMessage}"
                                            TextWrapping="Wrap"
@@ -345,260 +321,115 @@
 
 
 
-                <!-- ================= TODAY ================= -->
-                <Border Classes="SectionCard Stagger Delay1" Padding="20">
-                    <StackPanel Spacing="14">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="2">
-                                <TextBlock Text="Today" Classes="SubHeader" Margin="0"/>
-                                <TextBlock Text="{Binding TodayHeadline}" Classes="SectionLead"/>
-                            </StackPanel>
-                            <TextBlock Grid.Column="1" VerticalAlignment="Bottom" FontSize="12"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                       Text="Reminders send a PDF due list to WhatsApp"/>
-                        </Grid>
-
-                        <UniformGrid Columns="4" Classes="TodayGrid">
-                            <!-- 15th deadline -->
-                            <Border Classes="StatTile TodayCard TintWarning" Classes.DueNow="{Binding IsFirstHalfOfMonth}"
-                                    Tag="pending-first-half" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Margin="0,0,12,0">
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Classes="IconChip" Background="{DynamicResource WarningTintBrush}">
-                                            <PathIcon Data="{StaticResource Icon_Calendar}" Width="16" Height="16" Foreground="{DynamicResource WarningBrush}"/>
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="By the 15th" Classes="TileTitle"/>
-                                            <TextBlock Text="{Binding FirstHalfDeadlineLabel}" Classes="TileMeta"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Classes="NowPill" IsVisible="{Binding IsFirstHalfOfMonth}" VerticalAlignment="Top">
-                                            <TextBlock Text="Due now"/>
-                                        </Border>
-                                    </Grid>
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Classes="TileValue">
-                                            <Run Text="{Binding FirstHalfDeadlineCount}"/>
-                                            <Run Text="accounts" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </TextBlock>
-                                        <TextBlock Classes="TileMeta" Text="{Binding FirstHalfDeadlineAmount, StringFormat='₹{0:N0} to collect'}"/>
-                                    </StackPanel>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                        <Button Classes="Primary TileAction" Tag="pending-first-half" Click="SmartAutomation_Click" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Create the due-list PDF, copy it, and open WhatsApp">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13"/>
-                                                <TextBlock Text="Send reminders"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="View accounts" Tag="pending-first-half" Click="OpenSegment_Click"/>
-                                                    <MenuItem Header="Search in list" Tag="pending-first-half" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="pending-first-half" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Month-end deadline -->
-                            <Border Classes="StatTile TodayCard TintInfo" Classes.DueNow="{Binding IsSecondHalfOfMonth}"
-                                    Tag="pending-second-half" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Margin="0,0,12,0">
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Classes="IconChip" Background="{DynamicResource InfoTintBrush}">
-                                            <PathIcon Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="{DynamicResource InfoBrush}"/>
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="By month-end" Classes="TileTitle"/>
-                                            <TextBlock Text="{Binding SecondHalfDeadlineLabel}" Classes="TileMeta"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Classes="NowPill" IsVisible="{Binding IsSecondHalfOfMonth}" VerticalAlignment="Top">
-                                            <TextBlock Text="Due now"/>
-                                        </Border>
-                                    </Grid>
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Classes="TileValue">
-                                            <Run Text="{Binding SecondHalfDeadlineCount}"/>
-                                            <Run Text="accounts" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </TextBlock>
-                                        <TextBlock Classes="TileMeta" Text="{Binding SecondHalfDeadlineAmount, StringFormat='₹{0:N0} to collect'}"/>
-                                    </StackPanel>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                        <Button Classes="Primary TileAction" Tag="pending-second-half" Click="SmartAutomation_Click" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Create the due-list PDF, copy it, and open WhatsApp">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13"/>
-                                                <TextBlock Text="Send reminders"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="View accounts" Tag="pending-second-half" Click="OpenSegment_Click"/>
-                                                    <MenuItem Header="Search in list" Tag="pending-second-half" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="pending-second-half" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Last chance -->
-                            <Border Classes="StatTile TodayCard TintDanger"
-                                    Tag="critical-discontinuation" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Margin="0,0,12,0">
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                        <Border Classes="IconChip" Background="{DynamicResource DangerTintBrush}">
-                                            <PathIcon Data="{StaticResource Icon_Alert}" Width="16" Height="16" Foreground="{DynamicResource ErrorBrush}"/>
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Last chance" Classes="TileTitle"/>
-                                            <TextBlock Text="5–6 months overdue" Classes="TileMeta"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Classes="TileValue">
-                                            <Run Text="{Binding CriticalDiscontinuationCount}"/>
-                                            <Run Text="accounts" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </TextBlock>
-                                        <TextBlock Classes="TileMeta" Text="About to be discontinued"/>
-                                    </StackPanel>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                        <Button Classes="Secondary TileAction" Tag="critical-discontinuation" Click="SmartAutomation_Click" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Create the discontinuation warning PDF, copy it, and open WhatsApp">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="{DynamicResource ErrorBrush}"/>
-                                                <TextBlock Text="Warn customers"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="View accounts" Tag="critical-discontinuation" Click="OpenSegment_Click"/>
-                                                    <MenuItem Header="Search in list" Tag="critical-discontinuation" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="critical-discontinuation" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Rebate pitch -->
-                            <Border Classes="StatTile TodayCard TintSuccess"
-                                    Tag="rebate-upsell" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True">
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                        <Border Classes="IconChip" Background="{DynamicResource SuccessTintBrush}">
-                                            <PathIcon Data="{StaticResource Icon_Sparkle}" Width="16" Height="16" Foreground="{DynamicResource SuccessBrush}"/>
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Rebate pitch" Classes="TileTitle"/>
-                                            <TextBlock Text="6-month advance prospects" Classes="TileMeta"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Classes="TileValue">
-                                            <Run Text="{Binding RebateUpsellCount}"/>
-                                            <Run Text="accounts" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                        </TextBlock>
-                                        <TextBlock Classes="TileMeta" Text="{Binding RebateUpsellAmount, StringFormat='Up to ₹{0:N0} in advance'}"/>
-                                    </StackPanel>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                        <Button Classes="Secondary TileAction" Tag="rebate-upsell" Click="SmartAutomation_Click" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Create the rebate eligibility PDF, copy it, and open WhatsApp">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="13" Height="13" Foreground="{DynamicResource SuccessBrush}"/>
-                                                <TextBlock Text="Share offer"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="View accounts" Tag="rebate-upsell" Click="OpenSegment_Click"/>
-                                                    <MenuItem Header="Search in list" Tag="rebate-upsell" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="rebate-upsell" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                        </UniformGrid>
-                    </StackPanel>
-                </Border>
-
-                <!-- ================= PORTFOLIO ================= -->
-                <Border Classes="DefaultSummaryCard Stagger Delay2" Padding="20">
-                    <StackPanel Spacing="18">
+                <Border Classes="DefaultSummaryCard Hoverable" Padding="32">
+                    <StackPanel Spacing="32">
+                        <!-- HEADER SECTION -->
                         <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Top">
-                            <StackPanel Spacing="2">
-                                <TextBlock Text="Portfolio" Classes="SubHeader" Margin="0"/>
-                                <TextBlock Text="All active RD accounts" Classes="SectionLead"/>
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="PORTFOLIO OVERVIEW" Classes="Kicker" LetterSpacing="2" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                <TextBlock Text="Complete Active RD Portfolio" FontSize="28" FontWeight="Black" LetterSpacing="-0.5"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Classes="Secondary" Click="SearchDefaultSummary_Click" Content="Search accounts"/>
-                                <Button Classes="Primary" Click="OpenDefaultSummary_Click" Content="View all accounts"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Button Classes="Secondary" Padding="16,8" Click="SearchDefaultSummary_Click" Content="Search Accounts"/>
+                                <Button Classes="Primary" Padding="20,8" Click="OpenDefaultSummary_Click" Content="View All Accounts"/>
                             </StackPanel>
                         </Grid>
 
-                        <UniformGrid Columns="4">
-                            <Border Classes="Metric" Margin="0,0,12,0">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_User}" Width="14" Height="14" Foreground="{DynamicResource InfoBrush}"/>
-                                        <TextBlock Text="Active accounts" Classes="MetricLabel"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding TotalAccounts}" Classes="MetricValue"/>
+                        <!-- METRICS SECTION -->
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="32">
+                            <!-- Metric 1 -->
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Total Active Accounts" Classes="Kicker"/>
+                                <TextBlock Text="{Binding TotalAccounts}" FontSize="36" FontWeight="Black" LetterSpacing="-1"/>
+                            </StackPanel>
+                            
+                            <!-- Metric 2 -->
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Total Portfolio Size" Classes="Kicker"/>
+                                <TextBlock FontSize="36" FontWeight="Black" Foreground="{StaticResource AccentBlueBrush}" LetterSpacing="-1">
+                                    <Run Text="Rs. "/><Run Text="{Binding TotalAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+                            
+                            <!-- Metric 3 -->
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Total Due Collection" Classes="Kicker"/>
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" LetterSpacing="-0.5">
+                                    <Run Text="{Binding PendingThisMonthCount}" /> Accounts
+                                </TextBlock>
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                    <Run Text="Rs. "/><Run Text="{Binding PendingThisMonthAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Metric 4 -->
+                            <StackPanel Grid.Column="3" Spacing="4">
+                                <TextBlock Text="Deposited This Month" Classes="Kicker"/>
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" LetterSpacing="-0.5">
+                                    <Run Text="Rs. "/><Run Text="{Binding DepositedThisMonthAmount, StringFormat=N0}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Subtle Divider -->
+                        <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="0,8" Opacity="0.3"/>
+
+                        <!-- AUTOMATIONS SECTION -->
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="AUTOMATED ACTIONS" Classes="Kicker" LetterSpacing="2" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Text="1-Click PDF export &amp; WhatsApp dispatch for bulk collection reminders." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="13"/>
                                 </StackPanel>
-                            </Border>
-                            <Border Classes="Metric" Margin="0,0,12,0">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_Database}" Width="14" Height="14" Foreground="{DynamicResource InfoBrush}"/>
-                                        <TextBlock Text="Monthly portfolio" Classes="MetricLabel"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}" Classes="MetricValue"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                    <TextBlock Text="OWNER NUMBER:" Classes="Kicker" VerticalAlignment="Center"/>
+                                    <TextBox Width="180" Text="{Binding AgentPhoneNumber}" PlaceholderText="e.g. 919876543210"/>
                                 </StackPanel>
-                            </Border>
-                            <Border Classes="Metric Clickable" Margin="0,0,12,0" Tag="pending-month" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True"
-                                    ToolTip.Tip="View accounts still pending this month">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_Clock}" Width="14" Height="14" Foreground="{DynamicResource WarningBrush}"/>
-                                        <TextBlock Text="Pending this month" Classes="MetricLabel"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="MetricValue">
-                                        <Run Text="{Binding PendingThisMonthCount}"/>
-                                        <Run Text="accounts" FontSize="14" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    </TextBlock>
-                                    <TextBlock Classes="TileMeta" Text="{Binding PendingThisMonthAmount, StringFormat='₹{0:N0} still to collect'}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Classes="Metric">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <PathIcon Data="{StaticResource Icon_Check}" Width="14" Height="14" Foreground="{DynamicResource SuccessBrush}"/>
-                                        <TextBlock Text="Deposited this month" Classes="MetricLabel"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding DepositedThisMonthAmount, StringFormat='₹{0:N0}'}" Classes="MetricValue"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Button Classes="LinkButton" Tag="deposited-first-half" Click="OpenSegment_Click"
-                                                Content="{Binding FirstHalfDepositedWindowCount, StringFormat='1st half · {0}'}"/>
-                                        <Button Classes="LinkButton" Tag="deposited-second-half" Click="OpenSegment_Click"
-                                                Content="{Binding SecondHalfDepositedWindowCount, StringFormat='2nd half · {0}'}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </UniformGrid>
+                            </Grid>
+
+                            <WrapPanel Margin="0,4,0,0">
+                                <!-- 15th Deadline Auto -->
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-first-half" Click="SmartAutomation_Click" Background="{StaticResource WarningBrush}"
+                                        ToolTip.Tip="Generate 15th deadline due list PDF, copy to clipboard, and open WhatsApp">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Calendar}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Remind 15th Deadline" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding FirstHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+                                
+                                <!-- Month End Auto -->
+                                <Button Classes="Primary" Margin="0,0,12,12" Padding="18,12" Tag="pending-second-half" Click="SmartAutomation_Click"
+                                        ToolTip.Tip="Generate month-end due list PDF, copy to clipboard, and open WhatsApp">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Clock}" Width="16" Height="16" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Remind Month-End" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding SecondHalfDeadlineCount, StringFormat='({0})'}" FontWeight="Bold" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+
+                                <!-- Rebate Upsell Auto -->
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="rebate-upsell" Click="SmartAutomation_Click" BorderBrush="{StaticResource SuccessBrush}"
+                                        ToolTip.Tip="Generate advance rebate eligibility list PDF, copy to clipboard, and open WhatsApp">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Sparkle}" Width="16" Height="16" Foreground="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Pitch 6-Month Rebates" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding RebateUpsellCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+
+                                <!-- Critical Discontinuation Auto -->
+                                <Button Classes="Secondary" Margin="0,0,12,12" Padding="18,12" Tag="critical-discontinuation" Click="SmartAutomation_Click" BorderBrush="{StaticResource DangerBrush}"
+                                        ToolTip.Tip="Generate discontinuation warning list PDF, copy to clipboard, and open WhatsApp">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <PathIcon Grid.Column="0" Data="{StaticResource Icon_Alert}" Width="16" Height="16" Foreground="{StaticResource AccentRedBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Warn Discontinuations" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding CriticalDiscontinuationCount, StringFormat='({0})'}" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" Opacity="0.85" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -606,179 +437,282 @@
                     <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                 </Border>
 
-                <Border Classes="SectionCard Stagger Delay3" Padding="20">
+                <Border Classes="SectionCard" Padding="16">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Opportunities &amp; risks" Classes="SubHeader"/>
+                        <TextBlock Classes="SubHeader">
+                            <Run Text="{DynamicResource L_Dash_HalfMonthTitle}"/>
+                            <Run Text=" "/>
+                            <Run Text="{Binding HalfMonthTitleSuffix}"/>
+                        </TextBlock>
 
-                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
-                            <!-- Row 0: Rebate Upsell Prospects -->
-                            <Border Grid.Row="0" Grid.Column="0" Tag="defaulters" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="Defaulters (4+ months)" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
-                                        <Run Text="{Binding DefaulterAccountsCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_FirstHalfPending}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding FirstHalfPendingWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Text="Revival fee required" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                    </Grid>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding FirstHalfPendingWindowAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-first-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="1" Tag="vip-accounts" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintSuccess">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="High-value accounts" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
-                                        <Run Text="{Binding VipAccountsCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_SecondHalfPending}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding SecondHalfPendingWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding VipAccountsAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding SecondHalfPendingWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-second-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="2" Tag="at-risk-accounts" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="At risk (1–3 months overdue)" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
-                                        <Run Text="{Binding AtRiskAccountsCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_FirstHalfDeposited}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding FirstHalfDepositedWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Text="Monthly penalty applies" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                    </Grid>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding FirstHalfDepositedWindowAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-first-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="Commission forecast" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue" Foreground="{DynamicResource SuccessBrush}">
-                                        <Run Text="₹"/><Run Text="{Binding PendingCommissionForecast, StringFormat=N0}"/>
+
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_SecondHalfDeposited}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding SecondHalfDepositedWindowCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Text="Estimated 4% of this month's pending" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Grid.Row="1" Grid.Column="1" Tag="loan-eligible" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="Eligible for 50% loan" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
-                                        <Run Text="{Binding EligibleForLoanCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding SecondHalfDepositedWindowAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <TextBlock Text="12+ instalments paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                            <Border Grid.Row="1" Grid.Column="2" Tag="premature-closure" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="Premature closure prospects" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
-                                        <Run Text="{Binding EligibleForPrematureClosureCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    </TextBlock>
-                                    <TextBlock Text="36+ instalments paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="deposited-second-half" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <Border Classes="SectionCard Stagger Delay4" Padding="20">
+                <Border Classes="SectionCard" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Agent Insights (Opportunities &amp; Risks)" Classes="SubHeader"/>
+
+                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <!-- Row 0: Rebate Upsell Prospects -->
+                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Rebate Upsell Prospects" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding RebateUpsellCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Prime for 6-month advance pitch" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="rebate-upsell" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 0: Critical Discontinuation -->
+                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Last Chance (5-6 Mo Overdue)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding CriticalDiscontinuationCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="About to be permanently discontinued" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="critical-discontinuation" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 0: Defaulters -->
+                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Defaulter Accounts (4+ Mo)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding DefaulterAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Requires Revival Fee" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="defaulters" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: VIP Customers -->
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="VIP Accounts (High Value)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding VipAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding VipAccountsAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="vip-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Row 1: At-Risk Customers -->
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="At Risk (1-3 Mo Overdue)" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding AtRiskAccountsCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Monthly penalties applying" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="at-risk-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 1: Commission Forecast -->
+                            <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Pending Commission Forecast" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding PendingCommissionForecast, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="Estimated 4% of Pending Month" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 2: Eligible for Loan -->
+                            <Border Grid.Row="2" Grid.Column="0" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Eligible for 50% Loan" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding EligibleForLoanCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="12+ Installments Paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="loan-eligible" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Row 2: Premature Closure -->
+                            <Border Grid.Row="2" Grid.Column="1" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Premature Closure Prospects" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding EligibleForPrematureClosureCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="36+ Installments Paid" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="premature-closure" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="SectionCard" Padding="16">
                     <StackPanel Spacing="12">
                         <TextBlock Text="{DynamicResource L_Dash_ActionCenter}" Classes="SubHeader"/>
 
-                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
 
-                            <Border Grid.Row="0" Grid.Column="0" Tag="next-month" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_NextMonthCollection}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+                            <Border Grid.Row="0" Grid.Column="0" Classes="StatTile TintSuccess">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_PendingMonth}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
+                                        <Run Text="{Binding PendingThisMonthCount}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding PendingThisMonthAmount, StringFormat=N0}"/>
+                                    </TextBlock>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="pending-month" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="0" Grid.Column="1" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_NextMonthCollection}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding NextMonthCollectionCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding NextMonthCollectionAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding NextMonthCollectionAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="next-month" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="next-month" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="next-month" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="1" Tag="advanced-paid" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_AdvancePaid}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="0" Grid.Column="2" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_AdvancePaid}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding AdvancedPaidCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding AdvancedPaidAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AdvancedPaidAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="advanced-paid" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="advanced-paid" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="advanced-paid" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="2" Tag="new-accounts" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintInfo">
+
+                            <Border Grid.Row="1" Grid.Column="0" Classes="StatTile TintInfo">
                                 <StackPanel Spacing="6">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Border Classes="TileDot"/>
-                                            <TextBlock Text="{DynamicResource L_Dash_NewAccountsRecent}"
-                                                       Classes="TileTitle"
-                                                       VerticalAlignment="Center"/>
-                                        </StackPanel>
+                                        <TextBlock Text="{DynamicResource L_Dash_NewAccountsRecent}"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
                                         <Border Grid.Column="1"
                                                 Background="{DynamicResource SuccessTintBrush}"
                                                 BorderBrush="{StaticResource SuccessBrush}"
@@ -793,185 +727,125 @@
                                                        Foreground="{StaticResource SuccessBrush}"/>
                                         </Border>
                                     </Grid>
-                                    <TextBlock Classes="TileValue">
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding NewAccounts30DaysCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding NewAccounts30DaysAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding NewAccounts30DaysAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="new-accounts" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="new-accounts" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="new-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="0" Tag="freeze-risk" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_AboutToFreeze}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="1" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_AboutToFreeze}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding AboutToFreezeCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding AboutToFreezeAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AboutToFreezeAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="freeze-risk" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="freeze-risk" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="freeze-risk" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="1" Tag="due-soon" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintDanger">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_Due30Days}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="1" Grid.Column="2" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_Due30Days}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding AccountsDueSoon.Count}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Text="Needs action soon" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="due-soon" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="due-soon" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <TextBlock Text="Requires immediate action" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="due-soon" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="2" Tag="matured" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintDanger">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_MaturedAccounts}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <!-- Shift Matured to Row 3 -->
+                            <Border Grid.Row="3" Grid.Column="0" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_MaturedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding MaturedCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding MaturedAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding MaturedAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="matured" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="matured" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="matured" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="2" Grid.Column="0" Tag="closed-accounts" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintDanger">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_ClosedAccounts}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="2" Grid.Column="0" Classes="StatTile TintDanger">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_ClosedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding ClosedAccountsCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding ClosedAccountsAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding ClosedAccountsAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="closed-accounts" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="closed-accounts" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="closed-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="2" Grid.Column="1" Tag="about-to-mature" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintWarning">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="About to mature" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="2" Grid.Column="1" Classes="StatTile TintWarning">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="About To Mature" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding AboutToMatureCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding AboutToMatureAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding AboutToMatureAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="about-to-mature" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="about-to-mature" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="about-to-mature" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Row="2" Grid.Column="2" Tag="extended-accounts" Tapped="Tile_Tapped" KeyDown="Tile_KeyDown" Focusable="True" Classes="StatTile TintInfo">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Classes="TileDot"/>
-                                        <TextBlock Text="{DynamicResource L_Dash_ExtendedAccounts}" Classes="TileTitle" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <TextBlock Classes="TileValue">
+
+                            <Border Grid.Row="2" Grid.Column="2" Classes="StatTile TintInfo">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{DynamicResource L_Dash_ExtendedAccounts}" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="22" FontWeight="Bold">
                                         <Run Text="{Binding ExtendedAccountsCount}"/>
-                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}" FontSize="13" FontWeight="Normal" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                        <Run Text="{DynamicResource L_Dash_AccountsSuffix}"/>
                                     </TextBlock>
-                                    <TextBlock Classes="TileMeta">
-                                        <Run Text="₹"/><Run Text="{Binding ExtendedAccountsAmount, StringFormat=N0}"/>
+                                    <TextBlock Foreground="{DynamicResource AppTextSecondaryBrush}">
+                                        <Run Text="Rs. "/><Run Text="{Binding ExtendedAccountsAmount, StringFormat=N0}"/>
                                     </TextBlock>
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
-                                        <TextBlock Classes="TileLink" Text="View accounts →" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Classes="TileMenu" ToolTip.Tip="More actions">
-                                            <TextBlock Text="•••" FontSize="10"/>
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                    <MenuItem Header="Search in list" Tag="extended-accounts" Click="SearchSegment_Click"/>
-                                                    <MenuItem Header="Print list" Tag="extended-accounts" Click="PrintSegment_Click"/>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                    <WrapPanel>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="OpenSegment_Click" Content="{DynamicResource L_Common_ViewAccounts}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="SearchSegment_Click" Content="{DynamicResource L_Common_Search}" Margin="0,0,8,8"/>
+                                        <Button Classes="Secondary" Padding="10,6" Tag="extended-accounts" Click="PrintSegment_Click" Content="{DynamicResource L_Common_Print}" Margin="0,0,0,8"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
                         </Grid>
@@ -979,7 +853,7 @@
                 </Border>
 
                 <Grid ColumnDefinitions="*,1.4*" ColumnSpacing="16">
-                    <Border Grid.Column="0" Classes="Card Stagger Delay5">
+                    <Border Grid.Column="0" Classes="Card">
                         <StackPanel Spacing="12">
                             <TextBlock Text="{DynamicResource L_Dash_PortfolioRiskSplit}" Classes="SubHeader"/>
                             <TextBlock Text="{DynamicResource L_Dash_PortfolioRiskHint}"
@@ -1000,7 +874,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
                                     <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource ErrorBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Freeze risk" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Text="Freeze Risk" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,8">
                                     <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
@@ -1014,7 +888,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="1" Classes="Card Stagger Delay6">
+                    <Border Grid.Column="1" Classes="Card">
                         <StackPanel Spacing="12">
                             <TextBlock Text="{DynamicResource L_Dash_MonthlyWorkloadTrend}" Classes="SubHeader"/>
                             <TextBlock Text="{DynamicResource L_Dash_MonthlyWorkloadHint}"
@@ -1029,11 +903,11 @@
                             <WrapPanel HorizontalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,0">
                                     <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource AccentBlueBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Accounts" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Text="Default accounts" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource SuccessBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Earnings (₹)" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                    <TextBlock Text="Earnings (Rs.)" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                 </StackPanel>
                             </WrapPanel>
                         </StackPanel>

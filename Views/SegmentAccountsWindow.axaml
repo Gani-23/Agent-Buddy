@@ -54,7 +54,7 @@
                             <Run Text="{DynamicResource L_Segment_AccountsPrefix}"/>
                             <Run Text="{Binding Count}"/>
                             <Run Text="{DynamicResource L_Segment_TotalAmountPrefix}"/>
-                            <Run Text="₹"/>
+                            <Run Text="Rs. "/>
                             <Run Text="{Binding TotalAmount, StringFormat=N0}"/>
                         </TextBlock>
                     </StackPanel>
@@ -200,14 +200,14 @@
 
                                                 <TextBlock Grid.Row="1"
                                                            Grid.Column="2"
-                                                           Text="Paid upto"
+                                                           Text="Paid Upto"
                                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                 <TextBlock Grid.Row="1"
                                                            Grid.Column="3"
                                                            Text="{Binding MonthPaidUpto}"/>
 
                                                 <TextBlock Grid.Row="2"
-                                                           Text="Next due"
+                                                           Text="Next Due"
                                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                 <TextBlock Grid.Row="2"
                                                            Grid.Column="1"
@@ -215,7 +215,7 @@
 
                                                 <TextBlock Grid.Row="2"
                                                            Grid.Column="2"
-                                                           Text="Short code"
+                                                           Text="Short Code"
                                                            Foreground="{DynamicResource AppTextSecondaryBrush}"/>
                                                 <TextBlock Grid.Row="2"
                                                            Grid.Column="3"
@@ -236,7 +236,7 @@
                                                         HorizontalAlignment="Right">
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                         <PathIcon Data="{StaticResource Icon_WhatsApp}" Width="14" Height="14" Foreground="{StaticResource SuccessBrush}"/>
-                                                        <TextBlock Text="Send WhatsApp reminder" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Send WhatsApp Reminder" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
                                                     </StackPanel>
                                                 </Button>
                                             </Grid>
